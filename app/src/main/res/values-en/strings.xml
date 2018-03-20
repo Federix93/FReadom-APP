@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lab1</string>
+    <string name="username">Username</string>
+    <string name="phoneNumber">Phone</string>
+    <string name="email">Email</string>
+    <string name="title_dialog">Change picture</string>
+    <string name="camera_option_dialog">Take picture</string>
+    <string name="gallery_option_dialog">Choose picture</string>
+    <string name="negative_button_dialog">Cancel</string>
+</resources>
