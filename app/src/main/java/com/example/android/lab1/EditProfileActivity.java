@@ -102,7 +102,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch(i) {
-                            case 0:
+                            case CAPTURE_IMAGE:
                                 File photoFile = null;
                                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 if (cameraIntent.resolveActivity(getPackageManager()) != null){
@@ -120,7 +120,7 @@ public class EditProfileActivity extends AppCompatActivity {
                                     startActivityForResult(cameraIntent, CAPTURE_IMAGE);
                                 }
                                 break;
-                            case 1:
+                            case RESULT_LOAD_IMAGE:
                                 Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                 galleryIntent.setType("image/*");
                                 startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
