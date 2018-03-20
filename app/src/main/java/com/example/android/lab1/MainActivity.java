@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             mPhoneTextInputLayout.getEditText().setEnabled(false);
         }
         if(UserManager.getUser().getImage() != null) {
-            Glide.with(this).load(UserManager.getUser().getImage())
+            Glide.with(this).load(UserManager.getUser().getImage().toString())
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(circleImageView);
         }else{

@@ -4,4 +4,9 @@
     <string name="email">Email</string>
     <string name="phoneNumber">Phone</string>
     <string name="editIcon">default_descriptor</string>
+
+    <string name="title_dialog">Cambia foto</string>
+    <string name="camera_option_dialog">Scatta foto</string>
+    <string name="gallery_option_dialog">Scegli foto</string>
+    <string name="negative_button_dialog">Annulla</string>
 </resources>

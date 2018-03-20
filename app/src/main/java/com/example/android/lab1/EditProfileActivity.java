@@ -1,8 +1,15 @@
 package com.example.android.lab1;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +18,11 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -22,8 +34,9 @@ public class EditProfileActivity extends AppCompatActivity {
     TextInputLayout mUsernameTextInputLayout;
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
-    public final int RESULT_LOAD_IMAGE = 1;
-    public final int CAPTURE_IMAGE = 1;
+    private final int RESULT_LOAD_IMAGE = 1;
+    private final int CAPTURE_IMAGE = 0;
+    String mCurrentPhotoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,18 +89,47 @@ public class EditProfileActivity extends AppCompatActivity {
         mCameraImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                galleryIntent.setType("image/*");
 
-                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                Intent chooser = new Intent(Intent.ACTION_CHOOSER);
-                chooser.putExtra(Intent.EXTRA_INTENT, galleryIntent);
-                chooser.putExtra(Intent.EXTRA_TITLE, "Select from:");
-
-                Intent[] intentArray = { cameraIntent };
-                chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
-                startActivityForResult(chooser, RESULT_LOAD_IMAGE);
+                final CharSequence[] items = { getString(R.string.camera_option_dialog) ,getString(R.string.gallery_option_dialog)};
+                final AlertDialog.Builder dialog = new AlertDialog.Builder(view.getContext());
+                dialog.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+                dialog.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch(i) {
+                            case 0:
+                                File photoFile = null;
+                                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                if (cameraIntent.resolveActivity(getPackageManager()) != null){
+                                    try {
+                                        photoFile = saveThumbnail();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    if(photoFile != null) {
+                                        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                                                "com.example.android.fileprovider",
+                                                photoFile);
+                                        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                                    }
+                                    startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+                                }
+                                break;
+                            case 1:
+                                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                galleryIntent.setType("image/*");
+                                startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
+                                break;
+                            default:
+                                dialogInterface.cancel();
+                        }
+                    }
+                }).show();
             }
         });
     }
@@ -121,12 +163,28 @@ public class EditProfileActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
-                Glide.with(getApplicationContext()).load(data.getData()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+            Glide.with(getApplicationContext()).load(data.getData()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 UserManager.getUser().setImage(data.getData());
-        }else{
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            mUserImageView.setImageBitmap(imageBitmap);
+        }else if(requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK){
+            Log.d("CurrentPath", mCurrentPhotoPath);
+            UserManager.getUser().setImage(Uri.parse(mCurrentPhotoPath));
+            Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+
         }
+    }
+
+    public File saveThumbnail() throws IOException{
+
+        // Create an image file name
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String imageFileName = "JPEG_" + timeStamp + "_";
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File image = File.createTempFile(
+                    imageFileName,  /* prefix */
+                    ".jpg",         /* suffix */
+                    storageDir      /* directory */
+            );
+            mCurrentPhotoPath = image.getAbsolutePath();
+            return image;
     }
 }
