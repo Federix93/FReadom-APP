@@ -14,7 +14,7 @@ public class User {
     private String mEmail;
     private String mPhone;
     private String mAddress;
-    private Uri mImage;
+    private String mImage;
 
 
     private User(){}
@@ -25,11 +25,11 @@ public class User {
         return instance;
     }
 
-    public Uri getImage() {
+    public String getImage() {
         return mImage;
     }
 
-    public void setImage(Uri pImage) {
+    public void setImage(String pImage) {
         mImage = pImage;
     }
 

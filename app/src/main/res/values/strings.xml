@@ -9,4 +9,6 @@
     <string name="camera_option_dialog">Scatta foto</string>
     <string name="gallery_option_dialog">Scegli foto</string>
     <string name="negative_button_dialog">Annulla</string>
+
+    <string name="shared_preferences">SharedPreferencesKey</string>
 </resources>

@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
     TextInputLayout mPhoneTextInputLayout;
     ImageView circleImageView;
 
+    private User mUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,24 +37,29 @@ public class MainActivity extends AppCompatActivity {
         circleImageView = findViewById(R.id.profile_image);
 
         mToolbarIcon = findViewById(R.id.icon_toolbar);
+        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+        User mUser = sharedPreferencesManager.getUser();
 
         if (mUsernameTextInputLayout.getEditText() != null) {
-            mUsernameTextInputLayout.getEditText().setText(UserManager.getUser().getUsername());
+            if(mUser != null)
+                mUsernameTextInputLayout.getEditText().setText(mUser.getUsername());
             mUsernameTextInputLayout.getEditText().setKeyListener(null);
             mUsernameTextInputLayout.getEditText().setEnabled(false);
         }
         if (mEmailTextInputLayout.getEditText() != null) {
-            mEmailTextInputLayout.getEditText().setText(UserManager.getUser().getEmail());
+            if(mUser != null)
+                mEmailTextInputLayout.getEditText().setText(mUser.getEmail());
             mEmailTextInputLayout.getEditText().setKeyListener(null);
             mEmailTextInputLayout.getEditText().setEnabled(false);
         }
         if (mPhoneTextInputLayout.getEditText() != null) {
-            mPhoneTextInputLayout.getEditText().setText(UserManager.getUser().getPhone());
+            if(mUser != null)
+                mPhoneTextInputLayout.getEditText().setText(mUser.getPhone());
             mPhoneTextInputLayout.getEditText().setKeyListener(null);
             mPhoneTextInputLayout.getEditText().setEnabled(false);
         }
-        if(UserManager.getUser().getImage() != null) {
-            Glide.with(this).load(UserManager.getUser().getImage().toString())
+        if(mUser != null && UserManager.getUser().getImage() != null) {
+            Glide.with(this).load(mUser.getImage().toString())
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(circleImageView);
         }else{
