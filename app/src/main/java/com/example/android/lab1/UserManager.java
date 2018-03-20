@@ -12,4 +12,8 @@ public class UserManager {
         return instance;
     }
 
+    public static void setUser(User user){
+        instance.setInstance(user);
+    }
+
 }

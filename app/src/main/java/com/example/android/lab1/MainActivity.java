@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
     TextInputLayout mPhoneTextInputLayout;
     ImageView circleImageView;
 
-    private User mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         mToolbarIcon = findViewById(R.id.icon_toolbar);
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User mUser = sharedPreferencesManager.getUser();
+        UserManager.setUser(mUser);
 
         if (mUsernameTextInputLayout.getEditText() != null) {
             if(mUser != null)
@@ -58,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
             mPhoneTextInputLayout.getEditText().setKeyListener(null);
             mPhoneTextInputLayout.getEditText().setEnabled(false);
         }
-        if(mUser != null && UserManager.getUser().getImage() != null) {
-            Glide.with(this).load(mUser.getImage().toString())
+        if(mUser != null && mUser.getImage() != null) {
+            Glide.with(this).load(mUser.getImage())
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(circleImageView);
         }else{

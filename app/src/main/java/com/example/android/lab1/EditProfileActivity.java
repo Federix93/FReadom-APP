@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 
@@ -22,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
+
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -52,33 +52,43 @@ public class EditProfileActivity extends AppCompatActivity {
 
         mCameraImageView = findViewById(R.id.add_image_icon);
 
+
+        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+        User mUser = sharedPreferencesManager.getUser();
+        UserManager.setUser(mUser);
         if(savedInstanceState == null){
-            if (UserManager.getUser().getUsername() != null && mUsernameTextInputLayout.getEditText() != null)
-                mUsernameTextInputLayout.getEditText().setText(UserManager.getUser().getUsername());
-            if (UserManager.getUser().getEmail() != null && mEmailTextInputLayout.getEditText() != null)
-                mEmailTextInputLayout.getEditText().setText(UserManager.getUser().getEmail());
-            if (UserManager.getUser().getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
-                mPhoneTextInputLayout.getEditText().setText(UserManager.getUser().getPhone());
-            if(UserManager.getUser().getImage() != null && mUserImageView != null)
-                Glide.with(getApplicationContext()).load(UserManager.getUser().getImage().toString()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-            else{
-                Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
-                        .apply(bitmapTransform(new CircleCrop()))
-                        .into(mUserImageView);
+
+            if(mUser != null) {
+                if (mUser.getUsername() != null && mUsernameTextInputLayout.getEditText() != null)
+                    mUsernameTextInputLayout.getEditText().setText(mUser.getUsername());
+                if (mUser.getEmail() != null && mEmailTextInputLayout.getEditText() != null)
+                    mEmailTextInputLayout.getEditText().setText(mUser.getEmail());
+                if (mUser.getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
+                    mPhoneTextInputLayout.getEditText().setText(mUser.getPhone());
+                Log.d("LULLO", "IMAGE " + mUser.getImage());
+                if (mUser.getImage() != null && mUserImageView != null)
+                    Glide.with(getApplicationContext()).load(mUser.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                else {
+                    Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
+                            .apply(bitmapTransform(new CircleCrop()))
+                            .into(mUserImageView);
+                }
             }
         }
 
         mCheckImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(view.getContext());
+                User user = sharedPreferencesManager.getUser();
+                UserManager.getUser().setImage(user.getImage());
                 if (mUsernameTextInputLayout.getEditText() != null)
                     UserManager.getUser().setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
                 if (mEmailTextInputLayout.getEditText() != null)
                     UserManager.getUser().setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                 if (mPhoneTextInputLayout.getEditText() != null)
                     UserManager.getUser().setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-
-                SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(view.getContext());
                 sharedPreferencesManager.putUser();
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -139,11 +149,11 @@ public class EditProfileActivity extends AppCompatActivity {
         if (mUsernameTextInputLayout.getEditText() != null)
             outState.putString("Username", mUsernameTextInputLayout.getEditText().getText().toString());
         if (mEmailTextInputLayout.getEditText() != null)
-        outState.putString("Email", mEmailTextInputLayout.getEditText().getText().toString());
+            outState.putString("Email", mEmailTextInputLayout.getEditText().getText().toString());
         if (mPhoneTextInputLayout.getEditText() != null)
-        outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
+            outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
         if(UserManager.getUser().getImage() != null)
-            outState.putString("Bitmap", UserManager.getUser().getImage().toString());
+            outState.putString("Bitmap", UserManager.getUser().getImage());
         super.onSaveInstanceState(outState);
     }
 
@@ -162,17 +172,22 @@ public class EditProfileActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        String imageURI = null;
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             if(data.getData() != null) {
-                Glide.with(getApplicationContext()).load(data.getData().toString()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                UserManager.getUser().setImage(data.getData().toString());
+                imageURI = data.getData().toString();
+                Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                UserManager.getUser().setImage(imageURI);
             }
-
         }else if(requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK){
-            UserManager.getUser().setImage(mCurrentPhotoPath);
-            Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-
+            if(mCurrentPhotoPath != null) {
+                imageURI = mCurrentPhotoPath;
+                Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                UserManager.getUser().setImage(imageURI);
+            }
         }
+        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
+        sharedPreferencesManager.putUser();
     }
 
     public File saveThumbnail() throws IOException{

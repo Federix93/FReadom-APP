@@ -25,6 +25,10 @@ public class User {
         return instance;
     }
 
+    public void setInstance(User user){
+        instance = user;
+    }
+
     public String getImage() {
         return mImage;
     }
