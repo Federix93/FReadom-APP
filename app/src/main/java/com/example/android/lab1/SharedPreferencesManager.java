@@ -2,6 +2,7 @@ package com.example.android.lab1;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.UserManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -28,9 +29,9 @@ public class SharedPreferencesManager {
         return mInstance;
     }
 
-    public void putUser(){
+    public void putUser(User user){
         Gson gson = new Gson();
-        String json = gson.toJson(UserManager.getUser());
+        String json = gson.toJson(user);
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString("User", json);
         editor.apply();
@@ -38,8 +39,7 @@ public class SharedPreferencesManager {
 
     public User getUser(){
         Gson gson = new Gson();
-        String json = mSharedPreferences.getString(USER_KEY, "");
-        Log.d("LULLO", "JSON: " + json);
+        String json = mSharedPreferences.getString(USER_KEY, null);
         return gson.fromJson(json, User.class);
     }
 }

@@ -2,7 +2,7 @@ package com.example.android.lab1;
 
 import android.net.Uri;
 
-public class UserManager {
+/*public class UserManager {
 
     private static User instance = User.getInstance();
 
@@ -16,4 +16,4 @@ public class UserManager {
         instance.setInstance(user);
     }
 
-}
+}*/

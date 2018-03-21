@@ -3,6 +3,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.UserManager;
 import android.provider.MediaStore;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
@@ -52,27 +53,22 @@ public class EditProfileActivity extends AppCompatActivity {
 
         mCameraImageView = findViewById(R.id.add_image_icon);
 
-
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
-        User mUser = sharedPreferencesManager.getUser();
-        UserManager.setUser(mUser);
+        User user = sharedPreferencesManager.getUser();
         if(savedInstanceState == null){
-
-            if(mUser != null) {
-                if (mUser.getUsername() != null && mUsernameTextInputLayout.getEditText() != null)
-                    mUsernameTextInputLayout.getEditText().setText(mUser.getUsername());
-                if (mUser.getEmail() != null && mEmailTextInputLayout.getEditText() != null)
-                    mEmailTextInputLayout.getEditText().setText(mUser.getEmail());
-                if (mUser.getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
-                    mPhoneTextInputLayout.getEditText().setText(mUser.getPhone());
-                Log.d("LULLO", "IMAGE " + mUser.getImage());
-                if (mUser.getImage() != null && mUserImageView != null)
-                    Glide.with(getApplicationContext()).load(mUser.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                else {
-                    Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
-                            .apply(bitmapTransform(new CircleCrop()))
-                            .into(mUserImageView);
-                }
+            if (user != null && user.getUsername() != null && mUsernameTextInputLayout.getEditText() != null)
+                mUsernameTextInputLayout.getEditText().setText(user.getUsername());
+            if (user != null && user.getEmail() != null && mEmailTextInputLayout.getEditText() != null)
+                mEmailTextInputLayout.getEditText().setText(user.getEmail());
+            if (user != null && user.getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
+                mPhoneTextInputLayout.getEditText().setText(user.getPhone());
+            if (user != null && user.getImage() != null && mUserImageView != null) {
+                Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                mCurrentPhotoPath = user.getImage();
+            }else {
+                Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
+                        .apply(bitmapTransform(new CircleCrop()))
+                        .into(mUserImageView);
             }
         }
 
@@ -82,14 +78,15 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(view.getContext());
                 User user = sharedPreferencesManager.getUser();
-                UserManager.getUser().setImage(user.getImage());
                 if (mUsernameTextInputLayout.getEditText() != null)
-                    UserManager.getUser().setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                    user.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
                 if (mEmailTextInputLayout.getEditText() != null)
-                    UserManager.getUser().setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                    user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                 if (mPhoneTextInputLayout.getEditText() != null)
-                    UserManager.getUser().setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                sharedPreferencesManager.putUser();
+                    user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                Log.d("LULLO", "CHECK_IMAGE: " + mCurrentPhotoPath);
+                user.setImage(mCurrentPhotoPath);
+                sharedPreferencesManager.putUser(user);
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -146,14 +143,16 @@ public class EditProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
+        User user = sharedPreferencesManager.getUser();
         if (mUsernameTextInputLayout.getEditText() != null)
             outState.putString("Username", mUsernameTextInputLayout.getEditText().getText().toString());
         if (mEmailTextInputLayout.getEditText() != null)
             outState.putString("Email", mEmailTextInputLayout.getEditText().getText().toString());
         if (mPhoneTextInputLayout.getEditText() != null)
             outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
-        if(UserManager.getUser().getImage() != null)
-            outState.putString("Bitmap", UserManager.getUser().getImage());
+        if(user.getImage() != null)
+            outState.putString("UriImage", mCurrentPhotoPath);
         super.onSaveInstanceState(outState);
     }
 
@@ -165,7 +164,8 @@ public class EditProfileActivity extends AppCompatActivity {
             mEmailTextInputLayout.getEditText().setText(savedInstanceState.getString("Email"));
         if (mPhoneTextInputLayout.getEditText() != null)
             mPhoneTextInputLayout.getEditText().setText(savedInstanceState.getString("Phone"));
-        Glide.with(getApplicationContext()).load(savedInstanceState.getString("Bitmap")).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+        mCurrentPhotoPath = savedInstanceState.getString("UriImage");
+        Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -176,18 +176,15 @@ public class EditProfileActivity extends AppCompatActivity {
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             if(data.getData() != null) {
                 imageURI = data.getData().toString();
+                mCurrentPhotoPath = imageURI;
                 Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                UserManager.getUser().setImage(imageURI);
             }
         }else if(requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK){
             if(mCurrentPhotoPath != null) {
                 imageURI = mCurrentPhotoPath;
                 Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                UserManager.getUser().setImage(imageURI);
             }
         }
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
-        sharedPreferencesManager.putUser();
     }
 
     public File saveThumbnail() throws IOException{

@@ -37,29 +37,28 @@ public class MainActivity extends AppCompatActivity {
 
         mToolbarIcon = findViewById(R.id.icon_toolbar);
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
-        User mUser = sharedPreferencesManager.getUser();
-        UserManager.setUser(mUser);
+        User user = sharedPreferencesManager.getUser();
 
         if (mUsernameTextInputLayout.getEditText() != null) {
-            if(mUser != null)
-                mUsernameTextInputLayout.getEditText().setText(mUser.getUsername());
+            if(user != null)
+                mUsernameTextInputLayout.getEditText().setText(user.getUsername());
             mUsernameTextInputLayout.getEditText().setKeyListener(null);
             mUsernameTextInputLayout.getEditText().setEnabled(false);
         }
         if (mEmailTextInputLayout.getEditText() != null) {
-            if(mUser != null)
-                mEmailTextInputLayout.getEditText().setText(mUser.getEmail());
+            if(user != null)
+                mEmailTextInputLayout.getEditText().setText(user.getEmail());
             mEmailTextInputLayout.getEditText().setKeyListener(null);
             mEmailTextInputLayout.getEditText().setEnabled(false);
         }
         if (mPhoneTextInputLayout.getEditText() != null) {
-            if(mUser != null)
-                mPhoneTextInputLayout.getEditText().setText(mUser.getPhone());
+            if(user != null)
+                mPhoneTextInputLayout.getEditText().setText(user.getPhone());
             mPhoneTextInputLayout.getEditText().setKeyListener(null);
             mPhoneTextInputLayout.getEditText().setEnabled(false);
         }
-        if(mUser != null && mUser.getImage() != null) {
-            Glide.with(this).load(mUser.getImage())
+        if(user != null && user.getImage() != null) {
+            Glide.with(this).load(user.getImage())
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(circleImageView);
         }else{
