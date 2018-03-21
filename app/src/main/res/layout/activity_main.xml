@@ -62,7 +62,7 @@
                     android:id="@+id/username_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp">
+                    android:layout_marginStart="16dp">
 
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
@@ -88,7 +88,7 @@
                     android:id="@+id/email_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp">
+                    android:layout_marginStart="16dp">
 
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
@@ -115,7 +115,7 @@
                     android:id="@+id/phone_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp">
+                    android:layout_marginStart="16dp">
 
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"

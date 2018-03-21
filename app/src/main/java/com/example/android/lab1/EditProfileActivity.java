@@ -78,13 +78,14 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(view.getContext());
                 User user = sharedPreferencesManager.getUser();
+                if(user == null)
+                    user = User.getInstance();
                 if (mUsernameTextInputLayout.getEditText() != null)
                     user.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
                 if (mEmailTextInputLayout.getEditText() != null)
                     user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                 if (mPhoneTextInputLayout.getEditText() != null)
                     user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                Log.d("LULLO", "CHECK_IMAGE: " + mCurrentPhotoPath);
                 user.setImage(mCurrentPhotoPath);
                 sharedPreferencesManager.putUser(user);
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
@@ -151,7 +152,7 @@ public class EditProfileActivity extends AppCompatActivity {
             outState.putString("Email", mEmailTextInputLayout.getEditText().getText().toString());
         if (mPhoneTextInputLayout.getEditText() != null)
             outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
-        if(user.getImage() != null)
+        if(user != null && user.getImage() != null)
             outState.putString("UriImage", mCurrentPhotoPath);
         super.onSaveInstanceState(outState);
     }
