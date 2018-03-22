@@ -21,12 +21,11 @@
 
             <ImageView
                 android:id="@+id/icon_toolbar"
-                android:layout_width="24dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginEnd="12dp"
-                android:layout_marginTop="12dp"
                 android:src="@drawable/ic_mode_edit_black_24dp" />
 
             <ImageView
