@@ -3,6 +3,7 @@
     <string name="username">Username</string>
     <string name="email">Email</string>
     <string name="phoneNumber">Numero di telefono</string>
+    <string name="position">Posizione</string>
     <string name="editIcon" translatable="false">default_descriptor</string>
 
     <string name="title_dialog">Cambia foto</string>
@@ -11,4 +12,5 @@
     <string name="negative_button_dialog">Annulla</string>
 
     <string name="shared_preferences" translatable="false">SharedPreferencesKey</string>
+    <string name="title_activity_position">Map</string>
 </resources>

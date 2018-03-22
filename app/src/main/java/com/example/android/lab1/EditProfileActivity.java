@@ -30,6 +30,7 @@ public class EditProfileActivity extends AppCompatActivity {
     TextInputLayout mUsernameTextInputLayout;
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
+    ImageView mPositionImageView;
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
     String mCurrentPhotoPath;
@@ -50,6 +51,8 @@ public class EditProfileActivity extends AppCompatActivity {
         mCheckImageView = findViewById(R.id.icon_check_toolbar);
 
         mCameraImageView = findViewById(R.id.add_image_icon);
+
+        mPositionImageView = findViewById(R.id.position_image_view);
 
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
@@ -138,6 +141,15 @@ public class EditProfileActivity extends AppCompatActivity {
                 }).show();
             }
         });
+
+        mPositionImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), PositionActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override
