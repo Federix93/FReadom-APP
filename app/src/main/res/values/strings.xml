@@ -13,4 +13,5 @@
 
     <string name="shared_preferences" translatable="false">SharedPreferencesKey</string>
     <string name="title_activity_position">Map</string>
+    <string name="text_position_toolbar">Allega posizione</string>
 </resources>
