@@ -2,58 +2,53 @@ package com.example.android.lab1;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
 import java.util.Locale;
 
-public class PositionActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class PositionActivity extends AppCompatActivity implements OnMapReadyCallback{
 
     private Toolbar mToolbar;
-
     private GoogleMap mMap;
-    private CameraPosition mCameraPosition;
-    private GeoDataClient mGeoDataClient;
-    private PlaceDetectionClient mPlaceDetectionClient;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private TextView mCurrentPositionTextView;
+    protected Location mLastLocation;
+    private AddressResultReceiver mResultReceiver;
 
-    private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private static final int DEFAULT_ZOOM = 15;
+    private FusedLocationProviderClient mFusedLocationClient;
+
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean mLocationPermissionGranted;
 
-    // The geographical location where the device is currently located. That is, the last-known
-    // location retrieved by the Fused Location Provider.
-    private Location mLastKnownLocation;
-
-    // Keys for storing activity state.
-    private static final String KEY_CAMERA_POSITION = "camera_position";
-    private static final String KEY_LOCATION = "location";
-
-    // Used for selecting the current place.
-    private static final int M_MAX_ENTRIES = 5;
-    private String[] mLikelyPlaceNames;
-    private String[] mLikelyPlaceAddresses;
-    private String[] mLikelyPlaceAttributions;
-    private LatLng[] mLikelyPlaceLatLngs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,37 +60,48 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(mToolbar);
 
+        mCurrentPositionTextView = findViewById(R.id.current_position_text_view);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
         });
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        try {
+            Task task = mFusedLocationClient.getLastLocation();
+            task.addOnCompleteListener(this, new OnCompleteListener() {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    mLastLocation = (Location) task.getResult();
+                    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                            .findFragmentById(R.id.map);
+                    mapFragment.getMapAsync(new OnMapReadyCallback() {
+                        @Override
+                        public void onMapReady(GoogleMap googleMap) {
+                            mMap = googleMap;
+                            LatLng currentPostition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                            mMap.addMarker(new MarkerOptions().position(currentPostition).title("MARKER IN CURENT POSITION"));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPostition));
+                            setMapLongClick(mMap);
+                            startIntentService();
+                        }
+                    });
+                }
+            });
+        }catch(SecurityException e){
+            enableMyLocation();
+        }
     }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        setMapLongClick(mMap);
-    }
-
     private void setMapLongClick(final GoogleMap map){
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
                 String snippet = String.format(Locale.getDefault(), "Lat: %1$.5f, Long: %2$.5f",
                         latLng.latitude, latLng.longitude);
-                map.addMarker(new MarkerOptions().position(latLng).title("Location").snippet(snippet));
                 enableMyLocation();
+                map.addMarker(new MarkerOptions().position(latLng).title("Location").snippet(snippet));
             }
         });
     }
@@ -118,6 +124,39 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             mMap.setMyLocationEnabled(true);
         }else{
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    protected void startIntentService() {
+        mResultReceiver = new AddressResultReceiver(new Handler());
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        startService(intent);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+    }
+
+    class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultData == null) {
+                return;
+            }
+            String mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+            if (mAddressOutput == null) {
+                mAddressOutput = "";
+            }
+
+            mCurrentPositionTextView.setText(mAddressOutput);
+
         }
     }
 }

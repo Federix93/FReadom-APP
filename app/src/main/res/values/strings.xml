@@ -12,6 +12,11 @@
     <string name="negative_button_dialog">Annulla</string>
 
     <string name="shared_preferences" translatable="false">SharedPreferencesKey</string>
+
     <string name="title_activity_position">Map</string>
     <string name="text_position_toolbar">Allega posizione</string>
+    <string name="service_not_available">Nessun geocoder disponibile</string>
+    <string name="invalid_lat_long_used">Errata Latitudine o Longitudine usata</string>
+    <string name="no_address_found">Nessun indirizzo trovato</string>
+
 </resources>
