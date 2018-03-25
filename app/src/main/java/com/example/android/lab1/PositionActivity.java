@@ -96,6 +96,19 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    if(manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        enableLoc();
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(getParent(), new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                }
+                map.setMyLocationEnabled(true);
+                mLastLocation.setLatitude(latLng.latitude);
+                mLastLocation.setLongitude(latLng.longitude);
+                startIntentService();
                 String snippet = String.format(Locale.getDefault(), "Lat: %1$.5f, Long: %2$.5f",
                         latLng.latitude, latLng.longitude);
                 map.addMarker(new MarkerOptions().position(latLng).title("Location").snippet(snippet));
@@ -187,6 +200,14 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                mMap.clear();
+                getLocation();
+                return false;
+            }
+        });
     }
 
     public void getLocation(){
@@ -226,6 +247,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             mCurrentPositionTextView.setText(mAddressOutput);
             if(mLastLocation != null) {
                 LatLng currentPostition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(currentPostition).title("MARKER IN CURENT POSITION"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPostition, 12.0f));
                 setMapLongClick(mMap);
