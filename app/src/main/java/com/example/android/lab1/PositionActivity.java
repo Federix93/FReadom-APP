@@ -101,13 +101,12 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             public void onClick(View v) {
                 SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
                 User user = sharedPreferencesManager.getUser();
-                Log.d("LULLO", mAddressOutput);
                 if(user != null){
-                    user.setAddress(mAddressOutput);
+                    user.setTempAddress(mAddressOutput);
                     sharedPreferencesManager.putUser(user);
                 }else{
                     User newUser = User.getInstance();
-                    newUser.setAddress(mAddressOutput);
+                    newUser.setTempAddress(mAddressOutput);
                     sharedPreferencesManager.putUser(newUser);
                 }
                 finish();

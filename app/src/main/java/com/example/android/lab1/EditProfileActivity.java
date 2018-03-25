@@ -68,6 +68,12 @@ public class EditProfileActivity extends AppCompatActivity {
                 mEmailTextInputLayout.getEditText().setText(user.getEmail());
             if (user != null && user.getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
                 mPhoneTextInputLayout.getEditText().setText(user.getPhone());
+            if(mAddressTextInputLayout.getEditText() != null){
+                if(user != null)
+                    mAddressTextInputLayout.getEditText().setText(user.getAddress());
+                mAddressTextInputLayout.getEditText().setKeyListener(null);
+                mAddressTextInputLayout.getEditText().setEnabled(false);
+            }
             if (user != null && user.getImage() != null && mUserImageView != null) {
                 Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 mCurrentPhotoPath = user.getImage();
@@ -93,7 +99,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                 if (mPhoneTextInputLayout.getEditText() != null)
                     user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                if (mAddressTextInputLayout.getEditText() != null)
+                if (mAddressTextInputLayout.getEditText() != null && user.getTempAddress() != null)
                     user.setAddress(mAddressTextInputLayout.getEditText().getText().toString());
                 user.setImage(mCurrentPhotoPath);
                 sharedPreferencesManager.putUser(user);
@@ -161,8 +167,8 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onRestart() {
+        super.onRestart();
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
         if( mAddressTextInputLayout.getEditText() != null)
@@ -171,7 +177,7 @@ public class EditProfileActivity extends AppCompatActivity {
             mAddressTextInputLayout.getEditText().setEnabled(false);
             if (user != null)
             {
-                mAddressTextInputLayout.getEditText().setText(user.getAddress());
+                mAddressTextInputLayout.getEditText().setText(user.getTempAddress());
             }
         }
     }

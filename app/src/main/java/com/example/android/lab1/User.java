@@ -15,7 +15,7 @@ public class User {
     private String mPhone;
     private String mAddress;
     private String mImage;
-
+    private String mTempAddress;
 
     private User(){}
 
@@ -24,6 +24,10 @@ public class User {
             instance = new User();
         return instance;
     }
+
+    public String getTempAddress() { return mTempAddress; }
+
+    public void setTempAddress(String pTempAddress) { mTempAddress = pTempAddress; }
 
     public void setInstance(User user){
         instance = user;
