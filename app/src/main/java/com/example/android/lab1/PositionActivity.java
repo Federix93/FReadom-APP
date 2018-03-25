@@ -35,6 +35,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.Locale;
@@ -49,6 +50,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private GoogleApiClient mGoogleApiClient;
     private LocationManager manager;
     private FusedLocationProviderClient mFusedLocationClient;
+
+    private Marker mCurrentMarker;
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
@@ -223,10 +226,13 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 mAddressOutput = "";
             }
             mCurrentPositionTextView.setText(mAddressOutput);
-            LatLng currentPostition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(currentPostition).title("MARKER IN CURENT POSITION"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPostition));
-            setMapLongClick(mMap);
+            if(mLastLocation != null) {
+                LatLng currentPostition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                mCurrentMarker.remove();
+                mMap.addMarker(new MarkerOptions().position(currentPostition).title("MARKER IN CURENT POSITION"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPostition, 12.0f));
+                setMapLongClick(mMap);
+            }
         }
     }
 }
