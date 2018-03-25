@@ -16,6 +16,7 @@ public class User {
     private String mAddress;
     private String mImage;
     private String mTempAddress;
+    private String mShortBio;
 
     private User(){}
 
@@ -24,6 +25,10 @@ public class User {
             instance = new User();
         return instance;
     }
+
+    public String getShortBio(){ return mShortBio; }
+
+    public void setShortBio(String pShortBio){ mShortBio = pShortBio; }
 
     public String getTempAddress() { return mTempAddress; }
 

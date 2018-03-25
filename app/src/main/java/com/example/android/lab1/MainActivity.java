@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -21,7 +20,8 @@ public class MainActivity extends AppCompatActivity {
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
     TextInputLayout mAddressTextInputLayout;
-    ImageView circleImageView;
+    TextInputLayout mShortBioTextInputLayout;
+    ImageView mCircleImageView;
 
 
     @Override
@@ -37,7 +37,9 @@ public class MainActivity extends AppCompatActivity {
 
         mAddressTextInputLayout = findViewById(R.id.address_text_view);
 
-        circleImageView = findViewById(R.id.profile_image);
+        mCircleImageView = findViewById(R.id.profile_image);
+
+        mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
         mToolbarIcon = findViewById(R.id.icon_toolbar);
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
@@ -61,14 +63,22 @@ public class MainActivity extends AppCompatActivity {
             mPhoneTextInputLayout.getEditText().setKeyListener(null);
             mPhoneTextInputLayout.getEditText().setEnabled(false);
         }
+
+        if(mShortBioTextInputLayout.getEditText() != null){
+            if(user != null)
+                mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
+            mShortBioTextInputLayout.getEditText().setKeyListener(null);
+            mShortBioTextInputLayout.getEditText().setEnabled(false);
+        }
+
         if(user != null && user.getImage() != null) {
             Glide.with(this).load(user.getImage())
                     .apply(bitmapTransform(new CircleCrop()))
-                    .into(circleImageView);
+                    .into(mCircleImageView);
         }else{
             Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                     .apply(bitmapTransform(new CircleCrop()))
-                    .into(circleImageView);
+                    .into(mCircleImageView);
         }
 
         if(mAddressTextInputLayout.getEditText() != null){

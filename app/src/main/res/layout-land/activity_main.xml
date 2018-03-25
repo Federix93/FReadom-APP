@@ -27,8 +27,8 @@
             android:id="@+id/profile_image"
             android:layout_width="192dp"
             android:layout_height="192dp"
-            android:scaleType="centerCrop"
-            android:layout_centerInParent="true"/>
+            android:layout_centerInParent="true"
+            android:scaleType="centerCrop" />
 
     </RelativeLayout>
 
@@ -124,7 +124,7 @@
                             android:layout_height="match_parent"
                             android:hint="@string/phoneNumber"
                             android:inputType="phone"
-                            android:maxLength="13"/>
+                            android:maxLength="13" />
                     </android.support.design.widget.TextInputLayout>
                 </LinearLayout>
 
@@ -154,6 +154,30 @@
                     </android.support.design.widget.TextInputLayout>
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:paddingBottom="4dp"
+                        android:src="@drawable/ic_sms_black_24dp" />
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/bio_text_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp">
+
+                        <android.support.design.widget.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:hint="@string/short_bio_text" />
+                    </android.support.design.widget.TextInputLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

@@ -32,6 +32,7 @@ public class EditProfileActivity extends AppCompatActivity {
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
     TextInputLayout mAddressTextInputLayout;
+    TextInputLayout mShortBioTextInputLayout;
     ImageView mPositionImageView;
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
@@ -58,6 +59,8 @@ public class EditProfileActivity extends AppCompatActivity {
 
         mAddressTextInputLayout = findViewById(R.id.position_text_edit);
 
+        mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
+
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
         if(savedInstanceState == null)
@@ -68,6 +71,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 mEmailTextInputLayout.getEditText().setText(user.getEmail());
             if (user != null && user.getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
                 mPhoneTextInputLayout.getEditText().setText(user.getPhone());
+            if(user != null && user.getShortBio() != null && mShortBioTextInputLayout.getEditText() != null)
+                mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
             if(mAddressTextInputLayout.getEditText() != null){
                 if(user != null)
                     mAddressTextInputLayout.getEditText().setText(user.getAddress());
@@ -101,6 +106,8 @@ public class EditProfileActivity extends AppCompatActivity {
                     user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
                 if (mAddressTextInputLayout.getEditText() != null && user.getTempAddress() != null)
                     user.setAddress(mAddressTextInputLayout.getEditText().getText().toString());
+                if(mShortBioTextInputLayout.getEditText() != null)
+                    user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                 user.setImage(mCurrentPhotoPath);
                 sharedPreferencesManager.putUser(user);
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
@@ -194,6 +201,8 @@ public class EditProfileActivity extends AppCompatActivity {
             outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
         if (mAddressTextInputLayout.getEditText() != null)
             outState.putString("Address", mAddressTextInputLayout.getEditText().getText().toString());
+        if(mShortBioTextInputLayout.getEditText() != null)
+            outState.putString("ShortBio", mShortBioTextInputLayout.getEditText().getText().toString());
         if(user != null && user.getImage() != null)
             outState.putString("UriImage", mCurrentPhotoPath);
         super.onSaveInstanceState(outState);
@@ -209,6 +218,8 @@ public class EditProfileActivity extends AppCompatActivity {
             mPhoneTextInputLayout.getEditText().setText(savedInstanceState.getString("Phone"));
         if (mAddressTextInputLayout.getEditText() != null)
             mAddressTextInputLayout.getEditText().setText(savedInstanceState.getString("Address"));
+        if(mShortBioTextInputLayout.getEditText() != null)
+            mShortBioTextInputLayout.getEditText().setText(savedInstanceState.getString("ShortBio"));
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
         Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
         super.onRestoreInstanceState(savedInstanceState);
