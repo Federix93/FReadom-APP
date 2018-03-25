@@ -51,8 +51,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private LocationManager manager;
     private FusedLocationProviderClient mFusedLocationClient;
 
-    private Marker mCurrentMarker;
-
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
 
@@ -228,7 +226,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             mCurrentPositionTextView.setText(mAddressOutput);
             if(mLastLocation != null) {
                 LatLng currentPostition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                mCurrentMarker.remove();
                 mMap.addMarker(new MarkerOptions().position(currentPostition).title("MARKER IN CURENT POSITION"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPostition, 12.0f));
                 setMapLongClick(mMap);
