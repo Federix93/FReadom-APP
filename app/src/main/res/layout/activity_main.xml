@@ -23,9 +23,9 @@
                 android:id="@+id/icon_toolbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="12dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
+                android:padding="12dp"
                 android:src="@drawable/ic_mode_edit_black_24dp" />
 
             <ImageView
@@ -73,8 +73,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="2dp">
+                android:layout_marginTop="2dp"
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -100,8 +100,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="2dp">
+                android:layout_marginTop="2dp"
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -121,8 +121,35 @@
                         android:layout_height="match_parent"
                         android:hint="@string/phoneNumber"
                         android:inputType="phone"
-                        android:maxLength="13"/>
+                        android:maxLength="13" />
                 </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:paddingBottom="4dp"
+                    android:src="@drawable/ic_location_on_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/address_text_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:hint="@string/address_text" />
+                </android.support.design.widget.TextInputLayout>
+
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

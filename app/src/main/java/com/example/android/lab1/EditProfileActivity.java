@@ -9,6 +9,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
@@ -30,6 +31,7 @@ public class EditProfileActivity extends AppCompatActivity {
     TextInputLayout mUsernameTextInputLayout;
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
+    TextInputLayout mAddressTextInputLayout;
     ImageView mPositionImageView;
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
@@ -54,9 +56,12 @@ public class EditProfileActivity extends AppCompatActivity {
 
         mPositionImageView = findViewById(R.id.position_image_view);
 
+        mAddressTextInputLayout = findViewById(R.id.position_text_edit);
+
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
-        if(savedInstanceState == null){
+        if(savedInstanceState == null)
+        {
             if (user != null && user.getUsername() != null && mUsernameTextInputLayout.getEditText() != null)
                 mUsernameTextInputLayout.getEditText().setText(user.getUsername());
             if (user != null && user.getEmail() != null && mEmailTextInputLayout.getEditText() != null)
@@ -66,7 +71,8 @@ public class EditProfileActivity extends AppCompatActivity {
             if (user != null && user.getImage() != null && mUserImageView != null) {
                 Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 mCurrentPhotoPath = user.getImage();
-            }else {
+            }else
+                {
                 Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserImageView);
@@ -87,6 +93,8 @@ public class EditProfileActivity extends AppCompatActivity {
                     user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                 if (mPhoneTextInputLayout.getEditText() != null)
                     user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                if (mAddressTextInputLayout.getEditText() != null)
+                    user.setAddress(mAddressTextInputLayout.getEditText().getText().toString());
                 user.setImage(mCurrentPhotoPath);
                 sharedPreferencesManager.putUser(user);
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
@@ -153,6 +161,22 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+        User user = sharedPreferencesManager.getUser();
+        if( mAddressTextInputLayout.getEditText() != null)
+        {
+            mAddressTextInputLayout.getEditText().setKeyListener(null);
+            mAddressTextInputLayout.getEditText().setEnabled(false);
+            if (user != null)
+            {
+                mAddressTextInputLayout.getEditText().setText(user.getAddress());
+            }
+        }
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
         User user = sharedPreferencesManager.getUser();
@@ -162,6 +186,8 @@ public class EditProfileActivity extends AppCompatActivity {
             outState.putString("Email", mEmailTextInputLayout.getEditText().getText().toString());
         if (mPhoneTextInputLayout.getEditText() != null)
             outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
+        if (mAddressTextInputLayout.getEditText() != null)
+            outState.putString("Address", mAddressTextInputLayout.getEditText().getText().toString());
         if(user != null && user.getImage() != null)
             outState.putString("UriImage", mCurrentPhotoPath);
         super.onSaveInstanceState(outState);
@@ -175,6 +201,8 @@ public class EditProfileActivity extends AppCompatActivity {
             mEmailTextInputLayout.getEditText().setText(savedInstanceState.getString("Email"));
         if (mPhoneTextInputLayout.getEditText() != null)
             mPhoneTextInputLayout.getEditText().setText(savedInstanceState.getString("Phone"));
+        if (mAddressTextInputLayout.getEditText() != null)
+            mAddressTextInputLayout.getEditText().setText(savedInstanceState.getString("Address"));
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
         Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
         super.onRestoreInstanceState(savedInstanceState);

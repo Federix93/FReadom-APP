@@ -18,5 +18,6 @@
     <string name="service_not_available">Nessun geocoder disponibile</string>
     <string name="invalid_lat_long_used">Errata Latitudine o Longitudine usata</string>
     <string name="no_address_found">Nessun indirizzo trovato</string>
+    <string name="address_text">Indirizzo</string>
 
 </resources>

@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -45,11 +46,15 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private Toolbar mToolbar;
     private GoogleMap mMap;
     private TextView mCurrentPositionTextView;
+    private ImageView mConfirmPosition;
+
     protected Location mLastLocation;
     private AddressResultReceiver mResultReceiver;
     private GoogleApiClient mGoogleApiClient;
     private LocationManager manager;
     private FusedLocationProviderClient mFusedLocationClient;
+
+    private String mAddressOutput;
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
@@ -67,6 +72,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         setSupportActionBar(mToolbar);
 
         mCurrentPositionTextView = findViewById(R.id.current_position_text_view);
+        mConfirmPosition = findViewById(R.id.confirm_position_image_view);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -90,6 +96,23 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
+        mConfirmPosition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
+                User user = sharedPreferencesManager.getUser();
+                Log.d("LULLO", mAddressOutput);
+                if(user != null){
+                    user.setAddress(mAddressOutput);
+                    sharedPreferencesManager.putUser(user);
+                }else{
+                    User newUser = User.getInstance();
+                    newUser.setAddress(mAddressOutput);
+                    sharedPreferencesManager.putUser(newUser);
+                }
+                finish();
+            }
+        });
     }
 
     private void setMapLongClick(final GoogleMap map) {
@@ -240,7 +263,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             if (resultData == null) {
                 return;
             }
-            String mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+            mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
             if (mAddressOutput == null) {
                 mAddressOutput = "";
             }

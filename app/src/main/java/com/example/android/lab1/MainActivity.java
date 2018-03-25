@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     TextInputLayout mUsernameTextInputLayout;
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
+    TextInputLayout mAddressTextInputLayout;
     ImageView circleImageView;
 
 
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         mPhoneTextInputLayout = findViewById(R.id.phone_text);
 
         mEmailTextInputLayout = findViewById(R.id.email_text);
+
+        mAddressTextInputLayout = findViewById(R.id.address_text_view);
 
         circleImageView = findViewById(R.id.profile_image);
 
@@ -66,6 +69,13 @@ public class MainActivity extends AppCompatActivity {
             Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(circleImageView);
+        }
+
+        if(mAddressTextInputLayout.getEditText() != null){
+            if(user != null)
+                mAddressTextInputLayout.getEditText().setText(user.getAddress());
+            mAddressTextInputLayout.getEditText().setKeyListener(null);
+            mAddressTextInputLayout.getEditText().setEnabled(false);
         }
 
         mToolbarIcon.setOnClickListener(new View.OnClickListener() {
