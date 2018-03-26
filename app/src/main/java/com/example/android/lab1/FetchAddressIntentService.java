@@ -39,11 +39,13 @@ public class FetchAddressIntentService extends IntentService {
         String errorMessage = "";
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         Location location = intent.getParcelableExtra(Constants.LOCATION_DATA_EXTRA);
+        Log.d("LULLO", "LONGITUDE" + location.getLongitude());
         mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
 
         try{
             addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
         }catch(IOException e){
+            e.printStackTrace();
             errorMessage = getString(R.string.service_not_available);
         }catch(IllegalArgumentException e) {
             errorMessage = getString(R.string.invalid_lat_long_used);
@@ -77,7 +79,6 @@ public class FetchAddressIntentService extends IntentService {
                 ".RESULT_DATA_KEY";
         public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME +
                 ".LOCATION_DATA_EXTRA";
-        public static final String CURRENT_OR_LAST_LOCATION = "Location";
     }
     private void deliverResultToReceiver(int resultCode, String message) {
         Bundle bundle = new Bundle();

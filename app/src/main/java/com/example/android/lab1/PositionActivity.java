@@ -26,7 +26,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -101,8 +100,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
 
-
-
         mConfirmPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,10 +118,10 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
-    private void setMapLongClick(final GoogleMap map) {
-        map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+    private void setMapClick(final GoogleMap map) {
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
-            public void onMapLongClick(LatLng latLng) {
+            public void onMapClick(LatLng latLng) {
                 if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
                     if(manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -154,6 +151,10 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         super.onActivityResult(requestCode, resultCode, data);
         if (!(requestCode == PLAY_SERVICES_RESOLUTION_REQUEST && resultCode == RESULT_OK)) {
             finish();
+        }else {
+            mGoogleApiClient.disconnect();
+            mGoogleApiClient = null;
+            finish();
         }
     }
 
@@ -171,6 +172,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                     .addLocationRequest(mLocationRequest);
             builder.setAlwaysShow(true);
+
             PendingResult<LocationSettingsResult> result =
                     LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
             result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
@@ -240,6 +242,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         }
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            getLocationData();
         }catch(SecurityException e){
             e.printStackTrace();
         }
@@ -253,7 +256,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     protected void onStop() {
         super.onStop();
-        if(mGoogleApiClient.isConnected())
+        if(mGoogleApiClient != null && mGoogleApiClient.isConnected())
             mGoogleApiClient.disconnect();
     }
 
@@ -264,7 +267,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public void onLocationChanged(Location location) {
-        getLocationData();
+
     }
 
     class AddressResultReceiver extends ResultReceiver {
@@ -287,7 +290,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(currentPostition).title("MARKER IN CURENT POSITION"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPostition, 12.0f));
-                setMapLongClick(mMap);
+                setMapClick(mMap);
             }
         }
     }
@@ -298,6 +301,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mLastLocation != null) {
                 startIntentService();
+            }else{
+                Log.d("LULLO", "NULL COGLIONE");
             }
         }catch(SecurityException e){
 
