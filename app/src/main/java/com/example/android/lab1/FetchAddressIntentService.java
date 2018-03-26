@@ -77,6 +77,7 @@ public class FetchAddressIntentService extends IntentService {
                 ".RESULT_DATA_KEY";
         public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME +
                 ".LOCATION_DATA_EXTRA";
+        public static final String CURRENT_OR_LAST_LOCATION = "Location";
     }
     private void deliverResultToReceiver(int resultCode, String message) {
         Bundle bundle = new Bundle();

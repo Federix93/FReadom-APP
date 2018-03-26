@@ -5,12 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,12 +20,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -36,12 +38,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
+
 import java.util.Locale;
 
-public class PositionActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class PositionActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks, LocationListener {
 
     private Toolbar mToolbar;
     private GoogleMap mMap;
@@ -52,7 +54,9 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private AddressResultReceiver mResultReceiver;
     private GoogleApiClient mGoogleApiClient;
     private LocationManager manager;
-    private FusedLocationProviderClient mFusedLocationClient;
+    private Object synchronizedObject = new Object();
+
+    private LocationRequest mLocationRequest;
 
     private String mAddressOutput;
 
@@ -90,12 +94,15 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             if(manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 enableLoc();
             }else{
-                getLocation();
+                connectToGoogleMapApi();
             }
         } else {
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
+
+
+
         mConfirmPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,18 +129,22 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                         == PackageManager.PERMISSION_GRANTED) {
                     if(manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                         enableLoc();
+                    }else{
+                        connectToGoogleMapApi();
                     }
                 } else {
                     ActivityCompat.requestPermissions(getParent(), new String[]{
                             Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                 }
                 map.setMyLocationEnabled(true);
-                mLastLocation.setLatitude(latLng.latitude);
-                mLastLocation.setLongitude(latLng.longitude);
-                startIntentService();
-                String snippet = String.format(Locale.getDefault(), "Lat: %1$.5f, Long: %2$.5f",
-                        latLng.latitude, latLng.longitude);
-                map.addMarker(new MarkerOptions().position(latLng).title("Location").snippet(snippet));
+                if(mLastLocation != null) {
+                    mLastLocation.setLatitude(latLng.latitude);
+                    mLastLocation.setLongitude(latLng.longitude);
+                    startIntentService();
+                    String snippet = String.format(Locale.getDefault(), "Lat: %1$.5f, Long: %2$.5f",
+                            latLng.latitude, latLng.longitude);
+                    map.addMarker(new MarkerOptions().position(latLng).title("Location").snippet(snippet));
+                }
             }
         });
     }
@@ -141,39 +152,24 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PLAY_SERVICES_RESOLUTION_REQUEST && resultCode == RESULT_OK) {
-            getLocation();
-        }else {
+        if (!(requestCode == PLAY_SERVICES_RESOLUTION_REQUEST && resultCode == RESULT_OK)) {
             finish();
         }
     }
 
     private void enableLoc() {
         if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(PositionActivity.this)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                        @Override
-                        public void onConnected(Bundle bundle) {}
-
-                        @Override
-                        public void onConnectionSuspended(int i) {
-                            mGoogleApiClient.connect();
-                        }
-                    })
-                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                        @Override
-                        public void onConnectionFailed(ConnectionResult connectionResult) {
-                        }
-                    }).build();
-            mGoogleApiClient.connect();
-
-            LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            locationRequest.setInterval(30 * 1000);
-            locationRequest.setFastestInterval(5 * 1000);
+            connectToGoogleMapApi();
+            synchronized (synchronizedObject) {
+                if(mLocationRequest == null) {
+                    mLocationRequest = LocationRequest.create();
+                    mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                    mLocationRequest.setInterval(30 * 1000);
+                    mLocationRequest.setFastestInterval(5 * 1000);
+                }
+            }
             LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                    .addLocationRequest(locationRequest);
+                    .addLocationRequest(mLocationRequest);
             builder.setAlwaysShow(true);
             PendingResult<LocationSettingsResult> result =
                     LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
@@ -202,7 +198,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     if(manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                         enableLoc();
                     }else{
-                        getLocation();
+                        connectToGoogleMapApi();
                     }
                 } else {
                     finish();
@@ -226,30 +222,49 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public boolean onMyLocationButtonClick() {
                 mMap.clear();
-                getLocation();
+                getLocationData();
                 return false;
             }
         });
     }
 
-    public void getLocation(){
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        synchronized (synchronizedObject) {
+            if(mLocationRequest == null){
+                mLocationRequest = LocationRequest.create();
+                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                mLocationRequest.setInterval(30 * 1000);   //update every amount*1000 millisecs by default
+                mLocationRequest.setFastestInterval(5 * 1000);     //update every amount*1000 millisecs if the system updates the value on its own
+            }
+        }
         try {
-            mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    mLastLocation = location;
-                    if(mLastLocation == null)
-                        return;
-                    if(!Geocoder.isPresent())
-                        return;
-                    startIntentService();
-                }
-            });
-        } catch (SecurityException e) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }catch(SecurityException e){
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        connectToGoogleMapApi();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mGoogleApiClient.isConnected())
+            mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        finish();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        getLocationData();
     }
 
     class AddressResultReceiver extends ResultReceiver {
@@ -276,4 +291,29 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             }
         }
     }
+
+    private void getLocationData() {
+
+        try {
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
+                startIntentService();
+            }
+        }catch(SecurityException e){
+
+        }
+    }
+
+    private void connectToGoogleMapApi(){
+        if(mGoogleApiClient == null)
+        {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+            mGoogleApiClient.connect();
+        }
+    }
+
 }
