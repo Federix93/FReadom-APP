@@ -73,12 +73,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 mPhoneTextInputLayout.getEditText().setText(user.getPhone());
             if(user != null && user.getShortBio() != null && mShortBioTextInputLayout.getEditText() != null)
                 mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
-            /*if(mAddressTextInputLayout.getEditText() != null){
-                if(user != null)
-                    mAddressTextInputLayout.getEditText().setText(user.getAddress());
-                mAddressTextInputLayout.getEditText().setKeyListener(null);
-                mAddressTextInputLayout.getEditText().setEnabled(false);
-            }*/
             if (user != null && user.getImage() != null && mUserImageView != null) {
                 Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 mCurrentPhotoPath = user.getImage();
@@ -191,8 +185,6 @@ public class EditProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
-        User user = sharedPreferencesManager.getUser();
         if (mUsernameTextInputLayout.getEditText() != null)
             outState.putString("Username", mUsernameTextInputLayout.getEditText().getText().toString());
         if (mEmailTextInputLayout.getEditText() != null)
@@ -203,10 +195,7 @@ public class EditProfileActivity extends AppCompatActivity {
             outState.putString("Address", mAddressTextInputLayout.getEditText().getText().toString());
         if(mShortBioTextInputLayout.getEditText() != null)
             outState.putString("ShortBio", mShortBioTextInputLayout.getEditText().getText().toString());
-        if(user != null && user.getImage() != null)
-            outState.putString("UriImage", mCurrentPhotoPath);
-        else
-            outState.putString("UriImage", mCurrentPhotoPath);
+        outState.putString("UriImage", mCurrentPhotoPath);
         super.onSaveInstanceState(outState);
     }
 
