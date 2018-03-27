@@ -73,12 +73,12 @@ public class EditProfileActivity extends AppCompatActivity {
                 mPhoneTextInputLayout.getEditText().setText(user.getPhone());
             if(user != null && user.getShortBio() != null && mShortBioTextInputLayout.getEditText() != null)
                 mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
-            if(mAddressTextInputLayout.getEditText() != null){
+            /*if(mAddressTextInputLayout.getEditText() != null){
                 if(user != null)
                     mAddressTextInputLayout.getEditText().setText(user.getAddress());
                 mAddressTextInputLayout.getEditText().setKeyListener(null);
                 mAddressTextInputLayout.getEditText().setEnabled(false);
-            }
+            }*/
             if (user != null && user.getImage() != null && mUserImageView != null) {
                 Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 mCurrentPhotoPath = user.getImage();
@@ -174,8 +174,8 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
+    protected void onStart() {
+        super.onStart();
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
         if( mAddressTextInputLayout.getEditText() != null)
@@ -205,6 +205,8 @@ public class EditProfileActivity extends AppCompatActivity {
             outState.putString("ShortBio", mShortBioTextInputLayout.getEditText().getText().toString());
         if(user != null && user.getImage() != null)
             outState.putString("UriImage", mCurrentPhotoPath);
+        else
+            outState.putString("UriImage", mCurrentPhotoPath);
         super.onSaveInstanceState(outState);
     }
 
@@ -221,7 +223,14 @@ public class EditProfileActivity extends AppCompatActivity {
         if(mShortBioTextInputLayout.getEditText() != null)
             mShortBioTextInputLayout.getEditText().setText(savedInstanceState.getString("ShortBio"));
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
-        Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+        if(mCurrentPhotoPath != null)
+            Glide.with(getApplicationContext()).load(mCurrentPhotoPath)
+                    .apply(bitmapTransform(new CircleCrop()))
+                    .into(mUserImageView);
+        else
+            Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
+                    .apply(bitmapTransform(new CircleCrop()))
+                    .into(mUserImageView);
         super.onRestoreInstanceState(savedInstanceState);
     }
 
