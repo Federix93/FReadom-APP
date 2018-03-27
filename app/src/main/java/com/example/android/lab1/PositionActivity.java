@@ -49,6 +49,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private TextView mCurrentPositionTextView;
     private ImageView mConfirmPosition;
 
+    protected Location mCurrentLocationSelected;
     protected Location mLastLocation;
     private AddressResultReceiver mResultReceiver;
     private GoogleApiClient mGoogleApiClient;
@@ -220,6 +221,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
@@ -267,6 +269,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public void onLocationChanged(Location location) {
+        mCurrentLocationSelected = location;
 
     }
 
@@ -301,8 +304,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mLastLocation != null) {
                 startIntentService();
-            }else{
-                Log.d("LULLO", "NULL COGLIONE");
             }
         }catch(SecurityException e){
 
@@ -317,7 +318,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
-            mGoogleApiClient.connect();
         }
     }
 
