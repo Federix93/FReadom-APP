@@ -319,6 +319,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     .addApi(LocationServices.API)
                     .build();
         }
+        mGoogleApiClient.connect();
     }
 
 }
