@@ -92,7 +92,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     mAddressTextInputLayout.setText(user.getTempAddress());
                 }
                 else{
-                    mAddressTextInputLayout.setText("Seleziona la tua posizione");
+                    mAddressTextInputLayout.setText(R.string.selection_position);
                 }
             }
         }

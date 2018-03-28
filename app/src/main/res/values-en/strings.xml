@@ -12,4 +12,5 @@
     <string name="text_position_toolbar">Link position</string>
     <string name="address_text">Address</string>
     <string name="short_bio_text">Short Bio</string>
+    <string name="selection_position">Select your position</string>
 </resources>

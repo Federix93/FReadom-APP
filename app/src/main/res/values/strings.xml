@@ -20,5 +20,6 @@
     <string name="no_address_found">Nessun indirizzo trovato</string>
     <string name="address_text">Indirizzo</string>
     <string name="short_bio_text">Breve Descrizione</string>
+    <string name="selection_position">Seleziona la tua posizione</string>
 
 </resources>
