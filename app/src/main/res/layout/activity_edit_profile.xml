@@ -154,7 +154,10 @@
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:hint="@string/position"/>
+                        android:hint="@string/position"
+                        android:clickable="true"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"/>
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>
 

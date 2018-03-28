@@ -1,4 +1,5 @@
 package com.example.android.lab1;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 
@@ -63,27 +65,25 @@ public class EditProfileActivity extends AppCompatActivity {
 
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
-        if(savedInstanceState == null)
-        {
+        if (savedInstanceState == null) {
             if (user != null && user.getUsername() != null && mUsernameTextInputLayout.getEditText() != null)
                 mUsernameTextInputLayout.getEditText().setText(user.getUsername());
             if (user != null && user.getEmail() != null && mEmailTextInputLayout.getEditText() != null)
                 mEmailTextInputLayout.getEditText().setText(user.getEmail());
             if (user != null && user.getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
                 mPhoneTextInputLayout.getEditText().setText(user.getPhone());
-            if(user != null && user.getShortBio() != null && mShortBioTextInputLayout.getEditText() != null)
+            if (user != null && user.getShortBio() != null && mShortBioTextInputLayout.getEditText() != null)
                 mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
-            if(mAddressTextInputLayout.getEditText() != null){
-                if(user != null)
+            if (mAddressTextInputLayout.getEditText() != null) {
+                if (user != null)
                     mAddressTextInputLayout.getEditText().setText(user.getAddress());
-                mAddressTextInputLayout.getEditText().setKeyListener(null);
-                mAddressTextInputLayout.getEditText().setEnabled(false);
+                //mAddressTextInputLayout.getEditText().setKeyListener(null);
+                //mAddressTextInputLayout.getEditText().setEnabled(false);
             }
             if (user != null && user.getImage() != null && mUserImageView != null) {
                 Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 mCurrentPhotoPath = user.getImage();
-            }else
-                {
+            } else {
                 Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserImageView);
@@ -96,7 +96,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(view.getContext());
                 User user = sharedPreferencesManager.getUser();
-                if(user == null)
+                if (user == null)
                     user = User.getInstance();
                 if (mUsernameTextInputLayout.getEditText() != null)
                     user.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
@@ -106,7 +106,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
                 if (mAddressTextInputLayout.getEditText() != null && user.getTempAddress() != null)
                     user.setAddress(mAddressTextInputLayout.getEditText().getText().toString());
-                if(mShortBioTextInputLayout.getEditText() != null)
+                if (mShortBioTextInputLayout.getEditText() != null)
                     user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                 user.setImage(mCurrentPhotoPath);
                 sharedPreferencesManager.putUser(user);
@@ -120,7 +120,7 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                final CharSequence[] items = { getString(R.string.camera_option_dialog) ,getString(R.string.gallery_option_dialog)};
+                final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
                 final AlertDialog.Builder dialog = new AlertDialog.Builder(view.getContext());
                 dialog.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
                     @Override
@@ -131,17 +131,17 @@ public class EditProfileActivity extends AppCompatActivity {
                 dialog.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        switch(i) {
+                        switch (i) {
                             case CAPTURE_IMAGE:
                                 File photoFile = null;
                                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                if (cameraIntent.resolveActivity(getPackageManager()) != null){
+                                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
                                     try {
                                         photoFile = saveThumbnail();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                    if(photoFile != null) {
+                                    if (photoFile != null) {
                                         Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
                                                 "com.example.android.fileprovider",
                                                 photoFile);
@@ -171,6 +171,14 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
+        mAddressTextInputLayout.getEditText().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), PositionActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override
@@ -178,12 +186,10 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onRestart();
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
-        if( mAddressTextInputLayout.getEditText() != null)
-        {
-            mAddressTextInputLayout.getEditText().setKeyListener(null);
-            mAddressTextInputLayout.getEditText().setEnabled(false);
-            if (user != null)
-            {
+        if (mAddressTextInputLayout.getEditText() != null) {
+            //mAddressTextInputLayout.getEditText().setKeyListener(null);
+            //mAddressTextInputLayout.getEditText().setEnabled(false);
+            if (user != null) {
                 mAddressTextInputLayout.getEditText().setText(user.getTempAddress());
             }
         }
@@ -201,9 +207,9 @@ public class EditProfileActivity extends AppCompatActivity {
             outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
         if (mAddressTextInputLayout.getEditText() != null)
             outState.putString("Address", mAddressTextInputLayout.getEditText().getText().toString());
-        if(mShortBioTextInputLayout.getEditText() != null)
+        if (mShortBioTextInputLayout.getEditText() != null)
             outState.putString("ShortBio", mShortBioTextInputLayout.getEditText().getText().toString());
-        if(user != null && user.getImage() != null)
+        if (user != null && user.getImage() != null)
             outState.putString("UriImage", mCurrentPhotoPath);
         super.onSaveInstanceState(outState);
     }
@@ -218,7 +224,7 @@ public class EditProfileActivity extends AppCompatActivity {
             mPhoneTextInputLayout.getEditText().setText(savedInstanceState.getString("Phone"));
         if (mAddressTextInputLayout.getEditText() != null)
             mAddressTextInputLayout.getEditText().setText(savedInstanceState.getString("Address"));
-        if(mShortBioTextInputLayout.getEditText() != null)
+        if (mShortBioTextInputLayout.getEditText() != null)
             mShortBioTextInputLayout.getEditText().setText(savedInstanceState.getString("ShortBio"));
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
         Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
@@ -230,21 +236,20 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         String imageURI = null;
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
-            if(data.getData() != null) {
+            if (data.getData() != null) {
                 imageURI = data.getData().toString();
                 mCurrentPhotoPath = imageURI;
                 Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
             }
-        }else if(requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK){
-            if(mCurrentPhotoPath != null) {
+        } else if (requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK) {
+            if (mCurrentPhotoPath != null) {
                 imageURI = mCurrentPhotoPath;
                 Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
             }
         }
     }
 
-    public File saveThumbnail() throws IOException{
-
+    public File saveThumbnail() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
