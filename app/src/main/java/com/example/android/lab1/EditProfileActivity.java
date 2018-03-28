@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -12,6 +13,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 
@@ -31,7 +34,7 @@ public class EditProfileActivity extends AppCompatActivity {
     TextInputLayout mUsernameTextInputLayout;
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
-    TextInputLayout mAddressTextInputLayout;
+    TextView mAddressTextInputLayout;
     TextInputLayout mShortBioTextInputLayout;
     ImageView mPositionImageView;
     private final int RESULT_LOAD_IMAGE = 1;
@@ -57,7 +60,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         mPositionImageView = findViewById(R.id.position_image_view);
 
-        mAddressTextInputLayout = findViewById(R.id.position_text_edit);
+        mAddressTextInputLayout = findViewById(R.id.position_text_input_layout);
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
@@ -82,6 +85,16 @@ public class EditProfileActivity extends AppCompatActivity {
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserImageView);
             }
+            if( mAddressTextInputLayout != null)
+            {
+                if (user != null && user.getTempAddress() != null)
+                {
+                    mAddressTextInputLayout.setText(user.getTempAddress());
+                }
+                else{
+                    mAddressTextInputLayout.setText("Seleziona la tua posizione");
+                }
+            }
         }
 
         mCheckImageView.setOnClickListener(new View.OnClickListener() {
@@ -98,8 +111,8 @@ public class EditProfileActivity extends AppCompatActivity {
                     user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                 if (mPhoneTextInputLayout.getEditText() != null)
                     user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                if (mAddressTextInputLayout.getEditText() != null && user.getTempAddress() != null)
-                    user.setAddress(mAddressTextInputLayout.getEditText().getText().toString());
+                if (mAddressTextInputLayout != null && user.getTempAddress() != null)
+                    user.setAddress(mAddressTextInputLayout.getText().toString());
                 if(mShortBioTextInputLayout.getEditText() != null)
                     user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                 user.setImage(mCurrentPhotoPath);
@@ -165,20 +178,35 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
+        mAddressTextInputLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), PositionActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    public void onBackPressed() {
+        super.onBackPressed();
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
-        if( mAddressTextInputLayout.getEditText() != null)
+        user.setTempAddress(user.getAddress());
+        sharedPreferencesManager.putUser(user);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+        User user = sharedPreferencesManager.getUser();
+        if( mAddressTextInputLayout != null)
         {
-            mAddressTextInputLayout.getEditText().setKeyListener(null);
-            mAddressTextInputLayout.getEditText().setEnabled(false);
             if (user != null)
             {
-                mAddressTextInputLayout.getEditText().setText(user.getTempAddress());
+                mAddressTextInputLayout.setText(user.getTempAddress());
             }
         }
     }
@@ -191,8 +219,8 @@ public class EditProfileActivity extends AppCompatActivity {
             outState.putString("Email", mEmailTextInputLayout.getEditText().getText().toString());
         if (mPhoneTextInputLayout.getEditText() != null)
             outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
-        if (mAddressTextInputLayout.getEditText() != null)
-            outState.putString("Address", mAddressTextInputLayout.getEditText().getText().toString());
+        if (mAddressTextInputLayout != null)
+            outState.putString("Address", mAddressTextInputLayout.getText().toString());
         if(mShortBioTextInputLayout.getEditText() != null)
             outState.putString("ShortBio", mShortBioTextInputLayout.getEditText().getText().toString());
         outState.putString("UriImage", mCurrentPhotoPath);
@@ -207,8 +235,8 @@ public class EditProfileActivity extends AppCompatActivity {
             mEmailTextInputLayout.getEditText().setText(savedInstanceState.getString("Email"));
         if (mPhoneTextInputLayout.getEditText() != null)
             mPhoneTextInputLayout.getEditText().setText(savedInstanceState.getString("Phone"));
-        if (mAddressTextInputLayout.getEditText() != null)
-            mAddressTextInputLayout.getEditText().setText(savedInstanceState.getString("Address"));
+        if (mAddressTextInputLayout != null)
+            mAddressTextInputLayout.setText(savedInstanceState.getString("Address"));
         if(mShortBioTextInputLayout.getEditText() != null)
             mShortBioTextInputLayout.getEditText().setText(savedInstanceState.getString("ShortBio"));
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
