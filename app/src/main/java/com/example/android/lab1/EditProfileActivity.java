@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -33,12 +34,13 @@ public class EditProfileActivity extends AppCompatActivity {
     TextInputLayout mUsernameTextInputLayout;
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
-    TextInputLayout mAddressTextInputLayout;
+    TextView mAddressTextInputLayout;
     TextInputLayout mShortBioTextInputLayout;
     ImageView mPositionImageView;
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
     String mCurrentPhotoPath;
+    private AlertDialog.Builder mAlertDialogBuilder = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,12 +76,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 mPhoneTextInputLayout.getEditText().setText(user.getPhone());
             if (user != null && user.getShortBio() != null && mShortBioTextInputLayout.getEditText() != null)
                 mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
-            if (mAddressTextInputLayout.getEditText() != null) {
-                if (user != null)
-                    mAddressTextInputLayout.getEditText().setText(user.getAddress());
-                //mAddressTextInputLayout.getEditText().setKeyListener(null);
-                //mAddressTextInputLayout.getEditText().setEnabled(false);
-            }
             if (user != null && user.getImage() != null && mUserImageView != null) {
                 Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 mCurrentPhotoPath = user.getImage();
@@ -87,6 +83,14 @@ public class EditProfileActivity extends AppCompatActivity {
                 Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserImageView);
+            }
+
+            if (mAddressTextInputLayout != null) {
+                if (user != null && user.getTempAddress() != null) {
+                    mAddressTextInputLayout.setText(user.getTempAddress());
+                } else {
+                    mAddressTextInputLayout.setText(R.string.selection_position);
+                }
             }
         }
 
@@ -104,8 +108,8 @@ public class EditProfileActivity extends AppCompatActivity {
                     user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                 if (mPhoneTextInputLayout.getEditText() != null)
                     user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                if (mAddressTextInputLayout.getEditText() != null && user.getTempAddress() != null)
-                    user.setAddress(mAddressTextInputLayout.getEditText().getText().toString());
+                if (mAddressTextInputLayout != null && user.getTempAddress() != null)
+                    user.setAddress(mAddressTextInputLayout.getText().toString());
                 if (mShortBioTextInputLayout.getEditText() != null)
                     user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                 user.setImage(mCurrentPhotoPath);
@@ -121,14 +125,14 @@ public class EditProfileActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
-                final AlertDialog.Builder dialog = new AlertDialog.Builder(view.getContext());
-                dialog.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
+                mAlertDialogBuilder = new AlertDialog.Builder(view.getContext());
+                mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
                     }
                 });
-                dialog.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
+                mAlertDialogBuilder.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
@@ -167,18 +171,29 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), PositionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }
         });
 
-        mAddressTextInputLayout.getEditText().setOnClickListener(new View.OnClickListener() {
+        mAddressTextInputLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), PositionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+        User user = sharedPreferencesManager.getUser();
+        user.setTempAddress(user.getAddress());
+        sharedPreferencesManager.putUser(user);
     }
 
     @Override
@@ -186,31 +201,26 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onRestart();
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
-        if (mAddressTextInputLayout.getEditText() != null) {
-            //mAddressTextInputLayout.getEditText().setKeyListener(null);
-            //mAddressTextInputLayout.getEditText().setEnabled(false);
+        if (mAddressTextInputLayout != null) {
             if (user != null) {
-                mAddressTextInputLayout.getEditText().setText(user.getTempAddress());
+                mAddressTextInputLayout.setText(user.getTempAddress());
             }
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
-        User user = sharedPreferencesManager.getUser();
         if (mUsernameTextInputLayout.getEditText() != null)
             outState.putString("Username", mUsernameTextInputLayout.getEditText().getText().toString());
         if (mEmailTextInputLayout.getEditText() != null)
             outState.putString("Email", mEmailTextInputLayout.getEditText().getText().toString());
         if (mPhoneTextInputLayout.getEditText() != null)
             outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
-        if (mAddressTextInputLayout.getEditText() != null)
-            outState.putString("Address", mAddressTextInputLayout.getEditText().getText().toString());
+        if (mAddressTextInputLayout != null)
+            outState.putString("Address", mAddressTextInputLayout.getText().toString());
         if (mShortBioTextInputLayout.getEditText() != null)
             outState.putString("ShortBio", mShortBioTextInputLayout.getEditText().getText().toString());
-        if (user != null && user.getImage() != null)
-            outState.putString("UriImage", mCurrentPhotoPath);
+        outState.putString("UriImage", mCurrentPhotoPath);
         super.onSaveInstanceState(outState);
     }
 
@@ -222,12 +232,20 @@ public class EditProfileActivity extends AppCompatActivity {
             mEmailTextInputLayout.getEditText().setText(savedInstanceState.getString("Email"));
         if (mPhoneTextInputLayout.getEditText() != null)
             mPhoneTextInputLayout.getEditText().setText(savedInstanceState.getString("Phone"));
-        if (mAddressTextInputLayout.getEditText() != null)
-            mAddressTextInputLayout.getEditText().setText(savedInstanceState.getString("Address"));
+        if (mAddressTextInputLayout != null)
+            mAddressTextInputLayout.setText(savedInstanceState.getString("Address"));
         if (mShortBioTextInputLayout.getEditText() != null)
             mShortBioTextInputLayout.getEditText().setText(savedInstanceState.getString("ShortBio"));
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
-        Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+        if (mCurrentPhotoPath != null) {
+            Glide.with(getApplicationContext()).load(mCurrentPhotoPath)
+                    .apply(bitmapTransform(new CircleCrop()))
+                    .into(mUserImageView);
+        } else {
+            Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
+                    .apply(bitmapTransform(new CircleCrop()))
+                    .into(mUserImageView);
+        }
         super.onRestoreInstanceState(savedInstanceState);
     }
 
