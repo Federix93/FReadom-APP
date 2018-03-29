@@ -162,24 +162,28 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="0dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="16dp">
+                android:orientation="horizontal">
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_gravity="bottom"
+                    android:paddingBottom="4dp"
                     android:id="@+id/position_image_view"
                     android:src="@drawable/ic_location_on_black_24dp" />
-                <TextView
-                    android:id="@+id/position_text_input_layout"
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/position_text_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="21dp"
-                    android:hint="@string/position"
-                    android:textSize="16sp"/>
+                    android:layout_marginStart="16dp">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:hint="@string/position"
+                        android:clickable="true"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"/>
+                </android.support.design.widget.TextInputLayout>
             </LinearLayout>
 
         </LinearLayout>
