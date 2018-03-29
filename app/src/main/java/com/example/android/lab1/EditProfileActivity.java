@@ -26,7 +26,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class EditProfileActivity extends AppCompatActivity {
 
-    ImageView mCheckImageView;
+    ImageView mSaveProfileUpdatesImageView;
     ImageView mCameraImageView;
     ImageView mUserImageView;
     TextInputLayout mUsernameTextInputLayout;
@@ -53,7 +53,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         mUserImageView = findViewById(R.id.user_profile_edit_image);
 
-        mCheckImageView = findViewById(R.id.icon_check_toolbar);
+        mSaveProfileUpdatesImageView = findViewById(R.id.icon_check_toolbar);
 
         mCameraImageView = findViewById(R.id.add_image_icon);
 
@@ -96,7 +96,7 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         }
 
-        mCheckImageView.setOnClickListener(new View.OnClickListener() {
+        mSaveProfileUpdatesImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
