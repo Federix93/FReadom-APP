@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
@@ -14,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -244,7 +244,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         }
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-            getLocationData();
+            if (mLastLocation == null)
+                getLocationData();
         }catch(SecurityException e){
             e.printStackTrace();
         }
@@ -270,7 +271,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocationSelected = location;
-
     }
 
     class AddressResultReceiver extends ResultReceiver {
@@ -289,10 +289,10 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             }
             mCurrentPositionTextView.setText(mAddressOutput);
             if(mLastLocation != null) {
-                LatLng currentPostition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                LatLng currentPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                 mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(currentPostition).title("MARKER IN CURENT POSITION"));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPostition, 12.0f));
+                mMap.addMarker(new MarkerOptions().position(currentPosition).title("MARKER IN CURENT POSITION"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 12.0f));
                 setMapClick(mMap);
             }
         }
