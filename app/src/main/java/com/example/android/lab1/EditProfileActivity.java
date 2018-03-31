@@ -65,6 +65,8 @@ public class EditProfileActivity extends AppCompatActivity {
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
+        Intent showProfileIntent = getIntent();
+
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
         if (savedInstanceState == null) {
@@ -86,10 +88,18 @@ public class EditProfileActivity extends AppCompatActivity {
             }
 
             if (mAddressTextInputLayout != null) {
-                if (user != null && user.getTempAddress() != null) {
-                    mAddressTextInputLayout.setText(user.getTempAddress());
+                if (showProfileIntent != null && showProfileIntent.hasExtra(MainActivity.ADDRESS_KEY)) {
+                    String address = showProfileIntent.getStringExtra(MainActivity.ADDRESS_KEY);
+                    if (address != null)
+                        mAddressTextInputLayout.setText(address);
+                    else
+                        mAddressTextInputLayout.setText(R.string.selection_position);
                 } else {
-                    mAddressTextInputLayout.setText(R.string.selection_position);
+                    if (user != null && user.getTempAddress() != null) {
+                        mAddressTextInputLayout.setText(user.getTempAddress());
+                    } else {
+                        mAddressTextInputLayout.setText(R.string.selection_position);
+                    }
                 }
             }
         }

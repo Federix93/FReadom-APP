@@ -290,7 +290,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             if(mLastLocation != null) {
                 LatLng currentPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                 mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(currentPosition).title("MARKER IN CURENT POSITION"));
+                mMap.addMarker(new MarkerOptions().position(currentPosition).title("SELECTED POSITION"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 12.0f));
                 setMapClick(mMap);
             }

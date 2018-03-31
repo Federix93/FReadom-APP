@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     TextInputLayout mShortBioTextInputLayout;
     ImageView mCircleImageView;
 
+    public static final String ADDRESS_KEY = "ADDRESS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
         mToolbarIcon = findViewById(R.id.icon_toolbar);
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+        final SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
 
         if (mUsernameTextInputLayout.getEditText() != null) {
@@ -92,6 +93,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), EditProfileActivity.class);
+                User u = sharedPreferencesManager.getUser();
+                if (u != null)
+                    intent.putExtra(ADDRESS_KEY, u.getAddress());
                 startActivity(intent);
             }
         });
