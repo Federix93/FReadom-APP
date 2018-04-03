@@ -7,6 +7,8 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -20,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -37,6 +40,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Locale;
@@ -90,9 +94,9 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            if(manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 enableLoc();
-            }else{
+            } else {
                 connectToGoogleMapApi();
             }
         } else {
@@ -105,10 +109,10 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             public void onClick(View v) {
                 SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
                 User user = sharedPreferencesManager.getUser();
-                if(user != null){
+                if (user != null) {
                     user.setTempAddress(mAddressOutput);
                     sharedPreferencesManager.putUser(user);
-                }else{
+                } else {
                     User newUser = User.getInstance();
                     newUser.setTempAddress(mAddressOutput);
                     sharedPreferencesManager.putUser(newUser);
@@ -124,9 +128,9 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             public void onMapClick(LatLng latLng) {
                 if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
-                    if(manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                         enableLoc();
-                    }else{
+                    } else {
                         connectToGoogleMapApi();
                     }
                 } else {
@@ -134,14 +138,15 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                             Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                 }
                 map.setMyLocationEnabled(true);
-                if(mLastLocation != null) {
+                if (mLastLocation != null) {
                     mLastLocation.setLatitude(latLng.latitude);
                     mLastLocation.setLongitude(latLng.longitude);
                     startIntentService();
                     String snippet = String.format(Locale.getDefault(), "Lat: %1$.5f, Long: %2$.5f",
                             latLng.latitude, latLng.longitude);
-                    map.addMarker(new MarkerOptions().position(latLng).title("Location").snippet(snippet));
+                    //map.addMarker(new MarkerOptions().position(latLng).title("Location").snippet(snippet));
                 }
+
             }
         });
     }
@@ -151,7 +156,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         super.onActivityResult(requestCode, resultCode, data);
         if (!(requestCode == PLAY_SERVICES_RESOLUTION_REQUEST && resultCode == RESULT_OK)) {
             finish();
-        }else {
+        } else {
             mGoogleApiClient.disconnect();
             mGoogleApiClient = null;
             finish();
@@ -162,7 +167,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         if (mGoogleApiClient == null) {
             connectToGoogleMapApi();
             synchronized (synchronizedObject) {
-                if(mLocationRequest == null) {
+                if (mLocationRequest == null) {
                     mLocationRequest = LocationRequest.create();
                     mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                     mLocationRequest.setInterval(30 * 1000);
@@ -183,7 +188,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                         case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                             try {
                                 status.startResolutionForResult(PositionActivity.this, PLAY_SERVICES_RESOLUTION_REQUEST);
-                            } catch (IntentSender.SendIntentException e) {}
+                            } catch (IntentSender.SendIntentException e) {
+                            }
                             break;
                     }
                 }
@@ -197,9 +203,9 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if(manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                         enableLoc();
-                    }else{
+                    } else {
                         connectToGoogleMapApi();
                     }
                 } else {
@@ -221,6 +227,12 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                return true;
+            }
+        });
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
@@ -229,12 +241,13 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 return false;
             }
         });
+        //setMapClick(mMap);
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         synchronized (synchronizedObject) {
-            if(mLocationRequest == null){
+            if (mLocationRequest == null) {
                 mLocationRequest = LocationRequest.create();
                 mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                 mLocationRequest.setInterval(30 * 1000);   //update every amount*1000 millisecs by default
@@ -245,7 +258,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             if (mLastLocation == null)
                 getLocationData();
-        }catch(SecurityException e){
+        } catch (SecurityException e) {
             e.printStackTrace();
         }
     }
@@ -258,7 +271,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     protected void onStop() {
         super.onStop();
-        if(mGoogleApiClient != null && mGoogleApiClient.isConnected())
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
             mGoogleApiClient.disconnect();
     }
 
@@ -282,36 +295,44 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             if (resultData == null) {
                 return;
             }
-            mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
-            if (mAddressOutput == null) {
-                mAddressOutput = "";
-            }
-            mCurrentPositionTextView.setText(mAddressOutput);
-            if(mLastLocation != null) {
-                LatLng currentPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(currentPosition).title("SELECTED POSITION"));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 12.0f));
-                setMapClick(mMap);
+            if (resultCode == FetchAddressIntentService.Constants.SUCCESS_RESULT) {
+                mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+                if (mAddressOutput == null) {
+                    mAddressOutput = "";
+                }
+                mCurrentPositionTextView.setText(mAddressOutput);
+                if (mLastLocation != null) {
+                    LatLng currentPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    mMap.clear();
+                    mMap.addMarker(new MarkerOptions().position(currentPosition).title("SELECTED POSITION"));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 12.0f));
+                    setMapClick(mMap);
+                }
+            } else {
+                // no connection to translate position to address when request was made
+                //mMap.clear();
+                mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+                Toast.makeText(getApplicationContext(),
+                        R.string.no_internet_connection,
+                        Toast.LENGTH_SHORT)
+                        .show();
             }
         }
     }
 
     private void getLocationData() {
-
         try {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mLastLocation != null) {
                 startIntentService();
             }
-        }catch(SecurityException e){
+        } catch (SecurityException e) {
 
         }
     }
 
-    private void connectToGoogleMapApi(){
-        if(mGoogleApiClient == null)
-        {
+    private void connectToGoogleMapApi() {
+        if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
@@ -319,6 +340,14 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     .build();
         }
         mGoogleApiClient.connect();
+    }
+
+    protected boolean phoneIsConnectedToInternet() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        ;
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
 }

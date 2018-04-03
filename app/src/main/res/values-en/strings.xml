@@ -13,4 +13,12 @@
     <string name="address_text">Address</string>
     <string name="short_bio_text">Short Bio</string>
     <string name="selection_position">Select your position</string>
+    <string name="enable_internet">Connect to network to select new position</string>
+    <string name="service_not_available">No geocoder available</string>
+    <string name="invalid_lat_long_used">Used invalid latitude or longitude</string>
+    <string name="no_address_found">No address found</string>
+    <string name="shared_preferences" translatable="false">SharedPreferencesKey</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="title_activity_position">Map</string>
+
 </resources>
