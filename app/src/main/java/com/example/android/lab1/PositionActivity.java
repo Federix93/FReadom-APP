@@ -64,6 +64,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
     private String mAddressOutput;
 
+    private Float mInitialZoom;
+
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
 
@@ -120,6 +122,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 finish();
             }
         });
+
+        mInitialZoom = new Float(12.0);
     }
 
     private void setMapClick(final GoogleMap map) {
@@ -305,7 +309,13 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     LatLng currentPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     mMap.clear();
                     mMap.addMarker(new MarkerOptions().position(currentPosition).title("SELECTED POSITION"));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 12.0f));
+                    if (mInitialZoom == null)
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, mMap.getCameraPosition().zoom));
+                    else
+                    {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, mInitialZoom));
+                        mInitialZoom = null;
+                    }
                     setMapClick(mMap);
                 }
             } else {

@@ -26,7 +26,7 @@ import java.util.Date;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 
-public class EditProfileActivity extends AppCompatActivity {
+public class EditProfileActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
     ImageView mSaveProfileUpdatesImageView;
     ImageView mCameraImageView;
@@ -41,7 +41,8 @@ public class EditProfileActivity extends AppCompatActivity {
     private final int CAPTURE_IMAGE = 0;
     String mCurrentPhotoPath;
     private AlertDialog.Builder mAlertDialogBuilder = null;
-    private File photoFile = null;
+    private File mPhotoFile = null;
+    private View mFocusedView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,14 +152,14 @@ public class EditProfileActivity extends AppCompatActivity {
                                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 if (cameraIntent.resolveActivity(getPackageManager()) != null) {
                                     try {
-                                        photoFile = saveThumbnail();
+                                        mPhotoFile = saveThumbnail();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                    if (photoFile != null) {
+                                    if (mPhotoFile != null) {
                                         Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
                                                 "com.example.android.fileprovider",
-                                                photoFile);
+                                                mPhotoFile);
                                         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                                     }
                                     startActivityForResult(cameraIntent, CAPTURE_IMAGE);
@@ -194,7 +195,15 @@ public class EditProfileActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
+        mFocusedView = null;
+        mUsernameTextInputLayout.getEditText().setOnFocusChangeListener(this);
+        mEmailTextInputLayout.getEditText().setOnFocusChangeListener(this);
+        mPhoneTextInputLayout.getEditText().setOnFocusChangeListener(this);
+        mShortBioTextInputLayout.getEditText().setOnFocusChangeListener(this);
+        mUsernameTextInputLayout.getEditText().clearFocus();
+        mEmailTextInputLayout.getEditText().clearFocus();
+        mPhoneTextInputLayout.getEditText().clearFocus();
+        mShortBioTextInputLayout.getEditText().clearFocus();
     }
 
     @Override
@@ -220,6 +229,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         if (mUsernameTextInputLayout.getEditText() != null)
             outState.putString("Username", mUsernameTextInputLayout.getEditText().getText().toString());
         if (mEmailTextInputLayout.getEditText() != null)
@@ -230,12 +240,25 @@ public class EditProfileActivity extends AppCompatActivity {
             outState.putString("Address", mAddressTextInputLayout.getText().toString());
         if (mShortBioTextInputLayout.getEditText() != null)
             outState.putString("ShortBio", mShortBioTextInputLayout.getEditText().getText().toString());
+        if (mPhotoFile != null)
+            outState.putString("PhotoFile", mPhotoFile.getAbsolutePath());
+        if (mFocusedView != null) {
+            if (mFocusedView == mUsernameTextInputLayout.getEditText())
+                outState.putString("Focus", "FUsername");
+            else if (mFocusedView == mEmailTextInputLayout.getEditText())
+                outState.putString("Focus", "FEmail");
+            else if (mFocusedView == mPhoneTextInputLayout.getEditText())
+                outState.putString("Focus", "FPhone");
+            else
+                outState.putString("Focus", "FShortBio");
+        }
         outState.putString("UriImage", mCurrentPhotoPath);
-        super.onSaveInstanceState(outState);
+
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
         if (mUsernameTextInputLayout.getEditText() != null)
             mUsernameTextInputLayout.getEditText().setText(savedInstanceState.getString("Username"));
         if (mEmailTextInputLayout.getEditText() != null)
@@ -246,6 +269,13 @@ public class EditProfileActivity extends AppCompatActivity {
             mAddressTextInputLayout.setText(savedInstanceState.getString("Address"));
         if (mShortBioTextInputLayout.getEditText() != null)
             mShortBioTextInputLayout.getEditText().setText(savedInstanceState.getString("ShortBio"));
+        if (savedInstanceState.containsKey("PhotoFile"))
+            mPhotoFile = new File(savedInstanceState.getString("PhotoFile"));
+        if (savedInstanceState.containsKey("CurrentFocus")) {
+            View genericView = findViewById(savedInstanceState.getInt("CurrentFocus"));
+            if (genericView != null)
+                genericView.requestFocus();
+        }
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
         if (mCurrentPhotoPath != null) {
             Glide.with(getApplicationContext()).load(mCurrentPhotoPath)
@@ -256,7 +286,41 @@ public class EditProfileActivity extends AppCompatActivity {
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(mUserImageView);
         }
-        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState.containsKey("Focus")) {
+            switch (savedInstanceState.getString("Focus")) {
+                case "FUserName":
+                    mUsernameTextInputLayout.getEditText().requestFocus();
+                    mUsernameTextInputLayout.getEditText()
+                            .setSelection(mUsernameTextInputLayout.getEditText().getText().length());
+                    break;
+                case "FEmail":
+                    mEmailTextInputLayout.getEditText().requestFocus();
+                    mEmailTextInputLayout.getEditText()
+                            .setSelection(mEmailTextInputLayout.getEditText().getText().length());
+                    break;
+                case "FPhone":
+                    mPhoneTextInputLayout.getEditText().requestFocus();
+                    mPhoneTextInputLayout.getEditText()
+                            .setSelection(mPhoneTextInputLayout.getEditText().getText().length());
+                    break;
+                case "FShortBio":
+                    mShortBioTextInputLayout.getEditText().requestFocus();
+                    mShortBioTextInputLayout.getEditText()
+                            .setSelection(mShortBioTextInputLayout.getEditText().getText().length());
+                    break;
+                default:
+                    mUsernameTextInputLayout.getEditText().clearFocus();
+                    mEmailTextInputLayout.getEditText().clearFocus();
+                    mPhoneTextInputLayout.getEditText().clearFocus();
+                    mShortBioTextInputLayout.getEditText().clearFocus();
+            }
+        } else
+        {
+            mUsernameTextInputLayout.getEditText().clearFocus();
+            mEmailTextInputLayout.getEditText().clearFocus();
+            mPhoneTextInputLayout.getEditText().clearFocus();
+            mShortBioTextInputLayout.getEditText().clearFocus();
+        }
     }
 
     @Override
@@ -269,8 +333,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 mCurrentPhotoPath = imageURI;
                 Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
             }
-        } else if (requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK && photoFile != null) {
-            mCurrentPhotoPath = photoFile.getAbsolutePath();
+        } else if (requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK && mPhotoFile != null) {
+            mCurrentPhotoPath = mPhotoFile.getAbsolutePath();
             Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
         }
     }
@@ -286,5 +350,14 @@ public class EditProfileActivity extends AppCompatActivity {
         );
         //mCurrentPhotoPath = image.getAbsolutePath();
         return image;
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (hasFocus) {
+            mFocusedView = v;
+        } else {
+            mFocusedView = null;
+        }
     }
 }

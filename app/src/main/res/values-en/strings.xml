@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Lab1</string>
-    <string name="username">Username</string>
+    <string name="username">Name</string>
     <string name="phoneNumber">Phone</string>
     <string name="email">Email</string>
     <string name="title_dialog">Change picture</string>
