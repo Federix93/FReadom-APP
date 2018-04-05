@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     TextInputLayout mAddressTextInputLayout;
     TextInputLayout mShortBioTextInputLayout;
     ImageView mCircleImageView;
+    private Toolbar mToolbar;
 
     public static final String ADDRESS_KEY = "ADDRESS";
 
@@ -43,6 +45,12 @@ public class MainActivity extends AppCompatActivity {
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
         mToolbarIcon = findViewById(R.id.icon_toolbar);
+
+        mToolbar = findViewById(R.id.toolbar_main_activity);
+        mToolbar.setTitle(R.string.app_name);
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        setSupportActionBar(mToolbar);
+
         final SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
 

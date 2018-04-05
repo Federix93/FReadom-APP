@@ -20,4 +20,5 @@
     <string name="selection_position">Seleziona la tua posizione</string>
     <string name="enable_internet">Connettersi ad una rete per selezionare una nuova posizione</string>
     <string name="no_internet_connection">Connessione ad internet assente</string>
+    <string name="edit_title_activity">Modifica il tuo profilo</string>
 </resources>

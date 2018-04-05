@@ -10,6 +10,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -28,6 +29,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class EditProfileActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
+    private Toolbar mToolbar;
     ImageView mSaveProfileUpdatesImageView;
     ImageView mCameraImageView;
     ImageView mUserImageView;
@@ -67,6 +69,16 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
+        mToolbar = findViewById(R.id.toolbar_edit_activity);
+        mToolbar.setTitle(R.string.edit_title_activity);
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        setSupportActionBar(mToolbar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
         Intent showProfileIntent = getIntent();
 
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
