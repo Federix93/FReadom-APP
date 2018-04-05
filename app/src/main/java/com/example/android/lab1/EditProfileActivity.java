@@ -41,6 +41,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private final int CAPTURE_IMAGE = 0;
     String mCurrentPhotoPath;
     private AlertDialog.Builder mAlertDialogBuilder = null;
+    private File photoFile = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,7 +148,6 @@ public class EditProfileActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
                             case CAPTURE_IMAGE:
-                                File photoFile = null;
                                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 if (cameraIntent.resolveActivity(getPackageManager()) != null) {
                                     try {
@@ -269,11 +269,9 @@ public class EditProfileActivity extends AppCompatActivity {
                 mCurrentPhotoPath = imageURI;
                 Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
             }
-        } else if (requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK) {
-            if (mCurrentPhotoPath != null) {
-                imageURI = mCurrentPhotoPath;
-                Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-            }
+        } else if (requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK && photoFile != null) {
+            mCurrentPhotoPath = photoFile.getAbsolutePath();
+            Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
         }
     }
 
@@ -286,7 +284,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-        mCurrentPhotoPath = image.getAbsolutePath();
+        //mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
 }
