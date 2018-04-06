@@ -223,8 +223,10 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         super.onBackPressed();
         SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
-        user.setTempAddress(user.getAddress());
-        sharedPreferencesManager.putUser(user);
+        if (user != null) {
+            user.setTempAddress(user.getAddress());
+            sharedPreferencesManager.putUser(user);
+        }
     }
 
     @Override
