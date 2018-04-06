@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), EditProfileActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 User u = sharedPreferencesManager.getUser();
                 if (u != null)
                     intent.putExtra(ADDRESS_KEY, u.getAddress());
