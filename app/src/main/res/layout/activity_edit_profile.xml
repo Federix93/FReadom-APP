@@ -216,7 +216,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="21dp"
-                            android:hint="@string/position"
+                            android:hint="@string/selection_position"
                             android:textSize="16sp"
                             android:textColor="#000"/>
                     </LinearLayout>
