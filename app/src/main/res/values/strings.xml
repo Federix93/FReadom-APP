@@ -24,4 +24,8 @@
     <string name="isbn">ISBN</string>
     <string name="title">Titolo</string>
     <string name="load_book_auto_fill_icon_desc">Icona che permette di scaricare informazioni di un libro da internet</string>
+    <string name="author">Autore</string>
+    <string name="publisher">Casa editrice</string>
+    <string name="publishing_year">Anno di pubblicazione</string>
+    <string name="conditions">Condizioni</string>
 </resources>
