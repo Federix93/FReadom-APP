@@ -1,10 +1,11 @@
 package com.example.android.lab1;
 
 import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -12,7 +13,6 @@ import android.widget.EditText;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,22 +21,17 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static android.provider.CalendarContract.CalendarCache.URI;
 
 public class LoadBookActivity extends Activity {
     private static final String ISBN_REQUEST_TAG = "ISBN_REQUEST";
@@ -97,101 +92,80 @@ public class LoadBookActivity extends Activity {
         // TODO load gallery
 
         // ISBN auto fill listener
-        mIsbnImageView.setVisibility(View.INVISIBLE);
-        mIsbnEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        setIsbnListeners();
+
+    }
+
+
+    private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint)
+    {
+        String url;
+        isbn.replace("-", "");
+        if (! alternativeEndPoint)
+            url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn;
+        else
+            url = "https://www.googleapis.com/books/v1/volumes?q=ISBN:" + isbn;
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(
+                Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus && v instanceof EditText) {
-                    EditText isbnView = (EditText) v;
-                    validateIsbn(isbnView);
-                }
-            }
-        });
+            public void onResponse(JSONObject response) {
+                try {
+                    if (response.getInt("totalItems") > 0) {
+                        JSONObject book = response.getJSONArray("items")
+                                .getJSONObject(0).getJSONObject("volumeInfo");
 
-        mIsbnEditText.setFilters(new InputFilter[]{
-                new InputFilter() {
-                    Pattern mPattern = Pattern.compile("^[-0123456789]");
+                        mTitleEditText.setText(book.getString("title"));
+                        if (book.has("authors") &&
+                                book.getJSONArray("authors").length() > 0)
+                            mAuthorEditText.setText(book.getJSONArray("authors")
+                                    .getString(0));
+                        if (book.has("publisher"))
+                            mPublisherEditText.setText(book.getString("publisher"));
 
-                    @Override
-                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                        Matcher m = mPattern.matcher(source);
-                        return m.matches() ? null : "";
-                    }
-                }
-        });
+                        if (book.has("publishedDate")) {
+                            int currentYear, publishYear;
+                            currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                            publishYear = book.getInt("publishedDate");
+                            mPublishYearSpinner.setSelection(currentYear - publishYear);
+                        }
 
-
-        mIsbnImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (validateIsbn(mIsbnEditText)) {
-                    Log.d("AUTOFILL", "onClick: autofill " + mIsbnEditText.getText());
-                    String isbnApiUrl = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + mIsbnEditText.getText()
-                            .toString()
-                            .replace("-",
-                                    "");
-                    JsonObjectRequest jsonRequest = new JsonObjectRequest(
-                            Request.Method.GET, isbnApiUrl, null, new Response.Listener<JSONObject>() {
-
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                Log.d("AUTOFILL", "onResponse: recieved response");
-                                if (response.getInt("totalItems") > 0) {
-                                    // take item 0
-                                    Log.d("AUTOFILL", "onResponse: has items");
-                                    JSONObject book = response.getJSONArray("items")
-                                            .getJSONObject(0).getJSONObject("volumeInfo");
-
-                                        mTitleEditText.setText(book.getString("title"));
-                                    if (book.has("authors") &&
-                                            book.getJSONArray("authors").length() > 0)
-                                        mAuthorEditText.setText(book.getJSONArray("authors")
-                                                .getString(0));
-                                    if (book.has("publisher"))
-                                        mPublisherEditText.setText(book.getString("publisher"));
-
-                                    if (book.has("publishedDate")) {
-                                        int currentYear, publishYear;
-                                        currentYear = Calendar.getInstance().get(Calendar.YEAR);
-                                        publishYear = book.getInt("publishedDate");
-                                        mPublishYearSpinner.setSelection(currentYear - publishYear);
-                                    }
-
-                                    if (book.has("imageLinks")) {
-                                        JSONObject imageLinks = book.getJSONObject("imageLinks");
-                                        if (imageLinks.length() > 0 &&
-                                                imageLinks.has("thumbnail")) {
-                                            mWebThumbnail = imageLinks.getString("thumbnail");
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    Toast.makeText(getApplicationContext(),
-                                            "Book not found",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                        if (book.has("imageLinks")) {
+                            JSONObject imageLinks = book.getJSONObject("imageLinks");
+                            if (imageLinks.length() > 0 &&
+                                    imageLinks.has("thumbnail")) {
+                                mWebThumbnail = imageLinks.getString("thumbnail");
                             }
                         }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(getApplicationContext(), "ERROR IN REQUEST", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    jsonRequest.setTag(ISBN_REQUEST_TAG);
-                    if (mRequestQueue == null)
-                        mRequestQueue = Volley.newRequestQueue(getApplicationContext());
-                    mRequestQueue.add(jsonRequest);
-                }
 
+                        mTitleEditText.clearFocus();
+                        mAuthorEditText.clearFocus();
+                        mPublishYearSpinner.clearFocus();
+                    }
+                    else
+                    {
+                        // second request
+                        if (alternativeEndPoint)
+                            Toast.makeText(getApplicationContext(),
+                                    "Book not found",
+                                    Toast.LENGTH_SHORT).show();
+                        else
+                            makeRequestBookApi(isbn, true);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "ERROR IN REQUEST", Toast.LENGTH_SHORT).show();
             }
         });
-
-
+        jsonRequest.setTag(ISBN_REQUEST_TAG);
+        if (mRequestQueue == null)
+            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        mRequestQueue.add(jsonRequest);
     }
 
     @Override
@@ -233,5 +207,73 @@ public class LoadBookActivity extends Activity {
             mIsbnImageView.setVisibility(View.INVISIBLE);
         }
         return false;
+    }
+
+    private void setIsbnListeners()
+    {
+        mIsbnImageView.setVisibility(View.INVISIBLE);
+        mIsbnEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus && v instanceof EditText) {
+                    EditText isbnView = (EditText) v;
+                    validateIsbn(isbnView);
+                }
+            }
+        });
+
+        mIsbnEditText.addTextChangedListener(new TextWatcher() {
+            int mBefore;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                mBefore = s.length();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() > mBefore)
+                {
+                    // writing
+                    if (s.toString().replace("-", "").length() == 13)
+                        validateIsbn(mIsbnEditText);
+                }
+                else
+                {
+                    // deleting
+                    validateIsbn(mIsbnEditText);
+                }
+
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        mIsbnEditText.setFilters(new InputFilter[]{
+                new InputFilter() {
+                    Pattern mPattern = Pattern.compile("^[-0123456789]");
+
+                    @Override
+                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                        Matcher m = mPattern.matcher(source);
+                        return m.matches() ? null : "";
+                    }
+                }
+        });
+
+
+        mIsbnImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (validateIsbn(mIsbnEditText)) {
+                    makeRequestBookApi(mIsbnEditText.getText().toString(), false);
+                }
+
+            }
+        });
     }
 }

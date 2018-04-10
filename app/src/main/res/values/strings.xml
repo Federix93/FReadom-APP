@@ -32,6 +32,6 @@
     <string name="decent">Discrete</string>
     <string name="good">Buone</string>
     <string name="great">Ottime</string>
-    <string name="neww">Come nuovo</string>
+    <string name="neww">Nuovo</string>
     <string name="invalid_isbn">Codice ISBN-13 invalido</string>
 </resources>
