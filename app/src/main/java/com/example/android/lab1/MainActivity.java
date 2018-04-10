@@ -6,6 +6,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -85,7 +86,11 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == RC_SIGN_IN){
             if(resultCode == RESULT_OK){
-                openMainActivity();
+                FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                if(user != null) {
+                    setLoggedUser(user);
+                    openMainActivity();
+                }
             }else if(resultCode == RESULT_CANCELED){
                 Toast.makeText(MainActivity.this,"VINCENZO IS OFFLINE", Toast.LENGTH_LONG).show();
 
@@ -172,7 +177,18 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-
     }
+
+    private void setLoggedUser(FirebaseUser user){
+        final SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
+        User userLocal = sharedPreferencesManager.getUser();
+        if (userLocal == null)
+            userLocal = User.getInstance();
+        userLocal.setEmail(user.getEmail());
+        if (user.getPhotoUrl() != null)
+            userLocal.setImage(user.getPhotoUrl().toString());
+        userLocal.setUsername(user.getDisplayName());
+        sharedPreferencesManager.putUser(userLocal);
+    }
+
 }
