@@ -28,4 +28,10 @@
     <string name="publisher">Casa editrice</string>
     <string name="publishing_year">Anno di pubblicazione</string>
     <string name="conditions">Condizioni</string>
+    <string name="bad">Cattive</string>
+    <string name="decent">Discrete</string>
+    <string name="good">Buone</string>
+    <string name="great">Ottime</string>
+    <string name="neww">Come nuovo</string>
+    <string name="invalid_isbn">Codice ISBN-13 invalido</string>
 </resources>

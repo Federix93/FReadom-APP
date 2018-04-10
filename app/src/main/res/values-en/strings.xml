@@ -28,5 +28,11 @@
     <string name="publisher">Publisher</string>
     <string name="publishing_year">Publishing year</string>
     <string name="conditions">Conditions</string>
+    <string name="bad">Bad</string>
+    <string name="decent">Decent</string>
+    <string name="good">Good</string>
+    <string name="great">Great</string>
+    <string name="neww">New</string>
+    <string name="invalid_isbn">Invalid ISBN-13 code</string>
 
 </resources>

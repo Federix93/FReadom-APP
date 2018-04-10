@@ -9,7 +9,9 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar_loadbook"
@@ -20,13 +22,30 @@
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"></android.support.v7.widget.Toolbar>
 
         <ImageSwitcher
-            android:id="@+id/imageSwitcher"
+            android:id="@+id/load_book_gallery"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_load_book_image_switcher_height"></ImageSwitcher>
+            android:layout_height="@dimen/activity_load_book_image_switcher_height"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_loadbook"></ImageSwitcher>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/add_image_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/load_book_gallery"
+            android:layout_alignEnd="@id/load_book_gallery"
+            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="20dp"
+            android:src="@drawable/ic_add_a_photo_black_24dp"
+            app:elevation="6dp"
+            app:layout_anchor="@id/load_book_gallery"
+            app:layout_anchorGravity="bottom|end"
+            app:layout_constraintBottom_toBottomOf="@+id/load_book_gallery"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <EditText
             android:id="@+id/load_book_isbn"
-            android:layout_width="352dp"
+            android:inputType="phone"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_marginEnd="@dimen/activity_load_book_content_padding"
@@ -36,7 +55,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imageSwitcher" />
+            app:layout_constraintTop_toBottomOf="@id/load_book_gallery" />
 
         <ImageView
             android:id="@+id/load_book_auto_fill"
@@ -48,6 +67,7 @@
             android:layout_marginTop="8dp"
             android:contentDescription="@string/load_book_auto_fill_icon_desc"
             android:padding="5dp"
+            android:elevation="6dp"
             android:src="@drawable/ic_search_black_24dp"
             app:layout_constraintEnd_toEndOf="@id/load_book_isbn"
             app:layout_constraintTop_toTopOf="@id/load_book_isbn" />
@@ -114,33 +134,33 @@
             android:id="@+id/load_book_conditions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="5dp"
             android:layout_marginStart="@dimen/activity_load_book_content_padding"
-            android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
+            android:layout_marginTop="8dp"
             android:hint="@string/conditions"
+            android:paddingStart="5dp"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/load_book_publish_year_text_view" />
+            app:layout_constraintTop_toBottomOf="@+id/load_book_publish_year_text_view" />
 
         <Spinner
             android:id="@+id/load_book_conditions_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-            android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
+            app:layout_constraintTop_toBottomOf="@id/load_book_publish_year_spinner"
             android:spinnerMode="dropdown"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/load_book_publish_year_spinner" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <EditText
             android:id="@+id/load_book_position"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/position"
-            android:layout_marginStart="@dimen/activity_load_book_content_padding"
-            android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-            android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
+            android:layout_marginLeft="@dimen/activity_load_book_content_padding"
+            android:layout_marginRight="@dimen/activity_load_book_content_padding"
             app:layout_constraintTop_toBottomOf="@id/load_book_conditions"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             />
 
         <ImageView
@@ -152,7 +172,9 @@
             android:layout_marginTop="8dp"
             android:src="@drawable/ic_location_on_black_24dp"
             app:layout_constraintEnd_toEndOf="@+id/load_book_position"
-            app:layout_constraintTop_toTopOf="@+id/load_book_position" />
+            app:layout_constraintTop_toTopOf="@+id/load_book_position"
+            android:elevation="6dp"
+            />
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>
