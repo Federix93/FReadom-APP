@@ -4,4 +4,5 @@
     <dimen name="activity_load_book_image_switcher_height">150dp</dimen>
     <dimen name="activity_load_book_content_padding">16dp</dimen>
     <dimen name="activity_load_book_edit_text_margin">15dp</dimen>
+    <dimen name="icon_padding">12dp</dimen>
 </resources>

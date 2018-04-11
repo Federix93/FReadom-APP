@@ -1,7 +1,12 @@
 package com.example.android.lab1;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -22,6 +27,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.android.lab1.model.Condition;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,10 +40,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LoadBookActivity extends Activity {
+
     private static final String ISBN_REQUEST_TAG = "ISBN_REQUEST";
+    private static final int SCAN_REQUEST_TAG = 1;
+
     private ImageSwitcher mGallery;
     private ImageView mAddImageIcon;
     private EditText mIsbnEditText;
+    private ImageView mIsbnScanBarCode;
     private ImageView mIsbnImageView;
     private EditText mTitleEditText;
     private EditText mAuthorEditText;
@@ -46,10 +56,11 @@ public class LoadBookActivity extends Activity {
     private Spinner mPublishYearSpinner;
     private TextView mConditionsTextView;
     private Spinner mConditionsSpinner;
-    private EditText mPositionEditText;
+    private TextView mPositionEditText;
     private ImageView mPositionIcon;
     private String mWebThumbnail;
     private RequestQueue mRequestQueue;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +70,7 @@ public class LoadBookActivity extends Activity {
         mGallery = findViewById(R.id.load_book_gallery);
         mAddImageIcon = findViewById(R.id.add_image_icon);
         mIsbnEditText = findViewById(R.id.load_book_isbn);
+        mIsbnScanBarCode = findViewById(R.id.load_book_scan_bar_code);
         mIsbnImageView = findViewById(R.id.load_book_auto_fill);
         mTitleEditText = findViewById(R.id.load_book_title);
         mAuthorEditText = findViewById(R.id.load_book_author);
@@ -97,14 +109,13 @@ public class LoadBookActivity extends Activity {
     }
 
 
-    private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint)
-    {
+    private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint) {
         String url;
-        isbn.replace("-", "");
-        if (! alternativeEndPoint)
-            url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn;
+        String readIsbn = isbn.replace("-", "");
+        if (!alternativeEndPoint)
+            url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + readIsbn;
         else
-            url = "https://www.googleapis.com/books/v1/volumes?q=ISBN:" + isbn;
+            url = "https://www.googleapis.com/books/v1/volumes?q=ISBN:" + readIsbn;
         JsonObjectRequest jsonRequest = new JsonObjectRequest(
                 Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
@@ -115,13 +126,14 @@ public class LoadBookActivity extends Activity {
                         JSONObject book = response.getJSONArray("items")
                                 .getJSONObject(0).getJSONObject("volumeInfo");
 
-                        mTitleEditText.setText(book.getString("title"));
+                        mTitleEditText.setText(book.optString("title"));
                         if (book.has("authors") &&
                                 book.getJSONArray("authors").length() > 0)
                             mAuthorEditText.setText(book.getJSONArray("authors")
                                     .getString(0));
-                        if (book.has("publisher"))
-                            mPublisherEditText.setText(book.getString("publisher"));
+                        else
+                            mAuthorEditText.setText("");
+                        mPublisherEditText.setText(book.optString("publisher"));
 
                         if (book.has("publishedDate")) {
                             int currentYear, publishYear;
@@ -141,9 +153,7 @@ public class LoadBookActivity extends Activity {
                         mTitleEditText.clearFocus();
                         mAuthorEditText.clearFocus();
                         mPublishYearSpinner.clearFocus();
-                    }
-                    else
-                    {
+                    } else {
                         // second request
                         if (alternativeEndPoint)
                             Toast.makeText(getApplicationContext(),
@@ -169,8 +179,7 @@ public class LoadBookActivity extends Activity {
     }
 
     @Override
-    public void onStop()
-    {
+    public void onStop() {
         super.onStop();
         if (mRequestQueue != null)
             mRequestQueue.cancelAll(ISBN_REQUEST_TAG);
@@ -209,9 +218,10 @@ public class LoadBookActivity extends Activity {
         return false;
     }
 
-    private void setIsbnListeners()
-    {
+    private void setIsbnListeners() {
         mIsbnImageView.setVisibility(View.INVISIBLE);
+
+        // ISBN Edit Text
         mIsbnEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -232,14 +242,11 @@ public class LoadBookActivity extends Activity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() > mBefore)
-                {
+                if (s.length() > mBefore) {
                     // writing
                     if (s.toString().replace("-", "").length() == 13)
                         validateIsbn(mIsbnEditText);
-                }
-                else
-                {
+                } else {
                     // deleting
                     validateIsbn(mIsbnEditText);
                 }
@@ -265,7 +272,7 @@ public class LoadBookActivity extends Activity {
                 }
         });
 
-
+        // Autofill icon
         mIsbnImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -275,5 +282,63 @@ public class LoadBookActivity extends Activity {
 
             }
         });
+
+        // Scanner icon
+        final Activity thisActivity = this;
+        mIsbnScanBarCode.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                                                            Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                                        startBarCodeScanner();
+                                                    } else {
+                                                        ActivityCompat.requestPermissions(thisActivity,
+                                                                new String[]{Manifest.permission.CAMERA},
+                                                                SCAN_REQUEST_TAG);
+                                                    }
+                                                }
+                                            }
+        );
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case SCAN_REQUEST_TAG:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startBarCodeScanner();
+                    break;
+                }
+        }
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+
+        switch (requestCode) {
+            case SCAN_REQUEST_TAG:
+                if (resultCode == Activity.RESULT_OK) {
+                    // Parsing bar code reader result
+                    if (resultData != null && resultData.hasExtra(ScanBarCodeActivity.BARCODE_KEY)) {
+                        // disable input filters temporarely
+                        InputFilter[] filters = mIsbnEditText.getFilters();
+                        mIsbnEditText.setFilters(new InputFilter[]{});
+                        mIsbnEditText.setText(resultData.getStringExtra(ScanBarCodeActivity.BARCODE_KEY));
+                        mIsbnEditText.setFilters(filters);
+                        validateIsbn(mIsbnEditText);
+                    }
+                }
+                break;
+        }
+    }
+
+    private void startBarCodeScanner() {
+        Intent i = new Intent(this, ScanBarCodeActivity.class);
+        startActivityForResult(i, SCAN_REQUEST_TAG);
+    }
+
 }

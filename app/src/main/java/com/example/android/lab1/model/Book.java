@@ -1,4 +1,4 @@
-package com.example.android.lab1;
+package com.example.android.lab1.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -10,6 +10,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.example.android.lab1.model.User;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 

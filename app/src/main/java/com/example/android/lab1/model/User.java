@@ -1,6 +1,4 @@
-package com.example.android.lab1;
-
-import android.net.Uri;
+package com.example.android.lab1.model;
 
 /**
  * Created by Federico on 20/03/2018.

@@ -1,8 +1,10 @@
-package com.example.android.lab1;
+package com.example.android.lab1.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+
+import com.example.android.lab1.R;
 
 public class Condition
 {

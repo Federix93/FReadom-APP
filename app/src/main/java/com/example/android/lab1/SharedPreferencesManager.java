@@ -2,9 +2,8 @@ package com.example.android.lab1;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.UserManager;
-import android.util.Log;
 
+import com.example.android.lab1.model.User;
 import com.google.gson.Gson;
 
 /**
