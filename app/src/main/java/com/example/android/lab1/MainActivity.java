@@ -51,9 +51,21 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
         if (user != null) {
-            if (user.isEmailVerified()) {
+            if (!isEmailAndPasswordProvider()) {
                 setLoggedUser(user);
                 openMainActivity();
+            } else {
+                user.reload();
+                if (!user.isEmailVerified()) {
+                    if (!mProgressDialog.isShowing()) {
+                        mProgressDialog.setMessage("Verifica dell'email");
+                        mProgressDialog.setCancelable(false);
+                        mProgressDialog.show();
+                    }
+                }else{
+                    setLoggedUser(user);
+                    openMainActivity();
+                }
             }
         } else {
             startActivityForResult(
@@ -69,23 +81,6 @@ public class MainActivity extends AppCompatActivity {
                             .build(),
                     RC_SIGN_IN);
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //mFirebaseAuth.addAuthStateListener(mAuthStateListener);
-
-        if (mFirebaseAuth.getCurrentUser() != null) {
-            mFirebaseAuth.getCurrentUser().reload();
-
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
     }
 
     @Override
@@ -216,5 +211,14 @@ public class MainActivity extends AppCompatActivity {
             userLocal.setImage(user.getPhotoUrl().toString());
         userLocal.setUsername(user.getDisplayName());
         sharedPreferencesManager.putUser(userLocal);
+    }
+
+    private boolean isEmailAndPasswordProvider() {
+        for (UserInfo userInfo : mFirebaseAuth.getCurrentUser().getProviderData()) {
+            if (userInfo.getProviderId().equals("password")) {
+                return true;
+            }
+        }
+        return false;
     }
 }
