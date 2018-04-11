@@ -21,7 +21,4 @@
     <string name="no_internet_connection">No internet connection</string>
     <string name="title_activity_position">Map</string>
     <string name="edit_title_activity">Edit profile</string>
-
-    <string name="facebook_application_id">390974964703401</string>
-    <string name="fb_login_protocol_scheme">fb390974964703401</string>
 </resources>
