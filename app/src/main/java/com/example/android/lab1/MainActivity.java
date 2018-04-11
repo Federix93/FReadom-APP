@@ -1,7 +1,7 @@
 package com.example.android.lab1;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,12 +13,15 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.facebook.FacebookSdk;
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -33,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     TextInputLayout mShortBioTextInputLayout;
     ImageView mCircleImageView;
     private Toolbar mToolbar;
+    private ProgressDialog mProgressDialog;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
@@ -43,62 +47,85 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mProgressDialog = new ProgressDialog(this);
         mFirebaseAuth = FirebaseAuth.getInstance();
-
-        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    openMainActivity();
-                } else {
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false)
-                                    .setTheme(R.style.LoginTheme)
-                                    .setAvailableProviders(Arrays.asList(
-                                            new AuthUI.IdpConfig.EmailBuilder().build(),
-                                            new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                            new AuthUI.IdpConfig.FacebookBuilder().build()))
-                                    .build(),
-                            RC_SIGN_IN);
-                }
+        FirebaseUser user = mFirebaseAuth.getCurrentUser();
+        if (user != null) {
+            if (user.isEmailVerified()) {
+                setLoggedUser(user);
+                openMainActivity();
             }
-        };
+        } else {
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setIsSmartLockEnabled(false)
+                            .setTheme(R.style.LoginTheme)
+                            .setAvailableProviders(Arrays.asList(
+                                    new AuthUI.IdpConfig.EmailBuilder().build(),
+                                    new AuthUI.IdpConfig.GoogleBuilder().build(),
+                                    new AuthUI.IdpConfig.FacebookBuilder().build(),
+                                    new AuthUI.IdpConfig.TwitterBuilder().build()))
+                            .build(),
+                    RC_SIGN_IN);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+        //mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+
+        if (mFirebaseAuth.getCurrentUser() != null) {
+            mFirebaseAuth.getCurrentUser().reload();
+
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
+        // mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_SIGN_IN){
-            if(resultCode == RESULT_OK){
+        if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+            if (resultCode == RESULT_OK) {
                 FirebaseUser user = mFirebaseAuth.getCurrentUser();
-                if(user != null) {
+                if (user != null) {
+                    for (UserInfo userInfo : user.getProviderData()) {
+                        if (userInfo.getProviderId().equals("password")) {
+                            if (!user.isEmailVerified()) {
+                                user.sendEmailVerification();
+                                if (!mProgressDialog.isShowing()) {
+                                    mProgressDialog.setMessage("Verifica dell'email");
+                                    mProgressDialog.setCancelable(false);
+                                    mProgressDialog.show();
+                                }
+                            }
+                            break;
+                        }
+                    }
                     setLoggedUser(user);
                     openMainActivity();
                 }
-            }else if(resultCode == RESULT_CANCELED){
-                Toast.makeText(MainActivity.this,"VINCENZO IS OFFLINE", Toast.LENGTH_LONG).show();
-
+            } else {
+                if (response == null) {
+                    Toast.makeText(MainActivity.this, "YOU PRESSED BACK BUTTON", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+                    Toast.makeText(getApplicationContext(), R.string.no_internet_connection, Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
         }
     }
 
-    private void openMainActivity(){
+    private void openMainActivity() {
         setContentView(R.layout.activity_main);
 
         mUsernameTextInputLayout = findViewById(R.id.username_text);
@@ -179,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setLoggedUser(FirebaseUser user){
+    private void setLoggedUser(FirebaseUser user) {
         final SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
         User userLocal = sharedPreferencesManager.getUser();
         if (userLocal == null)
@@ -190,5 +217,4 @@ public class MainActivity extends AppCompatActivity {
         userLocal.setUsername(user.getDisplayName());
         sharedPreferencesManager.putUser(userLocal);
     }
-
 }
