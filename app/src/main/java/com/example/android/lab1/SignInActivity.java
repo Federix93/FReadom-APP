@@ -2,10 +2,10 @@ package com.example.android.lab1;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.constraint.ConstraintLayout;
+import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.ScrollView;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -21,15 +21,21 @@ public class SignInActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 10;
     private ProgressDialog mProgressDialog;
-
     private FirebaseAuth mFirebaseAuth;
+
+    private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+
+        mNetworkConnectionBroadcastReceiver = new NetworkConnectionReceiver(this);
+
         mProgressDialog = new ProgressDialog(this);
+
         mFirebaseAuth = FirebaseAuth.getInstance();
+
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
         if (user != null) {
             if (!isEmailAndPasswordProvider()) {
@@ -49,19 +55,23 @@ public class SignInActivity extends AppCompatActivity {
                 }
             }
         } else {
-            startActivityForResult(
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setIsSmartLockEnabled(false)
-                            .setTheme(R.style.LoginTheme)
-                            .setAvailableProviders(Arrays.asList(
-                                    new AuthUI.IdpConfig.EmailBuilder().build(),
-                                    new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                    new AuthUI.IdpConfig.FacebookBuilder().build(),
-                                    new AuthUI.IdpConfig.TwitterBuilder().build()))
-                            .build(),
-                    RC_SIGN_IN);
+            openFirebaseUI();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(mNetworkConnectionBroadcastReceiver, filter);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mNetworkConnectionBroadcastReceiver);
     }
 
     @Override
@@ -93,9 +103,9 @@ public class SignInActivity extends AppCompatActivity {
                     finish();
                     return;
                 }
-                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
-                    Toast.makeText(getApplicationContext(), R.string.no_internet_connection, Toast.LENGTH_SHORT).show();
-                    return;
+                if (response.getError() != null && response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+
+
                 }
             }
         }
@@ -124,5 +134,20 @@ public class SignInActivity extends AppCompatActivity {
     private void openMainActivity(){
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    private void openFirebaseUI(){
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setIsSmartLockEnabled(false)
+                        .setTheme(R.style.LoginTheme)
+                        .setAvailableProviders(Arrays.asList(
+                                new AuthUI.IdpConfig.EmailBuilder().build(),
+                                new AuthUI.IdpConfig.GoogleBuilder().build(),
+                                new AuthUI.IdpConfig.FacebookBuilder().build(),
+                                new AuthUI.IdpConfig.TwitterBuilder().build()))
+                        .build(),
+                RC_SIGN_IN);
     }
 }
