@@ -7,12 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.ui.ProgressDialogHolder;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Arrays;
 
