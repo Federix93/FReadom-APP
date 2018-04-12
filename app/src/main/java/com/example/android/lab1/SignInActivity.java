@@ -82,9 +82,11 @@ public class SignInActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 FirebaseUser user = mFirebaseAuth.getCurrentUser();
                 if (user != null) {
+                    boolean isPasswordMode = false;
                     for (UserInfo userInfo : user.getProviderData()) {
                         if (userInfo.getProviderId().equals("password")) {
                             if (!user.isEmailVerified()) {
+                                isPasswordMode = true;
                                 user.sendEmailVerification();
                                 if (!mProgressDialog.isShowing()) {
                                     mProgressDialog.setMessage("Verifica dell'email");
@@ -95,8 +97,10 @@ public class SignInActivity extends AppCompatActivity {
                             break;
                         }
                     }
-                    setLoggedUser(user);
-                    openMainActivity();
+                    if(!isPasswordMode) {
+                        setLoggedUser(user);
+                        openMainActivity();
+                    }
                 }
             } else {
                 if (response == null) {
