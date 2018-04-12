@@ -90,7 +90,7 @@ public class SignInActivity extends AppCompatActivity {
                 }
             } else {
                 if (response == null) {
-                    Toast.makeText(SignInActivity.this, "YOU PRESSED BACK BUTTON", Toast.LENGTH_LONG).show();
+                    finish();
                     return;
                 }
                 if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
