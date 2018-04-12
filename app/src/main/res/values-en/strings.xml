@@ -21,5 +21,8 @@
     <string name="no_internet_connection">No internet connection</string>
     <string name="title_activity_position">Map</string>
     <string name="edit_title_activity">Edit profile</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_profile">Profile</string>
 
 </resources>

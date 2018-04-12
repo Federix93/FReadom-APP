@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -18,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:padding="12dp"
-            android:src="@drawable/ic_mode_edit_black_24dp" />
+            app:srcCompat="@drawable/ic_mode_edit_black_24dp" />
 
     </android.support.v7.widget.Toolbar>
 
@@ -66,7 +67,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:paddingBottom="4dp"
-                        android:src="@drawable/ic_person_black_24dp" />
+                        app:srcCompat="@drawable/ic_person_black_24dp" />
 
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/username_text"
@@ -92,7 +93,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:paddingBottom="4dp"
-                        android:src="@drawable/ic_email_black_24dp" />
+                        app:srcCompat="@drawable/ic_email_black_24dp" />
 
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/email_text"
@@ -119,7 +120,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:paddingBottom="4dp"
-                        android:src="@drawable/ic_phone_black_24dp" />
+                        app:srcCompat="@drawable/ic_phone_black_24dp" />
 
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/phone_text"
@@ -146,7 +147,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/ic_sms_black_24dp" />
+                        app:srcCompat="@drawable/ic_sms_black_24dp" />
 
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/bio_text_edit"
@@ -173,7 +174,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:paddingBottom="4dp"
-                        android:src="@drawable/ic_location_on_black_24dp" />
+                        app:srcCompat="@drawable/ic_location_on_black_24dp" />
 
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/address_text_view"
