@@ -34,4 +34,5 @@
     <string name="great">Ottime</string>
     <string name="neww">Nuovo</string>
     <string name="invalid_isbn">Codice ISBN-13 invalido</string>
+    <string name="scan_isbn_hint">Inquadrare il codice a barre posto sul retro del libro</string>
 </resources>

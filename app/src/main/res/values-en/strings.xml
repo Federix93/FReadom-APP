@@ -34,5 +34,6 @@
     <string name="great">Great</string>
     <string name="neww">New</string>
     <string name="invalid_isbn">Invalid ISBN-13 code</string>
+    <string name="scan_isbn_hint">Aim at the bar code on the back of the book</string>
 
 </resources>
