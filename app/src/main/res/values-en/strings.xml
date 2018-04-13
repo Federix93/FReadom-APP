@@ -35,5 +35,8 @@
     <string name="neww">New</string>
     <string name="invalid_isbn">Invalid ISBN-13 code</string>
     <string name="scan_isbn_hint">Aim at the bar code on the back of the book</string>
+    <string name="load_book_toolbar_title">Add new book</string>
+    <string name="load_book_book_not_found">Book not found</string>
+    <string name="load_book_autofill_request_error">Error while recovering info about the book</string>
 
 </resources>

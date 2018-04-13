@@ -66,4 +66,8 @@ public class ImagePagerAdapter extends PagerAdapter
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((LinearLayout) object);
     }
+
+    public void addPhoto(String absolutePath) {
+        mPhotosPath.add(absolutePath);
+    }
 }

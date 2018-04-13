@@ -2,12 +2,20 @@ package com.example.android.lab1;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -15,7 +23,6 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -32,18 +39,25 @@ import com.example.android.lab1.model.Condition;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LoadBookActivity extends Activity implements View.OnClickListener {
+public class LoadBookActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String ISBN_REQUEST_TAG = "ISBN_REQUEST";
-    private static final int SCAN_REQUEST_TAG = 1;
+    private static final int SCAN_REQUEST_TAG = 3;
     private static final int POSITION_REQUEST = 2;
+
+    private final int RESULT_LOAD_IMAGE = 1;
+    private final int CAPTURE_IMAGE = 0;
 
     private static final String ISBN_FIELD = "ISBN";
     private static final String TITLE_FIELD = "TITLE";
@@ -67,6 +81,10 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
     private Spinner mConditionsSpinner;
     private TextView mPositionEditText;
     private ImageView mPositionIcon;
+    private Toolbar mToolbar;
+    private ImageView mConfirmImageView;
+    private AlertDialog.Builder mAlertDialogBuilder;
+    private File mPhotoFile; // last photo thumbnail
 
     private ArrayList<String> mPhotosPath;
     private String mWebThumbnail;
@@ -92,6 +110,19 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
         mConditionsSpinner = findViewById(R.id.load_book_conditions_spinner);
         mPositionEditText = findViewById(R.id.load_book_position);
         mPositionIcon = findViewById(R.id.load_book_location);
+        mToolbar = findViewById(R.id.toolbar_loadbook);
+        mConfirmImageView = findViewById(R.id.icon_check_toolbar);
+
+        // toolbar
+        mToolbar.setTitle(R.string.load_book_toolbar_title);
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+        setSupportActionBar(mToolbar);
 
         // spinners
 
@@ -114,6 +145,52 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
 
         // TODO load gallery
 
+        mAddImageIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
+                mAlertDialogBuilder = new AlertDialog.Builder(view.getContext());
+                mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+                mAlertDialogBuilder.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case CAPTURE_IMAGE:
+                                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+                                    try {
+                                        mPhotoFile = saveThumbnail();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    if (mPhotoFile != null) {
+                                        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                                                "com.example.android.fileprovider",
+                                                mPhotoFile);
+                                        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                                    }
+                                    startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+                                }
+                                break;
+                            case RESULT_LOAD_IMAGE:
+                                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                galleryIntent.setType("image/*");
+                                startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
+                                break;
+                            default:
+                                dialogInterface.cancel();
+                        }
+                    }
+                }).show();
+            }
+        });
+
         // ISBN auto fill listener
         setIsbnListeners();
 
@@ -121,18 +198,10 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
         mPositionEditText.setOnClickListener(this);
         mPositionIcon.setOnClickListener(this);
 
-        mAddImageIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO implement gallery
-            }
-        });
-
         if (savedInstanceState != null && savedInstanceState.containsKey(PHOTOS_PATH_FIELD))
             mPhotosPath = savedInstanceState.getStringArrayList(PHOTOS_PATH_FIELD);
-
-        mGallery.setAdapter(new ImagePagerAdapter(getApplicationContext(), mPhotosPath));
-
+        else
+            mPhotosPath = new ArrayList<>();
     }
 
 
@@ -184,7 +253,7 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
                         // second request
                         if (alternativeEndPoint)
                             Toast.makeText(getApplicationContext(),
-                                    "Book not found",
+                                    R.string.load_book_book_not_found,
                                     Toast.LENGTH_SHORT).show();
                         else
                             makeRequestBookApi(isbn, true);
@@ -196,7 +265,7 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "ERROR IN REQUEST", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.load_book_autofill_request_error, Toast.LENGTH_SHORT).show();
             }
         });
         jsonRequest.setTag(ISBN_REQUEST_TAG);
@@ -384,27 +453,37 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
                 if (resultCode == Activity.RESULT_OK) {
                     // Parsing bar code reader result
                     if (resultData != null && resultData.hasExtra(ScanBarCodeActivity.BARCODE_KEY)) {
-                        // disable input filters temporarely
-                        InputFilter[] filters = mIsbnEditText.getFilters();
-                        mIsbnEditText.setFilters(new InputFilter[]{});
-                        mIsbnEditText.setText(resultData.getStringExtra(ScanBarCodeActivity.BARCODE_KEY));
-                        mIsbnEditText.setFilters(filters);
-                        validateIsbn(mIsbnEditText);
+                        if (!mIsbnEditText.getText().toString().equals(resultData.getStringExtra(ScanBarCodeActivity.BARCODE_KEY))) {
+                            // disable input filters temporarely
+                            InputFilter[] filters = mIsbnEditText.getFilters();
+                            mIsbnEditText.setFilters(new InputFilter[]{});
+                            mIsbnEditText.setText(resultData.getStringExtra(ScanBarCodeActivity.BARCODE_KEY));
+                            mIsbnEditText.setFilters(filters);
+                            validateIsbn(mIsbnEditText);
+                            mTitleEditText.setText("");
+                            mAuthorEditText.setText("");
+                            mPublisherEditText.setText("");
+                            mPublishYearSpinner.setSelection(0);
+                        }
                     }
                 }
                 break;
             case POSITION_REQUEST:
-                if (resultCode == Activity.RESULT_OK)
-                {
-                    if (resultData != null && resultData.hasExtra(PositionActivity.ADDRESS_KEY))
-                    {
-                        if (mPositionEditText != null)
-                        {
+                if (resultCode == Activity.RESULT_OK) {
+                    if (resultData != null && resultData.hasExtra(PositionActivity.ADDRESS_KEY)) {
+                        if (mPositionEditText != null) {
                             mPositionEditText.setText(resultData.getStringExtra(PositionActivity.ADDRESS_KEY));
                         }
                     }
                 }
                 break;
+            case CAPTURE_IMAGE:
+                if (resultCode == Activity.RESULT_OK && mPhotoFile != null) {
+                    mPhotosPath.add(mPhotoFile.getAbsolutePath());
+                    mGallery.setAdapter(new ImagePagerAdapter(getApplicationContext(), mPhotosPath));
+                } else if (resultCode == RESULT_CANCELED && mPhotoFile != null) {
+                    deleteFile(mPhotoFile.getAbsolutePath());
+                }
         }
     }
 
@@ -414,10 +493,8 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
     }
 
     @Override
-    public void onClick(View v)
-    {
-        switch (v.getId())
-        {
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.load_book_position:
             case R.id.load_book_location:
                 Intent intent = new Intent(this, PositionActivity.class);
@@ -425,5 +502,18 @@ public class LoadBookActivity extends Activity implements View.OnClickListener {
                 break;
         }
 
+    }
+
+    public File saveThumbnail() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+        //mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 }
