@@ -5,24 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_main_activity"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
-
-        <ImageView
-            android:id="@+id/icon_toolbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:padding="12dp"
-            app:srcCompat="@drawable/ic_mode_edit_black_24dp" />
-
-    </android.support.v7.widget.Toolbar>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

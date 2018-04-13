@@ -44,13 +44,6 @@ public class MainActivity extends AppCompatActivity {
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
-        mToolbarIcon = findViewById(R.id.icon_toolbar);
-
-        mToolbar = findViewById(R.id.toolbar_main_activity);
-        mToolbar.setTitle(R.string.app_name);
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
-        setSupportActionBar(mToolbar);
-
         final SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
 
