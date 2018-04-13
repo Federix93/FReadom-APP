@@ -73,6 +73,7 @@ public class HomePage extends AppCompatActivity {
 
                         case DASH_FRAGMENT:
                             ft.commit();
+                            Toast.makeText(HomePage.this, "Function not implemented", Toast.LENGTH_SHORT).show();
                             break;
 
                         case PROFILE_FRAGMENT:

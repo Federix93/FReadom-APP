@@ -24,5 +24,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_profile">Profilo</string>
+    <string name="search">Cerca</string>
+    <string name="filter">Filtra</string>
 
 </resources>
