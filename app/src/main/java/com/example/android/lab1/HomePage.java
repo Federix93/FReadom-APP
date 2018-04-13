@@ -26,7 +26,6 @@ public class HomePage extends AppCompatActivity {
     private static final int PROFILE_FRAGMENT = 2;
 
     private AHBottomNavigation mBottomNavigation;
-    private int mCurrentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +47,6 @@ public class HomePage extends AppCompatActivity {
         mBottomNavigation.addItems(items);
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
-
-        mCurrentFragment = HOME_FRAGMENT;
 
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
@@ -83,109 +80,47 @@ public class HomePage extends AppCompatActivity {
 
                     }
                 }
-/*
-                if (currentFragment != null) {
-                    currentFragment.willBeHidden();
-                }
 
-                viewPager.setCurrentItem(position, false);
-
-                if (currentFragment == null) {
-                    return true;
-                }
-
-                currentFragment = adapter.getCurrentFragment();
-                currentFragment.willBeDisplayed();
-
-                if (position == 1) {
-                    bottomNavigation.setNotification("", 1);
-
-                    floatingActionButton.setVisibility(View.VISIBLE);
-                    floatingActionButton.setAlpha(0f);
-                    floatingActionButton.setScaleX(0f);
-                    floatingActionButton.setScaleY(0f);
-                    floatingActionButton.animate()
-                            .alpha(1)
-                            .scaleX(1)
-                            .scaleY(1)
-                            .setDuration(300)
-                            .setInterpolator(new OvershootInterpolator())
-                            .setListener(new Animator.AnimatorListener() {
-                                @Override
-                                public void onAnimationStart(Animator animation) {
-
-                                }
-
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    floatingActionButton.animate()
-                                            .setInterpolator(new LinearOutSlowInInterpolator())
-                                            .start();
-                                }
-
-                                @Override
-                                public void onAnimationCancel(Animator animation) {
-
-                                }
-
-                                @Override
-                                public void onAnimationRepeat(Animator animation) {
-
-                                }
-                            })
-                            .start();
-
-                } else {
-                    if (floatingActionButton.getVisibility() == View.VISIBLE) {
-                        floatingActionButton.animate()
-                                .alpha(0)
-                                .scaleX(0)
-                                .scaleY(0)
-                                .setDuration(300)
-                                .setInterpolator(new LinearOutSlowInInterpolator())
-                                .setListener(new Animator.AnimatorListener() {
-                                    @Override
-                                    public void onAnimationStart(Animator animation) {
-
-                                    }
-
-                                    @Override
-                                    public void onAnimationEnd(Animator animation) {
-                                        floatingActionButton.setVisibility(View.GONE);
-                                    }
-
-                                    @Override
-                                    public void onAnimationCancel(Animator animation) {
-                                        floatingActionButton.setVisibility(View.GONE);
-                                    }
-
-                                    @Override
-                                    public void onAnimationRepeat(Animator animation) {
-
-                                    }
-                                })
-                                .start();
-                    }
-                }
-*/
                 return true;
             }
         });
 
 
+
+
         // Only create new fragments when there is no previously saved state
         if(savedInstanceState == null) {
-
+/*
             HomeFragment homeFragment = new HomeFragment();
 
             fragmentManager.beginTransaction()
                     .add(R.id.fragment_frame, homeFragment)
                     .commit();
+                    */
+
+            //trovare un modo migliore per passare un messaggio quando il profilo viene salvato perchè
+            //potrebbe dare problemi quando viene utilizzata onSavedInstanceState in questa classe
+
+            //Tutto ciò viene fatto per far uscire come current profile il profilo e non l'homepage
+            if (getIntent().getExtras() != null)
+            {
+                ProfileFragment profileFragment = new ProfileFragment();
+
+                fragmentManager.beginTransaction()
+                        .add(R.id.fragment_frame, profileFragment)
+                        .commit();
+
+                mBottomNavigation.setCurrentItem(PROFILE_FRAGMENT);
+            }
+            else
+            {
+                HomeFragment homeFragment = new HomeFragment();
+
+                fragmentManager.beginTransaction()
+                        .add(R.id.fragment_frame, homeFragment)
+                        .commit();
+            }
         }
-
-
-
-
     }
 
 }

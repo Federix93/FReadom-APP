@@ -138,8 +138,11 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                 user.setImage(mCurrentPhotoPath);
                 sharedPreferencesManager.putUser(user);
-                Intent intent = new Intent(view.getContext(), MainActivity.class);
+
+                Intent intent = new Intent(view.getContext(), HomePage.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                Boolean applyChangeOnProfile = true;
+                intent.putExtra("ApplyChanges", applyChangeOnProfile);
                 startActivity(intent);
             }
         });

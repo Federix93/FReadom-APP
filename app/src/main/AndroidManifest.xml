@@ -55,7 +55,9 @@
         <activity
             android:name=".PositionActivity"
             android:theme="@style/AppTheme" />
-
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/AppTheme" />
         <service
             android:name=".FetchAddressIntentService"
             android:exported="false" />
