@@ -116,42 +116,37 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         if(savedInstanceState == null){
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
-            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            User userNormal = User.getInstance();
-                            data = document.getData();
-                            if (data != null) {
-                                if (data.get(User.Utils.USERNAME_KEY) != null && mUsernameTextInputLayout.getEditText() != null)
-                                    mUsernameTextInputLayout.getEditText().setText(data.get(User.Utils.USERNAME_KEY).toString());
-                                if (data.get(User.Utils.EMAIL_KEY) != null && mEmailTextInputLayout.getEditText() != null)
-                                    mEmailTextInputLayout.getEditText().setText(data.get(User.Utils.EMAIL_KEY).toString());
-                                if (data.get(User.Utils.PHONE_KEY) != null && mPhoneTextInputLayout.getEditText() != null)
-                                    mPhoneTextInputLayout.getEditText().setText(data.get(User.Utils.PHONE_KEY).toString());
-                                if (data.get(User.Utils.SHORTBIO_KEY) != null && mShortBioTextInputLayout.getEditText() != null)
-                                    mShortBioTextInputLayout.getEditText().setText(data.get(User.Utils.SHORTBIO_KEY).toString());
-                                if (mUserImageView != null) {
-                                    Glide.with(getApplicationContext()).load(data.get(User.Utils.PICTURE_KEY)).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                                    mCurrentPhotoPath = data.get(User.Utils.PICTURE_KEY).toString();
-                                }
+                public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                    User userNormal = User.getInstance();
+                    data = documentSnapshot.getData();
+                    if (data != null) {
+                        if (data.get(User.Utils.USERNAME_KEY) != null && mUsernameTextInputLayout.getEditText() != null)
+                            mUsernameTextInputLayout.getEditText().setText(data.get(User.Utils.USERNAME_KEY).toString());
+                        if (data.get(User.Utils.EMAIL_KEY) != null && mEmailTextInputLayout.getEditText() != null)
+                            mEmailTextInputLayout.getEditText().setText(data.get(User.Utils.EMAIL_KEY).toString());
+                        if (data.get(User.Utils.PHONE_KEY) != null && mPhoneTextInputLayout.getEditText() != null)
+                            mPhoneTextInputLayout.getEditText().setText(data.get(User.Utils.PHONE_KEY).toString());
+                        if (data.get(User.Utils.SHORTBIO_KEY) != null && mShortBioTextInputLayout.getEditText() != null)
+                            mShortBioTextInputLayout.getEditText().setText(data.get(User.Utils.SHORTBIO_KEY).toString());
+                        if (mUserImageView != null) {
+                            Glide.with(getApplicationContext()).load(data.get(User.Utils.PICTURE_KEY)).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                            mCurrentPhotoPath = data.get(User.Utils.PICTURE_KEY).toString();
+                        }
 
-                                if (mAddressTextInputLayout != null) {
-                                    if (showProfileIntent != null && showProfileIntent.hasExtra(MainActivity.ADDRESS_KEY)) {
-                                        String address = showProfileIntent.getStringExtra(MainActivity.ADDRESS_KEY);
-                                        if (address != null)
-                                            mAddressTextInputLayout.setText(address);
-                                        else
-                                            mAddressTextInputLayout.setText(R.string.selection_position);
-                                    } else {
-                                        if (userNormal != null && userNormal.getTempAddress() != null) {
-                                            mAddressTextInputLayout.setText(userNormal.getTempAddress());
-                                        } else {
-                                            mAddressTextInputLayout.setText(R.string.selection_position);
-                                        }
-                                    }
+                        if (mAddressTextInputLayout != null) {
+                            if (showProfileIntent != null && showProfileIntent.hasExtra(MainActivity.ADDRESS_KEY)) {
+                                String address = showProfileIntent.getStringExtra(MainActivity.ADDRESS_KEY);
+                                if (address != null)
+                                    mAddressTextInputLayout.setText(address);
+                                else
+                                    mAddressTextInputLayout.setText(R.string.selection_position);
+                            } else {
+                                if (userNormal != null && userNormal.getTempAddress() != null) {
+                                    mAddressTextInputLayout.setText(userNormal.getTempAddress());
+                                } else {
+                                    mAddressTextInputLayout.setText(R.string.selection_position);
                                 }
                             }
                         }
