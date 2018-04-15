@@ -39,7 +39,6 @@ public class SignInActivity extends AppCompatActivity {
         mProgressDialog = new ProgressDialog(this);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
-
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
         if (user != null) {
             if (!isEmailAndPasswordProvider()) {
