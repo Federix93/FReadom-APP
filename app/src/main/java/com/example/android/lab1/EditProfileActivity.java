@@ -1,10 +1,14 @@
 package com.example.android.lab1;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -18,18 +22,29 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 
 public class EditProfileActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
-    private Toolbar mToolbar;
+    Toolbar mToolbar;
     ImageView mSaveProfileUpdatesImageView;
     ImageView mCameraImageView;
     ImageView mUserImageView;
@@ -39,12 +54,17 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     TextView mAddressTextInputLayout;
     TextInputLayout mShortBioTextInputLayout;
     ImageView mPositionImageView;
+
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
-    String mCurrentPhotoPath;
+
+    private FirebaseAuth mFirebaseAuth;
+    private String mCurrentPhotoPath;
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
     private View mFocusedView;
+    private Intent showProfileIntent;
+    private Map<String, Object> data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,49 +93,28 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         mToolbar.setTitle(R.string.edit_title_activity);
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
         });
-        Intent showProfileIntent = getIntent();
+        showProfileIntent = getIntent();
 
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
-        User user = sharedPreferencesManager.getUser();
-        if (savedInstanceState == null) {
-            if (user != null && user.getUsername() != null && mUsernameTextInputLayout.getEditText() != null)
-                mUsernameTextInputLayout.getEditText().setText(user.getUsername());
-            if (user != null && user.getEmail() != null && mEmailTextInputLayout.getEditText() != null)
-                mEmailTextInputLayout.getEditText().setText(user.getEmail());
-            if (user != null && user.getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
-                mPhoneTextInputLayout.getEditText().setText(user.getPhone());
-            if (user != null && user.getShortBio() != null && mShortBioTextInputLayout.getEditText() != null)
-                mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
-            if (user != null && user.getImage() != null && mUserImageView != null) {
-                Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                mCurrentPhotoPath = user.getImage();
-            } else {
-                Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
-                        .apply(bitmapTransform(new CircleCrop()))
-                        .into(mUserImageView);
-            }
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
-            if (mAddressTextInputLayout != null) {
-                if (showProfileIntent != null && showProfileIntent.hasExtra(MainActivity.ADDRESS_KEY)) {
-                    String address = showProfileIntent.getStringExtra(MainActivity.ADDRESS_KEY);
-                    if (address != null)
-                        mAddressTextInputLayout.setText(address);
-                    else
-                        mAddressTextInputLayout.setText(R.string.selection_position);
-                } else {
-                    if (user != null && user.getTempAddress() != null) {
-                        mAddressTextInputLayout.setText(user.getTempAddress());
-                    } else {
-                        mAddressTextInputLayout.setText(R.string.selection_position);
-                    }
-                }
-            }
+        FirebaseUser user = mFirebaseAuth.getCurrentUser();
+
+        if (user == null) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        }
+
+        if(savedInstanceState == null){
+            new GUIManager().execute();
         }
 
         mSaveProfileUpdatesImageView.setOnClickListener(new View.OnClickListener() {
@@ -221,24 +220,24 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+        /*SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
         if (user != null) {
             user.setTempAddress(user.getAddress());
             sharedPreferencesManager.putUser(user);
-        }
+        }*/
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+        /*SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         User user = sharedPreferencesManager.getUser();
         if (mAddressTextInputLayout != null) {
             if (user != null) {
                 mAddressTextInputLayout.setText(user.getTempAddress());
             }
-        }
+        }*/
     }
 
     @Override
@@ -328,8 +327,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     mPhoneTextInputLayout.getEditText().clearFocus();
                     mShortBioTextInputLayout.getEditText().clearFocus();
             }
-        } else
-        {
+        } else {
             mUsernameTextInputLayout.getEditText().clearFocus();
             mEmailTextInputLayout.getEditText().clearFocus();
             mPhoneTextInputLayout.getEditText().clearFocus();
@@ -374,4 +372,67 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             mFocusedView = null;
         }
     }
+
+    private class GUIManager extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                User userNormal = User.getInstance();
+                                data = document.getData();
+                                if (data != null) {
+                                    if (data.get(User.Utils.USERNAME_KEY) != null && mUsernameTextInputLayout.getEditText() != null)
+                                        mUsernameTextInputLayout.getEditText().setText(data.get(User.Utils.USERNAME_KEY).toString());
+                                    if (data.get(User.Utils.EMAIL_KEY) != null && mEmailTextInputLayout.getEditText() != null)
+                                        mEmailTextInputLayout.getEditText().setText(data.get(User.Utils.EMAIL_KEY).toString());
+                                    if (data.get(User.Utils.PHONE_KEY) != null && mPhoneTextInputLayout.getEditText() != null)
+                                        mPhoneTextInputLayout.getEditText().setText(data.get(User.Utils.PHONE_KEY).toString());
+                                    if (data.get(User.Utils.SHORTBIO_KEY) != null && mShortBioTextInputLayout.getEditText() != null)
+                                        mShortBioTextInputLayout.getEditText().setText(data.get(User.Utils.SHORTBIO_KEY).toString());
+                                    if (mUserImageView != null) {
+                                        Glide.with(getApplicationContext()).load(data.get(User.Utils.PICTURE_KEY)).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                                        mCurrentPhotoPath = data.get(User.Utils.PICTURE_KEY).toString();
+                                    }
+
+                                    if (mAddressTextInputLayout != null) {
+                                        if (showProfileIntent != null && showProfileIntent.hasExtra(MainActivity.ADDRESS_KEY)) {
+                                            String address = showProfileIntent.getStringExtra(MainActivity.ADDRESS_KEY);
+                                            if (address != null)
+                                                mAddressTextInputLayout.setText(address);
+                                            else
+                                                mAddressTextInputLayout.setText(R.string.selection_position);
+                                        } else {
+                                            if (userNormal != null && userNormal.getTempAddress() != null) {
+                                                mAddressTextInputLayout.setText(userNormal.getTempAddress());
+                                            } else {
+                                                mAddressTextInputLayout.setText(R.string.selection_position);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            return null;
+        }
+    }
+
 }

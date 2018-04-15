@@ -42,7 +42,7 @@ public class SignInActivity extends AppCompatActivity {
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
         if (user != null) {
             if (!isEmailAndPasswordProvider()) {
-                setLoggedUser(user);
+                FirebaseManager.addUser(user);
                 openMainActivity();
             } else {
                 user.reload();
@@ -53,7 +53,7 @@ public class SignInActivity extends AppCompatActivity {
                         mProgressDialog.show();
                     }
                 }else{
-                    setLoggedUser(user);
+                    FirebaseManager.addUser(user);
                     openMainActivity();
                 }
             }
@@ -101,7 +101,7 @@ public class SignInActivity extends AppCompatActivity {
                         }
                     }
                     if(!isPasswordMode) {
-                        setLoggedUser(user);
+                        FirebaseManager.addUser(user);
                         openMainActivity();
                     }
                 }
@@ -116,20 +116,6 @@ public class SignInActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-    private void setLoggedUser(FirebaseUser user) {
-        final SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
-        User userLocal = sharedPreferencesManager.getUser();
-        if (userLocal == null) {
-            userLocal = User.getInstance();
-            userLocal.setEmail(user.getEmail());
-            if (user.getPhotoUrl() != null)
-                userLocal.setImage(user.getPhotoUrl().toString());
-            userLocal.setUsername(user.getDisplayName());
-            sharedPreferencesManager.putUser(userLocal);
-        }
-        FirebaseManager.addUser(user);
-
     }
 
     private boolean isEmailAndPasswordProvider() {
