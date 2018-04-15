@@ -14,8 +14,12 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -117,13 +121,15 @@ public class SignInActivity extends AppCompatActivity {
     private void setLoggedUser(FirebaseUser user) {
         final SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
         User userLocal = sharedPreferencesManager.getUser();
-        if (userLocal == null)
+        if (userLocal == null) {
             userLocal = User.getInstance();
-        userLocal.setEmail(user.getEmail());
-        if (user.getPhotoUrl() != null)
-            userLocal.setImage(user.getPhotoUrl().toString());
-        userLocal.setUsername(user.getDisplayName());
-        sharedPreferencesManager.putUser(userLocal);
+            userLocal.setEmail(user.getEmail());
+            if (user.getPhotoUrl() != null)
+                userLocal.setImage(user.getPhotoUrl().toString());
+            userLocal.setUsername(user.getDisplayName());
+            sharedPreferencesManager.putUser(userLocal);
+        }
+        FirebaseManager.addUser(user);
     }
 
     private boolean isEmailAndPasswordProvider() {
