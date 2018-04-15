@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +17,8 @@ import java.util.Map;
 public class FirebaseManager {
 
     public static void addUser(FirebaseUser user) {
-        Log.d("LULLO", "FIREBASE");
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Log.d("LULLO", "EMAIL: " + user.isEmailVerified());
         boolean hasAccessInPasswordMode = true;
         boolean isPasswordMode = false;
         for (UserInfo userInfo : user.getProviderData()) {
@@ -29,6 +29,7 @@ public class FirebaseManager {
                 }
             }
         }
+
         if (isPasswordMode && !hasAccessInPasswordMode)
             return;
         else {
@@ -43,6 +44,8 @@ public class FirebaseManager {
                 else
                     userToAddInFirebase.put(User.Utils.PICTURE_KEY, null);
                 userToAddInFirebase.put(User.Utils.PHONE_KEY, user.getPhoneNumber());
+                userToAddInFirebase.put(User.Utils.POSITION_KEY, null);
+                userToAddInFirebase.put(User.Utils.SHORTBIO_KEY, null);
                 documentReference.set(userToAddInFirebase).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -56,6 +59,10 @@ public class FirebaseManager {
                 });
             }
         }
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
     }
 
 }

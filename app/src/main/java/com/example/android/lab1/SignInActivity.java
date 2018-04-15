@@ -130,6 +130,7 @@ public class SignInActivity extends AppCompatActivity {
             sharedPreferencesManager.putUser(userLocal);
         }
         FirebaseManager.addUser(user);
+
     }
 
     private boolean isEmailAndPasswordProvider() {
