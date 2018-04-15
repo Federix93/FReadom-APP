@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -32,6 +33,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
 
 import java.io.File;
 import java.io.IOException;
@@ -159,22 +161,32 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             @Override
             public void onClick(View view) {
 
-                SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(view.getContext());
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+                db.runTransaction(new Transaction.Function<Void>() {
+                    @Nullable
+                    @Override
+                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                        User user = transaction.get(docRef).toObject(User.class);
+                        if (mUsernameTextInputLayout.getEditText() != null)
+                            user.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                        if (mEmailTextInputLayout.getEditText() != null)
+                            user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                        if (mPhoneTextInputLayout.getEditText() != null)
+                            user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                        if (mAddressTextInputLayout != null && user.getTempAddress() != null)
+                            user.setAddress(mAddressTextInputLayout.getText().toString());
+                        if (mShortBioTextInputLayout.getEditText() != null)
+                            user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                        user.setImage(mCurrentPhotoPath);
+                        transaction.set(docRef, user);
+                        return null;
+                    }
+                });
+
+                /*SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(view.getContext());
                 User user = sharedPreferencesManager.getUser();
-                if (user == null)
-                    user = User.getInstance();
-                if (mUsernameTextInputLayout.getEditText() != null)
-                    user.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
-                if (mEmailTextInputLayout.getEditText() != null)
-                    user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
-                if (mPhoneTextInputLayout.getEditText() != null)
-                    user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                if (mAddressTextInputLayout != null && user.getTempAddress() != null)
-                    user.setAddress(mAddressTextInputLayout.getText().toString());
-                if (mShortBioTextInputLayout.getEditText() != null)
-                    user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
-                user.setImage(mCurrentPhotoPath);
-                sharedPreferencesManager.putUser(user);
+                sharedPreferencesManager.putUser(user);*/
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
