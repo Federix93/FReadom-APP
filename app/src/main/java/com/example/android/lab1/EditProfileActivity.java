@@ -158,53 +158,12 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                                 if (mShortBioTextInputLayout.getEditText() != null)
                                     mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                                 mUser.setImage(mCurrentPhotoPath);
-                                /*for (DocumentChange change : querySnapshot.getDocumentChanges()) {
-                                    if (change.getType() == DocumentChange.Type.ADDED) {
-                                        Log.d("LULLO", "New city:" + change.getDocument().getData());
-                                    }
-
-                                    String source = querySnapshot.getMetadata().isFromCache() ?
-                                            "local cache" : "server";
-                                    Log.d("LULLO", "Data fetched from " + source);
-                                }*/
                                 docRef.set(mUser, SetOptions.merge());
                                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(intent);
                             }
                         });
-                /*db.runTransaction(new Transaction.Function<Void>() {
-                    @Nullable
-                    @Override
-                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-                        mUser = transaction.get(docRef).toObject(User.class);
-                        if (mUsernameTextInputLayout.getEditText() != null)
-                            mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
-                        if (mEmailTextInputLayout.getEditText() != null)
-                            mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
-                        if (mPhoneTextInputLayout.getEditText() != null)
-                            mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                        if (mAddressTextInputLayout != null && mUser.getTempAddress() != null)
-                            mUser.setAddress(mAddressTextInputLayout.getText().toString());
-                        if (mShortBioTextInputLayout.getEditText() != null)
-                            mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
-                        mUser.setImage(mCurrentPhotoPath);
-                        transaction.set(docRef, mUser);
-                        return null;
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        docRef.set(mUser);
-                    }
-                });*/
             }
         });
 
@@ -405,7 +364,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     @Override
     protected void onStop() {
         super.onStop();
-        if(mUserListenerRegistration != null){
+        if (mUserListenerRegistration != null) {
             mUserListenerRegistration.remove();
             mUserListenerRegistration = null;
         }
@@ -441,14 +400,14 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
     @Override
     public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-        if(e != null){
+        if (e != null) {
             return;
         }
         mUser = documentSnapshot.toObject(User.class);
         onUserLoaded(mUser);
     }
 
-    private void onUserLoaded(User user){
+    private void onUserLoaded(User user) {
         if (user != null) {
             if (mUsernameTextInputLayout.getEditText() != null)
                 mUsernameTextInputLayout.getEditText().setText(user.getUsername());
@@ -479,7 +438,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             }
         }
     }
-    private void clearFocusOnViews(){
+
+    private void clearFocusOnViews() {
         mUsernameTextInputLayout.getEditText().clearFocus();
         mEmailTextInputLayout.getEditText().clearFocus();
         mPhoneTextInputLayout.getEditText().clearFocus();
