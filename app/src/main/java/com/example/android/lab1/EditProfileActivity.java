@@ -102,8 +102,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             }
 
             if (mAddressTextInputLayout != null) {
-                if (showProfileIntent != null && showProfileIntent.hasExtra(MainActivity.ADDRESS_KEY)) {
-                    String address = showProfileIntent.getStringExtra(MainActivity.ADDRESS_KEY);
+                if (showProfileIntent != null && showProfileIntent.hasExtra(ProfileFragment.ADDRESS_KEY)) {
+                    String address = showProfileIntent.getStringExtra(ProfileFragment.ADDRESS_KEY);
                     if (address != null)
                         mAddressTextInputLayout.setText(address);
                     else
