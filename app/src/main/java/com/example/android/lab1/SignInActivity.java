@@ -14,8 +14,12 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QuerySnapshot;
+
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,10 +106,6 @@ public class SignInActivity extends AppCompatActivity {
                     }
                     if(!isPasswordMode) {
                         FirebaseManager.addUser(user);
-                        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
-                        //TODO: Ricordarsi che l'immagine del login potrebbe essere diversa da quella del cloud
-                        if(user.getPhotoUrl() != null)
-                            sharedPreferencesManager.putImage(user.getPhotoUrl().toString());
                         openMainActivity();
                     }
                 }

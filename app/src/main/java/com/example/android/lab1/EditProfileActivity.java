@@ -30,6 +30,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Transaction;
 
@@ -127,6 +128,10 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             @Override
             public void onClick(View view) {
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
+                FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                        .setPersistenceEnabled(true)
+                        .build();
+                db.setFirestoreSettings(settings);
                 final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
                 db.runTransaction(new Transaction.Function<Void>() {
                     @Nullable

@@ -1,8 +1,6 @@
 package com.example.android.lab1;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,16 +11,16 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.Map;
+import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -39,9 +37,12 @@ public class MainActivity extends AppCompatActivity {
     Toolbar mToolbar;
     private FirebaseAuth mFirebaseAuth;
 
+    private User mUser;
+
     public static final String ADDRESS_KEY = "ADDRESS";
     private static final int RC_SIGN_IN = 10;
-    private Map<String, Object> data;
+    SharedPreferencesManager mSharedPreferencesManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,9 +76,69 @@ public class MainActivity extends AppCompatActivity {
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(mToolbar);
 
+        mSharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        if(mFirebaseAuth.getCurrentUser() != null) {
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+        db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                if (e != null) {
+                    return;
+                }
+                mUser = documentSnapshot.toObject(User.class);
+                if (mUser != null) {
+                    if (mUsernameTextInputLayout.getEditText() != null) {
+                        if (mUser.getUsername() != null)
+                            mUsernameTextInputLayout.getEditText().setText(mUser.getUsername());
+                        mUsernameTextInputLayout.getEditText().setKeyListener(null);
+                        mUsernameTextInputLayout.getEditText().setEnabled(false);
+                    }
+                    if (mEmailTextInputLayout.getEditText() != null) {
+                        if (mUser.getEmail() != null)
+                            mEmailTextInputLayout.getEditText().setText(mUser.getEmail());
+                        mEmailTextInputLayout.getEditText().setKeyListener(null);
+                        mEmailTextInputLayout.getEditText().setEnabled(false);
+                    }
+                    if (mPhoneTextInputLayout.getEditText() != null) {
+                        if (mUser.getPhone() != null)
+                            mPhoneTextInputLayout.getEditText().setText(mUser.getPhone());
+                        mPhoneTextInputLayout.getEditText().setKeyListener(null);
+                        mPhoneTextInputLayout.getEditText().setEnabled(false);
+                    }
+
+                    if (mShortBioTextInputLayout.getEditText() != null) {
+                        if (mUser.getShortBio() != null)
+                            mShortBioTextInputLayout.getEditText().setText(mUser.getShortBio());
+                        mShortBioTextInputLayout.getEditText().setKeyListener(null);
+                        mShortBioTextInputLayout.getEditText().setEnabled(false);
+                    }
+
+                    if (mUser.getImage() != null) {
+                        Glide.with(getApplicationContext()).load(mUser.getImage())
+                                .apply(bitmapTransform(new CircleCrop()))
+                                .into(mCircleImageView);
+                    } else {
+                        Glide.with(getApplicationContext()).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
+                                .apply(bitmapTransform(new CircleCrop()))
+                                .into(mCircleImageView);
+                    }
+                    mSharedPreferencesManager.putImage(mUser.getImage());
+                    if (mAddressTextInputLayout.getEditText() != null) {
+                        if (mUser.getAddress() != null)
+                            mAddressTextInputLayout.getEditText().setText(mUser.getAddress());
+                        mAddressTextInputLayout.getEditText().setKeyListener(null);
+                        mAddressTextInputLayout.getEditText().setEnabled(false);
+                    }
+                }
+            }
+        });
+
+        //TODO: Ricordarsi che l'immagine del login potrebbe essere diversa da quella del cloud
+        /*if(mFirebaseAuth.getCurrentUser() != null) {
             DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
             docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
                 @Override
@@ -136,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-        }
+        }*/
 
         mToolbarIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,8 +205,8 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(view.getContext(), EditProfileActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 if (mFirebaseAuth.getCurrentUser() != null)
-                    if (data.get(User.Utils.POSITION_KEY) != null)
-                        intent.putExtra(ADDRESS_KEY, data.get(User.Utils.POSITION_KEY).toString());
+                    if (mUser != null)
+                        intent.putExtra(ADDRESS_KEY, mUser.getAddress());
                 startActivity(intent);
             }
         });
