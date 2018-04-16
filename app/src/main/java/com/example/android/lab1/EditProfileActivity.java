@@ -25,6 +25,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -32,6 +33,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Transaction;
 
 import java.io.File;
@@ -54,6 +57,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     TextView mAddressTextInputLayout;
     TextInputLayout mShortBioTextInputLayout;
     ImageView mPositionImageView;
+
+    private User mUser;
 
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
@@ -133,23 +138,58 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                         .build();
                 db.setFirestoreSettings(settings);
                 final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
-                db.runTransaction(new Transaction.Function<Void>() {
+                db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
+                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                                @Nullable FirebaseFirestoreException e) {
+                                if (e != null) {
+                                    return;
+                                }
+
+                                if (mUsernameTextInputLayout.getEditText() != null)
+                                    mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                                if (mEmailTextInputLayout.getEditText() != null)
+                                    mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                                if (mPhoneTextInputLayout.getEditText() != null)
+                                    mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                                if (mAddressTextInputLayout != null && mUser.getTempAddress() != null)
+                                    mUser.setAddress(mAddressTextInputLayout.getText().toString());
+                                if (mShortBioTextInputLayout.getEditText() != null)
+                                    mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                                mUser.setImage(mCurrentPhotoPath);
+                                /*for (DocumentChange change : querySnapshot.getDocumentChanges()) {
+                                    if (change.getType() == DocumentChange.Type.ADDED) {
+                                        Log.d("LULLO", "New city:" + change.getDocument().getData());
+                                    }
+
+                                    String source = querySnapshot.getMetadata().isFromCache() ?
+                                            "local cache" : "server";
+                                    Log.d("LULLO", "Data fetched from " + source);
+                                }*/
+                                docRef.set(mUser, SetOptions.merge());
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                            }
+                        });
+                /*db.runTransaction(new Transaction.Function<Void>() {
                     @Nullable
                     @Override
                     public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-                        User user = transaction.get(docRef).toObject(User.class);
+                        mUser = transaction.get(docRef).toObject(User.class);
                         if (mUsernameTextInputLayout.getEditText() != null)
-                            user.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                            mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
                         if (mEmailTextInputLayout.getEditText() != null)
-                            user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                            mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                         if (mPhoneTextInputLayout.getEditText() != null)
-                            user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                        if (mAddressTextInputLayout != null && user.getTempAddress() != null)
-                            user.setAddress(mAddressTextInputLayout.getText().toString());
+                            mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                        if (mAddressTextInputLayout != null && mUser.getTempAddress() != null)
+                            mUser.setAddress(mAddressTextInputLayout.getText().toString());
                         if (mShortBioTextInputLayout.getEditText() != null)
-                            user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
-                        user.setImage(mCurrentPhotoPath);
-                        transaction.set(docRef, user);
+                            mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                        mUser.setImage(mCurrentPhotoPath);
+                        transaction.set(docRef, mUser);
                         return null;
                     }
                 }).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -162,10 +202,9 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Snackbar.make(findViewById(android.R.id.content), "Failed to save updates",
-                                Snackbar.LENGTH_SHORT).show();
+                        docRef.set(mUser);
                     }
-                });
+                });*/
             }
         });
 
@@ -405,7 +444,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         if(e != null){
             return;
         }
-        onUserLoaded(documentSnapshot.toObject(User.class));
+        mUser = documentSnapshot.toObject(User.class);
+        onUserLoaded(mUser);
     }
 
     private void onUserLoaded(User user){
