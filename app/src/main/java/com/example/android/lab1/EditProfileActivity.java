@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -120,6 +121,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         mUserRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
 
+        Log.d("LULLO", "SharedPref: " + mSharedPreferencesManager.getImage());
         mCurrentPhotoPath = mSharedPreferencesManager.getImage();
 
         mSaveProfileUpdatesImageView.setOnClickListener(new View.OnClickListener() {
@@ -283,10 +285,12 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         }
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
         if (mCurrentPhotoPath != null) {
-            Glide.with(getApplicationContext()).load(mCurrentPhotoPath)
+            Log.d("LULLO", "3 " + mCurrentPhotoPath);
+            Glide.with(this).load(mCurrentPhotoPath)
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(mUserImageView);
         } else {
+            Log.d("LULLO", "4");
             Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(mUserImageView);
@@ -333,7 +337,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         } else if (requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK && mPhotoFile != null) {
             mCurrentPhotoPath = mPhotoFile.getAbsolutePath();
             mSharedPreferencesManager.putImage(mCurrentPhotoPath);
-            Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+            Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
         }
     }
 
@@ -387,7 +391,14 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             if (mShortBioTextInputLayout.getEditText() != null)
                 mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
             if (mUserImageView != null) {
-                Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                if(mCurrentPhotoPath != null) {
+                    Log.d("LULLO", "1 " + mCurrentPhotoPath);
+                    Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                }else {
+                    Log.d("LULLO", "2");
+                    Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
+                            .apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                }
             }
 
             if (mAddressTextInputLayout != null) {
