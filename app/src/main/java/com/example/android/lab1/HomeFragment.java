@@ -67,7 +67,7 @@ public class HomeFragment extends Fragment {
         mFAB.setVisibility(View.VISIBLE);
 
         mParent = getActivity();
-        numberOfItems = 2000;
+        numberOfItems = 200;
 
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 

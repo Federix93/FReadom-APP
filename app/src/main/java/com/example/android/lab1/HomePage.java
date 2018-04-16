@@ -48,6 +48,7 @@ public class HomePage extends AppCompatActivity {
         items.add(profileItem);
 
         mBottomNavigation.addItems(items);
+        mBottomNavigation.setBehaviorTranslationEnabled(false);
 
         mFAB = findViewById(R.id.fab_add_book);
         mFAB.setOnClickListener(new View.OnClickListener() {
