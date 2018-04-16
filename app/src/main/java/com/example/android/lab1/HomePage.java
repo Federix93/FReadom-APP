@@ -5,10 +5,12 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +28,7 @@ public class HomePage extends AppCompatActivity {
     private static final int PROFILE_FRAGMENT = 2;
 
     private AHBottomNavigation mBottomNavigation;
+    private FloatingActionButton mFAB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,16 @@ public class HomePage extends AppCompatActivity {
         items.add(profileItem);
 
         mBottomNavigation.addItems(items);
+
+        mFAB = findViewById(R.id.fab_add_book);
+        mFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(HomePage.this, "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mBottomNavigation.manageFloatingActionButtonBehavior(mFAB);
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 

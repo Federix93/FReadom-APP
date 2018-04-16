@@ -27,8 +27,8 @@ public class HomeFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private RecyclerBookAdapter mAdapter;
     private FragmentActivity mParent;
-    private FloatingActionButton mFAB;
     private Toolbar mToolbar;
+    private FloatingActionButton mFAB;
 
     public HomeFragment()
     {
@@ -63,6 +63,9 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        mFAB = getActivity().findViewById(R.id.fab_add_book);
+        mFAB.setVisibility(View.VISIBLE);
+
         mParent = getActivity();
         numberOfItems = 2000;
 
@@ -75,14 +78,6 @@ public class HomeFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
         mAdapter = new RecyclerBookAdapter(numberOfItems);
         mRecyclerView.setAdapter(mAdapter);
-
-        mFAB = rootView.findViewById(R.id.fab_add_book);
-        mFAB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(mParent, "Function not implemented", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         return rootView;
     }

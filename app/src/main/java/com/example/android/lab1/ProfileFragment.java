@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -30,6 +31,7 @@ public class ProfileFragment extends Fragment {
     TextInputLayout mShortBioTextInputLayout;
     ImageView mCircleImageView;
     private Toolbar mToolbar;
+    private FloatingActionButton mFAB;
 
     public static final String ADDRESS_KEY = "ADDRESS";
 
@@ -79,6 +81,9 @@ public class ProfileFragment extends Fragment {
                 return true;
             }
         });
+
+        mFAB = getActivity().findViewById(R.id.fab_add_book);
+        mFAB.setVisibility(View.GONE);
 
         if (mUsernameTextInputLayout.getEditText() != null) {
             if(user != null)
