@@ -38,7 +38,20 @@
             android:id="@+id/load_book_gallery"
             android:layout_width="match_parent"
             android:layout_height="@dimen/activity_load_book_image_switcher_height"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar_loadbook"></android.support.v4.view.ViewPager>
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_loadbook" />
+
+        <LinearLayout
+            android:id="@+id/dots_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal"
+            android:padding="@dimen/activity_load_book_content_padding"
+            app:layout_constraintBottom_toBottomOf="@+id/load_book_gallery"
+            app:layout_constraintEnd_toStartOf="@+id/add_image_icon"
+            app:layout_constraintStart_toStartOf="@+id/load_book_gallery" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/add_image_icon"
@@ -46,13 +59,12 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/load_book_gallery"
             android:layout_alignEnd="@id/load_book_gallery"
-            android:layout_marginBottom="12dp"
             android:layout_marginEnd="@dimen/activity_load_book_content_padding"
+            android:layout_marginBottom="-10dp"
             android:padding="@dimen/icon_padding"
             android:src="@drawable/ic_add_a_photo_black_24dp"
             app:elevation="6dp"
             app:layout_anchor="@id/load_book_gallery"
-            app:layout_anchorGravity="bottom|end"
             app:layout_constraintBottom_toBottomOf="@+id/load_book_gallery"
             app:layout_constraintEnd_toEndOf="parent" />
 

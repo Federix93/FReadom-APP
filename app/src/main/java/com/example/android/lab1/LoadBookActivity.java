@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,10 +22,13 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -85,6 +90,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private ImageView mConfirmImageView;
     private AlertDialog.Builder mAlertDialogBuilder;
     private File mPhotoFile; // last photo thumbnail
+    private LinearLayout mDotsContainer;
 
     private ArrayList<String> mPhotosPath;
     private String mWebThumbnail;
@@ -112,6 +118,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mPositionIcon = findViewById(R.id.load_book_location);
         mToolbar = findViewById(R.id.toolbar_loadbook);
         mConfirmImageView = findViewById(R.id.icon_check_toolbar);
+        mDotsContainer = findViewById(R.id.dots_container);
 
         // toolbar
         mToolbar.setTitle(R.string.load_book_toolbar_title);
@@ -119,7 +126,13 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                // delete photos
+                for (String s : mPhotosPath) {
+                    File f = new File(s);
+                    if (f.isFile())
+                        deleteFile(f.getAbsolutePath());
+                }
+                finish();
             }
         });
         setSupportActionBar(mToolbar);
@@ -142,8 +155,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
 
         mConditionsSpinner.setAdapter(makeDropDownAdapter(conditions));
-
-        // TODO load gallery
 
         mAddImageIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -202,6 +213,38 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mPhotosPath = savedInstanceState.getStringArrayList(PHOTOS_PATH_FIELD);
         else
             mPhotosPath = new ArrayList<>();
+
+        mConfirmImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // confirm data and send back a book
+            }
+        });
+
+        mGallery.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                TextView dot;
+                for (int i = 0; i < mDotsContainer.getChildCount(); i++)
+                {
+                    dot = (TextView) mDotsContainer.getChildAt(i);
+                    if (i == position)
+                        dot.setTextColor(Color.WHITE);
+                    else
+                        dot.setTextColor(Color.GRAY);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
 
@@ -243,6 +286,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             if (imageLinks.length() > 0 &&
                                     imageLinks.has("thumbnail")) {
                                 mWebThumbnail = imageLinks.getString("thumbnail");
+                                ;
                             }
                         }
 
@@ -314,8 +358,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mPositionEditText.setText(savedInstanceState.getString(POSITION_FIELD));
         if (savedInstanceState.containsKey(WEB_THUMBNAIL_FIELD))
             mWebThumbnail = savedInstanceState.getString(WEB_THUMBNAIL_FIELD);
-        if (savedInstanceState.containsKey(PHOTOS_PATH_FIELD))
+        if (savedInstanceState.containsKey(PHOTOS_PATH_FIELD)) {
             mPhotosPath = savedInstanceState.getStringArrayList(PHOTOS_PATH_FIELD);
+            mGallery.setAdapter(new ImagePagerAdapter(getApplicationContext(), mPhotosPath, (LinearLayout) findViewById(R.id.dots_container)));
+        }
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -479,11 +525,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case CAPTURE_IMAGE:
                 if (resultCode == Activity.RESULT_OK && mPhotoFile != null) {
-                    mPhotosPath.add(mPhotoFile.getAbsolutePath());
-                    mGallery.setAdapter(new ImagePagerAdapter(getApplicationContext(), mPhotosPath));
+                    updateGallery(mPhotoFile.getAbsolutePath(), null);
                 } else if (resultCode == RESULT_CANCELED && mPhotoFile != null) {
-                    deleteFile(mPhotoFile.getAbsolutePath());
+                    if (mPhotoFile != null && mPhotoFile.isFile())
+                        deleteFile(mPhotoFile.getAbsolutePath());
                 }
+                // TODO Add action result for photo picker
         }
     }
 
@@ -516,4 +563,17 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         //mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
+
+    private void updateGallery(String newPhoto, Integer optPosition) {
+        boolean customPosition;
+        if (optPosition == null) {
+            mPhotosPath.add(newPhoto);
+        } else if (optPosition >= 0 && optPosition < mPhotosPath.size())
+            mPhotosPath.add(optPosition, newPhoto);
+        else
+            optPosition = null;
+        mGallery.setAdapter(new ImagePagerAdapter(getApplicationContext(), mPhotosPath, (LinearLayout) findViewById(R.id.dots_container)));
+        mGallery.setCurrentItem(optPosition == null ? mPhotosPath.size() - 1 : optPosition, true);
+    }
+
 }
