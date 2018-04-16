@@ -44,9 +44,7 @@ public class FirebaseManager {
                 documentReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
                     @Override
                     public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                        Log.d("LULLO", "Document not exists1");
                         if(!documentSnapshot.exists()){
-                            Log.d("LULLO", "Document not exists2");
                             User userLocal = User.getInstance();
                             userLocal.setImage(user.getPhotoUrl().toString());
                             userLocal.setUsername(user.getDisplayName());
@@ -66,16 +64,6 @@ public class FirebaseManager {
                         }
                     }
                 });
-                /*Map<String, Object> userToAddInFirebase = new HashMap<>();
-                userToAddInFirebase.put(User.Utils.USERNAME_KEY, user.getDisplayName());
-                userToAddInFirebase.put(User.Utils.EMAIL_KEY, user.getEmail());
-                if (user.getPhotoUrl() != null)
-                    userToAddInFirebase.put(User.Utils.PICTURE_KEY, user.getPhotoUrl().toString());
-                else
-                    userToAddInFirebase.put(User.Utils.PICTURE_KEY, null);
-                userToAddInFirebase.put(User.Utils.PHONE_KEY, user.getPhoneNumber());
-                userToAddInFirebase.put(User.Utils.POSITION_KEY, null);
-                userToAddInFirebase.put(User.Utils.SHORTBIO_KEY, null);*/
             }
         }
     }

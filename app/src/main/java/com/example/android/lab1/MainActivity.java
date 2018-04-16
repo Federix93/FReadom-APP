@@ -1,7 +1,13 @@
 package com.example.android.lab1;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -76,6 +82,13 @@ public class MainActivity extends AppCompatActivity {
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(mToolbar);
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        1);
+        }
+
         mSharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -118,15 +131,16 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if (mUser.getImage() != null) {
-                        Glide.with(getApplicationContext()).load(mUser.getImage())
-                                .apply(bitmapTransform(new CircleCrop()))
-                                .into(mCircleImageView);
+                        mSharedPreferencesManager.putImage(mUser.getImage());
                     } else {
-                        Glide.with(getApplicationContext()).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
-                                .apply(bitmapTransform(new CircleCrop()))
-                                .into(mCircleImageView);
+                        mSharedPreferencesManager.putImage(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp).toString());
+                        mUser.setImage(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp).toString());
                     }
-                    mSharedPreferencesManager.putImage(mUser.getImage());
+
+                    Glide.with(getApplicationContext()).load(mUser.getImage())
+                            .apply(bitmapTransform(new CircleCrop()))
+                            .into(mCircleImageView);
+
                     if (mAddressTextInputLayout.getEditText() != null) {
                         if (mUser.getAddress() != null)
                             mAddressTextInputLayout.getEditText().setText(mUser.getAddress());
@@ -210,5 +224,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                }
+                break;
+        }
     }
 }
