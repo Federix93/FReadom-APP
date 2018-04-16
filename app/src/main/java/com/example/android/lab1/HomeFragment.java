@@ -35,7 +35,6 @@ public class HomeFragment extends Fragment {
     private View mRootView;
     private RecyclerView mRecyclerView;
     private RecyclerBookAdapter mAdapter;
-    private FragmentActivity mParent;
     private Toolbar mToolbar;
     private FloatingActionButton mFAB;
 
@@ -48,13 +47,19 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+        mRootView = inflater.inflate(R.layout.fragment_home, container, false);
+
+        mToolbar = getActivity().findViewById(R.id.toolbar_main_activity);
+        mFAB = mRootView.findViewById(R.id.fab_add_book);
+        mRecyclerView = mRootView.findViewById(R.id.recycler_books);
+
         if (container.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
             mNumColumns = 2;
         } else {
             mNumColumns = 3;
         }
 
-        mToolbar = getActivity().findViewById(R.id.toolbar_main_activity);
+
         mToolbar.setTitle("Lab 2");
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
@@ -77,17 +82,9 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        mFAB = getActivity().findViewById(R.id.fab_add_book);
-        mFAB.setVisibility(View.VISIBLE);
-
-        mParent = getActivity();
         mNumberOfItems = 200;
 
-        mRootView = inflater.inflate(R.layout.fragment_home, container, false);
-
-        mRecyclerView = mRootView.findViewById(R.id.recycler_books);
-
-        GridLayoutManager layoutManager = new GridLayoutManager(mParent, mNumColumns);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), mNumColumns);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
@@ -95,7 +92,33 @@ public class HomeFragment extends Fragment {
         mAdapter = new RecyclerBookAdapter(mRootView.getContext(), mNumberOfItems);
         mRecyclerView.setAdapter(mAdapter);
 
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && mFAB.getVisibility() == View.VISIBLE) {
+                    mFAB.hide();
+                } else if (dy < 0 && mFAB.getVisibility() != View.VISIBLE) {
+                    mFAB.show();
+                }
+            }
+        });
+
+        mFAB.setVisibility(View.VISIBLE);
+        mFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         return mRootView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mFAB.setVisibility(View.GONE);
     }
 
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
@@ -140,6 +163,5 @@ public class HomeFragment extends Fragment {
         Resources r = getResources();
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
     }
-
 
 }

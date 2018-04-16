@@ -28,7 +28,6 @@ public class HomePage extends AppCompatActivity {
     private static final int PROFILE_FRAGMENT = 2;
 
     private AHBottomNavigation mBottomNavigation;
-    private FloatingActionButton mFAB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,14 +48,6 @@ public class HomePage extends AppCompatActivity {
 
         mBottomNavigation.addItems(items);
         mBottomNavigation.setBehaviorTranslationEnabled(false);
-
-        mFAB = findViewById(R.id.fab_add_book);
-        mFAB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(HomePage.this, "Function not implemented", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 

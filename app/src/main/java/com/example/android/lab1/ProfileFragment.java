@@ -31,7 +31,6 @@ public class ProfileFragment extends Fragment {
     TextInputLayout mShortBioTextInputLayout;
     ImageView mCircleImageView;
     private Toolbar mToolbar;
-    private FloatingActionButton mFAB;
 
     public static final String ADDRESS_KEY = "ADDRESS";
 
@@ -81,9 +80,6 @@ public class ProfileFragment extends Fragment {
                 return true;
             }
         });
-
-        mFAB = getActivity().findViewById(R.id.fab_add_book);
-        mFAB.setVisibility(View.GONE);
 
         if (mUsernameTextInputLayout.getEditText() != null) {
             if(user != null)
