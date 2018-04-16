@@ -58,8 +58,6 @@ public class HomePage extends AppCompatActivity {
             }
         });
 
-        mBottomNavigation.manageFloatingActionButtonBehavior(mFAB);
-
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
