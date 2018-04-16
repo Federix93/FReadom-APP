@@ -1,34 +1,22 @@
 package com.example.android.lab1;
 
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.QuerySnapshot;
-
-
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class SignInActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 10;
-    private ProgressDialog mProgressDialog;
     private FirebaseAuth mFirebaseAuth;
 
     private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
@@ -39,9 +27,6 @@ public class SignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         mNetworkConnectionBroadcastReceiver = new NetworkConnectionReceiver(this);
-
-        mProgressDialog = new ProgressDialog(this);
-
         mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
         if (user != null) {
@@ -51,11 +36,7 @@ public class SignInActivity extends AppCompatActivity {
             } else {
                 user.reload();
                 if (!user.isEmailVerified()) {
-                    if (!mProgressDialog.isShowing()) {
-                        mProgressDialog.setMessage("Verifica dell'email");
-                        mProgressDialog.setCancelable(false);
-                        mProgressDialog.show();
-                    }
+                    showProgressDialog();
                 }else{
                     FirebaseManager.addUser(user);
                     openMainActivity();
@@ -69,7 +50,6 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
         registerReceiver(mNetworkConnectionBroadcastReceiver, filter);
 
@@ -95,11 +75,7 @@ public class SignInActivity extends AppCompatActivity {
                             if (!user.isEmailVerified()) {
                                 isPasswordMode = true;
                                 user.sendEmailVerification();
-                                if (!mProgressDialog.isShowing()) {
-                                    mProgressDialog.setMessage("Verifica dell'email");
-                                    mProgressDialog.setCancelable(false);
-                                    mProgressDialog.show();
-                                }
+                                showProgressDialog();
                             }
                             break;
                         }
@@ -114,10 +90,9 @@ public class SignInActivity extends AppCompatActivity {
                     finish();
                     return;
                 }
-                if (response.getError() != null && response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+                /*if (response.getError() != null && response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
 
-
-                }
+                }*/
             }
         }
     }
@@ -149,5 +124,9 @@ public class SignInActivity extends AppCompatActivity {
                                 new AuthUI.IdpConfig.TwitterBuilder().build()))
                         .build(),
                 RC_SIGN_IN);
+    }
+
+    private void showProgressDialog(){
+
     }
 }

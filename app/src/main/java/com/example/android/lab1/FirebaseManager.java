@@ -46,7 +46,10 @@ public class FirebaseManager {
                     public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
                         if(!documentSnapshot.exists()){
                             User userLocal = User.getInstance();
-                            userLocal.setImage(user.getPhotoUrl().toString());
+                            if(user.getPhotoUrl() != null)
+                                userLocal.setImage(user.getPhotoUrl().toString());
+                            else
+                                userLocal.setImage(null);
                             userLocal.setUsername(user.getDisplayName());
                             userLocal.setPhone(user.getPhoneNumber());
                             userLocal.setEmail(user.getEmail());

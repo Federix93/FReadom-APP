@@ -22,4 +22,5 @@
     <string name="title_activity_position">Map</string>
     <string name="edit_title_activity">Edit profile</string>
     <string name="connection_internet_dialog">Waiting for internet connection</string>
+    <string name="email_verification">Verify email to login, otherwise change login method</string>
 </resources>

@@ -22,5 +22,6 @@
     <string name="no_internet_connection">Connessione ad internet assente</string>
     <string name="edit_title_activity">Modifica il tuo profilo</string>
     <string name="connection_internet_dialog">Attesa della connessione internet</string>
+    <string name="email_verification">Verificare l\'email per procedere con il login, altrimenti cambiare metodo di accesso</string>
 
 </resources>
