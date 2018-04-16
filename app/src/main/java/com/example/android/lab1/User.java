@@ -34,10 +34,6 @@ public class User {
 
     public void setTempAddress(String pTempAddress) { mTempAddress = pTempAddress; }
 
-    public void setInstance(User user){
-        instance = user;
-    }
-
     public String getImage() {
         return mImage;
     }
@@ -79,11 +75,11 @@ public class User {
     }
 
     public static class Utils{
-        public static final String USERNAME_KEY = "name";
+        public static final String USERNAME_KEY = "username";
         public static final String EMAIL_KEY = "email";
-        public static final String PICTURE_KEY = "picture";
+        public static final String PICTURE_KEY = "image";
         public static final String POSITION_KEY = "position";
         public static final String PHONE_KEY = "phone";
-        public static final String SHORTBIO_KEY= "bio";
+        public static final String SHORTBIO_KEY= "shortBio";
     }
 }

@@ -102,6 +102,10 @@ public class SignInActivity extends AppCompatActivity {
                     }
                     if(!isPasswordMode) {
                         FirebaseManager.addUser(user);
+                        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+                        //TODO: Ricordarsi che l'immagine del login potrebbe essere diversa da quella del cloud
+                        if(user.getPhotoUrl() != null)
+                            sharedPreferencesManager.putImage(user.getPhotoUrl().toString());
                         openMainActivity();
                     }
                 }
