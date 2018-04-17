@@ -3,6 +3,7 @@ package com.example.android.lab1;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.example.android.lab1.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;

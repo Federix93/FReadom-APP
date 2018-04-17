@@ -1,6 +1,7 @@
 package com.example.android.lab1;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 
 public class HomeFragment extends Fragment {
 
+    private static final int ADD_BOOK_REQUEST = 1;
     private int mNumColumns;
 
     private int mNumberOfItems;
@@ -108,7 +110,8 @@ public class HomeFragment extends Fragment {
         mFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), LoadBookActivity.class);
+                startActivityForResult(intent, ADD_BOOK_REQUEST);
             }
         });
 

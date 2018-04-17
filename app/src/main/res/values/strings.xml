@@ -46,6 +46,6 @@
     <string name="search">Cerca</string>
     <string name="filter">Filtra</string>
     <string name="verification_email_confirm">OK</string>
-
     <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
+    <string name="confirm">Conferma</string>
 </resources>

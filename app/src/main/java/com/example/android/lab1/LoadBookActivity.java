@@ -26,6 +26,7 @@ import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -138,50 +139,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         else
             mPhotosPath = new ArrayList<>();
 
-        mConfirmImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // confirm data and send back a book
-                if (checkObligatoryFields()) {
-                    Condition c;
-                    String conditionText = mConditionsSpinner.getSelectedItem().toString();
-                    if (conditionText.equals(getString(R.string.bad)))
-                        c = new Condition(Condition.Status.BAD);
-                    else if (conditionText.equals(getString(R.string.decent)))
-                        c = new Condition(Condition.Status.DECENT);
-                    else if (conditionText.equals(getString(R.string.good)))
-                        c = new Condition(Condition.Status.GOOD);
-                    else if (conditionText.equals(getString(R.string.great)))
-                        c = new Condition(Condition.Status.GREAT);
-                    else
-                        c = new Condition(Condition.Status.NEW);
-
-                    Book result = new Book(mIsbnEditText.getText().toString(),
-                            mTitleEditText.getText().toString(),
-                            mAuthorEditText.getText().toString(),
-                            mPublisherEditText.getText().toString(),
-                            Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()),
-                            c,
-                            mPositionEditText.getText().toString());
-                    if (mWebThumbnail != null)
-                        result.setThumbnail(mWebThumbnail);
-                    if (mPhotosPath != null && mPhotosPath.size() > 0)
-                        for (String s : mPhotosPath) {
-                            result.getUserPhotosPath().add(s);
-                        }
-                    Intent intentResult = new Intent();
-                    intentResult.putExtra(BOOK_RESULT, result);
-                    setResult(RESULT_OK, intentResult);
-                    finish();
-                }
-                else
-                {
-                    Toast.makeText(getApplicationContext(),
-                            R.string.load_book_fill_fields,
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     private void setupCameraButton() {
@@ -247,6 +204,57 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 }
                 setResult(RESULT_CANCELED);
                 finish();
+            }
+        });
+
+        mToolbar.inflateMenu(R.menu.add_book);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int clickedItem = item.getItemId();
+                if(clickedItem == R.id.action_confirm)
+                {
+                    if (checkObligatoryFields()) {
+                        Condition c;
+                        String conditionText = mConditionsSpinner.getSelectedItem().toString();
+                        if (conditionText.equals(getString(R.string.bad)))
+                            c = new Condition(Condition.Status.BAD);
+                        else if (conditionText.equals(getString(R.string.decent)))
+                            c = new Condition(Condition.Status.DECENT);
+                        else if (conditionText.equals(getString(R.string.good)))
+                            c = new Condition(Condition.Status.GOOD);
+                        else if (conditionText.equals(getString(R.string.great)))
+                            c = new Condition(Condition.Status.GREAT);
+                        else
+                            c = new Condition(Condition.Status.NEW);
+
+                        Book result = new Book(mIsbnEditText.getText().toString(),
+                                mTitleEditText.getText().toString(),
+                                mAuthorEditText.getText().toString(),
+                                mPublisherEditText.getText().toString(),
+                                Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()),
+                                c,
+                                mPositionEditText.getText().toString());
+                        if (mWebThumbnail != null)
+                            result.setThumbnail(mWebThumbnail);
+                        if (mPhotosPath != null && mPhotosPath.size() > 0)
+                            for (String s : mPhotosPath) {
+                                result.getUserPhotosPath().add(s);
+                            }
+                        Intent intentResult = new Intent();
+                        intentResult.putExtra(BOOK_RESULT, result);
+                        setResult(RESULT_OK, intentResult);
+                        finish();
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(),
+                                R.string.load_book_fill_fields,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                return true;
             }
         });
         setSupportActionBar(mToolbar);
