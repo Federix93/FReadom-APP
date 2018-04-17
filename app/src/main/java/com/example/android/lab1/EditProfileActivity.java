@@ -153,7 +153,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                                     mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                                 mUser.setImage(mCurrentPhotoPath);
                                 docRef.set(mUser, SetOptions.merge());
-                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                intent.putExtra("ApplyChanges", true);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(intent);
                             }
@@ -401,8 +402,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             }
 
             if (mAddressTextInputLayout != null) {
-                if (showProfileIntent != null && showProfileIntent.hasExtra(MainActivity.ADDRESS_KEY)) {
-                    String address = showProfileIntent.getStringExtra(MainActivity.ADDRESS_KEY);
+                if (showProfileIntent != null && showProfileIntent.hasExtra(ProfileFragment.ADDRESS_KEY)) {
+                    String address = showProfileIntent.getStringExtra(ProfileFragment.ADDRESS_KEY);
                     if (address != null)
                         mAddressTextInputLayout.setText(address);
                     else

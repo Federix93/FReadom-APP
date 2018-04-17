@@ -1,5 +1,6 @@
 package com.example.android.lab1;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
@@ -16,12 +18,21 @@ public class HomePageActivity extends AppCompatActivity {
     private static final int DASH_FRAGMENT = 1;
     private static final int PROFILE_FRAGMENT = 2;
 
-    private AHBottomNavigation mBottomNavigation;
+    AHBottomNavigation mBottomNavigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
+
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+
+        if (mFirebaseAuth.getCurrentUser() == null) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        }
 
         mBottomNavigation = findViewById(R.id.bottom_navigation);
 
