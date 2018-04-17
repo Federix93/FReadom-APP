@@ -100,7 +100,8 @@ public class ProfileFragment extends Fragment {
                 .setPersistenceEnabled(true)
                 .build();
         mDb.setFirestoreSettings(settings);
-        mUserDocumentReference = mDb.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+        if(mFirebaseAuth.getCurrentUser() != null)
+            mUserDocumentReference = mDb.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
         mSharedPreferencesManager = SharedPreferencesManager.getInstance(getActivity());
 
         // Return the rootView
@@ -111,19 +112,21 @@ public class ProfileFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if(getActivity() != null) {
-            mUserDocumentReference.addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
-                @Override
-                public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                    if (e != null) {
-                        return;
+            if(mUserDocumentReference != null) {
+                mUserDocumentReference.addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                        if (e != null) {
+                            return;
+                        }
+                        mUser = documentSnapshot.toObject(User.class);
+                        checkPermissionToLoadPicture();
+                        if (mUser != null) {
+                            updateUI();
+                        }
                     }
-                    mUser = documentSnapshot.toObject(User.class);
-                    checkPermissionToLoadPicture();
-                    if (mUser != null) {
-                        updateUI();
-                    }
-                }
-            });
+                });
+            }
         }
     }
 
@@ -201,8 +204,7 @@ public class ProfileFragment extends Fragment {
         if(getActivity() != null) {
             if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         READ_EXTERNAL_STORAGE_PERMISSION);
             } else {
                 updatePicture();
