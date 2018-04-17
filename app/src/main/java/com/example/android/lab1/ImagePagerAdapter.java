@@ -62,22 +62,24 @@ public class ImagePagerAdapter extends PagerAdapter
                     .apply(new RequestOptions().centerCrop())
                     .into(imageView);
 
-            TextView[] dots = new TextView[mPhotosPath.size()];
+            /*TextView[] dots = new TextView[mPhotosPath.size()];
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.gravity = Gravity.CENTER;
+            Log.d("DEBUBDOTS", "instantiateItem: instantiang view n. " + Integer.toString(position));
             mDotsContainer.removeAllViews();
+
             for (int i = 0; i < dots.length; i++) {
                 dots[i] = new TextView(mContext);
                 dots[i].setText(".");
                 dots[i].setTextSize(45);
                 dots[i].setTypeface(null, Typeface.BOLD);
                 dots[i].setLayoutParams(params);
-                if (i == position)
-                    dots[i].setTextColor(Color.WHITE);
-                else
+                //if (i == position)
+                  //  dots[i].setTextColor(Color.WHITE);
+                //else
                     dots[i].setTextColor(Color.GRAY);
                 mDotsContainer.addView(dots[i]);
-            }
+            }*/
         }
         else
         {

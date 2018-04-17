@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Book implements Parcelable
@@ -15,19 +16,27 @@ public class Book implements Parcelable
     private String     publisher;
     private int        publishYear;
     private Condition  conditions;
-    private LatLng     position;
+    private String     address;
 
     private String thumbnail;
     private List<String> userPhotosPath;
 
-    public Book(String isbn, String title, String author, String publisher, int publishYear, Condition conditions, LatLng position) {
+    public Book(String isbn,
+                String title,
+                String author,
+                String publisher,
+                int publishYear,
+                Condition conditions,
+                String address) {
         this.isbn = isbn;
         this.title = title;
         this.author = author;
         this.publisher = publisher;
         this.publishYear = publishYear;
         this.conditions = conditions;
-        this.position = position;
+        this.address = address;
+        thumbnail = null;
+        userPhotosPath = new ArrayList<>();
     }
 
     public String getThumbnail() {
@@ -37,6 +46,7 @@ public class Book implements Parcelable
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
     }
+
 
     public List<String> getUserPhotosPath() {
         return userPhotosPath;
@@ -90,12 +100,12 @@ public class Book implements Parcelable
         this.conditions = conditions;
     }
 
-    public LatLng getPosition() {
-        return position;
+    public String getAddress() {
+        return address;
     }
 
-    public void setPosition(LatLng position) {
-        this.position = position;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @Override
@@ -111,25 +121,49 @@ public class Book implements Parcelable
                 author,
                 publisher,
                 Integer.toString(publishYear),
-                conditions.getStatus()
+                conditions.getStatus(),
+                address
         });
-        dest.writeParcelable(position, flags);
+        if (thumbnail != null)
+            dest.writeValue(thumbnail);
+        if (getUserPhotosPath() != null && getUserPhotosPath().size() > 0) {
+            dest.writeInt(getUserPhotosPath().size());
+            for (String s : getUserPhotosPath())
+                dest.writeString(s);
+        }
+        else
+        {
+            dest.writeInt(0);
+        }
+
     }
 
-    public static final Parcelable.Creator<Book> CREATOR = new Parcelable.Creator(){
+    public static final Creator CREATOR = new Creator(){
 
         @Override
         public Book createFromParcel(Parcel source) {
-            String[] stringFields = new String[6];
+            String[] stringFields = new String[7];
             source.readStringArray(stringFields);
-            LatLng latLng = source.readParcelable(LatLng.class.getClassLoader());
-            return new Book(stringFields[0],
+            Book res = new Book(stringFields[0],
                     stringFields[1],
                     stringFields[2],
                     stringFields[3],
                     Integer.parseInt(stringFields[4]),
                     new Condition(stringFields[5]),
-                    latLng);
+                    stringFields[6]);
+            String webThumbnail = source.readString();
+            if (webThumbnail != null)
+                res.setThumbnail(webThumbnail);
+            Integer numOfBooks = source.readInt();
+            if (numOfBooks > 0)
+            {
+                for (int i = 0; i < numOfBooks; i++)
+                {
+                    res.getUserPhotosPath().add(source.readString());
+                }
+            }
+
+            return res;
         }
 
         @Override

@@ -38,4 +38,5 @@
     <string name="load_book_toolbar_title">Aggiungi un nuovo libro</string>
     <string name="load_book_book_not_found">Libro non trovato</string>
     <string name="load_book_autofill_request_error">Errore durante la richiesta delle informazioni del libro</string>
+    <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
 </resources>

@@ -340,7 +340,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String imageURI = null;
+        String imageURI;
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             if (data.getData() != null) {
                 imageURI = data.getData().toString();
