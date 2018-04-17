@@ -730,7 +730,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private boolean checkObligatoryFields() {
         return mIsbnEditText.getText() != null &&
                 mIsbnEditText.getText().length() > 0 &&
-                mIsbnEditText.getError() != null &&
+                mIsbnEditText.getError() == null &&
                 mTitleEditText.getText() != null &&
                 mTitleEditText.getText().length() > 0 &&
                 mAuthorEditText.getText() != null &&
