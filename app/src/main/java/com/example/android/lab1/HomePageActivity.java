@@ -1,27 +1,16 @@
 package com.example.android.lab1;
 
-import android.app.FragmentTransaction;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
-public class HomePage extends AppCompatActivity {
+public class HomePageActivity extends AppCompatActivity {
 
     private static final int HOME_FRAGMENT = 0;
     private static final int DASH_FRAGMENT = 1;
@@ -73,7 +62,7 @@ public class HomePage extends AppCompatActivity {
 
                         case DASH_FRAGMENT:
                             ft.commit();
-                            Toast.makeText(HomePage.this, "Function not implemented", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(HomePageActivity.this, "Function not implemented", Toast.LENGTH_SHORT).show();
                             break;
 
                         case PROFILE_FRAGMENT:

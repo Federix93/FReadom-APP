@@ -58,7 +58,7 @@ public class ProfileFragment extends Fragment {
         mShortBioTextInputLayout = rootView.findViewById(R.id.bio_text_edit);
 
         final SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getContext());
-        User user = sharedPreferencesManager.getUser();
+        //User user = sharedPreferencesManager.getUser();
 
         mToolbar = getActivity().findViewById(R.id.toolbar_main_activity);
         mToolbar.setTitle(R.string.title_profile);
@@ -72,16 +72,16 @@ public class ProfileFragment extends Fragment {
                 if (clickedId == R.id.action_edit) {
                     Intent intent = new Intent(rootView.getContext(), EditProfileActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    User u = sharedPreferencesManager.getUser();
+                    /*User u = sharedPreferencesManager.getUser();
                     if (u != null)
                         intent.putExtra(ADDRESS_KEY, u.getAddress());
-                    startActivity(intent);
+                    startActivity(intent);*/
                 }
                 return true;
             }
         });
 
-        if (mUsernameTextInputLayout.getEditText() != null) {
+        /*if (mUsernameTextInputLayout.getEditText() != null) {
             if(user != null)
                 mUsernameTextInputLayout.getEditText().setText(user.getUsername());
             mUsernameTextInputLayout.getEditText().setKeyListener(null);
@@ -122,7 +122,7 @@ public class ProfileFragment extends Fragment {
                 mAddressTextInputLayout.getEditText().setText(user.getAddress());
             mAddressTextInputLayout.getEditText().setKeyListener(null);
             mAddressTextInputLayout.getEditText().setEnabled(false);
-        }
+        }*/
 /*
         mToolbarIcon.setOnClickListener(new View.OnClickListener() {
             @Override

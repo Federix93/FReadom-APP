@@ -72,13 +72,13 @@ public class MainActivity extends AppCompatActivity {
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
-        mToolbarIcon = findViewById(R.id.icon_toolbar);
+        //mToolbarIcon = findViewById(R.id.icon_toolbar);
 
-        mToolbar = findViewById(R.id.toolbar_main_activity);
+        /*mToolbar = findViewById(R.id.toolbar_main_activity);
         mToolbar.setTitle(R.string.app_name);
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(mToolbar);
-
+*/
         mDb = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         mUserDocumentReference = mDb.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
         mSharedPreferencesManager = SharedPreferencesManager.getInstance(this);
 
-        mToolbarIcon.setOnClickListener(new View.OnClickListener() {
+        /*mToolbarIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), EditProfileActivity.class);
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra(ADDRESS_KEY, mUser.getAddress());
                 startActivity(intent);
             }
-        });
+        });*/
     }
 
     @Override

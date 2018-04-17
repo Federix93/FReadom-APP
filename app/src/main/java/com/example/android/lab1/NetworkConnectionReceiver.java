@@ -58,7 +58,7 @@ public class NetworkConnectionReceiver extends BroadcastReceiver {
                             mAlertDialog = new AlertDialog.Builder(mActivity);
                             mAlertDialog.setMessage(mActivity.getString(R.string.email_verification));
                             mAlertDialog.setCancelable(false);
-                            mAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            mAlertDialog.setPositiveButton(mActivity.getString(R.string.verification_email_confirm), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.cancel();

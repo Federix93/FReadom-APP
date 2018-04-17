@@ -1,7 +1,5 @@
 package com.example.android.lab1;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
@@ -32,14 +30,12 @@ public class SignInActivity extends AppCompatActivity {
         if (user != null) {
             if (!isEmailAndPasswordProvider()) {
                 FirebaseManager.addUser(user);
-                openMainActivity();
+                openHomePageActivity();
             } else {
                 user.reload();
-                if (!user.isEmailVerified()) {
-                    showProgressDialog();
-                }else{
+                if (user.isEmailVerified()) {
                     FirebaseManager.addUser(user);
-                    openMainActivity();
+                    openHomePageActivity();
                 }
             }
         } else {
@@ -75,14 +71,13 @@ public class SignInActivity extends AppCompatActivity {
                             if (!user.isEmailVerified()) {
                                 isPasswordMode = true;
                                 user.sendEmailVerification();
-                                showProgressDialog();
                             }
                             break;
                         }
                     }
                     if(!isPasswordMode) {
                         FirebaseManager.addUser(user);
-                        openMainActivity();
+                        openHomePageActivity();
                     }
                 }
             } else {
@@ -106,8 +101,8 @@ public class SignInActivity extends AppCompatActivity {
         return false;
     }
 
-    private void openMainActivity(){
-        Intent intent = new Intent(this, MainActivity.class);
+    private void openHomePageActivity(){
+        Intent intent = new Intent(this, HomePageActivity.class);
         startActivity(intent);
     }
 
@@ -124,9 +119,5 @@ public class SignInActivity extends AppCompatActivity {
                                 new AuthUI.IdpConfig.TwitterBuilder().build()))
                         .build(),
                 RC_SIGN_IN);
-    }
-
-    private void showProgressDialog(){
-
     }
 }

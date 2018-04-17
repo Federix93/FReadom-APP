@@ -71,7 +71,7 @@
             android:name=".PositionActivity"
             android:theme="@style/AppTheme" />
 
-        <activity android:name=".HomePage"/>
+        <activity android:name=".HomePageActivity"/>
 
         <service
             android:name=".FetchAddressIntentService"
