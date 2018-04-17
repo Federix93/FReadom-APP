@@ -7,6 +7,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
@@ -17,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class NetworkConnectionReceiver extends BroadcastReceiver {
 
@@ -24,6 +27,8 @@ public class NetworkConnectionReceiver extends BroadcastReceiver {
     private ProgressDialog mProgressDialog;
     private FirebaseAuth mFirebaseAuth;
     private AlertDialog.Builder mAlertDialog;
+
+    private final int RC_SIGN_IN = 10;
 
     public NetworkConnectionReceiver(){
         super();
@@ -62,18 +67,37 @@ public class NetworkConnectionReceiver extends BroadcastReceiver {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.cancel();
-                                    mActivity.startActivityForResult(
-                                            AuthUI.getInstance()
-                                                    .createSignInIntentBuilder()
-                                                    .setIsSmartLockEnabled(false)
-                                                    .setTheme(R.style.LoginTheme)
-                                                    .setAvailableProviders(Arrays.asList(
-                                                            new AuthUI.IdpConfig.EmailBuilder().build(),
-                                                            new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                                            new AuthUI.IdpConfig.FacebookBuilder().build(),
-                                                            new AuthUI.IdpConfig.TwitterBuilder().build()))
-                                                    .build(),
-                                            10);
+                                    List<AuthUI.IdpConfig> providers = null;
+                                    PackageManager pkManager = mActivity.getPackageManager();
+                                    try {
+                                        PackageInfo pkgInfo = pkManager.getPackageInfo("com.twitter.android", 0);
+                                        String getPkgInfo = pkgInfo.toString();
+
+                                        if (!getPkgInfo.equals("com.twitter.android"))   {
+                                            providers = Arrays.asList(
+                                                    new AuthUI.IdpConfig.EmailBuilder().build(),
+                                                    new AuthUI.IdpConfig.GoogleBuilder().build(),
+                                                    new AuthUI.IdpConfig.FacebookBuilder().build(),
+                                                    new AuthUI.IdpConfig.TwitterBuilder().build());
+
+                                        }
+                                    } catch (PackageManager.NameNotFoundException e) {
+                                        providers = Arrays.asList(
+                                                new AuthUI.IdpConfig.EmailBuilder().build(),
+                                                new AuthUI.IdpConfig.GoogleBuilder().build(),
+                                                new AuthUI.IdpConfig.FacebookBuilder().build());
+                                    }
+
+                                    if(providers != null){
+                                        mActivity.startActivityForResult(
+                                                AuthUI.getInstance()
+                                                        .createSignInIntentBuilder()
+                                                        .setIsSmartLockEnabled(false)
+                                                        .setTheme(R.style.LoginTheme)
+                                                        .setAvailableProviders(providers)
+                                                        .build(),
+                                                RC_SIGN_IN);
+                                    }
                                 }
                             });
                             mAlertDialog.show();
