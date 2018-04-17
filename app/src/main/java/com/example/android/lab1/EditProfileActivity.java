@@ -141,8 +141,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
                 Intent intent = new Intent(view.getContext(), HomePage.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                Boolean applyChangeOnProfile = true;
-                intent.putExtra("ApplyChanges", applyChangeOnProfile);
+                intent.putExtra("ApplyChanges", true);
                 startActivity(intent);
             }
         });

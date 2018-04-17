@@ -93,19 +93,8 @@ public class HomePage extends AppCompatActivity {
 
         // Only create new fragments when there is no previously saved state
         if(savedInstanceState == null) {
-/*
-            HomeFragment homeFragment = new HomeFragment();
 
-            fragmentManager.beginTransaction()
-                    .add(R.id.fragment_frame, homeFragment)
-                    .commit();
-                    */
-
-            //trovare un modo migliore per passare un messaggio quando il profilo viene salvato perchè
-            //potrebbe dare problemi quando viene utilizzata onSavedInstanceState in questa classe
-
-            //Tutto ciò viene fatto per far uscire come current profile il profilo e non l'homepage
-            if (getIntent().getExtras() != null)
+            if (getIntent().getBooleanExtra("ApplyChanges", false))
             {
                 ProfileFragment profileFragment = new ProfileFragment();
 
