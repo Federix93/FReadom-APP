@@ -1,10 +1,14 @@
 package com.example.android.lab1;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
@@ -162,8 +166,9 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                         });
             }
         });
-
+        final Activity thisActivity = this;
         mCameraImageView.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
 
@@ -180,20 +185,10 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
                             case CAPTURE_IMAGE:
-                                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-                                    try {
-                                        mPhotoFile = saveThumbnail();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                    if (mPhotoFile != null) {
-                                        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
-                                                "com.example.android.fileprovider",
-                                                mPhotoFile);
-                                        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                                    }
-                                    startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+                                if (!Utilities.checkPermissionActivity(thisActivity, Manifest.permission.CAMERA)) {
+                                    Utilities.askPermissionActivity(thisActivity, Manifest.permission.CAMERA, CAPTURE_IMAGE);
+                                } else{
+                                    takePicture();
                                 }
                                 break;
                             case RESULT_LOAD_IMAGE:
@@ -263,6 +258,17 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         }
         outState.putString("UriImage", mCurrentPhotoPath);
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case CAPTURE_IMAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    takePicture();
+                }
+        }
     }
 
     @Override
@@ -392,10 +398,10 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             if (mShortBioTextInputLayout.getEditText() != null)
                 mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
             if (mUserImageView != null) {
-                if(mCurrentPhotoPath != null) {
+                if (mCurrentPhotoPath != null) {
                     Log.d("LULLO", "1 " + mCurrentPhotoPath);
                     Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                }else {
+                } else {
                     Log.d("LULLO", "2");
                     Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                             .apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
@@ -454,4 +460,21 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         return image;
     }
 
+    private void takePicture(){
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            try {
+                mPhotoFile = saveThumbnail();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (mPhotoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                        "com.example.android.fileprovider",
+                        mPhotoFile);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            }
+            startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+        }
+    }
 }
