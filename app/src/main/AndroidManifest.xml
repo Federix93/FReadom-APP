@@ -79,19 +79,20 @@
             android:name=".PositionActivity"
             android:theme="@style/AppTheme" />
 
-        <activity android:name=".HomePageActivity">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+        <activity android:name=".HomePageActivity"/>
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        </activity>
 
         <service
             android:name=".FetchAddressIntentService"
             android:exported="false" />
 
-        <activity android:name=".SignInActivity"/>
+        <activity android:name=".SignInActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <receiver
             android:name=".NetworkConnectionReceiver">
