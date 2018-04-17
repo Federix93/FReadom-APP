@@ -142,9 +142,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void setupCameraButton() {
+        final Activity thisActivity = this;
         mAddImageIcon.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
                 mAlertDialogBuilder = new AlertDialog.Builder(view.getContext());
                 mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
@@ -172,7 +173,15 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                                                 mPhotoFile);
                                         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                                     }
-                                    startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+                                    if(!Utilities.checkPermissionActivity(thisActivity, Manifest.permission.CAMERA))
+                                    {
+                                        Utilities.askPermissionActivity(thisActivity, Manifest.permission.CAMERA, CAPTURE_IMAGE);
+                                    }
+                                    else
+                                    {
+                                        startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+                                    }
+
                                 }
                                 break;
                             case RESULT_LOAD_IMAGE:
@@ -193,6 +202,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         // toolbar
         mToolbar.setTitle(R.string.load_book_toolbar_title);
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -200,7 +210,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 for (String s : mPhotosPath) {
                     File f = new File(s);
                     if (f.isFile())
-                        deleteFile(f.getAbsolutePath());
+                        f.delete();
                 }
                 setResult(RESULT_CANCELED);
                 finish();
@@ -257,7 +267,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 return true;
             }
         });
-        setSupportActionBar(mToolbar);
     }
 
     private void setupSpinners() {
@@ -579,7 +588,35 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                     startBarCodeScanner();
                     break;
                 }
+            case CAPTURE_IMAGE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCamera();
+                    break;
+                }
         }
+    }
+
+    private void startCamera() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            try {
+                mPhotoFile = saveThumbnail();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (mPhotoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                        "com.example.android.fileprovider",
+                        mPhotoFile);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            }
+
+            startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+
+        }
+
     }
 
 
@@ -703,5 +740,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mPositionEditText.getText() != null &&
                 mPositionEditText.getText().length() > 0;
     }
+
 
 }
