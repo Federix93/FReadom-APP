@@ -17,7 +17,7 @@ public class SharedPreferencesManager {
     private static SharedPreferences mSharedPreferences = null;
     private static Context mContext;
 
-    private final String USER_KEY = "User";
+    private final String IMAGE_KEY = "Image";
 
     private SharedPreferencesManager(){}
 
@@ -29,17 +29,13 @@ public class SharedPreferencesManager {
         return mInstance;
     }
 
-    public void putUser(User user){
-        Gson gson = new Gson();
-        String json = gson.toJson(user);
+    public void putImage(String image){
         SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString("User", json);
+        editor.putString("Image", image);
         editor.apply();
     }
 
-    public User getUser(){
-        Gson gson = new Gson();
-        String json = mSharedPreferences.getString(USER_KEY, null);
-        return gson.fromJson(json, User.class);
+    public String getImage(){
+        return mSharedPreferences.getString(IMAGE_KEY, null);
     }
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -18,6 +19,17 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +39,9 @@ import java.util.Date;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 
-public class EditProfileActivity extends AppCompatActivity implements View.OnFocusChangeListener {
+public class EditProfileActivity extends AppCompatActivity implements View.OnFocusChangeListener, EventListener<DocumentSnapshot> {
 
-    private Toolbar mToolbar;
+    Toolbar mToolbar;
     ImageView mSaveProfileUpdatesImageView;
     ImageView mCameraImageView;
     ImageView mUserImageView;
@@ -39,12 +51,22 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     TextView mAddressTextInputLayout;
     TextInputLayout mShortBioTextInputLayout;
     ImageView mPositionImageView;
+
+    private User mUser;
+
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
-    String mCurrentPhotoPath;
+
+    private FirebaseAuth mFirebaseAuth;
+    private String mCurrentPhotoPath;
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
     private View mFocusedView;
+    private Intent showProfileIntent;
+
+    DocumentReference mUserRef;
+    ListenerRegistration mUserListenerRegistration;
+    SharedPreferencesManager mSharedPreferencesManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,76 +95,69 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         mToolbar.setTitle(R.string.edit_title_activity);
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
         });
-        Intent showProfileIntent = getIntent();
+        showProfileIntent = getIntent();
 
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
-        User user = sharedPreferencesManager.getUser();
-        if (savedInstanceState == null) {
-            if (user != null && user.getUsername() != null && mUsernameTextInputLayout.getEditText() != null)
-                mUsernameTextInputLayout.getEditText().setText(user.getUsername());
-            if (user != null && user.getEmail() != null && mEmailTextInputLayout.getEditText() != null)
-                mEmailTextInputLayout.getEditText().setText(user.getEmail());
-            if (user != null && user.getPhone() != null && mPhoneTextInputLayout.getEditText() != null)
-                mPhoneTextInputLayout.getEditText().setText(user.getPhone());
-            if (user != null && user.getShortBio() != null && mShortBioTextInputLayout.getEditText() != null)
-                mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
-            if (user != null && user.getImage() != null && mUserImageView != null) {
-                Glide.with(getApplicationContext()).load(user.getImage()).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                mCurrentPhotoPath = user.getImage();
-            } else {
-                Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
-                        .apply(bitmapTransform(new CircleCrop()))
-                        .into(mUserImageView);
-            }
+        /*Firebase*/
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
-            if (mAddressTextInputLayout != null) {
-                if (showProfileIntent != null && showProfileIntent.hasExtra(ProfileFragment.ADDRESS_KEY)) {
-                    String address = showProfileIntent.getStringExtra(ProfileFragment.ADDRESS_KEY);
-                    if (address != null)
-                        mAddressTextInputLayout.setText(address);
-                    else
-                        mAddressTextInputLayout.setText(R.string.selection_position);
-                } else {
-                    if (user != null && user.getTempAddress() != null) {
-                        mAddressTextInputLayout.setText(user.getTempAddress());
-                    } else {
-                        mAddressTextInputLayout.setText(R.string.selection_position);
-                    }
-                }
-            }
+        FirebaseUser user = mFirebaseAuth.getCurrentUser();
+
+        if (user == null) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
         }
+
+        mSharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        mUserRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+
+        Log.d("LULLO", "SharedPref: " + mSharedPreferencesManager.getImage());
+        mCurrentPhotoPath = mSharedPreferencesManager.getImage();
 
         mSaveProfileUpdatesImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(view.getContext());
-                User user = sharedPreferencesManager.getUser();
-                if (user == null)
-                    user = User.getInstance();
-                if (mUsernameTextInputLayout.getEditText() != null)
-                    user.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
-                if (mEmailTextInputLayout.getEditText() != null)
-                    user.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
-                if (mPhoneTextInputLayout.getEditText() != null)
-                    user.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                if (mAddressTextInputLayout != null && user.getTempAddress() != null)
-                    user.setAddress(mAddressTextInputLayout.getText().toString());
-                if (mShortBioTextInputLayout.getEditText() != null)
-                    user.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
-                user.setImage(mCurrentPhotoPath);
-                sharedPreferencesManager.putUser(user);
-
-                Intent intent = new Intent(view.getContext(), HomePage.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("ApplyChanges", true);
-                startActivity(intent);
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                        .setPersistenceEnabled(true)
+                        .build();
+                db.setFirestoreSettings(settings);
+                final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+                db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
+                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                                @Nullable FirebaseFirestoreException e) {
+                                if (e != null) {
+                                    return;
+                                }
+                                if (mUsernameTextInputLayout.getEditText() != null)
+                                    mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                                if (mEmailTextInputLayout.getEditText() != null)
+                                    mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                                if (mPhoneTextInputLayout.getEditText() != null)
+                                    mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                                if (mAddressTextInputLayout != null && mUser.getTempAddress() != null)
+                                    mUser.setAddress(mAddressTextInputLayout.getText().toString());
+                                if (mShortBioTextInputLayout.getEditText() != null)
+                                    mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                                mUser.setImage(mCurrentPhotoPath);
+                                docRef.set(mUser, SetOptions.merge());
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                            }
+                        });
             }
         });
 
@@ -210,37 +225,13 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             }
         });
         mFocusedView = null;
-        mUsernameTextInputLayout.getEditText().setOnFocusChangeListener(this);
-        mEmailTextInputLayout.getEditText().setOnFocusChangeListener(this);
-        mPhoneTextInputLayout.getEditText().setOnFocusChangeListener(this);
-        mShortBioTextInputLayout.getEditText().setOnFocusChangeListener(this);
-        mUsernameTextInputLayout.getEditText().clearFocus();
-        mEmailTextInputLayout.getEditText().clearFocus();
-        mPhoneTextInputLayout.getEditText().clearFocus();
-        mShortBioTextInputLayout.getEditText().clearFocus();
+        resetFocus();
+        clearFocusOnViews();
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
-        User user = sharedPreferencesManager.getUser();
-        if (user != null) {
-            user.setTempAddress(user.getAddress());
-            sharedPreferencesManager.putUser(user);
-        }
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(this);
-        User user = sharedPreferencesManager.getUser();
-        if (mAddressTextInputLayout != null) {
-            if (user != null) {
-                mAddressTextInputLayout.setText(user.getTempAddress());
-            }
-        }
     }
 
     @Override
@@ -294,7 +285,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         }
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
         if (mCurrentPhotoPath != null) {
-            Glide.with(getApplicationContext()).load(mCurrentPhotoPath)
+            Log.d("LULLO", "3 " + mCurrentPhotoPath);
+            Glide.with(this).load(mCurrentPhotoPath)
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(mUserImageView);
         } else {
@@ -325,34 +317,127 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                             .setSelection(mShortBioTextInputLayout.getEditText().getText().length());
                     break;
                 default:
-                    mUsernameTextInputLayout.getEditText().clearFocus();
-                    mEmailTextInputLayout.getEditText().clearFocus();
-                    mPhoneTextInputLayout.getEditText().clearFocus();
-                    mShortBioTextInputLayout.getEditText().clearFocus();
+                    clearFocusOnViews();
             }
-        } else
-        {
-            mUsernameTextInputLayout.getEditText().clearFocus();
-            mEmailTextInputLayout.getEditText().clearFocus();
-            mPhoneTextInputLayout.getEditText().clearFocus();
-            mShortBioTextInputLayout.getEditText().clearFocus();
+        } else {
+            clearFocusOnViews();
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String imageURI = null;
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             if (data.getData() != null) {
-                imageURI = data.getData().toString();
-                mCurrentPhotoPath = imageURI;
-                Glide.with(getApplicationContext()).load(imageURI).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                mCurrentPhotoPath = data.getData().toString();
+                mSharedPreferencesManager.putImage(mCurrentPhotoPath);
+                Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
             }
         } else if (requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK && mPhotoFile != null) {
             mCurrentPhotoPath = mPhotoFile.getAbsolutePath();
-            Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+            mSharedPreferencesManager.putImage(mCurrentPhotoPath);
+            Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mUserListenerRegistration = mUserRef.addSnapshotListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mUserListenerRegistration != null) {
+            mUserListenerRegistration.remove();
+            mUserListenerRegistration = null;
+        }
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (hasFocus) {
+            mFocusedView = v;
+        } else {
+            mFocusedView = null;
+        }
+    }
+
+    @Override
+    public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+        if (e != null) {
+            return;
+        }
+        mUser = documentSnapshot.toObject(User.class);
+        onUserLoaded(mUser);
+    }
+
+    private void onUserLoaded(User user) {
+        if (user != null) {
+            if (mUsernameTextInputLayout.getEditText() != null)
+                mUsernameTextInputLayout.getEditText().setText(user.getUsername());
+            if (mEmailTextInputLayout.getEditText() != null)
+                mEmailTextInputLayout.getEditText().setText(user.getEmail());
+            if (mPhoneTextInputLayout.getEditText() != null)
+                mPhoneTextInputLayout.getEditText().setText(user.getPhone());
+            if (mShortBioTextInputLayout.getEditText() != null)
+                mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
+            if (mUserImageView != null) {
+                if(mCurrentPhotoPath != null) {
+                    Log.d("LULLO", "1 " + mCurrentPhotoPath);
+                    Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                }else {
+                    Log.d("LULLO", "2");
+                    Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
+                            .apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                }
+            }
+
+            if (mAddressTextInputLayout != null) {
+                if (showProfileIntent != null && showProfileIntent.hasExtra(MainActivity.ADDRESS_KEY)) {
+                    String address = showProfileIntent.getStringExtra(MainActivity.ADDRESS_KEY);
+                    if (address != null)
+                        mAddressTextInputLayout.setText(address);
+                    else
+                        mAddressTextInputLayout.setText(R.string.selection_position);
+                } else {
+                    if (user.getTempAddress() != null) {
+                        mAddressTextInputLayout.setText(user.getTempAddress());
+                    } else {
+                        mAddressTextInputLayout.setText(R.string.selection_position);
+                    }
+                }
+            }
+        }
+    }
+
+    private void clearFocusOnViews() {
+        if (mUsernameTextInputLayout.getEditText() != null)
+            mUsernameTextInputLayout.getEditText().clearFocus();
+        if (mEmailTextInputLayout.getEditText() != null)
+            mEmailTextInputLayout.getEditText().clearFocus();
+        if (mPhoneTextInputLayout.getEditText() != null)
+            mPhoneTextInputLayout.getEditText().clearFocus();
+        if (mShortBioTextInputLayout.getEditText() != null)
+            mShortBioTextInputLayout.getEditText().clearFocus();
+    }
+
+    private void resetFocus() {
+        if (mUsernameTextInputLayout.getEditText() != null)
+            mUsernameTextInputLayout.getEditText().setOnFocusChangeListener(this);
+        if (mEmailTextInputLayout.getEditText() != null)
+            mEmailTextInputLayout.getEditText().setOnFocusChangeListener(this);
+        if (mPhoneTextInputLayout.getEditText() != null)
+            mPhoneTextInputLayout.getEditText().setOnFocusChangeListener(this);
+        if (mShortBioTextInputLayout.getEditText() != null)
+            mShortBioTextInputLayout.getEditText().setOnFocusChangeListener(this);
     }
 
     public File saveThumbnail() throws IOException {
@@ -364,16 +449,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-        //mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
-    @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        if (hasFocus) {
-            mFocusedView = v;
-        } else {
-            mFocusedView = null;
-        }
-    }
 }

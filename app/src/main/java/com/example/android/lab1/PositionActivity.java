@@ -110,7 +110,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onClick(View v) {
                 SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
-                User user = sharedPreferencesManager.getUser();
+                /*User user = sharedPreferencesManager.getUser();
                 if (user != null) {
                     user.setTempAddress(mAddressOutput);
                     sharedPreferencesManager.putUser(user);
@@ -118,7 +118,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     User newUser = User.getInstance();
                     newUser.setTempAddress(mAddressOutput);
                     sharedPreferencesManager.putUser(newUser);
-                }
+                }*/
                 finish();
             }
         });

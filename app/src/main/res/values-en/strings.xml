@@ -21,6 +21,8 @@
     <string name="no_internet_connection">No internet connection</string>
     <string name="title_activity_position">Map</string>
     <string name="edit_title_activity">Edit profile</string>
+    <string name="connection_internet_dialog">Waiting for internet connection</string>
+    <string name="email_verification">Verify email to login, otherwise change login method</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_profile">Profile</string>
