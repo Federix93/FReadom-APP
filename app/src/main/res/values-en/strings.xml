@@ -31,8 +31,8 @@
     <string name="bad">Bad</string>
     <string name="decent">Decent</string>
     <string name="good">Good</string>
-    <string name="great">Great</string>
-    <string name="neww">New</string>
+    <string name="great">Near Mint</string>
+    <string name="neww">Mint</string>
     <string name="invalid_isbn">Invalid ISBN-13 code</string>
     <string name="scan_isbn_hint">Aim at the bar code on the back of the book</string>
     <string name="load_book_toolbar_title">Add new book</string>
