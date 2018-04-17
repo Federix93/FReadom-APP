@@ -109,7 +109,9 @@ public class SignInActivity extends AppCompatActivity {
 
     private void openHomePageActivity(){
         Intent intent = new Intent(this, HomePageActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+        finish();
     }
 
     private void openFirebaseUI(){
