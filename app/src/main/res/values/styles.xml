@@ -14,7 +14,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <!--<item name="android:windowBackground">@drawable/background_book</item>-->
+        <item name="android:windowBackground">@drawable/background</item>
         <item name="colorControlNormal">@android:color/white</item>
         <item name="colorControlActivated">@android:color/holo_red_dark</item>
         <item name="android:textColorHint">@android:color/white</item>
