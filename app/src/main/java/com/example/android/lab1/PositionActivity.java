@@ -18,12 +18,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.lab1.model.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -68,6 +68,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
+    public static final String ADDRESS_KEY = "ADDRESS_KEY";
 
 
     @Override
@@ -109,16 +110,10 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         mConfirmPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
-                /*User user = sharedPreferencesManager.getUser();
-                if (user != null) {
-                    user.setTempAddress(mAddressOutput);
-                    sharedPreferencesManager.putUser(user);
-                } else {
-                    User newUser = User.getInstance();
-                    newUser.setTempAddress(mAddressOutput);
-                    sharedPreferencesManager.putUser(newUser);
-                }*/
+                Intent i = new Intent();
+                if (mAddressOutput != null)
+                    i.putExtra(ADDRESS_KEY, mAddressOutput);
+                setResult(RESULT_OK, i);
                 finish();
             }
         });
