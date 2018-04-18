@@ -1,14 +1,6 @@
 apply plugin: 'com.android.application'
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'MAD'
-            keyPassword 'wewe1234'
-            storeFile file('C:/Users/Federico/Desktop/key_app.jks')
-            storePassword 'wewe123'
-        }
-    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.android.lab1"
