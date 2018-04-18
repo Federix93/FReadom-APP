@@ -25,14 +25,14 @@ public class HomePageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-//        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-//
-//        if (mFirebaseAuth.getCurrentUser() == null) {
-//            Intent intent = new Intent(this, SignInActivity.class);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            startActivity(intent);
-//            finish();
-//        }
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+
+        if (mFirebaseAuth.getCurrentUser() == null) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        }
 
         mBottomNavigation = findViewById(R.id.bottom_navigation);
 
