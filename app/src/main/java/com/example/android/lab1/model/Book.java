@@ -38,6 +38,8 @@ public class Book
     }
 
     public List<String> getUserPhotosPath() {
+        if (mUserPhotosPath == null)
+            mUserPhotosPath = new ArrayList<>();
         return mUserPhotosPath;
     }
 
