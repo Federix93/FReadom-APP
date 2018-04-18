@@ -33,6 +33,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -344,6 +345,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
 
     private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint) {
+        mIsbnImageView.setVisibility(View.GONE);
+        final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
+        mProgressBar.setVisibility(View.VISIBLE);
+
         String url;
         String readIsbn = isbn.replace("-", "");
         if (!alternativeEndPoint)
@@ -355,6 +360,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             public void onResponse(JSONObject response) {
+                mProgressBar.setVisibility(View.GONE);
+                mIsbnImageView.setVisibility(View.VISIBLE);
                 try {
                     if (response.getInt("totalItems") > 0) {
                         JSONObject book = response.getJSONArray("items")
@@ -540,18 +547,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             public void afterTextChanged(Editable s) {
 
             }
-        });
-
-        mIsbnEditText.getEditText().setFilters(new InputFilter[]{
-                new InputFilter() {
-                    Pattern mPattern = Pattern.compile("^[-0123456789]");
-
-                    @Override
-                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                        Matcher m = mPattern.matcher(source);
-                        return m.matches() ? null : "";
-                    }
-                }
         });
 
         // Autofill icon

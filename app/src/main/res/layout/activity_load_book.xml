@@ -113,6 +113,7 @@
                         <android.support.design.widget.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:inputType="number"
                             android:hint="@string/isbn" />
 
                     </android.support.design.widget.TextInputLayout>
@@ -126,6 +127,16 @@
                         android:contentDescription="@string/load_book_auto_fill_icon_desc"
                         android:padding="@dimen/icon_padding"
                         app:srcCompat="@drawable/ic_search_black_24dp" />
+
+                    <ProgressBar
+                        android:id="@+id/load_book_progress_bar"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginTop="32dp"
+                        android:layout_marginEnd="40dp"
+                        android:visibility="gone" />
+
+
 
                     <ImageView
                         android:id="@+id/load_book_scan_bar_code"
