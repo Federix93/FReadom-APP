@@ -73,7 +73,6 @@ public class ProfileFragment extends Fragment {
         if(getActivity() != null)
             mToolbar = getActivity().findViewById(R.id.toolbar_main_activity);
         mToolbar.setTitle(R.string.title_profile);
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_profile);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {

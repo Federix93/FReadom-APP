@@ -15,6 +15,7 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -34,7 +35,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,6 +69,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fr.ganfra.materialspinner.MaterialSpinner;
+
 public class LoadBookActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String ISBN_REQUEST_TAG = "ISBN_REQUEST";
@@ -86,15 +89,15 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
     private ViewPager mGallery;
-    private ImageView mAddImageIcon;
-    private EditText mIsbnEditText;
+    private ImageView mAddImageFAB;
+    private TextInputLayout mIsbnEditText;
     private ImageView mIsbnScanBarCode;
     private ImageView mIsbnImageView;
-    private EditText mTitleEditText;
-    private EditText mAuthorEditText;
-    private EditText mPublisherEditText;
-    private Spinner mPublishYearSpinner;
-    private Spinner mConditionsSpinner;
+    private TextInputLayout mTitleEditText;
+    private TextInputLayout mAuthorEditText;
+    private TextInputLayout mPublisherEditText;
+    private MaterialSpinner mPublishYearSpinner;
+    private MaterialSpinner mConditionsSpinner;
     private TextView mPositionEditText;
     private ImageView mPositionIcon;
     private Toolbar mToolbar;
@@ -116,7 +119,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_load_book);
 
         mGallery = findViewById(R.id.load_book_gallery);
-        mAddImageIcon = findViewById(R.id.add_image_icon);
+        mAddImageFAB = findViewById(R.id.add_image_fab);
         mIsbnEditText = findViewById(R.id.load_book_isbn);
         mIsbnScanBarCode = findViewById(R.id.load_book_scan_bar_code);
         mIsbnImageView = findViewById(R.id.load_book_auto_fill);
@@ -155,7 +158,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
     private void setupCameraButton() {
         final Activity thisActivity = this;
-        mAddImageIcon.setOnClickListener(new View.OnClickListener() {
+        mAddImageFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
                 final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
@@ -251,10 +254,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             condition = new Condition(Condition.Status.NEW);
 
                         final Book bookToLoad = new Book();
-                        bookToLoad.setIsbn(mIsbnEditText.getText().toString());
-                        bookToLoad.setTitle(mTitleEditText.getText().toString());
-                        bookToLoad.setAuthor(mAuthorEditText.getText().toString());
-                        bookToLoad.setPublisher(mPublisherEditText.getText().toString());
+                        bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
+                        bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
+                        bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
+                        bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
                         bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
                         bookToLoad.setAddress(mPositionEditText.getText().toString());
                         //bookToLoad.setConditions(condition);
@@ -300,6 +303,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             years[n] = Integer.toString(i);
 
         mPublishYearSpinner.setAdapter(makeDropDownAdapter(years));
+        mPublishYearSpinner.setHint(R.string.publishing_year);
+        mPublishYearSpinner.setFloatingLabelText(R.string.publishing_year);
 
         Condition.Status[] status = Condition.Status.values();
         String conditions[] = new String[status.length];
@@ -309,7 +314,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
 
         mConditionsSpinner.setAdapter(makeDropDownAdapter(conditions));
-
+        mConditionsSpinner.setHint(R.string.conditions);
+        mConditionsSpinner.setFloatingLabelText(R.string.conditions);
     }
 
     private void setupGalleryListeners() {
@@ -363,6 +369,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
 
     private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint) {
+        mIsbnImageView.setVisibility(View.GONE);
+        final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
+        mProgressBar.setVisibility(View.VISIBLE);
+
         String url;
         String readIsbn = isbn.replace("-", "");
         if (!alternativeEndPoint)
@@ -374,19 +384,21 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             public void onResponse(JSONObject response) {
+                mProgressBar.setVisibility(View.GONE);
+                mIsbnImageView.setVisibility(View.VISIBLE);
                 try {
                     if (response.getInt("totalItems") > 0) {
                         JSONObject book = response.getJSONArray("items")
                                 .getJSONObject(0).getJSONObject("volumeInfo");
 
-                        mTitleEditText.setText(book.optString("title"));
+                        mTitleEditText.getEditText().setText(book.optString("title"));
                         if (book.has("authors") &&
                                 book.getJSONArray("authors").length() > 0)
-                            mAuthorEditText.setText(book.getJSONArray("authors")
+                            mAuthorEditText.getEditText().setText(book.getJSONArray("authors")
                                     .getString(0));
                         else
-                            mAuthorEditText.setText("");
-                        mPublisherEditText.setText(book.optString("publisher"));
+                            mAuthorEditText.getEditText().setText("");
+                        mPublisherEditText.getEditText().setText(book.optString("publisher"));
 
                         if (book.has("publishedDate")) {
                             int currentYear, publishYear;
@@ -441,13 +453,13 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (mIsbnEditText != null)
-            outState.putString(ISBN_FIELD, mIsbnEditText.getText().toString());
+            outState.putString(ISBN_FIELD, mIsbnEditText.getEditText().getText().toString());
         if (mTitleEditText != null)
-            outState.putString(TITLE_FIELD, mTitleEditText.getText().toString());
+            outState.putString(TITLE_FIELD, mTitleEditText.getEditText().getText().toString());
         if (mAuthorEditText != null)
-            outState.putString(AUTHOR_FIELD, mAuthorEditText.getText().toString());
+            outState.putString(AUTHOR_FIELD, mAuthorEditText.getEditText().getText().toString());
         if (mPublisherEditText != null)
-            outState.putString(PUBLISHER_FIELD, mPublisherEditText.getText().toString());
+            outState.putString(PUBLISHER_FIELD, mPublisherEditText.getEditText().getText().toString());
         if (mPositionEditText != null && mPositionEditText.getText() != null)
             outState.putString(POSITION_FIELD, mPositionEditText.getText().toString());
         if (mWebThumbnail != null)
@@ -467,13 +479,13 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState.containsKey(ISBN_FIELD))
-            mIsbnEditText.setText(savedInstanceState.getString(ISBN_FIELD));
+            mIsbnEditText.getEditText().setText(savedInstanceState.getString(ISBN_FIELD));
         if (savedInstanceState.containsKey(TITLE_FIELD))
-            mTitleEditText.setText(savedInstanceState.getString(TITLE_FIELD));
+            mTitleEditText.getEditText().setText(savedInstanceState.getString(TITLE_FIELD));
         if (savedInstanceState.containsKey(AUTHOR_FIELD))
-            mAuthorEditText.setText(savedInstanceState.getString(AUTHOR_FIELD));
+            mAuthorEditText.getEditText().setText(savedInstanceState.getString(AUTHOR_FIELD));
         if (savedInstanceState.containsKey(PUBLISHER_FIELD))
-            mPublisherEditText.setText(savedInstanceState.getString(PUBLISHER_FIELD));
+            mPublisherEditText.getEditText().setText(savedInstanceState.getString(PUBLISHER_FIELD));
         if (savedInstanceState.containsKey(POSITION_FIELD))
             mPositionEditText.setText(savedInstanceState.getString(POSITION_FIELD));
         if (savedInstanceState.containsKey(WEB_THUMBNAIL_FIELD))
@@ -532,7 +544,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             }
         });
 
-        mIsbnEditText.addTextChangedListener(new TextWatcher() {
+        mIsbnEditText.getEditText().addTextChangedListener(new TextWatcher() {
             int mBefore;
 
             @Override
@@ -545,10 +557,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 if (s.length() > mBefore) {
                     // writing
                     if (s.toString().replace("-", "").length() == 13)
-                        validateIsbn(mIsbnEditText);
+                        validateIsbn(mIsbnEditText.getEditText());
                 } else {
                     // deleting
-                    validateIsbn(mIsbnEditText);
+                    validateIsbn(mIsbnEditText.getEditText());
                 }
 
 
@@ -560,24 +572,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             }
         });
 
-        mIsbnEditText.setFilters(new InputFilter[]{
-                new InputFilter() {
-                    Pattern mPattern = Pattern.compile("^[-0123456789]");
-
-                    @Override
-                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                        Matcher m = mPattern.matcher(source);
-                        return m.matches() ? null : "";
-                    }
-                }
-        });
-
         // Autofill icon
         mIsbnImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (validateIsbn(mIsbnEditText)) {
-                    makeRequestBookApi(mIsbnEditText.getText().toString(), false);
+                if (validateIsbn(mIsbnEditText.getEditText())) {
+                    makeRequestBookApi(mIsbnEditText.getEditText().getText().toString(), false);
                 }
 
             }
@@ -652,16 +652,16 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 if (resultCode == Activity.RESULT_OK) {
                     // Parsing bar code reader result
                     if (resultData != null && resultData.hasExtra(ScanBarCodeActivity.BARCODE_KEY)) {
-                        if (!mIsbnEditText.getText().toString().equals(resultData.getStringExtra(ScanBarCodeActivity.BARCODE_KEY))) {
+                        if (!mIsbnEditText.getEditText().getText().toString().equals(resultData.getStringExtra(ScanBarCodeActivity.BARCODE_KEY))) {
                             // disable input filters temporarely
-                            InputFilter[] filters = mIsbnEditText.getFilters();
-                            mIsbnEditText.setFilters(new InputFilter[]{});
-                            mIsbnEditText.setText(resultData.getStringExtra(ScanBarCodeActivity.BARCODE_KEY));
-                            mIsbnEditText.setFilters(filters);
-                            validateIsbn(mIsbnEditText);
-                            mTitleEditText.setText("");
-                            mAuthorEditText.setText("");
-                            mPublisherEditText.setText("");
+                            InputFilter[] filters = mIsbnEditText.getEditText().getFilters();
+                            mIsbnEditText.getEditText().setFilters(new InputFilter[]{});
+                            mIsbnEditText.getEditText().setText(resultData.getStringExtra(ScanBarCodeActivity.BARCODE_KEY));
+                            mIsbnEditText.getEditText().setFilters(filters);
+                            validateIsbn(mIsbnEditText.getEditText());
+                            mTitleEditText.getEditText().setText("");
+                            mAuthorEditText.getEditText().setText("");
+                            mPublisherEditText.getEditText().setText("");
                             mPublishYearSpinner.setSelection(0);
                         }
                     }
@@ -751,10 +751,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private boolean checkObligatoryFields() {
-        return mIsbnEditText.getText() != null && mIsbnEditText.getText().length() > 0 && mIsbnEditText.getError() == null &&
-                mTitleEditText.getText() != null && mTitleEditText.getText().length() > 0 &&
-                mAuthorEditText.getText() != null && mAuthorEditText.getText().length() > 0 &&
-                mPublisherEditText.getText() != null && mPublisherEditText.getText().length() > 0 &&
+        return mIsbnEditText.getEditText().getText() != null && mIsbnEditText.getEditText().getText().length() > 0 && mIsbnEditText.getError() == null &&
+                mTitleEditText.getEditText().getText() != null && mTitleEditText.getEditText().getText().length() > 0 &&
+                mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
+                mPublisherEditText.getEditText().getText() != null && mPublisherEditText.getEditText().getText().length() > 0 &&
                 mPositionEditText.getText() != null && mPositionEditText.getText().length() > 0;
     }
 

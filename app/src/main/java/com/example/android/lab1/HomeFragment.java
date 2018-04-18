@@ -17,7 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
@@ -78,6 +77,7 @@ public class HomeFragment extends Fragment {
 
 
         mToolbar.setTitle(getString(R.string.app_name));
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
