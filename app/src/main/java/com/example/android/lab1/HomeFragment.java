@@ -102,7 +102,6 @@ public class HomeFragment extends Fragment {
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(),NUM_COLUMNS);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
-        //mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();

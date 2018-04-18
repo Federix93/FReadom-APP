@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -69,7 +70,6 @@ import java.util.regex.Pattern;
 
 public class LoadBookActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static final String BOOK_RESULT = "BOOK_RESULT";
     private static final String ISBN_REQUEST_TAG = "ISBN_REQUEST";
     private static final int SCAN_REQUEST_TAG = 3;
     private static final int POSITION_REQUEST = 2;
@@ -102,6 +102,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private AlertDialog.Builder mAlertDialogBuilder;
     private File mPhotoFile; // last photo thumbnail
     private LinearLayout mDotsContainer;
+    private long lastClickTime = 0;
 
     private ArrayList<String> mPhotosPath;
     private String mWebThumbnail;
@@ -184,12 +185,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                                                 mPhotoFile);
                                         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                                     }
-                                    if(!Utilities.checkPermissionActivity(thisActivity, Manifest.permission.CAMERA))
-                                    {
+                                    if (!Utilities.checkPermissionActivity(thisActivity, Manifest.permission.CAMERA)) {
                                         Utilities.askPermissionActivity(thisActivity, Manifest.permission.CAMERA, CAPTURE_IMAGE);
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         startActivityForResult(cameraIntent, CAPTURE_IMAGE);
                                     }
 
@@ -230,64 +228,67 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
         mToolbar.inflateMenu(R.menu.add_book);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @SuppressLint("RestrictedApi")
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 int clickedItem = item.getItemId();
-                if(clickedItem == R.id.action_confirm)
-                {
+                // preventing double, using threshold of 1000 ms
+                mToolbar.setOnMenuItemClickListener(null);
+                lastClickTime = SystemClock.elapsedRealtime();
+                if (clickedItem == R.id.action_confirm) {
                     //if (checkObligatoryFields()) {
-                        Condition c;
+                        Condition condition;
                         String conditionText = mConditionsSpinner.getSelectedItem().toString();
                         if (conditionText.equals(getString(R.string.bad)))
-                            c = new Condition(Condition.Status.BAD);
+                            condition = new Condition(Condition.Status.BAD);
                         else if (conditionText.equals(getString(R.string.decent)))
-                            c = new Condition(Condition.Status.DECENT);
+                            condition = new Condition(Condition.Status.DECENT);
                         else if (conditionText.equals(getString(R.string.good)))
-                            c = new Condition(Condition.Status.GOOD);
+                            condition = new Condition(Condition.Status.GOOD);
                         else if (conditionText.equals(getString(R.string.great)))
-                            c = new Condition(Condition.Status.GREAT);
+                            condition = new Condition(Condition.Status.GREAT);
                         else
-                            c = new Condition(Condition.Status.NEW);
+                            condition = new Condition(Condition.Status.NEW);
 
-                        @SuppressLint("RestrictedApi") final Book result = new Book(mIsbnEditText.getText().toString(),
-                                mTitleEditText.getText().toString(),
-                                mAuthorEditText.getText().toString(),
-                                mPublisherEditText.getText().toString(),
-                                Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()),
-                                /*c,*/
-                                mPositionEditText.getText().toString(), mFirebaseAuth.getUid());
+                        final Book bookToLoad = new Book();
+                        bookToLoad.setIsbn(mIsbnEditText.getText().toString());
+                        bookToLoad.setTitle(mTitleEditText.getText().toString());
+                        bookToLoad.setAuthor(mAuthorEditText.getText().toString());
+                        bookToLoad.setPublisher(mPublisherEditText.getText().toString());
+                        bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
+                        bookToLoad.setAddress(mPositionEditText.getText().toString());
+                        //bookToLoad.setConditions(condition);
+                        bookToLoad.setUid(mFirebaseAuth.getUid());
+
                         if (mWebThumbnail != null)
-                            result.setThumbnail(mWebThumbnail);
+                            bookToLoad.setThumbnail(mWebThumbnail);
                         if (mPhotosPath != null && mPhotosPath.size() > 0)
                             for (String s : mPhotosPath) {
-                                result.getUserPhotosPath().add(s);
+                                bookToLoad.getUserPhotosPath().add(s);
                             }
                         FirebaseFirestore db = FirebaseFirestore.getInstance();
-                        db.collection("books").add(result).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        db.collection("books").add(bookToLoad).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
-                                Toast.makeText(getApplicationContext(), "Document Created", Toast.LENGTH_LONG).show();
-                                Intent intentResult = new Intent();
-                                intentResult.putExtra(BOOK_RESULT, result);
-                                setResult(RESULT_OK, intentResult);
+                                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                startActivity(intent);
                                 finish();
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 Toast.makeText(getApplicationContext(), "Impossible create document", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                startActivity(intent);
+                                finish();
                             }
                         });
-                    /*}
-                    else
-                    {
-                        Toast.makeText(getApplicationContext(),
-                                R.string.load_book_fill_fields,
-                                Toast.LENGTH_SHORT).show();
-                    }*/
-                }
-
+                    }
+                //}
                 return true;
+
             }
         });
     }
@@ -457,8 +458,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             outState.putInt(NUM_OF_DOTS, mGallery.getAdapter().getCount());
             outState.putInt(SELECTED_DOT, mGallery.getCurrentItem());
         }
-        if (mPhotoFile != null)
-        {
+        if (mPhotoFile != null) {
             outState.putString(CURRENT_PHOTO, mPhotoFile.getAbsolutePath());
         }
         super.onSaveInstanceState(outState);
@@ -751,17 +751,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private boolean checkObligatoryFields() {
-        return mIsbnEditText.getText() != null &&
-                mIsbnEditText.getText().length() > 0 &&
-                mIsbnEditText.getError() == null &&
-                mTitleEditText.getText() != null &&
-                mTitleEditText.getText().length() > 0 &&
-                mAuthorEditText.getText() != null &&
-                mAuthorEditText.getText().length() > 0 &&
-                mPublisherEditText.getText() != null &&
-                mPublisherEditText.getText().length() > 0 &&
-                mPositionEditText.getText() != null &&
-                mPositionEditText.getText().length() > 0;
+        return mIsbnEditText.getText() != null && mIsbnEditText.getText().length() > 0 && mIsbnEditText.getError() == null &&
+                mTitleEditText.getText() != null && mTitleEditText.getText().length() > 0 &&
+                mAuthorEditText.getText() != null && mAuthorEditText.getText().length() > 0 &&
+                mPublisherEditText.getText() != null && mPublisherEditText.getText().length() > 0 &&
+                mPositionEditText.getText() != null && mPositionEditText.getText().length() > 0;
     }
 
 
