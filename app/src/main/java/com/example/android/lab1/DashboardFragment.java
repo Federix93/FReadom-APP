@@ -42,17 +42,15 @@ public class DashboardFragment extends Fragment {
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_dashboard);
 
-        ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.viewpager);
+        ViewPager viewPager = rootView.findViewById(R.id.viewpager);
         setupViewPager(viewPager);
 
         // Give the TabLayout the ViewPager
-        TabLayout tabs = (TabLayout) rootView.findViewById(R.id.tabs);
+        TabLayout tabs = rootView.findViewById(R.id.tabs);
         tabs.addTab(tabs.newTab());
         tabs.addTab(tabs.newTab());
         tabs.addTab(tabs.newTab());
-//        tabs.addTab(tabs.newTab().setText("Library"));
-//        tabs.addTab(tabs.newTab().setText("Lended"));
-//        tabs.addTab(tabs.newTab().setText("Borrowed"));
+
         tabs.setupWithViewPager(viewPager);
 
         return rootView;
@@ -60,9 +58,9 @@ public class DashboardFragment extends Fragment {
 
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(mFt);
-        adapter.addFragment(new DashboardFragmentLibraryItem(), "Library");
-        adapter.addFragment(new DashboardFragmentLendedItem(), "Lended");
-        adapter.addFragment(new DashboardFragmentBorrowedItem(), "Borrowed");
+        adapter.addFragment(new DashboardFragmentLibraryItem(), getResources().getString(R.string.dashboard_library_item));
+        adapter.addFragment(new DashboardFragmentLendedItem(), getResources().getString(R.string.dashboard_lended_item));
+        adapter.addFragment(new DashboardFragmentBorrowedItem(), getResources().getString(R.string.dashboard_borrowed_item));
         viewPager.setAdapter(adapter);
     }
 
