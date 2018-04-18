@@ -55,7 +55,7 @@
                     android:scaleType="centerCrop" />
 
                 <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/add_image_icon"
+                    android:id="@+id/add_image_fab"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/user_profile_edit_image"

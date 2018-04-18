@@ -33,7 +33,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,7 +80,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
     private ViewPager mGallery;
-    private ImageView mAddImageIcon;
+    private ImageView mAddImageFAB;
     private TextInputLayout mIsbnEditText;
     private ImageView mIsbnScanBarCode;
     private ImageView mIsbnImageView;
@@ -109,7 +108,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_load_book);
 
         mGallery = findViewById(R.id.load_book_gallery);
-        mAddImageIcon = findViewById(R.id.add_image_icon);
+        mAddImageFAB = findViewById(R.id.add_image_fab);
         mIsbnEditText = findViewById(R.id.load_book_isbn);
         mIsbnScanBarCode = findViewById(R.id.load_book_scan_bar_code);
         mIsbnImageView = findViewById(R.id.load_book_auto_fill);
@@ -146,7 +145,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
     private void setupCameraButton() {
         final Activity thisActivity = this;
-        mAddImageIcon.setOnClickListener(new View.OnClickListener() {
+        mAddImageFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
                 final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};

@@ -84,7 +84,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
         mSaveProfileUpdatesImageView = findViewById(R.id.icon_check_toolbar);
 
-        mCameraImageView = findViewById(R.id.add_image_icon);
+        mCameraImageView = findViewById(R.id.add_image_fab);
 
         mPositionImageView = findViewById(R.id.position_image_view);
 
