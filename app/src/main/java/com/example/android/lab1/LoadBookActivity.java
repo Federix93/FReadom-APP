@@ -1,6 +1,7 @@
 package com.example.android.lab1;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -44,6 +45,13 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,8 +106,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private ArrayList<String> mPhotosPath;
     private String mWebThumbnail;
     private RequestQueue mRequestQueue;
+    protected FirebaseAuth mFirebaseAuth;
 
-
+    @SuppressLint("RestrictedApi")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,6 +147,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mPhotosPath = savedInstanceState.getStringArrayList(PHOTOS_PATH_FIELD);
         else
             mPhotosPath = new ArrayList<>();
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
     }
 
@@ -224,7 +235,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 int clickedItem = item.getItemId();
                 if(clickedItem == R.id.action_confirm)
                 {
-                    if (checkObligatoryFields()) {
+                    //if (checkObligatoryFields()) {
                         Condition c;
                         String conditionText = mConditionsSpinner.getSelectedItem().toString();
                         if (conditionText.equals(getString(R.string.bad)))
@@ -238,30 +249,42 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         else
                             c = new Condition(Condition.Status.NEW);
 
-                        Book result = new Book(mIsbnEditText.getText().toString(),
+                        @SuppressLint("RestrictedApi") final Book result = new Book(mIsbnEditText.getText().toString(),
                                 mTitleEditText.getText().toString(),
                                 mAuthorEditText.getText().toString(),
                                 mPublisherEditText.getText().toString(),
                                 Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()),
-                                c,
-                                mPositionEditText.getText().toString());
+                                /*c,*/
+                                mPositionEditText.getText().toString(), mFirebaseAuth.getUid());
                         if (mWebThumbnail != null)
                             result.setThumbnail(mWebThumbnail);
                         if (mPhotosPath != null && mPhotosPath.size() > 0)
                             for (String s : mPhotosPath) {
                                 result.getUserPhotosPath().add(s);
                             }
-                        Intent intentResult = new Intent();
-                        intentResult.putExtra(BOOK_RESULT, result);
-                        setResult(RESULT_OK, intentResult);
-                        finish();
-                    }
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        db.collection("books").add(result).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Toast.makeText(getApplicationContext(), "Document Created", Toast.LENGTH_LONG).show();
+                                Intent intentResult = new Intent();
+                                intentResult.putExtra(BOOK_RESULT, result);
+                                setResult(RESULT_OK, intentResult);
+                                finish();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getApplicationContext(), "Impossible create document", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    /*}
                     else
                     {
                         Toast.makeText(getApplicationContext(),
                                 R.string.load_book_fill_fields,
                                 Toast.LENGTH_SHORT).show();
-                    }
+                    }*/
                 }
 
                 return true;

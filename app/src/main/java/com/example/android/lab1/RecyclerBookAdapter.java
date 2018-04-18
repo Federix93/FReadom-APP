@@ -14,16 +14,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.android.lab1.model.Book;
+
+import java.util.List;
 
 public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapter.BookViewHolder> {
 
-    private Context mContext;
-    private int mNumberItems;
 
-    public RecyclerBookAdapter(Context context, int nItems)
+    private List<Book> books;
+
+    public RecyclerBookAdapter(List<Book> books)
     {
-        mContext = context;
-        mNumberItems = nItems;
+        this.books = books;
     }
 
     @NonNull
@@ -32,14 +34,12 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.recycler_book_item, parent, false);
-        BookViewHolder viewHolder = new BookViewHolder(view);
-
-        return viewHolder;
+        return new BookViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final BookViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(books.get(position));
     }
 
     /**
@@ -48,7 +48,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
     @Override
     public int getItemCount() {
-        return mNumberItems;
+        return books.size();
     }
 
     public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -59,19 +59,19 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         public BookViewHolder(View itemView) {
             super(itemView);
 
-            mTitle = (TextView) itemView.findViewById(R.id.title);
-            mAuthor = (TextView) itemView.findViewById(R.id.author);
-            mThumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
-            mOverflow = (ImageView) itemView.findViewById(R.id.overflow);
+            mTitle = itemView.findViewById(R.id.title);
+            mAuthor = itemView.findViewById(R.id.author);
+            mThumbnail = itemView.findViewById(R.id.thumbnail);
+            mOverflow = itemView.findViewById(R.id.overflow);
 
             itemView.setOnClickListener(this);
         }
 
-        void bind(int listIndex)
+        void bind(Book book)
         {
-            mTitle.setText("Titolo mediamente lungo");
-            mAuthor.setText("Gino Pilotino Il Terzo");
-            Glide.with(mContext).load(mContext.getResources().getDrawable(R.drawable.book_placeholder_thumbnail)).into(mThumbnail);
+            mTitle.setText(book.getTitle());
+            mAuthor.setText(book.getAuthor());
+            Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.book_placeholder_thumbnail)).into(mThumbnail);
             mOverflow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -82,7 +82,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(mContext, "Sono il numer "+getAdapterPosition(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -105,10 +105,8 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         public boolean onMenuItemClick(MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.action_view_preview:
-                    Toast.makeText(mContext, "Preview", Toast.LENGTH_SHORT).show();
                     return true;
                 case R.id.action_add_wishlist:
-                    Toast.makeText(mContext, "Wishlist", Toast.LENGTH_SHORT).show();
                     return true;
                 default:
             }

@@ -21,7 +21,7 @@
     <string name="no_internet_connection">No internet connection</string>
     <string name="title_activity_position">Map</string>
     <string name="edit_title_activity">Edit profile</string>
-    <string name="isbn">ISBN</string>
+    <string name="mIsbn">ISBN</string>
     <string name="title">Title</string>
     <string name="load_book_auto_fill_icon_desc">Icon which permits to download info about a book from the Internet</string>
     <string name="author">Author</string>

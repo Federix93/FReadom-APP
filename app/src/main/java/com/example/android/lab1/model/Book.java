@@ -3,109 +3,112 @@ package com.example.android.lab1.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Book implements Parcelable
 {
-    private String     isbn;
-    private String     title;
-    private String     author;
-    private String     publisher;
-    private int        publishYear;
-    private Condition  conditions;
-    private String     address;
+    private String mIsbn;
+    private String mTitle;
+    private String mAuthor;
+    private String mPublisher;
+    private int    mPublishYear;
+    //private Condition mConditions;
+    private String mAddress;
+    private String mUid;
+    private String mThumbnail;
+    private List<String> mUserPhotosPath;
 
-    private String thumbnail;
-    private List<String> userPhotosPath;
+    public Book(){}
 
-    public Book(String isbn,
-                String title,
-                String author,
-                String publisher,
-                int publishYear,
-                Condition conditions,
-                String address) {
-        this.isbn = isbn;
-        this.title = title;
-        this.author = author;
-        this.publisher = publisher;
-        this.publishYear = publishYear;
-        this.conditions = conditions;
-        this.address = address;
-        thumbnail = null;
-        userPhotosPath = new ArrayList<>();
+    public Book(String mIsbn, String title, String author, String publisher, int publishYear,
+                /*Condition conditions,*/ String address, String Uid) {
+        mIsbn = mIsbn;
+        mTitle = title;
+        mAuthor = author;
+        mPublisher = publisher;
+        mPublishYear = publishYear;
+        //mConditions = conditions;
+        mAddress = address;
+        mThumbnail = null;
+        mUserPhotosPath = new ArrayList<>();
+        mUid = Uid;
     }
 
     public String getThumbnail() {
-        return thumbnail;
+        return mThumbnail;
     }
 
     public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
+        mThumbnail = thumbnail;
     }
 
+    public String getUid() {
+        return mUid;
+    }
+
+    public void setUid(String mUid) {
+        this.mUid = mUid;
+    }
 
     public List<String> getUserPhotosPath() {
-        return userPhotosPath;
+        return mUserPhotosPath;
     }
 
     public String getIsbn() {
-        return isbn;
+        return mIsbn;
     }
 
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
+    public void setIsbn(String mIsbn) {
+        mIsbn = mIsbn;
     }
 
     public String getTitle() {
-        return title;
+        return mTitle;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        mTitle = title;
     }
 
     public String getAuthor() {
-        return author;
+        return mAuthor;
     }
 
     public void setAuthor(String author) {
-        this.author = author;
+        mAuthor = author;
     }
 
     public String getPublisher() {
-        return publisher;
+        return mPublisher;
     }
 
     public void setPublisher(String publisher) {
-        this.publisher = publisher;
+        mPublisher = publisher;
     }
 
     public int getPublishYear() {
-        return publishYear;
+        return mPublishYear;
     }
 
     public void setPublishYear(int publishYear) {
-        this.publishYear = publishYear;
+        mPublishYear = publishYear;
     }
 
-    public Condition getConditions() {
-        return conditions;
+    /*public Condition getConditions() {
+        return mConditions;
     }
 
     public void setConditions(Condition conditions) {
-        this.conditions = conditions;
-    }
+        mConditions = conditions;
+    }*/
 
     public String getAddress() {
-        return address;
+        return mAddress;
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        mAddress = address;
     }
 
     @Override
@@ -116,16 +119,17 @@ public class Book implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringArray(new String[] {
-                isbn,
-                title,
-                author,
-                publisher,
-                Integer.toString(publishYear),
-                conditions.getStatus(),
-                address
+                mIsbn,
+                mTitle,
+                mAuthor,
+                mPublisher,
+                Integer.toString(mPublishYear),
+                /*mConditions.getStatus(),*/
+                mAddress,
+                mUid
         });
-        if (thumbnail != null)
-            dest.writeValue(thumbnail);
+        if (mThumbnail != null)
+            dest.writeValue(mThumbnail);
         if (getUserPhotosPath() != null && getUserPhotosPath().size() > 0) {
             dest.writeInt(getUserPhotosPath().size());
             for (String s : getUserPhotosPath())
@@ -142,15 +146,15 @@ public class Book implements Parcelable
 
         @Override
         public Book createFromParcel(Parcel source) {
-            String[] stringFields = new String[7];
+            String[] stringFields = new String[8];
             source.readStringArray(stringFields);
             Book res = new Book(stringFields[0],
                     stringFields[1],
                     stringFields[2],
                     stringFields[3],
                     Integer.parseInt(stringFields[4]),
-                    new Condition(stringFields[5]),
-                    stringFields[6]);
+                    /*new Condition(stringFields[5]),*/
+                    stringFields[6], stringFields[7]);
             String webThumbnail = source.readString();
             if (webThumbnail != null)
                 res.setThumbnail(webThumbnail);

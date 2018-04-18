@@ -59,7 +59,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="@dimen/activity_load_book_content_padding"
             android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-            android:hint="@string/isbn"
+            android:hint="@string/mIsbn"
             android:inputType="phone"
             android:maxLength="13"
             app:layout_constraintEnd_toStartOf="@+id/load_book_scan_bar_code"

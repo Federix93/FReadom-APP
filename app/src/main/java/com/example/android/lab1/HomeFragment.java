@@ -17,9 +17,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.FocusFinder;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,17 +30,30 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.lab1.model.Book;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.List;
+
 public class HomeFragment extends Fragment {
 
     private static final int ADD_BOOK_REQUEST = 1;
-    private int mNumColumns;
+    private int NUM_COLUMNS;
 
-    private int mNumberOfItems;
-    private View mRootView;
+
+    View mRootView;
+    Toolbar mToolbar;
+
     private RecyclerView mRecyclerView;
     private RecyclerBookAdapter mAdapter;
-    private Toolbar mToolbar;
     private FloatingActionButton mFAB;
+
+    Query mQuery;
+    FirebaseFirestore mFirebaseFirestore;
 
     public HomeFragment()
     {
@@ -56,13 +71,13 @@ public class HomeFragment extends Fragment {
         mRecyclerView = mRootView.findViewById(R.id.recycler_books);
 
         if (container.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-            mNumColumns = 2;
+            NUM_COLUMNS = 2;
         } else {
-            mNumColumns = 3;
+            NUM_COLUMNS = 4;
         }
 
 
-        mToolbar.setTitle("Lab 2");
+        mToolbar.setTitle(getString(R.string.app_name));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -84,17 +99,27 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        mNumberOfItems = 200;
-
-        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), mNumColumns);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(),NUM_COLUMNS);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
+        //mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mAdapter = new RecyclerBookAdapter(mRootView.getContext(), mNumberOfItems);
-        mRecyclerView.setAdapter(mAdapter);
 
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
+        mQuery = mFirebaseFirestore.collection("books");
+        mQuery.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
+                if(e != null){
+                    return;
+                }
+                List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
+                mAdapter = new RecyclerBookAdapter(books);
+                mRecyclerView.setAdapter(mAdapter);
+            }
+        });
+
+       mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -122,49 +147,6 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mFAB.setVisibility(View.GONE);
-    }
-
-    public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
-
-        private int spanCount;
-        private int spacing;
-        private boolean includeEdge;
-
-        public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
-            this.spanCount = spanCount;
-            this.spacing = spacing;
-            this.includeEdge = includeEdge;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            int position = parent.getChildAdapterPosition(view); // item position
-            int column = position % spanCount; // item column
-
-            if (includeEdge) {
-                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
-                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
-
-                if (position < spanCount) { // top edge
-                    outRect.top = spacing;
-                }
-                outRect.bottom = spacing; // item bottom
-            } else {
-                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
-                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
-                if (position >= spanCount) {
-                    outRect.top = spacing; // item top
-                }
-            }
-        }
-    }
-
-    /**
-     * Converting dp to pixel
-     */
-    private int dpToPx(int dp) {
-        Resources r = getResources();
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
     }
 
 }
