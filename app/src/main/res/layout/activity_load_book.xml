@@ -60,23 +60,21 @@
                         app:layout_constraintEnd_toEndOf="@+id/load_book_gallery"
                         app:layout_constraintStart_toStartOf="@+id/load_book_gallery" />
 
-                    <android.support.design.widget.FloatingActionButton
-                        android:id="@+id/add_image_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignBottom="@id/load_book_gallery"
-                        android:layout_alignEnd="@id/load_book_gallery"
-                        android:layout_marginBottom="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:padding="@dimen/icon_padding"
-                        app:elevation="6dp"
-                        app:layout_anchor="@id/load_book_gallery"
-                        app:layout_constraintBottom_toBottomOf="@+id/load_book_gallery"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
-
-
                 </android.support.constraint.ConstraintLayout>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/add_image_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/load_book_gallery"
+                    android:layout_alignEnd="@id/load_book_gallery"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:padding="@dimen/icon_padding"
+                    app:elevation="6dp"
+                    android:layout_gravity="end|bottom"
+                    app:srcCompat="@drawable/ic_add_a_photo_black_24dp"
+                    app:layout_collapseMode="pin"/>
 
             </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -215,52 +213,27 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/load_book_publish_year_text_view"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:hint="@string/publishing_year"
-                        android:layout_weight="1"
-                        android:paddingStart="5dp"
-                        android:textSize="18sp" />
-
-                    <Spinner
+                    <include
                         android:id="@+id/load_book_publish_year_spinner"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:spinnerMode="dropdown"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/load_book_conditions"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:hint="@string/conditions"
-                        android:layout_weight="1"
-                        android:paddingStart="5dp"
-                        android:textSize="18sp"/>
+                        android:layout_weight="2"
+                        android:layout_margin="20dp"
+                        layout="@layout/spinner" />
 
-                    <Spinner
+
+                    <include
                         android:id="@+id/load_book_conditions_spinner"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:spinnerMode="dropdown"/>
+                        android:layout_weight="2"
+                        android:layout_margin="20dp"
+                        layout="@layout/spinner" />
+
 
                 </LinearLayout>
+
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -285,7 +258,7 @@
                         android:id="@+id/load_book_location"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
+                        android:layout_marginEnd="8dp"
                         android:layout_marginTop="7dp"
                         android:elevation="6dp"
                         android:padding="@dimen/icon_padding"

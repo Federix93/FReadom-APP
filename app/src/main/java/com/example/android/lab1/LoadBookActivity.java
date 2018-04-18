@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fr.ganfra.materialspinner.MaterialSpinner;
+
 public class LoadBookActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String BOOK_RESULT = "BOOK_RESULT";
@@ -86,8 +88,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private TextInputLayout mTitleEditText;
     private TextInputLayout mAuthorEditText;
     private TextInputLayout mPublisherEditText;
-    private Spinner mPublishYearSpinner;
-    private Spinner mConditionsSpinner;
+    private MaterialSpinner mPublishYearSpinner;
+    private MaterialSpinner mConditionsSpinner;
     private TextView mPositionEditText;
     private ImageView mPositionIcon;
     private Toolbar mToolbar;
@@ -277,6 +279,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             years[n] = Integer.toString(i);
 
         mPublishYearSpinner.setAdapter(makeDropDownAdapter(years));
+        mPublishYearSpinner.setHint(R.string.publishing_year);
+        mPublishYearSpinner.setFloatingLabelText(R.string.publishing_year);
 
         Condition.Status[] status = Condition.Status.values();
         String conditions[] = new String[status.length];
@@ -286,7 +290,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
 
         mConditionsSpinner.setAdapter(makeDropDownAdapter(conditions));
-
+        mConditionsSpinner.setHint(R.string.conditions);
+        mConditionsSpinner.setFloatingLabelText(R.string.conditions);
     }
 
     private void setupGalleryListeners() {

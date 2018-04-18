@@ -63,6 +63,7 @@ public class HomeFragment extends Fragment {
 
 
         mToolbar.setTitle("Lab 2");
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fr.ganfra.materialspinner.MaterialSpinner android:id="@+id/spinner"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:ms_multiline="false"
+    app:ms_enableFloatingLabel="true"
+    app:ms_enableErrorLabel="false"
+    app:ms_baseColor="@color/colorAccent"
+    app:ms_highlightColor="@color/colorAccent"
+    app:ms_errorColor="@color/error_color"
+    app:ms_hintColor="@color/colorPrimary"
+    app:ms_arrowColor="@color/colorAccent"
+    app:ms_arrowSize="16dp"
+    app:ms_alignLabels="false"
+    app:ms_floatingLabelColor="@color/colorPrimaryDark"
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto" />
