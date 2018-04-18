@@ -28,6 +28,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -236,10 +237,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             public boolean onMenuItemClick(MenuItem item) {
                 int clickedItem = item.getItemId();
                 // preventing double, using threshold of 1000 ms
-                mToolbar.setOnMenuItemClickListener(null);
                 lastClickTime = SystemClock.elapsedRealtime();
                 if (clickedItem == R.id.action_confirm) {
-                    //if (checkObligatoryFields()) {
+                    if (checkObligatoryFields()) {
+                        mToolbar.setOnMenuItemClickListener(null);
                         Condition condition;
                         String conditionText = mConditionsSpinner.getSelectedItem().toString();
                         if (conditionText.equals(getString(R.string.bad)))
@@ -254,11 +255,16 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             condition = new Condition(Condition.Status.NEW);
 
                         final Book bookToLoad = new Book();
-                        bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
-                        bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
-                        bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
-                        bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
-                        bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
+                        if(mIsbnEditText.getEditText() != null)
+                            bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
+                        if(mTitleEditText.getEditText() != null)
+                            bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
+                        if(mAuthorEditText.getEditText() != null)
+                            bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
+                        if(mPublisherEditText.getEditText() != null)
+                            bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
+                        if(mPublishYearSpinner.getSelectedItem() != null)
+                            bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
                         bookToLoad.setAddress(mPositionEditText.getText().toString());
                         //bookToLoad.setConditions(condition);
                         bookToLoad.setUid(mFirebaseAuth.getUid());
@@ -289,7 +295,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             }
                         });
                     }
-                //}
+                }
                 return true;
 
             }
@@ -751,6 +757,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private boolean checkObligatoryFields() {
+        Log.d("LULLO", "ISSSSSSS: " + (mIsbnEditText.getEditText().getText() != null && mIsbnEditText.getEditText().getText().length() > 0 && mIsbnEditText.getError() == null &&
+                mTitleEditText.getEditText().getText() != null && mTitleEditText.getEditText().getText().length() > 0 &&
+                mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
+                mPublisherEditText.getEditText().getText() != null && mPublisherEditText.getEditText().getText().length() > 0 &&
+                mPositionEditText.getText() != null && mPositionEditText.getText().length() > 0));
         return mIsbnEditText.getEditText().getText() != null && mIsbnEditText.getEditText().getText().length() > 0 && mIsbnEditText.getError() == null &&
                 mTitleEditText.getEditText().getText() != null && mTitleEditText.getEditText().getText().length() > 0 &&
                 mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
