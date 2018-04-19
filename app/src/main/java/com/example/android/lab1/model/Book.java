@@ -14,6 +14,7 @@ public class Book
     private String mAddress;
     private String mUid;
     private String mThumbnail;
+    private String mTags;
     private List<String> bookImagesUrls;
 
     public Book(){}
@@ -88,6 +89,16 @@ public class Book
 
     public void setAddress(String address) {
         mAddress = address;
+    }
+
+    public String getTags()
+    {
+        return mTags;
+    }
+
+    public void setTags(String tags)
+    {
+        this.mTags = tags;
     }
 
     public List<String> getBookImagesUrls() {
