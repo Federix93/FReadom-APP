@@ -39,7 +39,6 @@ public class FetchAddressIntentService extends IntentService {
         String errorMessage = "";
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         Location location = intent.getParcelableExtra(Constants.LOCATION_DATA_EXTRA);
-        Log.d("LULLO", "LONGITUDE" + location.getLongitude());
         mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
 
         try{

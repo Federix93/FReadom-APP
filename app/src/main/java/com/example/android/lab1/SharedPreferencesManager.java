@@ -17,6 +17,7 @@ public class SharedPreferencesManager {
     private static Context mContext;
 
     private final String IMAGE_KEY = "Image";
+    private final String ADDRESS_KEY = "Address";
 
     private SharedPreferencesManager(){}
 
@@ -30,11 +31,21 @@ public class SharedPreferencesManager {
 
     public void putImage(String image){
         SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString("Image", image);
+        editor.putString(IMAGE_KEY, image);
         editor.apply();
     }
 
     public String getImage(){
         return mSharedPreferences.getString(IMAGE_KEY, null);
+    }
+
+    public void putAddress(String address){
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(ADDRESS_KEY, address);
+        editor.apply();
+    }
+
+    public String getAddress(){
+        return mSharedPreferences.getString(ADDRESS_KEY, mContext.getResources().getString(R.string.selection_position));
     }
 }
