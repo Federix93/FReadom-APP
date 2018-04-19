@@ -316,22 +316,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void uploadBookInfo() {
-
-        Condition condition;
+        String condition = null;
         if(mConditionsSpinner.getSelectedItem() != null){
-            String conditionText = mConditionsSpinner.getSelectedItem().toString();
-            if (conditionText.equals(getString(R.string.bad)))
-                condition = new Condition(Condition.Status.BAD);
-            else if (conditionText.equals(getString(R.string.decent)))
-                condition = new Condition(Condition.Status.DECENT);
-            else if (conditionText.equals(getString(R.string.good)))
-                condition = new Condition(Condition.Status.GOOD);
-            else if (conditionText.equals(getString(R.string.great)))
-                condition = new Condition(Condition.Status.GREAT);
-            else
-                condition = new Condition(Condition.Status.NEW);
+            Integer conditionKey = mConditionsSpinner.getSelectedItemPosition();
+            Log.d("LULLO", "Position " + conditionKey);
+            condition = Condition.mMapcondition.get(conditionKey);
         }
-
 
         final Book bookToLoad = new Book();
         bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
@@ -339,7 +329,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
         bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
         bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
-        //bookToLoad.setConditions(condition);
+        bookToLoad.setConditions(condition);
         bookToLoad.setAddress(mPositionEditText.getText().toString());
         bookToLoad.setUid(mFirebaseAuth.getCurrentUser().getUid());
 
@@ -390,15 +380,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mPublishYearSpinner.setHint(R.string.publishing_year);
         mPublishYearSpinner.setFloatingLabelText(R.string.publishing_year);
 
-        Condition.Status[] status = Condition.Status.values();
-        String conditions[] = new String[status.length];
-        int i = 0;
-        for (Condition.Status s : status) {
-            conditions[i++] = getString(Condition.getResource(s));
-        }
+        String[] conditions = Condition.mMapcondition.values().toArray(new String[0]);
 
-        mConditionsSpinner.setAdapter(makeDropDownAdapter(conditions));
         mConditionsSpinner.setHint(R.string.conditions);
+        mConditionsSpinner.setAdapter(makeDropDownAdapter(conditions));
         mConditionsSpinner.setFloatingLabelText(R.string.conditions);
     }
 
@@ -848,7 +833,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mAuthorEditText != null && mAuthorEditText.getEditText() != null && mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
                 mPublisherEditText != null && mPublisherEditText.getEditText() != null && mPublisherEditText.getEditText().getText() != null && mPublisherEditText.getEditText().getText().length() > 0 &&
                 mPublishYearSpinner != null && !((String) mPublishYearSpinner.getItemAtPosition(mPublishYearSpinner.getSelectedItemPosition())).isEmpty() &&
-                mConditionsSpinner != null && !((String) mConditionsSpinner.getItemAtPosition(mConditionsSpinner.getSelectedItemPosition())).isEmpty() &&
+                mConditionsSpinner != null && !((String) mConditionsSpinner.getItemAtPosition(mConditionsSpinner.getSelectedItemPosition() -1)).isEmpty() &&
                 mPositionEditText != null && mPositionEditText.getText() != null && mPositionEditText.getText().length() > 0;
     }
 

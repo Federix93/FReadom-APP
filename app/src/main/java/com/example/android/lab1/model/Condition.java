@@ -1,29 +1,41 @@
 package com.example.android.lab1.model;
 
+import android.content.IntentFilter;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import com.example.android.lab1.R;
+import com.google.android.gms.internal.zzfgs;
+import com.google.firebase.firestore.Blob;
 
-public class Condition
-{
-    public enum Status
+import java.util.HashMap;
+import java.util.Map;
+
+public abstract class Condition {
+
+    private static String BAD = "BAD";
+    private static final String DECENT = "DECENT";
+    private static final String GOOD = "GOOD";
+    private static final String GREAT = "GREAT";
+    private static final String NEW = "NEW";
+
+    public static final Map<Integer, String> mMapcondition = new HashMap<Integer, String>();;
+
+    static{
+        mMapcondition.put(1, BAD);
+        mMapcondition.put(2, DECENT);
+        mMapcondition.put(3, GOOD);
+        mMapcondition.put(4, GREAT);
+        mMapcondition.put(5, NEW);
+    }
+
+    /*public enum Status
     {
         BAD, DECENT, GOOD, GREAT, NEW
     }
 
     private Status status;
-
-    public Condition(Status s)
-    {
-        setStatus(s);
-    }
-
-    public Condition(String s)
-    {
-        setStatus(Status.valueOf(s));
-    }
 
     public String getStatus()
     {
@@ -51,5 +63,5 @@ public class Condition
                 return R.string.neww;
         }
         return null;
-    }
+    }*/
 }

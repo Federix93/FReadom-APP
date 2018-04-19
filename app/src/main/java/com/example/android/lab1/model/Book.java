@@ -10,7 +10,7 @@ public class Book
     private String mAuthor;
     private String mPublisher;
     private int    mPublishYear;
-    private Condition mConditions;
+    private String mCondition;
     private String mAddress;
     private String mUid;
     private String mThumbnail;
@@ -74,12 +74,12 @@ public class Book
         mPublishYear = publishYear;
     }
 
-    public Condition getConditions() {
-        return mConditions;
+    public String getCondition() {
+        return mCondition;
     }
 
-    public void setConditions(Condition conditions) {
-        mConditions = conditions;
+    public void setConditions(String condition) {
+        mCondition = condition;
     }
 
     public String getAddress() {
