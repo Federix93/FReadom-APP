@@ -318,17 +318,20 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private void uploadBookInfo() {
 
         Condition condition;
-        String conditionText = mConditionsSpinner.getSelectedItem().toString();
-        if (conditionText.equals(getString(R.string.bad)))
-            condition = new Condition(Condition.Status.BAD);
-        else if (conditionText.equals(getString(R.string.decent)))
-            condition = new Condition(Condition.Status.DECENT);
-        else if (conditionText.equals(getString(R.string.good)))
-            condition = new Condition(Condition.Status.GOOD);
-        else if (conditionText.equals(getString(R.string.great)))
-            condition = new Condition(Condition.Status.GREAT);
-        else
-            condition = new Condition(Condition.Status.NEW);
+        if(mConditionsSpinner.getSelectedItem() != null){
+            String conditionText = mConditionsSpinner.getSelectedItem().toString();
+            if (conditionText.equals(getString(R.string.bad)))
+                condition = new Condition(Condition.Status.BAD);
+            else if (conditionText.equals(getString(R.string.decent)))
+                condition = new Condition(Condition.Status.DECENT);
+            else if (conditionText.equals(getString(R.string.good)))
+                condition = new Condition(Condition.Status.GOOD);
+            else if (conditionText.equals(getString(R.string.great)))
+                condition = new Condition(Condition.Status.GREAT);
+            else
+                condition = new Condition(Condition.Status.NEW);
+        }
+
 
         final Book bookToLoad = new Book();
         bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
@@ -336,9 +339,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
         bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
         bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
-        bookToLoad.setConditions(condition);
-        bookToLoad.setAddress(mPositionEditText.getText().toString());
         //bookToLoad.setConditions(condition);
+        bookToLoad.setAddress(mPositionEditText.getText().toString());
         bookToLoad.setUid(mFirebaseAuth.getCurrentUser().getUid());
 
         if (mWebThumbnail != null)
@@ -842,11 +844,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private boolean checkObligatoryFields() {
-        Log.d("LULLO", "ISSSSSSS: " + (mIsbnEditText.getEditText().getText() != null && mIsbnEditText.getEditText().getText().length() > 0 && mIsbnEditText.getError() == null &&
-                mTitleEditText.getEditText().getText() != null && mTitleEditText.getEditText().getText().length() > 0 &&
-                mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
-                mPublisherEditText.getEditText().getText() != null && mPublisherEditText.getEditText().getText().length() > 0 &&
-                mPositionEditText.getText() != null && mPositionEditText.getText().length() > 0));
         return mIsbnEditText != null && mIsbnEditText.getEditText() != null && mIsbnEditText.getEditText().getText() != null && mIsbnEditText.getEditText().getText().length() > 0 && mIsbnEditText.getError() == null &&
                 mTitleEditText != null && mTitleEditText.getEditText() != null && mTitleEditText.getEditText().getText() != null && mTitleEditText.getEditText().getText().length() > 0 &&
                 mAuthorEditText != null && mAuthorEditText.getEditText() != null && mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&

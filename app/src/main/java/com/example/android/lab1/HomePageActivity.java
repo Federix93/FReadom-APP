@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -19,6 +18,9 @@ public class HomePageActivity extends AppCompatActivity {
     private static final int PROFILE_FRAGMENT = 2;
 
     AHBottomNavigation mBottomNavigation;
+    HomeFragment mHomeFragment;
+    DashboardFragment mDashboardFragment;
+    ProfileFragment mProfileFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,34 +53,29 @@ public class HomePageActivity extends AppCompatActivity {
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
+        mHomeFragment = new HomeFragment();
+        mDashboardFragment = new DashboardFragment();
+        mProfileFragment = new ProfileFragment();
+
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
 
-                if (wasSelected)
-                {
+                if (wasSelected) {
                     return true;
-                }
-                else
-                {
+                } else {
                     android.support.v4.app.FragmentTransaction ft = fragmentManager.beginTransaction();
-                    ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-
-                    switch (position)
-                    {
+                    switch (position) {
                         case HOME_FRAGMENT:
-                            HomeFragment homeFragment = new HomeFragment();
-                            ft.replace(R.id.fragment_frame, homeFragment).commit();
+                            ft.replace(R.id.fragment_frame, mHomeFragment).commit();
                             break;
 
                         case DASH_FRAGMENT:
-                            DashboardFragment dashboardFragment = new DashboardFragment();
-                            ft.replace(R.id.fragment_frame, dashboardFragment).commit();
+                            ft.replace(R.id.fragment_frame, mDashboardFragment).commit();
                             break;
 
                         case PROFILE_FRAGMENT:
-                            ProfileFragment profileFragment = new ProfileFragment();
-                            ft.replace(R.id.fragment_frame, profileFragment).commit();
+                            ft.replace(R.id.fragment_frame, mProfileFragment).commit();
                             break;
 
                     }
@@ -88,31 +85,24 @@ public class HomePageActivity extends AppCompatActivity {
             }
         });
 
-
-
-
         // Only create new fragments when there is no previously saved state
-        if(savedInstanceState == null) {
 
-            if (getIntent().getBooleanExtra("ApplyChanges", false))
-            {
-                ProfileFragment profileFragment = new ProfileFragment();
+        if (getIntent().getBooleanExtra("ApplyChanges", false)) {
+            ProfileFragment profileFragment = new ProfileFragment();
 
-                fragmentManager.beginTransaction()
-                        .add(R.id.fragment_frame, profileFragment)
-                        .commit();
+            fragmentManager.beginTransaction()
+                    .add(R.id.fragment_frame, profileFragment)
+                    .commit();
 
-                mBottomNavigation.setCurrentItem(PROFILE_FRAGMENT);
-            }
-            else
-            {
-                HomeFragment homeFragment = new HomeFragment();
+            mBottomNavigation.setCurrentItem(PROFILE_FRAGMENT);
+        } else {
+            HomeFragment homeFragment = new HomeFragment();
 
-                fragmentManager.beginTransaction()
-                        .add(R.id.fragment_frame, homeFragment)
-                        .commit();
-            }
+            fragmentManager.beginTransaction()
+                    .add(R.id.fragment_frame, homeFragment)
+                    .commit();
         }
+        
     }
 
 }
