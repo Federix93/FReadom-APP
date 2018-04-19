@@ -52,5 +52,6 @@
     <string name="dashboard_lended_item">Lended</string>
     <string name="load_book_upload">Uploading book</string>
     <string name="load_book_upload_error">Unable to upload book</string>
+    <string name="load_book_tags">Tags</string>
 
 </resources>

@@ -54,5 +54,6 @@
     <string name="load_book_upload">Upload del libro in corso</string>
     <string name="mIsbn">ISBN</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
+    <string name="load_book_tags">Tags</string>
 
 </resources>
