@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -59,10 +61,10 @@ import com.google.firebase.storage.UploadTask;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +76,7 @@ import java.util.regex.Pattern;
 
 import fr.ganfra.materialspinner.MaterialSpinner;
 
-public class LoadBookActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoadBookActivity extends AppCompatActivity implements View.OnClickListener, OnSuccessListener<UploadTask.TaskSnapshot>, OnFailureListener {
 
     private static final String ISBN_REQUEST_TAG = "ISBN_REQUEST";
     private static final int SCAN_REQUEST_TAG = 3;
@@ -89,8 +91,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String WEB_THUMBNAIL_FIELD = "WEB_THUMBNAIL";
     private static final String PHOTOS_PATH_FIELD = "PHOTOS_PATH";
     private static final String CURRENT_PHOTO = "CURRENT_PHOTO";
+    private static final String CURRENT_STORAGE_REF = "CURRENT_STORAGE_REF";
+    private static final String IMAGE_DOWNLOAD_URLS = "IMAGE_DOWNLOAD_URLS";
+    private static final String UPLOADED_IMAGE_COUNT = "UPLOADED_IMAGES_COUNT";
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
+    protected FirebaseAuth mFirebaseAuth;
     private ViewPager mGallery;
     private ImageView mAddImageFAB;
     private TextInputLayout mIsbnEditText;
@@ -109,11 +115,28 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private File mPhotoFile; // last photo thumbnail
     private LinearLayout mDotsContainer;
     private long lastClickTime = 0;
-
     private ArrayList<String> mPhotosPath;
     private String mWebThumbnail;
     private RequestQueue mRequestQueue;
-    protected FirebaseAuth mFirebaseAuth;
+    private StorageReference mStorageRef;
+    private Integer mUploadedImagesCount;
+    private ArrayList<String> mDownloadUrls;
+
+    public static String getSha1Hex(String clearString) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+            messageDigest.update(clearString.getBytes("UTF-8"));
+            byte[] bytes = messageDigest.digest();
+            StringBuilder buffer = new StringBuilder();
+            for (byte b : bytes) {
+                buffer.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+            }
+            return buffer.toString();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+            return null;
+        }
+    }
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -243,84 +266,112 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 if (clickedItem == R.id.action_confirm) {
                     if (checkObligatoryFields()) {
                         mToolbar.setOnMenuItemClickListener(null);
-                        Condition condition;
-                        String conditionText = mConditionsSpinner.getSelectedItem().toString();
-                        if (conditionText.equals(getString(R.string.bad)))
-                            condition = new Condition(Condition.Status.BAD);
-                        else if (conditionText.equals(getString(R.string.decent)))
-                            condition = new Condition(Condition.Status.DECENT);
-                        else if (conditionText.equals(getString(R.string.good)))
-                            condition = new Condition(Condition.Status.GOOD);
-                        else if (conditionText.equals(getString(R.string.great)))
-                            condition = new Condition(Condition.Status.GREAT);
-                        else
-                            condition = new Condition(Condition.Status.NEW);
 
-                        final Book bookToLoad = new Book();
-                        if(mIsbnEditText.getEditText() != null)
-                            bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
-                        if(mTitleEditText.getEditText() != null)
-                            bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
-                        if(mAuthorEditText.getEditText() != null)
-                            bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
-                        if(mPublisherEditText.getEditText() != null)
-                            bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
-                        if(mPublishYearSpinner.getSelectedItem() != null)
-                            bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
-                        bookToLoad.setAddress(mPositionEditText.getText().toString());
-                        //bookToLoad.setConditions(condition);
-                        bookToLoad.setUid(mFirebaseAuth.getUid());
+                        lockUI();
+                        mIsbnImageView.setVisibility(View.GONE);
+                        final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        Toast.makeText(getApplicationContext(),
+                                R.string.load_book_upload,
+                                Toast.LENGTH_SHORT)
+                                .show();
 
-                        if (mWebThumbnail != null)
-                            bookToLoad.setThumbnail(mWebThumbnail);
                         if (mPhotosPath != null && mPhotosPath.size() > 0)
-                            for (String s : mPhotosPath) {
-                                bookToLoad.getUserPhotosPath().add(s);
-                            }
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
-                        db.collection("books").add(bookToLoad).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                            @Override
-                            public void onSuccess(DocumentReference documentReference) {
-                                // using documentReference create a folder on storage for storing photos
-                                if (bookToLoad.getUserPhotosPath().size() > 0) {
-                                    FirebaseStorage storage = FirebaseStorage.getInstance();
-                                    StorageReference storageRef = storage.getReference();
-                                    StorageReference booksImgRef;
-                                    for (int i = 0; i < bookToLoad.getUserPhotosPath().size(); i++)
-                                    {
-                                        booksImgRef = storageRef.child("images/books/" + documentReference.getId() + "/user_book_photo" + Integer.toString(i) + ".jpg");
-                                        UploadTask uploadTask = booksImgRef.putFile(Uri.fromFile(new File(bookToLoad.getUserPhotosPath().get(i))));
-                                        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                            @Override
-                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                Log.d("FIREBASESTORAGE", "onSuccess: " + taskSnapshot.getDownloadUrl());
-                                            }
-                                        });
-                                    }
-                                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                    startActivity(intent);
-                                    finish();
+                            uploadPhotos(mPhotosPath);
+                        else
+                            uploadBookInfo();
 
-                                }
 
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getApplicationContext(), "Impossible create document", Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                startActivity(intent);
-                                finish();
-                            }
-                        });
                     }
                 }
                 return true;
 
             }
         });
+    }
+
+    private void uploadPhotos(final ArrayList<String> mPhotosPath) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageReference = storage.getReference();
+        mUploadedImagesCount = 0;
+        if (mPhotosPath.size() > 0) {
+            mDownloadUrls = new ArrayList<>();
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            String lastPathSegment = Uri.fromFile(new File(mPhotosPath.get(mUploadedImagesCount))).getLastPathSegment();
+            String lastPathHash = getSha1Hex(lastPathSegment + Long.toString(System.currentTimeMillis()));
+
+            mStorageRef = storageReference.child(uid + "/images/books/" + lastPathHash + "-" + lastPathSegment + ".jpg");
+
+            // compress current image
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = BitmapFactory.decodeFile(mPhotosPath.get(0), options);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+            byte[] compressedImage = out.toByteArray();
+
+            UploadTask uploadTask = mStorageRef.putBytes(compressedImage);
+            uploadTask.addOnSuccessListener(this).addOnFailureListener(this);
+        }
+    }
+
+    private void uploadBookInfo() {
+
+        Condition condition;
+        String conditionText = mConditionsSpinner.getSelectedItem().toString();
+        if (conditionText.equals(getString(R.string.bad)))
+            condition = new Condition(Condition.Status.BAD);
+        else if (conditionText.equals(getString(R.string.decent)))
+            condition = new Condition(Condition.Status.DECENT);
+        else if (conditionText.equals(getString(R.string.good)))
+            condition = new Condition(Condition.Status.GOOD);
+        else if (conditionText.equals(getString(R.string.great)))
+            condition = new Condition(Condition.Status.GREAT);
+        else
+            condition = new Condition(Condition.Status.NEW);
+
+        final Book bookToLoad = new Book();
+        bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
+        bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
+        bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
+        bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
+        bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
+        bookToLoad.setConditions(condition);
+        bookToLoad.setAddress(mPositionEditText.getText().toString());
+        //bookToLoad.setConditions(condition);
+        bookToLoad.setUid(mFirebaseAuth.getCurrentUser().getUid());
+
+        if (mWebThumbnail != null)
+            bookToLoad.setThumbnail(mWebThumbnail);
+        if (mDownloadUrls != null)
+            bookToLoad.setBookImagesUrls(mDownloadUrls);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("books").add(bookToLoad).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                // using documentReference create a folder on storage for storing photos
+                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                findViewById(R.id.load_book_progress_bar).setVisibility(View.GONE);
+                mIsbnImageView.setVisibility(View.VISIBLE);
+                Toast.makeText(getApplicationContext(), R.string.load_book_upload_error, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
+    private void lockUI() {
+        // this methods disable all UI controls while downloads or uploads are happening
+        // TODO
     }
 
     private void setupSpinners() {
@@ -394,7 +445,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         });
     }
 
-
     private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint) {
         mIsbnImageView.setVisibility(View.GONE);
         final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
@@ -461,6 +511,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                mProgressBar.setVisibility(View.GONE);
+                mIsbnImageView.setVisibility(View.VISIBLE);
                 Toast.makeText(getApplicationContext(), R.string.load_book_autofill_request_error, Toast.LENGTH_SHORT).show();
             }
         });
@@ -499,6 +551,15 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
         if (mPhotoFile != null) {
             outState.putString(CURRENT_PHOTO, mPhotoFile.getAbsolutePath());
+        }
+        if (mStorageRef != null) {
+            outState.putString(CURRENT_STORAGE_REF, mStorageRef.toString());
+        }
+        if (mDownloadUrls != null) {
+            outState.putStringArrayList(IMAGE_DOWNLOAD_URLS, mDownloadUrls);
+        }
+        if (mUploadedImagesCount != null) {
+            outState.putInt(UPLOADED_IMAGE_COUNT, mUploadedImagesCount);
         }
         super.onSaveInstanceState(outState);
     }
@@ -669,7 +730,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
     }
 
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
@@ -783,12 +843,47 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
                 mPublisherEditText.getEditText().getText() != null && mPublisherEditText.getEditText().getText().length() > 0 &&
                 mPositionEditText.getText() != null && mPositionEditText.getText().length() > 0));
-        return mIsbnEditText.getEditText().getText() != null && mIsbnEditText.getEditText().getText().length() > 0 && mIsbnEditText.getError() == null &&
-                mTitleEditText.getEditText().getText() != null && mTitleEditText.getEditText().getText().length() > 0 &&
-                mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
-                mPublisherEditText.getEditText().getText() != null && mPublisherEditText.getEditText().getText().length() > 0 &&
-                mPositionEditText.getText() != null && mPositionEditText.getText().length() > 0;
+        return mIsbnEditText != null && mIsbnEditText.getEditText() != null && mIsbnEditText.getEditText().getText() != null && mIsbnEditText.getEditText().getText().length() > 0 && mIsbnEditText.getError() == null &&
+                mTitleEditText != null && mTitleEditText.getEditText() != null && mTitleEditText.getEditText().getText() != null && mTitleEditText.getEditText().getText().length() > 0 &&
+                mAuthorEditText != null && mAuthorEditText.getEditText() != null && mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
+                mPublisherEditText != null && mPublisherEditText.getEditText() != null && mPublisherEditText.getEditText().getText() != null && mPublisherEditText.getEditText().getText().length() > 0 &&
+                mPublishYearSpinner != null && !((String) mPublishYearSpinner.getItemAtPosition(mPublishYearSpinner.getSelectedItemPosition())).isEmpty() &&
+                mConditionsSpinner != null && !((String) mConditionsSpinner.getItemAtPosition(mConditionsSpinner.getSelectedItemPosition())).isEmpty() &&
+                mPositionEditText != null && mPositionEditText.getText() != null && mPositionEditText.getText().length() > 0;
     }
 
+    @Override
+    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+        mUploadedImagesCount++;
+        if (mUploadedImagesCount >= mPhotosPath.size()) {
+            // upload book now
+            uploadBookInfo();
+        } else {
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference storageReference = storage.getReference();
 
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            String lastPathSegment = Uri.fromFile(new File(mPhotosPath.get(mUploadedImagesCount))).getLastPathSegment();
+            String lastPathHash = getSha1Hex(lastPathSegment + Long.toString(System.currentTimeMillis()));
+
+            mStorageRef = storageReference.child(uid + "/images/books/" + lastPathHash + "-" + lastPathSegment + ".jpg");
+
+            // compress current image
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = BitmapFactory.decodeFile(mPhotosPath.get(0), options);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+            byte[] compressedImage = out.toByteArray();
+
+            UploadTask uploadTask = mStorageRef.putBytes(compressedImage);
+            uploadTask.addOnSuccessListener(this).addOnFailureListener(this);
+        }
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception e) {
+        // TODO delete uploaded images
+
+    }
 }

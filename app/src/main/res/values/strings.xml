@@ -4,7 +4,7 @@
     <string name="email">Email</string>
     <string name="phoneNumber">Numero di telefono</string>
     <string name="position">Posizione</string>
-    <string name="editIcon" translatable="false">default_descriptor</string>
+    <string name="editIcon">default_descriptor</string>
     <string name="title_dialog">Cambia foto</string>
     <string name="camera_option_dialog">Scatta foto</string>
     <string name="gallery_option_dialog">Scegli foto</string>
@@ -51,5 +51,8 @@
     <string name="dashboard_library_item">Libreria</string>
     <string name="dashboard_borrowed_item">Presi in prestito</string>
     <string name="dashboard_lended_item">Prestati</string>
+    <string name="load_book_upload">Upload del libro in corso</string>
+    <string name="mIsbn">ISBN</string>
+    <string name="load_book_upload_error">Impossibile caricare il libro</string>
 
 </resources>

@@ -21,7 +21,6 @@
     <string name="no_internet_connection">No internet connection</string>
     <string name="title_activity_position">Map</string>
     <string name="edit_title_activity">Edit profile</string>
-    <string name="mIsbn">ISBN</string>
     <string name="title">Title</string>
     <string name="load_book_auto_fill_icon_desc">Icon which permits to download info about a book from the Internet</string>
     <string name="author">Author</string>
@@ -51,5 +50,7 @@
     <string name="dashboard_library_item">Library</string>
     <string name="dashboard_borrowed_item">Borrowed</string>
     <string name="dashboard_lended_item">Lended</string>
+    <string name="load_book_upload">Uploading book</string>
+    <string name="load_book_upload_error">Unable to upload book</string>
 
 </resources>

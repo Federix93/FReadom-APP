@@ -1,8 +1,5 @@
 package com.example.android.lab1.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +14,7 @@ public class Book
     private String mAddress;
     private String mUid;
     private String mThumbnail;
-    private List<String> mUserPhotosPath;
+    private List<String> bookImagesUrls;
 
     public Book(){}
 
@@ -35,12 +32,6 @@ public class Book
 
     public void setUid(String mUid) {
         this.mUid = mUid;
-    }
-
-    public List<String> getUserPhotosPath() {
-        if (mUserPhotosPath == null)
-            mUserPhotosPath = new ArrayList<>();
-        return mUserPhotosPath;
     }
 
     public String getIsbn() {
@@ -99,4 +90,11 @@ public class Book
         mAddress = address;
     }
 
+    public List<String> getBookImagesUrls() {
+        return bookImagesUrls;
+    }
+
+    public void setBookImagesUrls(ArrayList<String> bookImagesUrls) {
+        this.bookImagesUrls = bookImagesUrls;
+    }
 }
