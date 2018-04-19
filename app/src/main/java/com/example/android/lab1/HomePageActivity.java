@@ -85,24 +85,24 @@ public class HomePageActivity extends AppCompatActivity {
             }
         });
 
-        // Only create new fragments when there is no previously saved state
+        if(savedInstanceState == null) {
 
-        if (getIntent().getBooleanExtra("ApplyChanges", false)) {
-            ProfileFragment profileFragment = new ProfileFragment();
+            if (getIntent().getBooleanExtra("ApplyChanges", false)) {
+                ProfileFragment profileFragment = new ProfileFragment();
 
-            fragmentManager.beginTransaction()
-                    .add(R.id.fragment_frame, profileFragment)
-                    .commit();
+                fragmentManager.beginTransaction()
+                        .add(R.id.fragment_frame, profileFragment)
+                        .commit();
 
-            mBottomNavigation.setCurrentItem(PROFILE_FRAGMENT);
-        } else {
-            HomeFragment homeFragment = new HomeFragment();
+                mBottomNavigation.setCurrentItem(PROFILE_FRAGMENT);
+            } else {
+                HomeFragment homeFragment = new HomeFragment();
 
-            fragmentManager.beginTransaction()
-                    .add(R.id.fragment_frame, homeFragment)
-                    .commit();
+                fragmentManager.beginTransaction()
+                        .add(R.id.fragment_frame, homeFragment)
+                        .commit();
+            }
         }
-        
     }
 
 }

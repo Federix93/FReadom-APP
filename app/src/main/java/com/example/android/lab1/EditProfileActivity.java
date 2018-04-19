@@ -61,6 +61,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
+    private static final int POSITION_REQUEST = 2;
 
     private FirebaseAuth mFirebaseAuth;
     private String mCurrentPhotoPath;
@@ -72,11 +73,14 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     DocumentReference mUserRef;
     ListenerRegistration mUserListenerRegistration;
     SharedPreferencesManager mSharedPreferencesManager;
+    Bundle mSavedInstanceState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
+
+        mSavedInstanceState = savedInstanceState;
 
         mUsernameTextInputLayout = findViewById(R.id.username_text_edit);
 
@@ -112,9 +116,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         /*Firebase*/
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-        FirebaseUser user = mFirebaseAuth.getCurrentUser();
 
-        if (user == null) {
+        if (mFirebaseAuth.getCurrentUser() == null) {
             Intent intent = new Intent(this, SignInActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
@@ -151,7 +154,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                                     mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                                 if (mPhoneTextInputLayout.getEditText() != null)
                                     mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                                if (mAddressTextInputLayout != null && mUser.getTempAddress() != null)
+                                if (mAddressTextInputLayout != null)
                                     mUser.setAddress(mAddressTextInputLayout.getText().toString());
                                 if (mShortBioTextInputLayout.getEditText() != null)
                                     mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
@@ -186,7 +189,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                             case CAPTURE_IMAGE:
                                 if (!Utilities.checkPermissionActivity(thisActivity, Manifest.permission.CAMERA)) {
                                     Utilities.askPermissionActivity(thisActivity, Manifest.permission.CAMERA, CAPTURE_IMAGE);
-                                } else{
+                                } else {
                                     takePicture();
                                 }
                                 break;
@@ -208,7 +211,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), PositionActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
+                startActivityForResult(intent, POSITION_REQUEST);
             }
         });
 
@@ -217,7 +220,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), PositionActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
+                startActivityForResult(intent, POSITION_REQUEST);
             }
         });
         mFocusedView = null;
@@ -292,7 +295,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         }
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
         if (mCurrentPhotoPath != null) {
-            Log.d("LULLO", "3 " + mCurrentPhotoPath);
             Glide.with(this).load(mCurrentPhotoPath)
                     .apply(bitmapTransform(new CircleCrop()))
                     .into(mUserImageView);
@@ -334,16 +336,31 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
-            if (data.getData() != null) {
-                mCurrentPhotoPath = data.getData().toString();
-                mSharedPreferencesManager.putImage(mCurrentPhotoPath);
-                Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-            }
-        } else if (requestCode == CAPTURE_IMAGE && resultCode == RESULT_OK && mPhotoFile != null) {
-            mCurrentPhotoPath = mPhotoFile.getAbsolutePath();
-            mSharedPreferencesManager.putImage(mCurrentPhotoPath);
-            Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+        switch (requestCode) {
+            case RESULT_LOAD_IMAGE:
+                if (resultCode == RESULT_OK && data != null) {
+                    if (data.getData() != null) {
+                        mCurrentPhotoPath = data.getData().toString();
+                        mSharedPreferencesManager.putImage(mCurrentPhotoPath);
+                        Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                    }
+                }
+                break;
+            case CAPTURE_IMAGE:
+                if (resultCode == RESULT_OK && mPhotoFile != null) {
+                    mCurrentPhotoPath = mPhotoFile.getAbsolutePath();
+                    mSharedPreferencesManager.putImage(mCurrentPhotoPath);
+                    Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                }
+                break;
+            case POSITION_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    if (data != null && data.hasExtra(PositionActivity.ADDRESS_KEY)) {
+                        if (mAddressTextInputLayout != null) {
+                            mAddressTextInputLayout.setText(data.getStringExtra(PositionActivity.ADDRESS_KEY));
+                        }
+                    }
+                }
         }
     }
 
@@ -398,10 +415,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                 mShortBioTextInputLayout.getEditText().setText(user.getShortBio());
             if (mUserImageView != null) {
                 if (mCurrentPhotoPath != null) {
-                    Log.d("LULLO", "1 " + mCurrentPhotoPath);
                     Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 } else {
-                    Log.d("LULLO", "2");
                     Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                             .apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 }
@@ -415,8 +430,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     else
                         mAddressTextInputLayout.setText(R.string.selection_position);
                 } else {
-                    if (user.getTempAddress() != null) {
-                        mAddressTextInputLayout.setText(user.getTempAddress());
+                    if (user.getAddress() != null) {
+                        mAddressTextInputLayout.setText(user.getAddress());
                     } else {
                         mAddressTextInputLayout.setText(R.string.selection_position);
                     }
@@ -459,7 +474,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         return image;
     }
 
-    private void takePicture(){
+    private void takePicture() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (cameraIntent.resolveActivity(getPackageManager()) != null) {
             try {

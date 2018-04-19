@@ -13,7 +13,6 @@ public class User {
     private String mPhone;
     private String mAddress;
     private String mImage;
-    private String mTempAddress;
     private String mShortBio;
 
     private User(){}
@@ -27,10 +26,6 @@ public class User {
     public String getShortBio(){ return mShortBio; }
 
     public void setShortBio(String pShortBio){ mShortBio = pShortBio; }
-
-    public String getTempAddress() { return mTempAddress; }
-
-    public void setTempAddress(String pTempAddress) { mTempAddress = pTempAddress; }
 
     public String getImage() {
         return mImage;
@@ -76,7 +71,7 @@ public class User {
         public static final String USERNAME_KEY = "username";
         public static final String EMAIL_KEY = "email";
         public static final String PICTURE_KEY = "image";
-        public static final String POSITION_KEY = "position";
+        public static final String POSITION_KEY = "address";
         public static final String PHONE_KEY = "phone";
         public static final String SHORTBIO_KEY= "shortBio";
     }

@@ -455,7 +455,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mIsbnImageView.setVisibility(View.GONE);
         final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
         mProgressBar.setVisibility(View.VISIBLE);
-
         String url;
         String readIsbn = isbn.replace("-", "");
         if (!alternativeEndPoint)
