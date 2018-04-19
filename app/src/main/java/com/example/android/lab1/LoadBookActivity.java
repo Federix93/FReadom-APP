@@ -374,6 +374,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         // TODO
     }
 
+    private void unLockUI() {
+        // TODO revert above method
+    }
+
     private void setupSpinners() {
         String years[] = new String[200];
 
