@@ -26,7 +26,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
-import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
@@ -48,19 +47,22 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -279,10 +281,29 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         db.collection("books").add(bookToLoad).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
-                                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                startActivity(intent);
-                                finish();
+                                // using documentReference create a folder on storage for storing photos
+                                if (bookToLoad.getUserPhotosPath().size() > 0) {
+                                    FirebaseStorage storage = FirebaseStorage.getInstance();
+                                    StorageReference storageRef = storage.getReference();
+                                    StorageReference booksImgRef;
+                                    for (int i = 0; i < bookToLoad.getUserPhotosPath().size(); i++)
+                                    {
+                                        booksImgRef = storageRef.child("images/books/" + documentReference.getId() + "/user_book_photo" + Integer.toString(i) + ".jpg");
+                                        UploadTask uploadTask = booksImgRef.putFile(Uri.fromFile(new File(bookToLoad.getUserPhotosPath().get(i))));
+                                        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                Log.d("FIREBASESTORAGE", "onSuccess: " + taskSnapshot.getDownloadUrl());
+                                            }
+                                        });
+                                    }
+                                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                    startActivity(intent);
+                                    finish();
+
+                                }
+
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
