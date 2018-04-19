@@ -40,7 +40,6 @@ public class DashboardFragment extends Fragment {
 
         mToolbar.setTitle(R.string.title_dashboard);
         mToolbar.getMenu().clear();
-        mToolbar.inflateMenu(R.menu.fragment_dashboard);
 
         ViewPager viewPager = rootView.findViewById(R.id.viewpager);
         setupViewPager(viewPager);
