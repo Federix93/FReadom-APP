@@ -304,7 +304,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         Uri filePathUri = Uri.parse(mPhotosPath.get(mUploadedImagesCount));
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
+        ByteArrayOutputStream out;
         Bitmap bitmap = null;
         if (filePathUri.getScheme() != null && filePathUri.getScheme().equals("content")) {
             try {
@@ -324,8 +324,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 bitmap.getHeight(),
                 m,
                 true);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        compressedRotated.compress(Bitmap.CompressFormat.JPEG, 80, out);
+        out = new ByteArrayOutputStream();
+        compressedRotated.compress(Bitmap.CompressFormat.JPEG, 75, out);
         return out.toByteArray();
     }
 
@@ -376,7 +376,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
         final Book bookToLoad = new Book();
         bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
-        Log.d("DEBUGUPLOAD", "uploadBookInfo: " + bookToLoad.getIsbn());
         bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
         bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
         bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
@@ -461,9 +460,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             public void onPageSelected(int position) {
-                //Log.d("DEBUBDOTS", "onPageSelected: selectedPage: " + Integer.toString(position));
                 TextView dot;
-                //Log.d("DEBUBDOTS", "onPageSelected: numOfDots: " + Integer.toString(mDotsContainer.getChildCount()));
                 for (int i = 0; i < mDotsContainer.getChildCount(); i++) {
                     dot = (TextView) mDotsContainer.getChildAt(i);
                     if (i == position)
@@ -936,8 +933,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private boolean checkObligatoryFields() {
-        Log.d("DEBUGFIELD", "checkObligatoryFields: " + Integer.toString(mConditionsSpinner.getSelectedItemPosition()));
-        Log.d("DEBUGFIELD", Integer.toString(mPublishYearSpinner.getSelectedItemPosition()));
         return mIsbnEditText != null && mIsbnEditText.getEditText() != null && mIsbnEditText.getEditText().getText() != null && mIsbnEditText.getEditText().getText().length() > 0 && mIsbnEditText.getError() == null &&
                 mTitleEditText != null && mTitleEditText.getEditText() != null && mTitleEditText.getEditText().getText() != null && mTitleEditText.getEditText().getText().length() > 0 &&
                 mAuthorEditText != null && mAuthorEditText.getEditText() != null && mAuthorEditText.getEditText().getText() != null && mAuthorEditText.getEditText().getText().length() > 0 &&
