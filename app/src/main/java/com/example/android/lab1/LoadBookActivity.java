@@ -52,7 +52,6 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -97,6 +96,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String CURRENT_STORAGE_REF = "CURRENT_STORAGE_REF";
     private static final String IMAGE_DOWNLOAD_URLS = "IMAGE_DOWNLOAD_URLS";
     private static final String UPLOADED_IMAGE_COUNT = "UPLOADED_IMAGES_COUNT";
+    private static final String UPLOADING = "UPLOADING";
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
     protected FirebaseAuth mFirebaseAuth;
@@ -124,6 +124,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private StorageReference mStorageRef;
     private Integer mUploadedImagesCount;
     private ArrayList<String> mDownloadUrls;
+    private boolean mUploading;
 
     public static String getSha1Hex(String clearString) {
         try {
@@ -167,6 +168,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
 
         // complex listeners are handled in separate function
+        mUploading = false;
         setupToolBar();
         setupCameraButton();
         setupIsbnListeners();
@@ -271,6 +273,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         mToolbar.setOnMenuItemClickListener(null);
 
                         lockUI(true);
+                        mUploading = true;
                         mIsbnImageView.setVisibility(View.GONE);
                         final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
                         mProgressBar.setVisibility(View.VISIBLE);
@@ -355,7 +358,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void uploadBookInfo() {
-
         Condition condition;
         if (mConditionsSpinner.getSelectedItem() != null) {
             String conditionText = mConditionsSpinner.getSelectedItem().toString();
@@ -388,7 +390,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         if (mDownloadUrls != null)
             bookToLoad.setBookImagesUrls(mDownloadUrls);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Task<DocumentReference> books = db.collection("books").add(bookToLoad).addOnSuccessListener(this, new OnSuccessListener<DocumentReference>() {
+        db.collection("books").add(bookToLoad).addOnSuccessListener(this, new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 // using documentReference create a folder on storage for storing photos
@@ -607,11 +609,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             outState.putString(CURRENT_PHOTO, mPhotoFile.getAbsolutePath());
         }
         if (mStorageRef != null) {
-            List<UploadTask> activeUploadTasks = mStorageRef.getActiveUploadTasks();
-            if (activeUploadTasks.size() > 0) {
-                activeUploadTasks.get(0).pause();
-                Log.d("DEBUGUPLOAD", "onSaveInstanceState: paused upload");
-            }
             outState.putString(CURRENT_STORAGE_REF, mStorageRef.toString());
         }
         if (mDownloadUrls != null) {
@@ -620,6 +617,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         if (mUploadedImagesCount != null) {
             outState.putInt(UPLOADED_IMAGE_COUNT, mUploadedImagesCount);
         }
+        outState.putBoolean(UPLOADING, mUploading);
         super.onSaveInstanceState(outState);
     }
 
@@ -650,15 +648,22 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mDownloadUrls = savedInstanceState.getStringArrayList(IMAGE_DOWNLOAD_URLS);
         if (savedInstanceState.containsKey(UPLOADED_IMAGE_COUNT))
             mUploadedImagesCount = savedInstanceState.getInt(UPLOADED_IMAGE_COUNT);
+
+        if (savedInstanceState.containsKey(UPLOADING)) {
+            mUploading = savedInstanceState.getBoolean(UPLOADING);
+            if (mUploading) {
+                lockUI(true);
+                mIsbnImageView.setVisibility(View.GONE);
+                final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
+                mProgressBar.setVisibility(View.VISIBLE);
+            }
+        }
+
         if (savedInstanceState.containsKey(CURRENT_STORAGE_REF)) {
             mStorageRef = FirebaseStorage.getInstance().getReferenceFromUrl(savedInstanceState.getString(CURRENT_STORAGE_REF));
             List<UploadTask> activeDownloads = mStorageRef.getActiveUploadTasks();
             if (activeDownloads.size() > 0) {
                 Log.d("DEBUGUPLOAD", "onRestoreInstanceState: Restarted download");
-                lockUI(true);
-                mIsbnImageView.setVisibility(View.GONE);
-                final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
-                mProgressBar.setVisibility(View.VISIBLE);
                 if (activeDownloads.get(0).isPaused())
                     activeDownloads.get(0).addOnSuccessListener(this)
                             .addOnFailureListener(this)
@@ -669,7 +674,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         super.onRestoreInstanceState(savedInstanceState);
     }
 
-    @Override
+    /*@Override
     protected void onResume() {
         super.onResume();
         if (mStorageRef != null) {
@@ -681,7 +686,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         }
-    }
+    }*/
 
     private ArrayAdapter<String> makeDropDownAdapter(String[] items) {
         List<String> temp;
