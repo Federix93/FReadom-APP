@@ -68,8 +68,9 @@ public class HomeFragment extends Fragment {
         mToolbar = getActivity().findViewById(R.id.toolbar_main_activity);
         mFAB = mRootView.findViewById(R.id.fab_add_book);
         mRecyclerView = mRootView.findViewById(R.id.recycler_books);
+        mRecyclerView.setAdapter(new RecyclerBookAdapter(null));
 
-        if (container.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
             NUM_COLUMNS = 2;
         } else {
             NUM_COLUMNS = 4;

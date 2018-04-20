@@ -57,5 +57,6 @@
     <string name="condition_good">Good</string>
     <string name="condition_near_mint">Near mint</string>
     <string name="condition_mint">Mint</string>
+    <string name="load_book_tags">Tags</string>
 
 </resources>

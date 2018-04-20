@@ -88,6 +88,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String AUTHOR_FIELD = "AUTHOR";
     private static final String PUBLISHER_FIELD = "PUBLISHER";
     private static final String POSITION_FIELD = "POSITION";
+    private static final String TAGS_FIELD = "TAGS";
     private static final String WEB_THUMBNAIL_FIELD = "WEB_THUMBNAIL";
     private static final String PHOTOS_PATH_FIELD = "PHOTOS_PATH";
     private static final String CURRENT_PHOTO = "CURRENT_PHOTO";
@@ -107,6 +108,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private TextInputLayout mPublisherEditText;
     private MaterialSpinner mPublishYearSpinner;
     private MaterialSpinner mConditionsSpinner;
+    private TextInputLayout mTagsEditText;
     private TextView mPositionEditText;
     private ImageView mPositionIcon;
     private Toolbar mToolbar;
@@ -155,6 +157,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mPublishYearSpinner = findViewById(R.id.load_book_publish_year_spinner);
         mConditionsSpinner = findViewById(R.id.load_book_conditions_spinner);
         mPositionEditText = findViewById(R.id.load_book_position);
+        mTagsEditText = findViewById(R.id.load_book_tags);
         mPositionIcon = findViewById(R.id.load_book_location);
         mToolbar = findViewById(R.id.toolbar_loadbook);
         mConfirmImageView = findViewById(R.id.icon_check_toolbar);
@@ -329,6 +332,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
         bookToLoad.setConditions(condition);
         bookToLoad.setAddress(mPositionEditText.getText().toString());
+        bookToLoad.setTags(mTagsEditText.getEditText().getText().toString());
         bookToLoad.setUid(mFirebaseAuth.getCurrentUser().getUid());
 
         if (mWebThumbnail != null)
@@ -336,7 +340,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         if (mDownloadUrls != null)
             bookToLoad.setBookImagesUrls(mDownloadUrls);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("books").add(bookToLoad).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        db.collection("books").add(bookToLoad).addOnSuccessListener(
+                new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 // using documentReference create a folder on storage for storing photos
@@ -527,6 +532,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             outState.putString(PUBLISHER_FIELD, mPublisherEditText.getEditText().getText().toString());
         if (mPositionEditText != null && mPositionEditText.getText() != null)
             outState.putString(POSITION_FIELD, mPositionEditText.getText().toString());
+        if(mTagsEditText != null)
+            outState.putString(TAGS_FIELD, mTagsEditText.getEditText().getText().toString());
         if (mWebThumbnail != null)
             outState.putString(WEB_THUMBNAIL_FIELD, mWebThumbnail);
         if (mPhotosPath != null)
@@ -562,6 +569,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mPublisherEditText.getEditText().setText(savedInstanceState.getString(PUBLISHER_FIELD));
         if (savedInstanceState.containsKey(POSITION_FIELD))
             mPositionEditText.setText(savedInstanceState.getString(POSITION_FIELD));
+        if(savedInstanceState.containsKey(TAGS_FIELD))
+            mTagsEditText.getEditText().setText(savedInstanceState.getString(TAGS_FIELD));
         if (savedInstanceState.containsKey(WEB_THUMBNAIL_FIELD))
             mWebThumbnail = savedInstanceState.getString(WEB_THUMBNAIL_FIELD);
         if (savedInstanceState.containsKey(PHOTOS_PATH_FIELD)) {
