@@ -52,5 +52,10 @@
     <string name="dashboard_lended_item">Lended</string>
     <string name="load_book_upload">Uploading book</string>
     <string name="load_book_upload_error">Unable to upload book</string>
+    <string name="condition_poor">Poor</string>
+    <string name="condition_fair">Fair</string>
+    <string name="condition_good">Good</string>
+    <string name="condition_near_mint">Near mint</string>
+    <string name="condition_mint">Mint</string>
 
 </resources>

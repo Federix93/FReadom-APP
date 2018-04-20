@@ -316,11 +316,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void uploadBookInfo() {
-        String condition = null;
+        Integer condition = null;
         if(mConditionsSpinner.getSelectedItem() != null){
-            Integer conditionKey = mConditionsSpinner.getSelectedItemPosition();
-            Log.d("LULLO", "Position " + conditionKey);
-            condition = Condition.mMapcondition.get(conditionKey);
+            condition = mConditionsSpinner.getSelectedItemPosition();
         }
 
         final Book bookToLoad = new Book();
@@ -380,10 +378,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mPublishYearSpinner.setHint(R.string.publishing_year);
         mPublishYearSpinner.setFloatingLabelText(R.string.publishing_year);
 
-        String[] conditions = Condition.mMapcondition.values().toArray(new String[0]);
-
         mConditionsSpinner.setHint(R.string.conditions);
-        mConditionsSpinner.setAdapter(makeDropDownAdapter(conditions));
+        mConditionsSpinner.setAdapter(makeDropDownAdapter(Condition.getConditions(this).toArray(new String[0])));
         mConditionsSpinner.setFloatingLabelText(R.string.conditions);
     }
 
