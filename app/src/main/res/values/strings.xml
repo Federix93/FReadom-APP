@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lab1</string>
+    <string name="app_name">Lab2</string>
     <string name="username">Nome</string>
     <string name="email">Email</string>
     <string name="phoneNumber">Numero di telefono</string>
