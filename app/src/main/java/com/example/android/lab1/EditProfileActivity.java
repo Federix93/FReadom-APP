@@ -424,7 +424,12 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     }
                 }
                 if(mAddressTextInputLayout != null){
-                    mAddressTextInputLayout.setText(mCurrentAddress);
+                    if(mCurrentAddress.equals(getString(R.string.selection_position))
+                            && mSharedPreferencesManager.getAddress().equals(getString(R.string.selection_position))){
+                        mAddressTextInputLayout.setText(mUser.getAddress());
+                    }else{
+                        mAddressTextInputLayout.setText(mCurrentAddress);
+                    }
                 }
             }
         }
