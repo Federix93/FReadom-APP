@@ -1,6 +1,8 @@
 package com.example.android.lab1;
 
-import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +18,8 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.model.Book;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapter.BookViewHolder> {
@@ -73,7 +77,12 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         {
             mTitle.setText(book.getTitle());
             mAuthor.setText(book.getAuthor());
-            Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.book_placeholder_thumbnail)).into(mThumbnail);
+            if (book.getThumbnail() != null) {
+                new DownLoadImageTask(mThumbnail).execute(book.getThumbnail());
+            } else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
+                new DownLoadImageTask(mThumbnail).execute(book.getBookImagesUrls().get(0));
+            } else
+                Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mThumbnail);
             mOverflow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -113,6 +122,35 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
                 default:
             }
             return false;
+        }
+    }
+
+    private class DownLoadImageTask extends AsyncTask<String, Void, Bitmap> {
+        // TODO move this inner class somewhere else
+        private ImageView mTarget;
+
+        public DownLoadImageTask(ImageView target) {
+            mTarget = target;
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            Bitmap logo = null;
+            try {
+                InputStream is = new URL(strings[0]).openStream();
+                /*
+                    decodeStream(InputStream is)
+                        Decode an input stream into a bitmap.
+                 */
+                logo = BitmapFactory.decodeStream(is);
+            } catch (Exception e) { // Catch the download exception
+                e.printStackTrace();
+            }
+            return logo;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            mTarget.setImageBitmap(result);
         }
     }
 }

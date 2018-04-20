@@ -40,7 +40,7 @@ public class Book
     }
 
     public void setIsbn(String mIsbn) {
-        mIsbn = mIsbn;
+        this.mIsbn = mIsbn;
     }
 
     public String getTitle() {

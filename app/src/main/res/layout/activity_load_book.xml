@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -108,12 +107,15 @@
                         android:layout_marginStart="@dimen/activity_load_book_content_padding"
                         android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
                         android:inputType="phone"
-                        android:maxLength="13">
+                        android:maxLength="13"
+                        app:counterEnabled="true"
+                        app:counterMaxLength="13">
 
                         <android.support.design.widget.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:inputType="number"
+                            android:maxLength="13"
                             android:hint="@string/isbn" />
 
                     </android.support.design.widget.TextInputLayout>
