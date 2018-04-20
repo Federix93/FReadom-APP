@@ -97,6 +97,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String IMAGE_DOWNLOAD_URLS = "IMAGE_DOWNLOAD_URLS";
     private static final String UPLOADED_IMAGE_COUNT = "UPLOADED_IMAGES_COUNT";
     private static final String UPLOADING = "UPLOADING";
+    private static final String IMAGES_UPLOADED = "IMAGES_UPLOADED";
+    private static final String DOCUMENT_UPLOADED = "DOCUMENT_UPLOADED";
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
     protected FirebaseAuth mFirebaseAuth;
@@ -125,6 +127,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private Integer mUploadedImagesCount;
     private ArrayList<String> mDownloadUrls;
     private boolean mUploading;
+    private boolean mImagesUploaded;
+    private boolean mDocumentUploaded;
 
     public static String getSha1Hex(String clearString) {
         try {
@@ -169,6 +173,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
         // complex listeners are handled in separate function
         mUploading = false;
+        mImagesUploaded = false;
         setupToolBar();
         setupCameraButton();
         setupIsbnListeners();
@@ -274,6 +279,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
                         lockUI(true);
                         mUploading = true;
+                        mDocumentUploaded = false;
                         mIsbnImageView.setVisibility(View.GONE);
                         final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
                         mProgressBar.setVisibility(View.VISIBLE);
@@ -284,8 +290,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
                         if (mPhotosPath != null && mPhotosPath.size() > 0)
                             uploadPhotos();
-                        else
+                        else {
+                            mImagesUploaded = true;
                             uploadBookInfo();
+                        }
 
                     } else {
                         Toast.makeText(getApplicationContext(),
@@ -389,6 +397,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         if (mDownloadUrls != null)
             bookToLoad.setBookImagesUrls(mDownloadUrls);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        mDocumentUploaded = true;
         db.collection("books").add(bookToLoad).addOnSuccessListener(this, new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
@@ -614,6 +623,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         if (mUploadedImagesCount != null) {
             outState.putInt(UPLOADED_IMAGE_COUNT, mUploadedImagesCount);
         }
+        outState.putBoolean(IMAGES_UPLOADED, mImagesUploaded);
+        outState.putBoolean(DOCUMENT_UPLOADED, mDocumentUploaded);
         outState.putBoolean(UPLOADING, mUploading);
         super.onSaveInstanceState(outState);
     }
@@ -661,17 +672,24 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             List<UploadTask> activeDownloads = mStorageRef.getActiveUploadTasks();
             if (activeDownloads.size() > 0) {
                 Log.d("DEBUGUPLOAD", "onRestoreInstanceState: Restarted download");
-                if (activeDownloads.get(0).isPaused())
-                    activeDownloads.get(0).addOnSuccessListener(this)
-                            .addOnFailureListener(this)
-                            .resume();
+                activeDownloads.get(0).addOnSuccessListener(this)
+                        .addOnFailureListener(this)
+                        .resume();
             }
 
         }
+
+        if (savedInstanceState.containsKey(IMAGES_UPLOADED)) {
+            mImagesUploaded = savedInstanceState.getBoolean(IMAGES_UPLOADED);
+        }
+        if (savedInstanceState.containsKey(DOCUMENT_UPLOADED))
+            mDocumentUploaded = savedInstanceState.getBoolean(DOCUMENT_UPLOADED);
+        if (!mDocumentUploaded && mImagesUploaded)
+            uploadBookInfo();
         super.onRestoreInstanceState(savedInstanceState);
     }
 
-    /*@Override
+    @Override
     protected void onResume() {
         super.onResume();
         if (mStorageRef != null) {
@@ -683,7 +701,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         }
-    }*/
+    }
 
     private ArrayAdapter<String> makeDropDownAdapter(String[] items) {
         List<String> temp;
@@ -951,6 +969,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
         if (mUploadedImagesCount >= mPhotosPath.size()) {
             // upload book now
+            mImagesUploaded = true;
             uploadBookInfo();
         } else {
             FirebaseStorage storage = FirebaseStorage.getInstance();
