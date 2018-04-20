@@ -80,7 +80,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
             } else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
                 new DownLoadImageTask(mThumbnail).execute(book.getBookImagesUrls().get(0));
             } else
-                Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.book_placeholder_thumbnail)).into(mThumbnail);
+                Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mThumbnail);
             mOverflow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
