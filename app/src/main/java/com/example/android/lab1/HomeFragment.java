@@ -30,6 +30,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.lab1.model.Book;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -77,7 +79,7 @@ public class HomeFragment extends Fragment {
         }
 
 
-        mToolbar.setTitle(getString(R.string.app_name));
+        mToolbar.setTitle(getString(R.string.toolbar_title_home));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -113,6 +115,12 @@ public class HomeFragment extends Fragment {
                     return;
                 }
                 List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
+                for(int i = 0; i < books.size(); i++) {
+                    if(books.get(i).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                        books.remove(i);
+                    }
+                }
+
                 mAdapter = new RecyclerBookAdapter(books);
                 mRecyclerView.setAdapter(mAdapter);
             }

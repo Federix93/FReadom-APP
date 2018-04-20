@@ -61,4 +61,7 @@
     <string name="condition_good">Buone</string>
     <string name="condition_near_mint">Ottime</string>
     <string name="condition_mint">Perfette</string>
+
+    <string name="toolbar_title_home">Ricerca libri</string>
+
 </resources>
