@@ -33,16 +33,16 @@ public class SignInActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
         if (user != null) {
-            if (!isEmailAndPasswordProvider()) {
+            /*if (!isEmailAndPasswordProvider()) {
                 FirebaseManager.addUser(user);
                 openHomePageActivity();
             } else {
-                user.reload();
-                if (user.isEmailVerified()) {
+                user.reload();*/
+                //if (user.isEmailVerified()) {
                     FirebaseManager.addUser(user);
                     openHomePageActivity();
-                }
-            }
+              //  }
+            //}
         } else {
             openFirebaseUI();
         }
@@ -70,7 +70,7 @@ public class SignInActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 FirebaseUser user = mFirebaseAuth.getCurrentUser();
                 if (user != null) {
-                    boolean isPasswordMode = false;
+                    /*boolean isPasswordMode = false;
                     for (UserInfo userInfo : user.getProviderData()) {
                         if (userInfo.getProviderId().equals("password")) {
                             if (!user.isEmailVerified()) {
@@ -80,11 +80,11 @@ public class SignInActivity extends AppCompatActivity {
                             break;
                         }
                     }
-                    if(!isPasswordMode) {
+                    if(!isPasswordMode) {*/
                         FirebaseManager.addUser(user);
                         openHomePageActivity();
                     }
-                }
+                //}
             } else {
                 if (response == null) {
                     Log.d("LULLO", "RESPONSE NULL" );

@@ -27,10 +27,10 @@ public class NetworkConnectionReceiver extends BroadcastReceiver {
     private ProgressDialog mProgressDialog;
     private FirebaseAuth mFirebaseAuth;
     private AlertDialog.Builder mAlertDialog;
-
+    private List<AuthUI.IdpConfig> providers;
     private final int RC_SIGN_IN = 10;
 
-    public NetworkConnectionReceiver(){
+    public NetworkConnectionReceiver() {
         super();
     }
 
@@ -42,24 +42,25 @@ public class NetworkConnectionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent arg1) {
         NetworkInfo activeNetwork = null;
-        if(mProgressDialog == null){
+        if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(mActivity);
             mProgressDialog.setMessage(mActivity.getString(R.string.connection_internet_dialog));
             mProgressDialog.setCancelable(false);
         }
         ConnectivityManager cm = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        if(cm != null)
-             activeNetwork = cm.getActiveNetworkInfo();
+        if (cm != null)
+            activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null
                 && activeNetwork.isConnectedOrConnecting();
+
         if (isConnected) {
             mFirebaseAuth = FirebaseAuth.getInstance();
             FirebaseUser user = mFirebaseAuth.getCurrentUser();
             if (user != null) {
                 for (UserInfo userInfo : mFirebaseAuth.getCurrentUser().getProviderData()) {
                     if (userInfo.getProviderId().equals("password")) {
-                        if(!user.isEmailVerified()){
+                        /*if (!user.isEmailVerified()) {
                             mAlertDialog = new AlertDialog.Builder(mActivity);
                             mAlertDialog.setMessage(mActivity.getString(R.string.email_verification));
                             mAlertDialog.setCancelable(false);
@@ -67,48 +68,54 @@ public class NetworkConnectionReceiver extends BroadcastReceiver {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.cancel();
-                                    List<AuthUI.IdpConfig> providers = null;
-                                    PackageManager pkManager = mActivity.getPackageManager();
-                                    try {
-                                        PackageInfo pkgInfo = pkManager.getPackageInfo("com.twitter.android", 0);
-                                        String getPkgInfo = pkgInfo.toString();
-
-                                        if (!getPkgInfo.equals("com.twitter.android"))   {
-                                            providers = Arrays.asList(
-                                                    new AuthUI.IdpConfig.EmailBuilder().build(),
-                                                    new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                                    new AuthUI.IdpConfig.FacebookBuilder().build(),
-                                                    new AuthUI.IdpConfig.TwitterBuilder().build());
-
-                                        }
-                                    } catch (PackageManager.NameNotFoundException e) {
-                                        providers = Arrays.asList(
-                                                new AuthUI.IdpConfig.EmailBuilder().build(),
-                                                new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                                new AuthUI.IdpConfig.FacebookBuilder().build());
-                                    }
-
-                                    if(providers != null){
-                                        mActivity.startActivityForResult(
-                                                AuthUI.getInstance()
-                                                        .createSignInIntentBuilder()
-                                                        .setIsSmartLockEnabled(false)
-                                                        .setTheme(R.style.LoginTheme)
-                                                        .setAvailableProviders(providers)
-                                                        .build(),
-                                                RC_SIGN_IN);
-                                    }
+                                    mActivity.finish();
                                 }
                             });
                             mAlertDialog.show();
-                        }
+                        }*/
                     }
                 }
+            } else {
+                setProviders();
             }
-            if(mProgressDialog.isShowing())
+            if (mProgressDialog.isShowing()) {
                 mProgressDialog.dismiss();
-        }else {
+            }
+        } else {
             mProgressDialog.show();
+        }
+    }
+
+    public void setProviders() {
+        PackageManager pkManager = mActivity.getPackageManager();
+        try {
+            PackageInfo pkgInfo = pkManager.getPackageInfo("com.twitter.android", 0);
+            String getPkgInfo = pkgInfo.toString();
+
+            if (!getPkgInfo.equals("com.twitter.android")) {
+                providers = Arrays.asList(
+                        new AuthUI.IdpConfig.EmailBuilder().build(),
+                        new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.FacebookBuilder().build(),
+                        new AuthUI.IdpConfig.TwitterBuilder().build());
+
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            providers = Arrays.asList(
+                    new AuthUI.IdpConfig.EmailBuilder().build(),
+                    new AuthUI.IdpConfig.GoogleBuilder().build(),
+                    new AuthUI.IdpConfig.FacebookBuilder().build());
+        }
+
+        if (providers != null) {
+            mActivity.startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setIsSmartLockEnabled(false)
+                            .setTheme(R.style.LoginTheme)
+                            .setAvailableProviders(providers)
+                            .build(),
+                    RC_SIGN_IN);
         }
     }
 }

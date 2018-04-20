@@ -39,7 +39,7 @@
     <string name="load_book_book_not_found">Libro non trovato</string>
     <string name="load_book_autofill_request_error">Errore durante la richiesta delle informazioni del libro</string>
     <string name="connection_internet_dialog">Attesa della connessione internet</string>
-    <string name="email_verification">Verificare l\'email per procedere con il login, altrimenti cambiare metodo di accesso</string>
+    <string name="email_verification">Verificare l\'email per procedere con il login, altrimenti cambiare metodo di accesso.</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_profile">Profilo</string>

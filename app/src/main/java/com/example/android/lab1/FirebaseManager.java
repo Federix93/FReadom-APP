@@ -19,7 +19,7 @@ public class FirebaseManager {
     public static void addUser(final FirebaseUser user) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        boolean hasAccessInPasswordMode = true;
+       /* boolean hasAccessInPasswordMode = true;
         boolean isPasswordMode = false;
         for (UserInfo userInfo : user.getProviderData()) {
             if (userInfo.getProviderId().equals("password")) {
@@ -32,7 +32,7 @@ public class FirebaseManager {
 
         if (isPasswordMode && !hasAccessInPasswordMode)
             return;
-        else {
+        else {*/
             if (user.getEmail() != null) {
                 final DocumentReference documentReference = db.collection("users").document(user.getUid());
                 documentReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -63,6 +63,6 @@ public class FirebaseManager {
                 });
             }
         }
-    }
+    //}
 
 }
