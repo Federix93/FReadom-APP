@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.model.Book;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -35,7 +37,6 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
     @NonNull
     @Override
     public BookViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.recycler_book_item, parent, false);
         return new BookViewHolder(view);
@@ -61,6 +62,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
         TextView mTitle, mAuthor;
         ImageView mThumbnail, mOverflow;
+        StorageReference mStorageReference;
 
         public BookViewHolder(View itemView) {
             super(itemView);
@@ -77,10 +79,12 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         {
             mTitle.setText(book.getTitle());
             mAuthor.setText(book.getAuthor());
-            if (book.getThumbnail() != null) {
-                new DownLoadImageTask(mThumbnail).execute(book.getThumbnail());
-            } else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
-                new DownLoadImageTask(mThumbnail).execute(book.getBookImagesUrls().get(0));
+            /*if (book.getThumbnail() != null) {
+                mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getThumbnail());
+                Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
+            } else */if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
+                mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getBookImagesUrls().get(0));
+                Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
             } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mThumbnail);
             mOverflow.setOnClickListener(new View.OnClickListener() {
@@ -125,7 +129,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         }
     }
 
-    private class DownLoadImageTask extends AsyncTask<String, Void, Bitmap> {
+    /*private class DownLoadImageTask extends AsyncTask<String, Void, Bitmap> {
         // TODO move this inner class somewhere else
         private ImageView mTarget;
 
@@ -138,10 +142,10 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
             Bitmap logo = null;
             try {
                 InputStream is = new URL(strings[0]).openStream();
-                /*
-                    decodeStream(InputStream is)
-                        Decode an input stream into a bitmap.
-                 */
+
+                    //decodeStream(InputStream is)
+                      //  Decode an input stream into a bitmap.
+
                 logo = BitmapFactory.decodeStream(is);
             } catch (Exception e) { // Catch the download exception
                 e.printStackTrace();
@@ -152,5 +156,5 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         protected void onPostExecute(Bitmap result) {
             mTarget.setImageBitmap(result);
         }
-    }
+    }*/
 }
