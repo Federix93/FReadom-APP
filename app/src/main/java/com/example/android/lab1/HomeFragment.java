@@ -17,11 +17,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.FocusFinder;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,7 +80,6 @@ public class HomeFragment extends Fragment {
             NUM_COLUMNS = 4;
         }
 
-
         mToolbar.setTitle(getString(R.string.toolbar_title_home));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
@@ -88,10 +89,6 @@ public class HomeFragment extends Fragment {
                 int clickedId = item.getItemId();
                 switch (clickedId)
                 {
-                    case R.id.action_search:
-                        Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
-                        break;
-
                     case R.id.action_filter:
                         Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
                         break;
@@ -100,6 +97,8 @@ public class HomeFragment extends Fragment {
                 return true;
             }
         });
+
+        setupToolbarSearch(mToolbar.getMenu(), R.id.action_search);
 
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(),NUM_COLUMNS);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -148,6 +147,28 @@ public class HomeFragment extends Fragment {
         });
 
         return mRootView;
+    }
+
+    private void setupToolbarSearch(Menu menu, int itemId) {
+        final MenuItem searchItem = menu.findItem(itemId);
+        final SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Toast.makeText(getActivity(), "Search: " +query, Toast.LENGTH_SHORT).show();
+                /*if( ! searchView.isIconified()) {
+                    searchView.setIconified(true);
+                }*/
+                searchItem.collapseActionView();
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String s) {
+                //Toast.makeText(getActivity(), "Text now is " +s, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+
     }
 
     @Override
