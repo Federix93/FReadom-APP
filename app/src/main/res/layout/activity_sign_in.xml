@@ -1,12 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SignInActivity"
-    android:background="@drawable/background"
-    android:id="@+id/root">
+    tools:context=".SignInActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <ImageView
+        android:layout_width="272dp"
+        android:id="@+id/logo"
+        android:layout_height="272dp"
+        android:layout_centerInParent="true"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/buttons_container_linear_layout"
+        android:orientation="vertical">
+
+    <Button
+        android:id="@+id/open_without_login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/FirebaseUI.Button"
+        android:text="LULLO1"/>
+
+    <Button
+        android:id="@+id/open_firebase_ui_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/FirebaseUI.Button"
+        android:text="LULLO2"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
 

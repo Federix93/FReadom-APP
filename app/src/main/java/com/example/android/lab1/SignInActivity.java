@@ -4,16 +4,31 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,6 +36,10 @@ public class SignInActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 10;
     private FirebaseAuth mFirebaseAuth;
+
+    ImageView mLogoImageView;
+    RelativeLayout mRootRelativeLayout;
+    LinearLayout mContainerLinearLayout;
 
     private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
 
@@ -32,19 +51,31 @@ public class SignInActivity extends AppCompatActivity {
         mNetworkConnectionBroadcastReceiver = new NetworkConnectionReceiver(this);
         mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
+
+        mLogoImageView = findViewById(R.id.logo);
+        mRootRelativeLayout = findViewById(R.id.root);
+        mContainerLinearLayout = findViewById(R.id.buttons_container_linear_layout);
+
+        GlideApp.with(this).load(R.drawable.background).diskCacheStrategy(DiskCacheStrategy.DATA).into(new SimpleTarget<Drawable>() {
+            @Override
+            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                mRootRelativeLayout.setBackground(resource);
+            }
+        });
+
+        Glide.with(this)
+                .load(R.drawable.bookique).apply(new RequestOptions().transforms(new CenterCrop()))
+                .transition(new DrawableTransitionOptions().transition(R.anim.logo_animation))
+                .into(mLogoImageView);
+
+        Animation logoMoveAnimation = AnimationUtils.loadAnimation(this, R.anim.button_animation);
+        mContainerLinearLayout.startAnimation(logoMoveAnimation);
+
         if (user != null) {
-            /*if (!isEmailAndPasswordProvider()) {
-                FirebaseManager.addUser(user);
-                openHomePageActivity();
-            } else {
-                user.reload();*/
-                //if (user.isEmailVerified()) {
-                    FirebaseManager.addUser(user);
-                    openHomePageActivity();
-              //  }
-            //}
+            //FirebaseManager.addUser(user);
+            //openHomePageActivity();
         } else {
-            openFirebaseUI();
+            //openFirebaseUI();
         }
     }
 
@@ -70,24 +101,12 @@ public class SignInActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 FirebaseUser user = mFirebaseAuth.getCurrentUser();
                 if (user != null) {
-                    /*boolean isPasswordMode = false;
-                    for (UserInfo userInfo : user.getProviderData()) {
-                        if (userInfo.getProviderId().equals("password")) {
-                            if (!user.isEmailVerified()) {
-                                isPasswordMode = true;
-                                user.sendEmailVerification();
-                            }
-                            break;
-                        }
-                    }
-                    if(!isPasswordMode) {*/
-                        FirebaseManager.addUser(user);
-                        openHomePageActivity();
-                    }
-                //}
+                    FirebaseManager.addUser(user);
+                    openHomePageActivity();
+                }
             } else {
                 if (response == null) {
-                    Log.d("LULLO", "RESPONSE NULL" );
+                    Log.d("LULLO", "RESPONSE NULL");
                     finish();
                     return;
                 }
@@ -107,14 +126,14 @@ public class SignInActivity extends AppCompatActivity {
         return false;
     }
 
-    private void openHomePageActivity(){
+    private void openHomePageActivity() {
         Intent intent = new Intent(this, HomePageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
     }
 
-    private void openFirebaseUI(){
+    private void openFirebaseUI() {
 
         List<AuthUI.IdpConfig> providers = null;
         PackageManager pkManager = this.getPackageManager();
@@ -122,7 +141,7 @@ public class SignInActivity extends AppCompatActivity {
             PackageInfo pkgInfo = pkManager.getPackageInfo("com.twitter.android", 0);
             String getPkgInfo = pkgInfo.toString();
 
-            if (!getPkgInfo.equals("com.twitter.android"))   {
+            if (!getPkgInfo.equals("com.twitter.android")) {
                 providers = Arrays.asList(
                         new AuthUI.IdpConfig.EmailBuilder().build(),
                         new AuthUI.IdpConfig.GoogleBuilder().build(),
@@ -137,12 +156,13 @@ public class SignInActivity extends AppCompatActivity {
                     new AuthUI.IdpConfig.FacebookBuilder().build());
         }
 
-        if(providers != null){
+        if (providers != null) {
             startActivityForResult(
                     AuthUI.getInstance()
                             .createSignInIntentBuilder()
                             .setIsSmartLockEnabled(false)
                             .setTheme(R.style.LoginTheme)
+                            .setLogo(R.drawable.bookique)
                             .setAvailableProviders(providers)
                             .build(),
                     RC_SIGN_IN);

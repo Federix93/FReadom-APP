@@ -57,27 +57,15 @@ public class NetworkConnectionReceiver extends BroadcastReceiver {
         if (isConnected) {
             mFirebaseAuth = FirebaseAuth.getInstance();
             FirebaseUser user = mFirebaseAuth.getCurrentUser();
-            if (user != null) {
+            /*if (user != null) {
                 for (UserInfo userInfo : mFirebaseAuth.getCurrentUser().getProviderData()) {
                     if (userInfo.getProviderId().equals("password")) {
-                        /*if (!user.isEmailVerified()) {
-                            mAlertDialog = new AlertDialog.Builder(mActivity);
-                            mAlertDialog.setMessage(mActivity.getString(R.string.email_verification));
-                            mAlertDialog.setCancelable(false);
-                            mAlertDialog.setPositiveButton(mActivity.getString(R.string.verification_email_confirm), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                    mActivity.finish();
-                                }
-                            });
-                            mAlertDialog.show();
-                        }*/
+
                     }
                 }
             } else {
                 setProviders();
-            }
+            }*/
             if (mProgressDialog.isShowing()) {
                 mProgressDialog.dismiss();
             }
