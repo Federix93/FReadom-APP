@@ -115,9 +115,11 @@ public class HomeFragment extends Fragment {
                     return;
                 }
                 List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
-                for(int i = 0; i < books.size(); i++) {
-                    if(books.get(i).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
-                        books.remove(i);
+                if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    for (int i = 0; i < books.size(); i++) {
+                        if (books.get(i).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            books.remove(i);
+                        }
                     }
                 }
 

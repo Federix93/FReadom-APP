@@ -11,6 +11,8 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -36,6 +38,8 @@ public class SignInActivity extends AppCompatActivity {
 
     ImageView mLogoImageView;
     ConstraintLayout mRootConstraintLayout;
+    Button mLoginButton;
+    Button mWithoutLoginButton;
 
     private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
 
@@ -48,8 +52,14 @@ public class SignInActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
 
+        if(user != null){
+            openHomePageActivity();
+        }
+
         mLogoImageView = findViewById(R.id.logo);
         mRootConstraintLayout = findViewById(R.id.root);
+        mLoginButton = findViewById(R.id.open_firebase_ui_button);
+        mWithoutLoginButton = findViewById(R.id.open_without_login_button);
 
         GlideApp.with(this).load(R.drawable.background).diskCacheStrategy(DiskCacheStrategy.DATA).into(new SimpleTarget<Drawable>() {
             @Override
@@ -63,14 +73,19 @@ public class SignInActivity extends AppCompatActivity {
                 .transition(new DrawableTransitionOptions().transition(R.anim.button_animation))
                 .into(mLogoImageView);
 
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openFirebaseUI();
+            }
+        });
 
-
-        if (user != null) {
-            //FirebaseManager.addUser(user);
-            //openHomePageActivity();
-        } else {
-            //openFirebaseUI();
-        }
+        mWithoutLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openHomePageActivity();
+            }
+        });
     }
 
     @Override
@@ -100,12 +115,9 @@ public class SignInActivity extends AppCompatActivity {
                 }
             } else {
                 if (response == null) {
-                    Log.d("LULLO", "RESPONSE NULL");
-                    finish();
                     return;
                 }
                 if (response.getError() != null) {
-                    Log.d("LULLO", "RESPONSE: " + response.getError());
                 }
             }
         }
