@@ -7,14 +7,11 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -38,8 +35,7 @@ public class SignInActivity extends AppCompatActivity {
     private FirebaseAuth mFirebaseAuth;
 
     ImageView mLogoImageView;
-    RelativeLayout mRootRelativeLayout;
-    LinearLayout mContainerLinearLayout;
+    ConstraintLayout mRootConstraintLayout;
 
     private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
 
@@ -53,23 +49,21 @@ public class SignInActivity extends AppCompatActivity {
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
 
         mLogoImageView = findViewById(R.id.logo);
-        mRootRelativeLayout = findViewById(R.id.root);
-        mContainerLinearLayout = findViewById(R.id.buttons_container_linear_layout);
+        mRootConstraintLayout = findViewById(R.id.root);
 
         GlideApp.with(this).load(R.drawable.background).diskCacheStrategy(DiskCacheStrategy.DATA).into(new SimpleTarget<Drawable>() {
             @Override
             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                mRootRelativeLayout.setBackground(resource);
+                mRootConstraintLayout.setBackground(resource);
             }
         });
 
         Glide.with(this)
                 .load(R.drawable.bookique).apply(new RequestOptions().transforms(new CenterCrop()))
-                .transition(new DrawableTransitionOptions().transition(R.anim.logo_animation))
+                .transition(new DrawableTransitionOptions().transition(R.anim.button_animation))
                 .into(mLogoImageView);
 
-        Animation logoMoveAnimation = AnimationUtils.loadAnimation(this, R.anim.button_animation);
-        mContainerLinearLayout.startAnimation(logoMoveAnimation);
+
 
         if (user != null) {
             //FirebaseManager.addUser(user);

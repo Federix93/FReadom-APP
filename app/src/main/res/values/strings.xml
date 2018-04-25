@@ -64,4 +64,7 @@
 
     <string name="toolbar_title_home">Ricerca libri</string>
 
+    <string name="button_signin">ACCEDI</string>
+    <string name="access_without_login">CONTINUA SENZA ACCEDERE</string>
+
 </resources>

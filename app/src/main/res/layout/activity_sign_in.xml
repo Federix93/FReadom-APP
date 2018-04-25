@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
     android:layout_width="match_parent"
@@ -7,34 +8,56 @@
     tools:context=".SignInActivity">
 
     <ImageView
-        android:layout_width="272dp"
         android:id="@+id/logo"
-        android:layout_height="272dp"
-        android:layout_centerInParent="true"/>
+        android:layout_width="0dp"
+        android:layout_height="320dp"
+        android:layout_marginEnd="56dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="72dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toTopOf="@+id/open_firebase_ui_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.3"
+        app:layout_constraintVertical_chainStyle="packed" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/buttons_container_linear_layout"
-        android:orientation="vertical">
-
-    <Button
-        android:id="@+id/open_without_login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/FirebaseUI.Button"
-        android:text="LULLO1"/>
 
     <Button
         android:id="@+id/open_firebase_ui_button"
+        style="@style/FirebaseUI.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="24dp"
+        android:padding="24dp"
+        android:text="@string/button_signin"
+        android:textSize="18sp"
+        android:textColorHighlight="@color/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@id/open_without_login_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logo"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/open_without_login_button"
         style="@style/FirebaseUI.Button"
-        android:text="LULLO2"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="24dp"
+        android:textColorHighlight="@color/colorPrimary"
+        android:text="@string/access_without_login"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/open_firebase_ui_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    </LinearLayout>
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>
 
