@@ -1,6 +1,7 @@
 package com.example.android.lab1;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -18,13 +19,15 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.lab1.model.User;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -35,6 +38,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -52,6 +57,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private GoogleMap mMap;
     private TextView mCurrentPositionTextView;
     private ImageView mConfirmPosition;
+    private static final int ADDRESS_SEARCH_BAR_REQUEST = 11;
 
     protected Location mCurrentLocationSelected;
     protected Location mLastLocation;
@@ -68,7 +74,9 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
+    private ImageView mSearchAddressImageView;
     public static final String ADDRESS_KEY = "ADDRESS_KEY";
+    private Activity mSelf;
 
 
     @Override
@@ -76,6 +84,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_position);
 
+        mSearchAddressImageView = findViewById(R.id.position_search_address);
         mToolbar = findViewById(R.id.toolbar_position);
         mToolbar.setTitle(R.string.text_position_toolbar);
         mToolbar.setNavigationIcon(R.drawable.ic_close_black_24dp);
@@ -93,6 +102,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 onBackPressed();
             }
         });
+
 
         manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -153,12 +163,25 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (!(requestCode == PLAY_SERVICES_RESOLUTION_REQUEST && resultCode == RESULT_OK)) {
-            finish();
-        } else {
+        if (requestCode == PLAY_SERVICES_RESOLUTION_REQUEST && resultCode == RESULT_OK) {
             mGoogleApiClient.disconnect();
             mGoogleApiClient = null;
             finish();
+        } else if (requestCode == ADDRESS_SEARCH_BAR_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(this, data);
+                setMarker(place.getLatLng());
+                // TODO deliver back place object
+                mCurrentPositionTextView.setText(place.getAddress());
+                Log.i("AUTOCOMPLETE", "Place: " + place.getName());
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+                // TODO: Handle the error.
+                Log.i("AUTOCOMPLETE", status.getStatusMessage());
+
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
         }
     }
 
@@ -254,6 +277,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             }
         }
         try {
+            //LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(mLocationRe);
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             if (mLastLocation == null)
                 getLocationData();
@@ -282,6 +306,22 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocationSelected = location;
+        mSelf = this;
+        mSearchAddressImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent i = Utilities.getSearchBarIntent(mSelf,
+                            new LatLng(mCurrentLocationSelected.getLatitude(), mCurrentLocationSelected.getLongitude()),
+                            (double) getResources().getInteger(R.integer.position_radius_address));
+                    startActivityForResult(i, ADDRESS_SEARCH_BAR_REQUEST);
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     class AddressResultReceiver extends ResultReceiver {
@@ -304,13 +344,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     LatLng currentPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     mMap.clear();
                     mMap.addMarker(new MarkerOptions().position(currentPosition).title("SELECTED POSITION"));
-                    if (mInitialZoom == null)
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, mMap.getCameraPosition().zoom));
-                    else
-                    {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, mInitialZoom));
-                        mInitialZoom = null;
-                    }
                     setMapClick(mMap);
                 }
             } else {
@@ -353,6 +386,17 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         ;
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+    private void setMarker(LatLng position) {
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(position));
+        if (mInitialZoom == null)
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, mMap.getCameraPosition().zoom));
+        else {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, mInitialZoom));
+            mInitialZoom = null;
+        }
     }
 
 }
