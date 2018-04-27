@@ -115,6 +115,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_position);
 
+        // init toolbar
         mSearchAddressImageView = findViewById(R.id.position_search_address);
         mToolbar = findViewById(R.id.toolbar_position);
         mToolbar.setTitle(R.string.text_position_toolbar);
@@ -151,7 +152,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         mInitialZoom = new Float(12.0);
         mSelf = this;
 
-
+        // network listener setup
         mNetworkAvaiable = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -319,6 +320,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         if (Utilities.checkPermissionActivity(mSelf, Manifest.permission.ACCESS_FINE_LOCATION)
                 && isLocationEnabled(getApplicationContext())) {
             enableLoc();
+            // make one time position request
             LocationServices
                     .getFusedLocationProviderClient(mSelf)
                     .requestLocationUpdates(LocationRequest.create(),
@@ -333,6 +335,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                                         @Override
                                         public void onClick(View v) {
                                             try {
+                                                // load address bar
                                                 Intent intent = Utilities.getSearchBarIntent(mSelf,
                                                         new LatLng(location.getLatitude(), location.getLongitude()),
                                                         (double) getResources().getInteger(R.integer.position_radius_address));
@@ -346,6 +349,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                                             }
                                         }
                                     });
+                                    // translate latlng to address
                                     resolveLocation(location);
                                 }
                             }, null);
