@@ -1,4 +1,4 @@
-package com.example.android.lab1;
+package com.example.android.lab1.utils.glideimageloader;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

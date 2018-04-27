@@ -1,10 +1,9 @@
-package com.example.android.lab1;
+package com.example.android.lab1.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.android.lab1.model.User;
-import com.google.gson.Gson;
+import com.example.android.lab1.R;
 
 /**
  * Created by Federico on 20/03/2018.

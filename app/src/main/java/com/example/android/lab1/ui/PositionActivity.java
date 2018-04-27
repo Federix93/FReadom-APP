@@ -1,4 +1,4 @@
-package com.example.android.lab1;
+package com.example.android.lab1.ui;
 
 import android.Manifest;
 import android.content.Context;
@@ -23,7 +23,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.lab1.model.User;
+import com.example.android.lab1.utils.FetchAddressIntentService;
+import com.example.android.lab1.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;

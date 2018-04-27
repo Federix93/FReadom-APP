@@ -1,7 +1,6 @@
-package com.example.android.lab1;
+package com.example.android.lab1.utils.glideimageloader;
 
 import android.content.Context;
-import android.os.storage.StorageManager;
 import android.support.annotation.NonNull;
 
 import com.bumptech.glide.Glide;

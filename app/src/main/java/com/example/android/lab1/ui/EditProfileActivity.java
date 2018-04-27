@@ -1,4 +1,4 @@
-package com.example.android.lab1;
+package com.example.android.lab1.ui;
 
 import android.Manifest;
 import android.app.Activity;
@@ -23,7 +23,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.example.android.lab1.model.Condition;
+import com.example.android.lab1.R;
+import com.example.android.lab1.utils.SharedPreferencesManager;
+import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

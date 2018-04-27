@@ -22,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".EditProfileActivity" />
+        <activity android:name=".ui.EditProfileActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -34,14 +34,14 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".LoadBookActivity"
-            android:parentActivityName=".HomePageActivity">
+        <activity android:name=".ui.LoadBookActivity"
+            android:parentActivityName=".ui.homepage.HomePageActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HomePageActivity" />
+                android:value=".ui.homepage.HomePageActivity" />
         </activity>
 
-        <activity android:name=".ScanBarCodeActivity" />
+        <activity android:name=".ui.ScanBarCodeActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -76,17 +76,17 @@
         </activity>
 
         <activity
-            android:name=".PositionActivity"
+            android:name=".ui.PositionActivity"
             android:theme="@style/AppTheme" />
 
-        <activity android:name=".HomePageActivity"/>
+        <activity android:name=".ui.homepage.HomePageActivity"/>
 
 
         <service
-            android:name=".FetchAddressIntentService"
+            android:name=".utils.FetchAddressIntentService"
             android:exported="false" />
 
-        <activity android:name=".SignInActivity">
+        <activity android:name=".ui.SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -94,7 +94,7 @@
         </activity>
 
         <receiver
-            android:name=".NetworkConnectionReceiver">
+            android:name=".utils.NetworkConnectionReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>

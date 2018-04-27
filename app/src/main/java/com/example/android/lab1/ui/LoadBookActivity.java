@@ -1,4 +1,4 @@
-package com.example.android.lab1;
+package com.example.android.lab1.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -48,6 +48,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.android.lab1.adapter.ImagePagerAdapter;
+import com.example.android.lab1.R;
+import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
 import com.google.android.gms.tasks.OnFailureListener;

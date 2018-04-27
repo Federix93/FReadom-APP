@@ -1,12 +1,12 @@
-package com.example.android.lab1;
+package com.example.android.lab1.ui.homepage;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.example.android.lab1.R;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;

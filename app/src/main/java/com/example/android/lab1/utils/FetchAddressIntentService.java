@@ -1,7 +1,6 @@
-package com.example.android.lab1;
+package com.example.android.lab1.utils;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -10,7 +9,8 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
+
+import com.example.android.lab1.R;
 
 import java.io.IOException;
 import java.util.ArrayList;

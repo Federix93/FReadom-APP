@@ -1,13 +1,9 @@
-package com.example.android.lab1;
+package com.example.android.lab1.ui;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
-import com.google.zxing.Result;
+import com.example.android.lab1.R;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 

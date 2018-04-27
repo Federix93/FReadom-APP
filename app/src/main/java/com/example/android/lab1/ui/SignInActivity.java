@@ -1,4 +1,4 @@
-package com.example.android.lab1;
+package com.example.android.lab1.ui;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -22,6 +21,11 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.android.lab1.FirebaseManager;
+import com.example.android.lab1.GlideApp;
+import com.example.android.lab1.utils.NetworkConnectionReceiver;
+import com.example.android.lab1.R;
+import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;

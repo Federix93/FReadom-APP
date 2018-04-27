@@ -1,4 +1,4 @@
-package com.example.android.lab1;
+package com.example.android.lab1.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.android.lab1.R;
 
 import java.io.File;
 import java.util.ArrayList;
