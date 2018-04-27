@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.example.android.lab1.ui.PositionActivity;
+
 public class NetworkReceiver extends BroadcastReceiver {
 
     public static final String NETWORK_AVAILABILITY_RESULT = "NETWORK_AVAILABLE";
