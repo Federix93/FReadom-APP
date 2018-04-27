@@ -125,9 +125,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
         mCurrentPositionTextView = findViewById(R.id.current_position_text_view);
         mConfirmPosition = findViewById(R.id.confirm_position_image_view);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,6 +182,10 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -277,14 +279,19 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                    if (mMap != null && !mMap.isMyLocationEnabled())
+                        mMap.setMyLocationEnabled(true);
+                    if (!isLocationEnabled(getApplicationContext()))
                         enableLoc();
+                    else
+                        getCurrentLocation();
                 } else {
                     finish();
                 }
@@ -303,7 +310,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 return true;
             }
         });
-        if (Utilities.checkPermissionActivity(this, Manifest.permission.ACCESS_FINE_LOCATION))
+        if (Utilities.checkPermissionActivity(mSelf, Manifest.permission.ACCESS_FINE_LOCATION))
             mMap.setMyLocationEnabled(true);
         getCurrentLocation();
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
@@ -317,44 +324,45 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
     @SuppressLint("MissingPermission")
     private void getCurrentLocation() {
-        if (Utilities.checkPermissionActivity(mSelf, Manifest.permission.ACCESS_FINE_LOCATION)
-                && isLocationEnabled(getApplicationContext())) {
-            enableLoc();
-            // make one time position request
-            LocationServices
-                    .getFusedLocationProviderClient(mSelf)
-                    .requestLocationUpdates(LocationRequest.create(),
-                            new LocationCallback() {
-                                @Override
-                                public void onLocationResult(LocationResult locationResult) {
-                                    if (locationResult == null || locationResult.getLocations().size() == 0) {
-                                        return;
-                                    }
-                                    final Location location = locationResult.getLocations().get(0);
-                                    mSearchAddressImageView.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            try {
-                                                // load address bar
-                                                Intent intent = Utilities.getSearchBarIntent(mSelf,
-                                                        new LatLng(location.getLatitude(), location.getLongitude()),
-                                                        (double) getResources().getInteger(R.integer.position_radius_address));
-                                                startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-                                            } catch (GooglePlayServicesRepairableException e) {
-                                                // TODO: Handle the error.
-                                                e.printStackTrace();
-                                            } catch (GooglePlayServicesNotAvailableException e) {
-                                                // TODO: Handle the error.
-                                                e.printStackTrace();
-                                            }
+        if (Utilities.checkPermissionActivity(mSelf, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (!isLocationEnabled(getApplicationContext()))
+                enableLoc();
+            else
+                // make one time position request
+                LocationServices.getFusedLocationProviderClient(mSelf)
+                        .requestLocationUpdates(LocationRequest.create(),
+                                new LocationCallback() {
+                                    @Override
+                                    public void onLocationResult(LocationResult locationResult) {
+                                        if (locationResult == null || locationResult.getLocations().size() == 0) {
+                                            return;
                                         }
-                                    });
-                                    // translate latlng to address
-                                    resolveLocation(location);
-                                }
-                            }, null);
+                                        final Location location = locationResult.getLocations().get(0);
+                                        mSearchAddressImageView.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                try {
+                                                    // load address bar
+                                                    Intent intent = Utilities.getSearchBarIntent(mSelf,
+                                                            new LatLng(location.getLatitude(), location.getLongitude()),
+                                                            (double) getResources().getInteger(R.integer.position_radius_address));
+                                                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                                                } catch (GooglePlayServicesRepairableException e) {
+                                                    // TODO: Handle the error.
+                                                    e.printStackTrace();
+                                                } catch (GooglePlayServicesNotAvailableException e) {
+                                                    // TODO: Handle the error.
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
+                                        // translate latlng to address
+                                        resolveLocation(location);
+                                    }
+                                }, null);
         } else {
-            enableLoc();
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
 
