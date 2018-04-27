@@ -27,14 +27,15 @@
 
     <Button
         android:id="@+id/open_firebase_ui_button"
-        style="@style/FirebaseUI.Button"
-        android:layout_width="wrap_content"
+        style="@style/FirebaseUI.Button.AccountChooser.GoogleButton"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
         android:layout_marginTop="24dp"
-        android:padding="24dp"
+        android:textAlignment="center"
         android:text="@string/button_signin"
-        android:textSize="18sp"
         android:textColorHighlight="@color/colorPrimary"
         app:layout_constraintBottom_toTopOf="@id/open_without_login_button"
         app:layout_constraintEnd_toEndOf="parent"
@@ -45,18 +46,20 @@
 
     <Button
         android:id="@+id/open_without_login_button"
-        style="@style/FirebaseUI.Button"
-        android:layout_width="wrap_content"
+        style="@style/FirebaseUI.Button.AccountChooser.GoogleButton"
+        android:textAlignment="center"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:padding="24dp"
-        android:textColorHighlight="@color/colorPrimary"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
         android:text="@string/access_without_login"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/open_firebase_ui_button"
+        android:textColorHighlight="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/open_firebase_ui_button" />
 
 
 </android.support.constraint.ConstraintLayout>
