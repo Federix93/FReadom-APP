@@ -90,7 +90,10 @@ public class HomeFragment extends Fragment {
                 switch (clickedId)
                 {
                     case R.id.action_filter:
-                        Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getActivity(), SearchTestActivity.class);
+                        startActivity(intent);
+                        //Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+
                         break;
 
                 }
@@ -114,6 +117,7 @@ public class HomeFragment extends Fragment {
                     return;
                 }
                 List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
+
                 for(int i = 0; i < books.size(); i++) {
                     if(books.get(i).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
                         books.remove(i);

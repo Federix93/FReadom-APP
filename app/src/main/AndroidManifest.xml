@@ -21,7 +21,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".EditProfileActivity" />
 
         <provider
@@ -34,13 +33,13 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".LoadBookActivity"
+        <activity
+            android:name=".LoadBookActivity"
             android:parentActivityName=".HomePageActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".HomePageActivity" />
         </activity>
-
         <activity android:name=".ScanBarCodeActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -58,29 +57,28 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_application_id"
-            tools:replace="android:value"/>
+            tools:replace="android:value" />
 
-        <activity android:name="com.facebook.FacebookActivity"
-            android:configChanges=
-                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name" />
         <activity
             android:name="com.facebook.CustomTabActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".PositionActivity"
             android:theme="@style/AppTheme" />
-
-        <activity android:name=".HomePageActivity"/>
-
+        <activity android:name=".HomePageActivity" />
 
         <service
             android:name=".FetchAddressIntentService"
@@ -89,16 +87,18 @@
         <activity android:name=".SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".NetworkConnectionReceiver">
+        <receiver android:name=".NetworkConnectionReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".SearchTestActivity" />
     </application>
 
 </manifest>
