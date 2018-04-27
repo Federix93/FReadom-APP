@@ -75,10 +75,9 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         {
             mTitle.setText(book.getTitle());
             mAuthor.setText(book.getAuthor());
-            /*if (book.getThumbnail() != null) {
-                mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getThumbnail());
-                Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
-            } else */if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
+            if (book.getThumbnail() != null) {
+                Glide.with(itemView.getContext()).load(book.getThumbnail()).into(mThumbnail);
+            } else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
                 mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getBookImagesUrls().get(0));
                 Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
             } else
