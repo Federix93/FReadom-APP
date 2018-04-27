@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,8 +33,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -50,9 +49,7 @@ public class HomePageActivity extends AppCompatActivity
     ImageView mProfileImage;
     TextView mUsernameTextView;
     TextView mEmailTextView;
-
-
-    private User mUser;
+    LinearLayout mSideNavLinearLayout;
 
     private static final int HOME_FRAGMENT = 0;
     private static final int DASH_FRAGMENT = 1;
@@ -78,6 +75,9 @@ public class HomePageActivity extends AppCompatActivity
         mProfileImage = header.findViewById(R.id.profile_image);
         mUsernameTextView = header.findViewById(R.id.name_text_nav_drawer);
         mEmailTextView = header.findViewById(R.id.email_text_nav_drawer);
+        mSideNavLinearLayout = header.findViewById(R.id.header_nav_drawer);
+
+        header.setBackgroundResource(R.drawable.background);
 
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
