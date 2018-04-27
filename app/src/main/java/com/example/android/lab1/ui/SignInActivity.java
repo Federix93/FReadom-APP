@@ -25,7 +25,7 @@ import com.example.android.lab1.FirebaseManager;
 import com.example.android.lab1.GlideApp;
 import com.example.android.lab1.utils.NetworkConnectionReceiver;
 import com.example.android.lab1.R;
-import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.ui.homepage.HomePageToDeleteActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
@@ -137,7 +137,7 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void openHomePageActivity() {
-        Intent intent = new Intent(this, HomePageActivity.class);
+        Intent intent = new Intent(this, HomePageToDeleteActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();

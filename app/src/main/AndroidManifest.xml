@@ -35,10 +35,10 @@
         </provider>
 
         <activity android:name=".ui.LoadBookActivity"
-            android:parentActivityName=".ui.homepage.HomePageActivity">
+            android:parentActivityName=".ui.homepage.HomePageToDeleteActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.homepage.HomePageActivity" />
+                android:value=".ui.homepage.HomePageToDeleteActivity" />
         </activity>
 
         <activity android:name=".ui.ScanBarCodeActivity" />
@@ -79,7 +79,7 @@
             android:name=".ui.PositionActivity"
             android:theme="@style/AppTheme" />
 
-        <activity android:name=".ui.homepage.HomePageActivity"/>
+        <activity android:name=".ui.homepage.HomePageToDeleteActivity"/>
 
 
         <service

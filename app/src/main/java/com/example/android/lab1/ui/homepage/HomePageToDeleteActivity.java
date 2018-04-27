@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
-public class HomePageActivity extends AppCompatActivity {
+public class HomePageToDeleteActivity extends AppCompatActivity {
 
     private static final int HOME_FRAGMENT = 0;
     private static final int DASH_FRAGMENT = 1;
@@ -25,7 +25,7 @@ public class HomePageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_page);
+        setContentView(R.layout.activity_home_page_to_delete);
 
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 

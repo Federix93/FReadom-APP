@@ -50,7 +50,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.android.lab1.adapter.ImagePagerAdapter;
 import com.example.android.lab1.R;
-import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.ui.homepage.HomePageToDeleteActivity;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
@@ -400,7 +400,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 // using documentReference create a folder on storage for storing photos
-                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                Intent intent = new Intent(getApplicationContext(), HomePageToDeleteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 finish();
@@ -411,7 +411,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 findViewById(R.id.load_book_progress_bar).setVisibility(View.GONE);
                 mIsbnImageView.setVisibility(View.VISIBLE);
                 Toast.makeText(getApplicationContext(), R.string.load_book_upload_error, Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                Intent intent = new Intent(getApplicationContext(), HomePageToDeleteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 finish();
