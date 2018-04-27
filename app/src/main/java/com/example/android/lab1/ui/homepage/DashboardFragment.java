@@ -38,7 +38,7 @@ public class DashboardFragment extends Fragment {
 
         mFt = getChildFragmentManager();
 
-        mToolbar = getActivity().findViewById(R.id.toolbar_main_activity);
+        mToolbar = getActivity().findViewById(R.id.toolbar_home_page_activity);
 
         mToolbar.setTitle(R.string.title_dashboard);
         mToolbar.getMenu().clear();

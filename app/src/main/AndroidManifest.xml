@@ -84,9 +84,7 @@
             android:name=".utils.FetchAddressIntentService"
             android:exported="false" />
 
-        <activity android:name=".ui.SignInActivity">
-
-        </activity>
+        <activity android:name=".ui.SignInActivity"></activity>
 
         <receiver android:name=".utils.NetworkConnectionReceiver">
             <intent-filter>

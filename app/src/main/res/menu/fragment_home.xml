@@ -4,16 +4,8 @@
 
     <item
         android:id="@+id/action_search"
-        android:orderInCategory="1"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/search"/>
-
-    <item
-        android:id="@+id/action_filter"
-        android:orderInCategory="2"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_filter_white_24dp"
-        android:title="@string/filter"/>
 
 </menu>

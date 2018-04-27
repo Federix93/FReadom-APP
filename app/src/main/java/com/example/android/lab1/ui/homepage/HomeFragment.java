@@ -1,10 +1,8 @@
 package com.example.android.lab1.ui.homepage;
 
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -18,7 +16,6 @@ import android.widget.Toast;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
-import com.example.android.lab1.ui.LoadBookActivity;
 import com.example.android.lab1.model.Book;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.EventListener;
@@ -40,13 +37,11 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecyclerBookAdapter mAdapter;
-    private FloatingActionButton mFAB;
 
     Query mQuery;
     FirebaseFirestore mFirebaseFirestore;
 
-    public HomeFragment()
-    {
+    public HomeFragment() {
 
     }
 
@@ -56,12 +51,12 @@ public class HomeFragment extends Fragment {
 
         mRootView = inflater.inflate(R.layout.fragment_home, container, false);
 
-        mToolbar = getActivity().findViewById(R.id.toolbar_main_activity);
-        mFAB = mRootView.findViewById(R.id.fab_add_book);
+        mToolbar = getActivity().findViewById(R.id.toolbar_home_page_activity);
+
         mRecyclerView = mRootView.findViewById(R.id.recycler_books);
         mRecyclerView.setAdapter(new RecyclerBookAdapter(null));
 
-        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             NUM_COLUMNS = 2;
         } else {
             NUM_COLUMNS = 4;
@@ -75,22 +70,16 @@ public class HomeFragment extends Fragment {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 int clickedId = item.getItemId();
-                switch (clickedId)
-                {
+                switch (clickedId) {
                     case R.id.action_search:
                         Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
                         break;
-
-                    case R.id.action_filter:
-                        Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
-                        break;
-
                 }
                 return true;
             }
         });
 
-        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(),NUM_COLUMNS);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), NUM_COLUMNS);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -100,11 +89,11 @@ public class HomeFragment extends Fragment {
         mQuery.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                if(e != null){
+                if (e != null) {
                     return;
                 }
                 List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
-                if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                     for (int i = 0; i < books.size(); i++) {
                         if (books.get(i).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                             books.remove(i);
@@ -117,34 +106,12 @@ public class HomeFragment extends Fragment {
             }
         });
 
-       mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0 && mFAB.getVisibility() == View.VISIBLE) {
-                    mFAB.hide();
-                } else if (dy < 0 && mFAB.getVisibility() != View.VISIBLE) {
-                    mFAB.show();
-                }
-            }
-        });
-
-        mFAB.setVisibility(View.VISIBLE);
-        mFAB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), LoadBookActivity.class);
-                startActivityForResult(intent, ADD_BOOK_REQUEST);
-            }
-        });
-
         return mRootView;
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mFAB.setVisibility(View.GONE);
     }
 
 }

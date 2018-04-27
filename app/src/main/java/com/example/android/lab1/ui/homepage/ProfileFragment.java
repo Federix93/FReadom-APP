@@ -73,7 +73,7 @@ public class ProfileFragment extends Fragment {
         mShortBioTextInputLayout = rootView.findViewById(R.id.bio_text_edit);
 
         if(getActivity() != null)
-            mToolbar = getActivity().findViewById(R.id.toolbar_main_activity);
+            mToolbar = getActivity().findViewById(R.id.toolbar_home_page_activity);
         mToolbar.setTitle(R.string.title_profile);
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_profile);
