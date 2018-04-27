@@ -11,13 +11,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
-            <ImageView
-                android:id="@+id/test_book_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <com.example.android.lab1.BookCoverHitView
+                android:layout_width="100dp"
+                android:layout_height="155dp"
                 android:layout_margin="10dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/book_placeholder_thumbnail"/>
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -40,6 +40,13 @@
                     android:textSize="18sp"
                     algolia:highlighted='@{true}'
                     algolia:attribute='@{"author"}'/>
+
+                <com.example.android.lab1.UserPictureHitView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/book_placeholder_thumbnail"/>
 
             </LinearLayout>
 

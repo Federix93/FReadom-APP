@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import com.algolia.instantsearch.helpers.InstantSearch;
 import com.algolia.instantsearch.helpers.Searcher;
+import com.algolia.instantsearch.ui.views.Hits;
 
 public class SearchTestActivity extends AppCompatActivity {
 
@@ -19,10 +20,13 @@ public class SearchTestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_test);
 
+
         searcher = Searcher.create(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME);
 
         InstantSearch helper = new InstantSearch(this, searcher);
         helper.search();
+
+
 
 
     }
