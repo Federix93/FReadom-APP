@@ -11,7 +11,7 @@
     <string name="negative_button_dialog">Annulla</string>
     <string name="shared_preferences" translatable="false">SharedPreferencesKey</string>
     <string name="title_activity_position">Map</string>
-    <string name="text_position_toolbar">Allega posizione</string>
+    <string name="text_position_toolbar">Cerca</string>
     <string name="service_not_available">Nessun geocoder disponibile</string>
     <string name="invalid_lat_long_used">Errata Latitudine o Longitudine usata</string>
     <string name="no_address_found">Nessun indirizzo trovato</string>
@@ -52,7 +52,6 @@
     <string name="dashboard_borrowed_item">Presi in prestito</string>
     <string name="dashboard_lended_item">Prestati</string>
     <string name="load_book_upload">Upload del libro in corso</string>
-    <string name="mIsbn">ISBN</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
     <string name="load_book_tags">Tags</string>
 
@@ -63,6 +62,8 @@
     <string name="condition_mint">Perfette</string>
 
     <string name="toolbar_title_home">Ricerca libri</string>
+    <string name="activate_position">Attivare la posizione</string>
+    <string name="activate">Attiva</string>
 
     <string name="button_signin">ACCEDI</string>
     <string name="access_without_login">CONTINUA SENZA ACCEDERE</string>

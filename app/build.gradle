@@ -22,6 +22,7 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation "com.android.support:support-core-utils:27.1.1"
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.android.support:design:27.1.1'
@@ -50,6 +51,7 @@ dependencies {
     implementation 'me.dm7.barcodescanner:zxing:1.9.8'
     implementation 'com.github.ganfra:material-spinner:2.0.0'
     implementation 'com.google.firebase:firebase-storage:12.0.1'
+    implementation 'com.google.maps.android:android-maps-utils:0.4.4'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
 }
 

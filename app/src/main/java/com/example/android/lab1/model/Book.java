@@ -12,7 +12,7 @@ public class Book
     private int    mPublishYear;
     private int mCondition;
     private String mAddress;
-    private String mUid;
+    private String mUid; // user id
     private String mThumbnail;
     private String mTags;
     private List<String> bookImagesUrls;
