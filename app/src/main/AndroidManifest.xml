@@ -99,7 +99,7 @@
         <activity
             android:name=".ui.homepage.HomePageActivity"
             android:label="@string/title_activity_home_page"
-            android:theme="@style/AppTheme">
+            android:theme="@style/ThemeDrawer">
         </activity>
     </application>
 
