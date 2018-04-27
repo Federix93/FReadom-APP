@@ -22,7 +22,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.android.lab1.FirebaseManager;
-import com.example.android.lab1.GlideApp;
+import com.example.android.lab1.utils.glideimageloader.GlideApp;
 import com.example.android.lab1.utils.NetworkConnectionReceiver;
 import com.example.android.lab1.R;
 import com.example.android.lab1.ui.homepage.HomePageToDeleteActivity;
