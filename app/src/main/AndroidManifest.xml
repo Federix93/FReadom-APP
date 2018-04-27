@@ -97,19 +97,9 @@
 
         </activity>
 
-        <service
-            android:name=".FetchAddressIntentService"
-            android:exported="false" />
-
         <activity android:name=".SignInActivity">
 
         </activity>
-
-        <receiver android:name=".NetworkConnectionReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
 
 
     </application>

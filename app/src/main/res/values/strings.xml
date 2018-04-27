@@ -52,7 +52,6 @@
     <string name="dashboard_borrowed_item">Presi in prestito</string>
     <string name="dashboard_lended_item">Prestati</string>
     <string name="load_book_upload">Upload del libro in corso</string>
-    <string name="mIsbn">ISBN</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
     <string name="load_book_tags">Tags</string>
 
@@ -63,5 +62,7 @@
     <string name="condition_mint">Perfette</string>
 
     <string name="toolbar_title_home">Ricerca libri</string>
+    <string name="activate_position">Attivare la posizione</string>
+    <string name="activate">Attiva</string>
 
 </resources>

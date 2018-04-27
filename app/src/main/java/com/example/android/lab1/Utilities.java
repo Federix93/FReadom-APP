@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.example.android.lab1.model.Address;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
@@ -41,6 +42,15 @@ public abstract class Utilities {
         LatLng northeastCorner =
                 SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 45.0);
         return new LatLngBounds(southwestCorner, northeastCorner);
+    }
+
+    public static Address readResultOfPositionActivity(Intent i) {
+        if (i.hasExtra(PositionActivity.ADDRESS_KEY) && i.hasExtra(PositionActivity.LAT_KEY) && i.hasExtra(PositionActivity.LON_KEY)) {
+            return new Address(i.getStringExtra(PositionActivity.ADDRESS_KEY),
+                    i.getDoubleExtra(PositionActivity.LAT_KEY, 0),
+                    i.getDoubleExtra(PositionActivity.LON_KEY, 0));
+        }
+        return null;
     }
 
 }
