@@ -82,6 +82,13 @@
         <service
             android:name=".utils.FetchAddressIntentService"
             android:exported="false" />
+        <activity android:name=".ui.BookDetailsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.BookPhotoDetailActivity"/>
 
         <activity android:name=".ui.SignInActivity">
             <intent-filter>
