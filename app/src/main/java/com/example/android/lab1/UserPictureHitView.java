@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.algolia.instantsearch.ui.views.AlgoliaHitView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -30,7 +31,6 @@ public class UserPictureHitView extends AppCompatImageView implements AlgoliaHit
     public UserPictureHitView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        mContext = context;
         thisObject = this;
     }
 
@@ -48,7 +48,7 @@ public class UserPictureHitView extends AppCompatImageView implements AlgoliaHit
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     User mUser = documentSnapshot.toObject(User.class);
-                    Glide.with(getContext()).load(mUser.getImage()).into(thisObject);
+                    Glide.with(getContext()).load(mUser.getImage()).apply(RequestOptions.circleCropTransform()).into(thisObject);
                 }
             });
         }
