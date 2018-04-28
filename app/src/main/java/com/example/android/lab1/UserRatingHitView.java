@@ -2,6 +2,7 @@ package com.example.android.lab1;
 
 import android.content.Context;
 import android.support.v7.widget.AppCompatRatingBar;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 
 import com.algolia.instantsearch.ui.views.AlgoliaHitView;
@@ -14,7 +15,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONObject;
 
-public class UserRatingHitView extends AppCompatRatingBar implements AlgoliaHitView {
+import java.util.Locale;
+
+public class UserRatingHitView extends AppCompatTextView implements AlgoliaHitView {
 
 
     public UserRatingHitView(Context context, AttributeSet attrs) {
@@ -35,7 +38,7 @@ public class UserRatingHitView extends AppCompatRatingBar implements AlgoliaHitV
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     User mUser = documentSnapshot.toObject(User.class);
-                    setRating(mUser.getRating());
+                    setText(Float.toString(mUser.getRating()));
                 }
             });
         }

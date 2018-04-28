@@ -64,4 +64,6 @@
 
     <string name="toolbar_title_home">Ricerca libri</string>
 
+    <string name="search_books_hint">Titolo, autore, editore, tags...</string>
+
 </resources>

@@ -59,5 +59,6 @@
     <string name="condition_mint">Mint</string>
     <string name="load_book_tags">Tags</string>
     <string name="toolbar_title_home">Search books</string>
+    <string name="search_books_hint">Title, author, publisher, tags...</string>
 
 </resources>

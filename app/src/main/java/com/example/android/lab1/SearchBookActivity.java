@@ -22,15 +22,10 @@ public class SearchBookActivity extends AppCompatActivity {
 
         searcher = Searcher.create(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME);
 
+        searcher.search();
+
         InstantSearch helper = new InstantSearch(this, searcher);
         helper.search();
-
-
-
-
-
-
-
 
 
     }
