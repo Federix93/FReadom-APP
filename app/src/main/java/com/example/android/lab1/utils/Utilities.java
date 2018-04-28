@@ -54,6 +54,23 @@ public abstract class Utilities {
         return null;
     }
 
+    public static String Isbn10ToIsbn13(String isbn10) {
+        // https://stackoverflow.com/questions/17108621/converting-isbn10-to-isbn13
+        int d, sum = 0;
+        String isbn13 = isbn10;
+        isbn13 = "978" + isbn13.substring(0, 9);
+        //if (LOG_D) Log.d(TAG, "ISBN13 without sum" + ISBN13);
+        for (int i = 0; i < isbn13.length(); i++) {
+            d = ((i % 2 == 0) ? 1 : 3);
+            sum += ((((int) isbn13.charAt(i)) - 48) * d);
+            //if (LOG_D) Log.d(TAG, "adding " + ISBN13.charAt(i) + "x" + d + "=" + ((((int) ISBN13.charAt(i)) - 48) * d));
+        }
+        sum = 10 - (sum % 10);
+        isbn13 += sum;
+
+        return isbn13;
+    }
+
 }
 
 
