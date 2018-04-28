@@ -14,6 +14,7 @@ public class User {
     private String mAddress;
     private String mImage;
     private String mShortBio;
+    private Float mRating;
 
     private User(){}
 
@@ -65,6 +66,16 @@ public class User {
 
     public void setPhone(String pPhone) {
         mPhone = pPhone;
+    }
+
+    public Float getRating ()
+    {
+        return mRating;
+    }
+
+    public void setRating(Float rating)
+    {
+        mRating = rating;
     }
 
     public static class Utils{

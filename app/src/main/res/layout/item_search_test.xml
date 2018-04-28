@@ -46,7 +46,13 @@
                     android:layout_height="50dp"
                     android:layout_margin="10dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/book_placeholder_thumbnail"/>
+                    android:src="@drawable/ic_person_black_24dp"/>
+                
+                <com.example.android.lab1.model.UserRatingHitView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:rating="0"/>
 
             </LinearLayout>
 
