@@ -51,7 +51,7 @@
                     tools:layout_editor_absoluteX="0dp" />
 
                 <com.example.android.lab1.UserPictureHitView
-                    android:id="@+id/userPictureHitView"
+                    android:id="@+id/search_user_picture"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginBottom="24dp"

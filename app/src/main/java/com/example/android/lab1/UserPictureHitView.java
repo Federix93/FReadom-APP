@@ -25,7 +25,6 @@ import org.json.JSONObject;
 
 public class UserPictureHitView extends AppCompatImageView implements AlgoliaHitView {
 
-    Context mContext;
     UserPictureHitView thisObject;
 
     public UserPictureHitView(Context context, AttributeSet attrs)
