@@ -1,4 +1,4 @@
-package com.example.android.lab1.model;
+package com.example.android.lab1;
 
 import android.content.Context;
 import android.support.v7.widget.AppCompatRatingBar;
@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 
 import com.algolia.instantsearch.ui.views.AlgoliaHitView;
 import com.bumptech.glide.Glide;
+import com.example.android.lab1.model.User;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;

@@ -98,7 +98,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".SearchTestActivity" />
+        <activity android:name=".SearchBookActivity" />
     </application>
 
 </manifest>

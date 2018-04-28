@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".SearchTestActivity">
+    tools:context=".SearchBookActivity">
 
     <com.algolia.instantsearch.ui.views.SearchBox
         android:id="@+id/test_searchbox"
@@ -21,6 +21,6 @@
         app:autoHideKeyboard="true"
         app:hitsPerPage="30"
         app:remainingItemsBeforeLoading="10"
-        algolia:itemLayout="@layout/item_search_test"/>
+        algolia:itemLayout="@layout/book_search_item"/>
 
 </LinearLayout>

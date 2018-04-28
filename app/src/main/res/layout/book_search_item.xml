@@ -25,7 +25,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/test_book_title"
+                    android:id="@+id/search_book_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -39,7 +39,7 @@
                     algolia:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/test_book_author"
+                    android:id="@+id/search_book_author"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -47,7 +47,7 @@
                     android:textSize="18sp"
                     algolia:attribute='@{"author"}'
                     algolia:highlighted='@{true}'
-                    algolia:layout_constraintTop_toBottomOf="@+id/test_book_title"
+                    algolia:layout_constraintTop_toBottomOf="@+id/search_book_title"
                     tools:layout_editor_absoluteX="0dp" />
 
                 <com.example.android.lab1.UserPictureHitView
@@ -60,7 +60,7 @@
                     algolia:layout_constraintStart_toStartOf="parent"
                     algolia:srcCompat="@drawable/ic_person_black_24dp" />
 
-                <com.example.android.lab1.model.UserRatingHitView
+                <com.example.android.lab1.UserRatingHitView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="0dp"
