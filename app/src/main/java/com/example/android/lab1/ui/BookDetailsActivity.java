@@ -3,11 +3,9 @@ package com.example.android.lab1.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +41,10 @@ public class BookDetailsActivity extends AppCompatActivity {
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
             View photoView = inflater.inflate(R.layout.book_image_item, parent, false);
+            int width = (parent.getMeasuredWidth() / 3) - 8;
+            int height = parent.getMeasuredHeight();
+            photoView.setLayoutParams(new RecyclerView.LayoutParams(width, height));
+
             ImageGalleryAdapter.MyViewHolder viewHolder = new ImageGalleryAdapter.MyViewHolder(photoView);
             return viewHolder;
         }
@@ -55,7 +57,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
             Glide.with(mContext)
                     .load(bookPhoto.getUrl())
-                    .apply(new RequestOptions().override(200, 200).fitCenter()
+                    .apply(new RequestOptions().override(400, 400).fitCenter()
                     .placeholder(R.drawable.ic_no_book_photo))
                     .into(imageView);
         }
