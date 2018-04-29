@@ -1,1 +1,7 @@
-<resources></resources>
+<resources>
+
+    <style name="MyMaterialTheme.Base" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="android:statusBarColor">@color/background_app</item>
+    </style>
+</resources>
