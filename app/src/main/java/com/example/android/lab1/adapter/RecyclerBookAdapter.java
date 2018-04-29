@@ -66,7 +66,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
             mTitle = itemView.findViewById(R.id.title);
             mAuthor = itemView.findViewById(R.id.author);
             mThumbnail = itemView.findViewById(R.id.thumbnail);
-            mOverflow = itemView.findViewById(R.id.overflow);
+            //mOverflow = itemView.findViewById(R.id.overflow);
 
             itemView.setOnClickListener(this);
         }
@@ -82,12 +82,12 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
                 Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
             } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mThumbnail);
-            mOverflow.setOnClickListener(new View.OnClickListener() {
+            /*mOverflow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     showPopupMenu(mOverflow);
                 }
-            });
+            });*/
         }
 
         @Override
@@ -97,14 +97,14 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
     }
 
 
-    private void showPopupMenu(View view) {
+    /*private void showPopupMenu(View view) {
         // inflate menu
         PopupMenu popup = new PopupMenu(view.getContext(), view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.book_item, popup.getMenu());
         popup.setOnMenuItemClickListener(new MyMenuItemClickListener());
         popup.show();
-    }
+    }*/
 
     class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
 
