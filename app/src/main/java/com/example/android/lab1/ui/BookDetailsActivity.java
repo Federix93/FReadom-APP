@@ -35,6 +35,9 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     private class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapter.MyViewHolder> {
 
+        private BookPhoto[] mBookPhoto;
+        private Context mContext;
+
         @Override
         public ImageGalleryAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -87,8 +90,6 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         }
-        private BookPhoto[] mBookPhoto;
-        private Context mContext;
 
         public ImageGalleryAdapter (Context context, BookPhoto[] bookPhotos) {
             mContext = context;

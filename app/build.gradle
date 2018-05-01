@@ -55,6 +55,7 @@ dependencies {
     implementation 'com.android.support:palette-v7:27.1.1'
     implementation 'com.github.jrvansuita:MaterialAbout:0.2.3'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
+    implementation 'me.zhanghai.android.materialratingbar:library:1.2.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
 
 }
