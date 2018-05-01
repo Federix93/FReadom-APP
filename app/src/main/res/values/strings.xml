@@ -76,5 +76,8 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_lullo">LulloActivity</string>
     <string name="title_notifications">Notifications</string>
+    <string name="book_thumbnail_content_description">Anteprima del libro</string>
+    <string name="add_to_favorite">Aggiungi ai preferiti</string>
+    <string name="share">Condividi</string>
 
 </resources>

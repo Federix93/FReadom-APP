@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".ui.BookDetailsActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBarLayoutBookDetails"
@@ -36,12 +37,12 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:id="@+id/imageView3"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/book_thumbnail"
+                    android:layout_width="115dp"
                     android:layout_height="180dp"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
-                    android:contentDescription="Book thumbnail"
+                    android:contentDescription="@string/book_thumbnail_content_description"
                     android:scaleType="centerCrop"
                     android:src="@drawable/book_placeholder_thumbnail"
                     app:layout_constraintStart_toStartOf="parent"
@@ -53,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="15dp"
                     android:layout_marginTop="16dp"
                     android:gravity="start"
                     android:text="Il Signore degli anelli: le due torri"
@@ -61,44 +62,44 @@
                     android:textSize="20sp"
                     android:textStyle="bold"
                     app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintStart_toEndOf="@+id/imageView3"
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:paddingLeft="10dp" />
 
                 <TextView
-                    android:id="@+id/author1"
+                    android:id="@+id/author"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="15dp"
                     android:layout_marginTop="8dp"
                     android:text=" J. R. R. Tolkien"
                     android:textColor="@color/black"
                     android:textSize="16sp"
-                    app:layout_constraintStart_toEndOf="@+id/imageView3"
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toBottomOf="@+id/bookTitle" />
 
                 <TextView
                     android:id="@+id/editor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="15dp"
                     android:layout_marginTop="4dp"
                     android:text="Giunti Editore"
-                    app:layout_constraintStart_toEndOf="@+id/imageView3"
-                    app:layout_constraintTop_toBottomOf="@+id/author1" />
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@+id/author" />
 
                 <TextView
                     android:id="@+id/publication_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="15dp"
                     android:layout_marginTop="2dp"
                     android:text="10 Gennaio 2002"
-                    app:layout_constraintStart_toEndOf="@+id/imageView3"
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toBottomOf="@+id/editor" />
 
                 <android.support.v7.widget.AppCompatButton
-                    android:id="@+id/appCompatButton2"
+                    android:id="@+id/preview_button"
                     android:layout_width="0dp"
                     android:layout_height="35dp"
                     android:layout_marginBottom="25dp"
@@ -108,14 +109,14 @@
                     android:text="Preview"
                     android:textColor="#03a5e4"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/appCompatButton"
+                    app:layout_constraintEnd_toStartOf="@+id/book_button"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+                    app:layout_constraintTop_toBottomOf="@+id/book_thumbnail" />
 
                 <android.support.v7.widget.AppCompatButton
-                    android:id="@+id/appCompatButton"
+                    android:id="@+id/book_button"
                     android:layout_width="0dp"
                     android:layout_height="35dp"
                     android:layout_marginBottom="25dp"
@@ -128,16 +129,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toEndOf="@+id/appCompatButton2" />
-
-                <!--<View-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="1dp"-->
-                    <!--android:layout_gravity="end"-->
-                    <!--android:background="@android:color/darker_gray"-->
-                    <!--app:layout_constraintBottom_toBottomOf="parent"-->
-                    <!--app:layout_constraintEnd_toEndOf="parent"-->
-                    <!--app:layout_constraintStart_toStartOf="parent" />-->
+                    app:layout_constraintStart_toEndOf="@+id/preview_button" />
 
                 <!--<ImageView-->
                 <!--android:id="@+id/add_to_favorite_small_icon"-->
@@ -204,7 +196,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="2dp"
-                    android:text="Add to Favorite"
+                    android:text="@string/add_to_favorite"
                     android:textColor="@color/black"
                     android:textSize="12sp" />
 
@@ -232,7 +224,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="2dp"
-                    android:text="Share"
+                    android:text="@string/share"
                     android:textColor="@color/black"
                     android:textSize="12sp"/>
 
@@ -250,12 +242,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+                <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/profile_image"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_marginStart="25dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="12dp"
                     android:src="@mipmap/profile_picture"
                     app:civ_border_color="@color/white"
                     app:civ_border_width="1dp"

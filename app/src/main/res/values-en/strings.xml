@@ -63,5 +63,8 @@
     <string name="access_without_login">CONTINUE WITHOUT SIGNIN</string>
     <string name="activate_position">Please activate position</string>
     <string name="activate">Activate</string>
+    <string name="book_thumbnail_content_description">Book thumbnail</string>
+    <string name="add_to_favorite">Add to favorite</string>
+    <string name="share">Share</string>
 
 </resources>
