@@ -104,7 +104,7 @@ public class HomePageActivity extends AppCompatActivity
         mEmailTextView = header.findViewById(R.id.email_text_nav_drawer);
         mSideNavLinearLayout = header.findViewById(R.id.header_nav_drawer);
 
-        header.setBackgroundResource(R.drawable.background);
+        //header.setBackgroundResource(R.drawable.background);
 
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
