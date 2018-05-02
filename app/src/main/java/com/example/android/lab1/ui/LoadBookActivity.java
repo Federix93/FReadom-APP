@@ -42,6 +42,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.algolia.search.saas.Client;
+import com.algolia.search.saas.Index;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -136,6 +138,13 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private boolean mImagesUploaded;
     private boolean mDocumentUploaded;
 
+    //Algolia connection parameters
+    Client algoliaClient;
+    Index algoliaIndex;
+    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
+    private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
+    private final static String ALGOLIA_BOOK_INDEX = "books";
+
     public static String getSha1Hex(String clearString) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
@@ -177,7 +186,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
         // TODO add recieve intent to modify book
 
-
+        //initialize Algolia connection
+        setupAlgolia();
         // complex listeners are handled in separate function
         mUploading = false;
         mImagesUploaded = false;
@@ -281,6 +291,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 // preventing double, using threshold of 1000 ms
                 lastClickTime = SystemClock.elapsedRealtime();
                 if (clickedItem == R.id.action_confirm) {
+                    //Initialize book uploading
                     if (checkObligatoryFields()) {
                         mToolbar.setOnMenuItemClickListener(null);
 
@@ -382,6 +393,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         final Book bookToLoad = new Book();
         bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
         bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
+        List<String> authors = new ArrayList<>();
         bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
         bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
         bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
@@ -400,6 +412,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 // using documentReference create a folder on storage for storing photos
+                uploadOnAlgloia(bookToLoad, documentReference.getId());
                 Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
@@ -417,7 +430,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 finish();
             }
         });
+
+
     }
+
+
 
     private void lockUI(boolean doIt) {
         // this methods disable all UI controls while downloads or uploads are happening
@@ -991,6 +1008,50 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             StorageReference child = storageReference.child(generateStorageRef(mPhotosPath.get(i)));
             child.delete();
         }
+
+    }
+
+    private void setupAlgolia()
+    {
+        algoliaClient = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
+        algoliaIndex = algoliaClient.getIndex(ALGOLIA_BOOK_INDEX);
+    }
+
+    private void uploadOnAlgloia(Book bookToLoad, String bookID) {
+
+        try {
+
+            JSONObject book = new JSONObject();
+
+            book.put("title", bookToLoad.getTitle());
+            book.put("author", bookToLoad.getAuthor());
+            book.put("publisher", bookToLoad.getPublisher());
+            book.put("publishYear", bookToLoad.getPublishYear());
+            book.put("conditions", bookToLoad.getCondition());
+            book.put("uid", bookToLoad.getUid());
+            book.put("address", bookToLoad.getAddress());
+
+            if(bookToLoad.getIsbn() != null)
+            {
+                book.put("isbn", bookToLoad.getIsbn());
+            }
+
+            if(bookToLoad.getThumbnail() != null)
+            {
+                book.put("thumbnail", bookToLoad.getThumbnail());
+            }
+
+            if(bookToLoad.getTags() != null)
+            {
+                book.put("tags", bookToLoad.getTags());
+            }
+
+            algoliaIndex.addObjectAsync(book, bookID,null);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
 
     }
 }

@@ -63,5 +63,6 @@
     <string name="access_without_login">CONTINUE WITHOUT SIGNIN</string>
     <string name="activate_position">Please activate position</string>
     <string name="activate">Activate</string>
+    <string name="search_books_hint">Title, author, publisher, tags...</string>
 
 </resources>

@@ -77,4 +77,6 @@
     <string name="title_activity_lullo">LulloActivity</string>
     <string name="title_notifications">Notifications</string>
 
+    <string name="search_books_hint">Titolo, autore, editore, tags...</string>
+
 </resources>

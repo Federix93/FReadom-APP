@@ -17,6 +17,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    dataBinding.enabled true
 }
 
 dependencies {
@@ -53,6 +55,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:12.0.1'
     implementation 'com.google.maps.android:android-maps-utils:0.4.4'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
+    implementation 'com.algolia:algoliasearch-android:3.20.11'
+    implementation 'com.algolia:instantsearch-android:1.7.25'
 }
 
 apply plugin: 'com.google.gms.google-services'

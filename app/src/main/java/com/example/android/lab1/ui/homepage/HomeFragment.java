@@ -62,7 +62,6 @@ public class HomeFragment extends Fragment {
             NUM_COLUMNS = 4;
         }
 
-
         mToolbar.setTitle(getString(R.string.toolbar_title_home));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
