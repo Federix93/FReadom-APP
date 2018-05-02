@@ -10,8 +10,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.Toast;
 
-import com.algolia.instantsearch.helpers.InstantSearch;
-import com.algolia.instantsearch.helpers.Searcher;
+import com.arlib.floatingsearchview.FloatingSearchView;
+import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.example.android.lab1.R;
 
 public class SearchBookActivity extends AppCompatActivity {
@@ -21,15 +21,34 @@ public class SearchBookActivity extends AppCompatActivity {
     private final static String ALGOLIA_INDEX_NAME = "books";
 
     private Toolbar mToolbar;
-    private Searcher searcher;
+    private FloatingSearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_book);
 
-        mToolbar = findViewById(R.id.toolbar_search_books);
-        //mToolbar.inflateMenu();
+        mSearchView = findViewById(R.id.floating_search_view);
+
+        mSearchView.setOnSearchListener(new FloatingSearchView.OnSearchListener() {
+            @Override
+            public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
+
+            }
+
+            @Override
+            public void onSearchAction(String currentQuery) {
+                Toast.makeText(getApplicationContext(), currentQuery, Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        mSearchView.setOnQueryChangeListener(new FloatingSearchView.OnQueryChangeListener() {
+            @Override
+            public void onSearchTextChanged(String oldQuery, String newQuery) {
+                Toast.makeText(getApplicationContext(), oldQuery+">"+newQuery, Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
 
@@ -49,32 +68,10 @@ public class SearchBookActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_search_books, menu);
 
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.search_button_search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(getApplicationContext(), "Search: " +query, Toast.LENGTH_SHORT).show();
-                /*if( ! searchView.isIconified()) {
-                    searchView.setIconified(true);
-                }*/
-
-                return false;
-            }
-            @Override
-            public boolean onQueryTextChange(String s) {
-                //Toast.makeText(getActivity(), "Text now is " +s, Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
-
         return true;
     }
+
+
 
     protected void onDestroy() {
       //  searcher.destroy();

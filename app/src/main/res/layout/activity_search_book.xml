@@ -9,17 +9,20 @@
     android:orientation="vertical"
     tools:context=".ui.searchbooks.SearchBookActivity">
 
-
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appBarLayout3"
+    <com.arlib.floatingsearchview.FloatingSearchView
+        android:id="@+id/floating_search_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:floatingSearch_searchHint="Search..."
+        app:floatingSearch_suggestionsListAnimDuration="250"
+        app:floatingSearch_showSearchKey="false"
+        app:floatingSearch_leftActionMode="showSearch"
+        app:floatingSearch_menu="@menu/menu_search_books"
+        app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
 
-        <include
-            android:id="@+id/toolbar_search_books"
-            layout="@layout/toolbar" />
-
-    </android.support.design.widget.AppBarLayout>
+    <!--app:floatingSearch_searchBarMarginLeft="@dimen/search_view_inset"-->
+    <!--app:floatingSearch_searchBarMarginTop="@dimen/search_view_inset"-->
+    <!--app:floatingSearch_searchBarMarginRight="@dimen/search_view_inset"-->
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/results_recycler_view"
