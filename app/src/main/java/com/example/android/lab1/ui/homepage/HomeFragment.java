@@ -1,8 +1,10 @@
 package com.example.android.lab1.ui.homepage;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
@@ -17,6 +19,7 @@ import android.widget.Toast;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.ui.GenreBooksActivity;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.EventListener;
@@ -33,6 +36,7 @@ public class HomeFragment extends Fragment {
 
     View mRootView;
     Toolbar mToolbar;
+    AppCompatButton mGenreFilterButton;
 
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
@@ -55,6 +59,7 @@ public class HomeFragment extends Fragment {
 
         mFirstRecyclerView = mRootView.findViewById(R.id.first_recycler_books);
         mSecondRecyclerView = mRootView.findViewById(R.id.second_recycler_books);
+        mGenreFilterButton = mRootView.findViewById(R.id.genre_filter_button);
 
         mToolbar.setTitle(getString(R.string.toolbar_title_home));
         mToolbar.getMenu().clear();
@@ -69,6 +74,14 @@ public class HomeFragment extends Fragment {
                         break;
                 }
                 return true;
+            }
+        });
+
+        mGenreFilterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), GenreBooksActivity.class);
+                startActivity(intent);
             }
         });
 

@@ -79,4 +79,10 @@
     <string name="no_name_nav_drawer">Nessun nome</string>
     <string name="button_right_recycler_view">ALTRO</string>
 
+    <string-array name="genre">
+        <item>Arte e spettacoli</item>
+        <item>Biografie e diari</item>
+        <item>Economia e finanza</item>
+        <item>Fantascienza e fantasy</item>
+    </string-array>
 </resources>

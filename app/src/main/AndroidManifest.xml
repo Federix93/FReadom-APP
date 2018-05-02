@@ -86,6 +86,7 @@
         <activity android:name=".ui.SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -99,8 +100,8 @@
         <activity
             android:name=".ui.homepage.HomePageActivity"
             android:label="@string/title_activity_home_page"
-            android:theme="@style/ThemeDrawer">
-        </activity>
+            android:theme="@style/ThemeDrawer"></activity>
+        <activity android:name=".ui.GenreBooksActivity"></activity>
     </application>
 
 </manifest>
