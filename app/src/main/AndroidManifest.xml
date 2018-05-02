@@ -100,7 +100,7 @@
             android:theme="@style/AppTheme">
         </activity>
 
-        <activity android:name=".SearchBookActivity" />
+        <activity android:name=".ui.searchbooks.SearchBookActivity" />
     </application>
 
 </manifest>

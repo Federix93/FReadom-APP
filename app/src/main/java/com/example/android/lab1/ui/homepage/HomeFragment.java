@@ -1,5 +1,6 @@
 package com.example.android.lab1.ui.homepage;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -71,7 +73,8 @@ public class HomeFragment extends Fragment {
                 int clickedId = item.getItemId();
                 switch (clickedId) {
                     case R.id.action_search:
-                        Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getActivity(), SearchBookActivity.class);
+                        startActivity(intent);
                         break;
                 }
                 return true;

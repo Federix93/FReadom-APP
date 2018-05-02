@@ -1,12 +1,12 @@
-package com.example.android.lab1;
+package com.example.android.lab1.ui.searchbooks;
 
 import android.content.Context;
-import android.support.v7.widget.AppCompatRatingBar;
-import android.support.v7.widget.AppCompatTextView;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 
 import com.algolia.instantsearch.ui.views.AlgoliaHitView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.model.User;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
@@ -15,13 +15,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONObject;
 
-import java.util.Locale;
 
-public class UserRatingHitView extends AppCompatTextView implements AlgoliaHitView {
+public class UserPictureHitView extends AppCompatImageView implements AlgoliaHitView {
 
+    UserPictureHitView thisObject;
 
-    public UserRatingHitView(Context context, AttributeSet attrs) {
+    public UserPictureHitView(Context context, AttributeSet attrs)
+    {
         super(context, attrs);
+        thisObject = this;
     }
 
     @Override
@@ -38,7 +40,7 @@ public class UserRatingHitView extends AppCompatTextView implements AlgoliaHitVi
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     User mUser = documentSnapshot.toObject(User.class);
-                    setText(Float.toString(mUser.getRating()));
+                    Glide.with(getContext()).load(mUser.getImage()).apply(RequestOptions.circleCropTransform()).into(thisObject);
                 }
             });
         }

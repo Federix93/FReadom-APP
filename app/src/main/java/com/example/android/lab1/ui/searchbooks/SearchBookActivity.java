@@ -1,10 +1,11 @@
-package com.example.android.lab1;
+package com.example.android.lab1.ui.searchbooks;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.algolia.instantsearch.helpers.InstantSearch;
 import com.algolia.instantsearch.helpers.Searcher;
+import com.example.android.lab1.R;
 
 public class SearchBookActivity extends AppCompatActivity {
 
