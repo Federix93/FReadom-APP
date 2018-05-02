@@ -123,7 +123,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private TextView mPositionEditText;
     private ImageView mPositionIcon;
     private Toolbar mToolbar;
-    private ImageView mConfirmImageView;
     private AlertDialog.Builder mAlertDialogBuilder;
     private File mPhotoFile; // last photo thumbnail
     private LinearLayout mDotsContainer;
@@ -181,7 +180,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mTagsEditText = findViewById(R.id.load_book_tags);
         mPositionIcon = findViewById(R.id.load_book_location);
         mToolbar = findViewById(R.id.toolbar_loadbook);
-        mConfirmImageView = findViewById(R.id.icon_check_toolbar);
         mDotsContainer = findViewById(R.id.dots_container);
 
         // TODO add recieve intent to modify book

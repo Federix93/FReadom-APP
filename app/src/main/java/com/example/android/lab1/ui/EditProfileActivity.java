@@ -6,18 +6,23 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -78,6 +83,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     SharedPreferencesManager mSharedPreferencesManager;
     Bundle mSavedInstanceState;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,8 +99,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
         mUserImageView = findViewById(R.id.user_profile_edit_image);
 
-        mSaveProfileUpdatesImageView = findViewById(R.id.icon_check_toolbar);
-
         mCameraImageView = findViewById(R.id.add_image_fab);
 
         mPositionImageView = findViewById(R.id.position_image_view);
@@ -103,18 +107,74 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
+        Window window = getWindow();
+
+// clear FLAG_TRANSLUCENT_STATUS flag:
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+// finally change the color
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.background_app));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View decor = getWindow().getDecorView();
+
+            decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
+
         mToolbar = findViewById(R.id.toolbar_edit_activity);
         mToolbar.setTitle(R.string.edit_title_activity);
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
-        setSupportActionBar(mToolbar);
-
+        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                finish();
             }
         });
+        mToolbar.inflateMenu(R.menu.activity_edit_profile_menu);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int clicked = item.getItemId();
+                if(clicked == R.id.confirm_updates) {
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                            .setPersistenceEnabled(true)
+                            .build();
+                    db.setFirestoreSettings(settings);
+                    final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+                    db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
+                            .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                @Override
+                                public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                                    @Nullable FirebaseFirestoreException e) {
+                                    if (e != null) {
+                                        return;
+                                    }
+                                    if (mUsernameTextInputLayout.getEditText() != null)
+                                        mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                                    if (mEmailTextInputLayout.getEditText() != null)
+                                        mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                                    if (mPhoneTextInputLayout.getEditText() != null)
+                                        mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                                    if (mAddressTextInputLayout != null)
+                                        mUser.setAddress(mCurrentAddress);
+                                    if (mShortBioTextInputLayout.getEditText() != null)
+                                        mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                                    mUser.setImage(mCurrentPhotoPath);
+                                    docRef.set(mUser, SetOptions.merge());
+                                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                    intent.putExtra("ApplyChanges", true);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                }
+                            });
+                }
+                return true;
+            }
 
+        });
         /*Firebase*/
         mFirebaseAuth = FirebaseAuth.getInstance();
 
@@ -132,44 +192,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
         mCurrentPhotoPath = mSharedPreferencesManager.getImage();
         mCurrentAddress = mSharedPreferencesManager.getAddress();
-        Log.d("LULLO", mCurrentAddress);
-        mSaveProfileUpdatesImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                        .setPersistenceEnabled(true)
-                        .build();
-                db.setFirestoreSettings(settings);
-                final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
-                db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
-                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                            @Override
-                            public void onEvent(@Nullable QuerySnapshot querySnapshot,
-                                                @Nullable FirebaseFirestoreException e) {
-                                if (e != null) {
-                                    return;
-                                }
-                                if (mUsernameTextInputLayout.getEditText() != null)
-                                    mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
-                                if (mEmailTextInputLayout.getEditText() != null)
-                                    mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
-                                if (mPhoneTextInputLayout.getEditText() != null)
-                                    mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                                if (mAddressTextInputLayout != null)
-                                    mUser.setAddress(mCurrentAddress);
-                                if (mShortBioTextInputLayout.getEditText() != null)
-                                    mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
-                                mUser.setImage(mCurrentPhotoPath);
-                                docRef.set(mUser, SetOptions.merge());
-                                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                intent.putExtra("ApplyChanges", true);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                            }
-                        });
-            }
-        });
+
         final Activity thisActivity = this;
         mCameraImageView.setOnClickListener(new View.OnClickListener() {
 

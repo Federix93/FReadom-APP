@@ -88,8 +88,6 @@ public class HomePageActivity extends AppCompatActivity
             View decor = getWindow().getDecorView();
 
             decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-
-
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
