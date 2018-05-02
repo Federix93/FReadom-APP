@@ -97,9 +97,8 @@
         <activity
             android:name=".ui.homepage.HomePageActivity"
             android:label="@string/title_activity_home_page"
-            android:theme="@style/AppTheme">
-        </activity>
-
+            android:theme="@style/ThemeDrawer"></activity>
+        <activity android:name=".ui.GenreBooksActivity"></activity>
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
     </application>
 

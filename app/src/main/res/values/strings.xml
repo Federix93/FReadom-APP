@@ -61,7 +61,7 @@
     <string name="condition_near_mint">Ottime</string>
     <string name="condition_mint">Perfette</string>
 
-    <string name="toolbar_title_home">Ricerca libri</string>
+    <string name="toolbar_title_home">Libreria</string>
     <string name="activate_position">Attivare la posizione</string>
     <string name="activate">Attiva</string>
 
@@ -74,9 +74,17 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_lullo">LulloActivity</string>
     <string name="title_notifications">Notifications</string>
+    <string name="no_email_nav_drawer">Nessuna email</string>
+    <string name="no_name_nav_drawer">Nessun nome</string>
+    <string name="button_right_recycler_view">ALTRO</string>
 
     <string name="search_books_hint">Titolo, autore, editore, tags...</string>
 
+    <string-array name="genre">
+        <item>Arte e spettacoli</item>
+        <item>Biografie e diari</item>
+        <item>Economia e finanza</item>
+        <item>Fantascienza e fantasy</item>
+    </string-array>
 </resources>

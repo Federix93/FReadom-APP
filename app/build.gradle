@@ -57,6 +57,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
     implementation 'com.algolia:algoliasearch-android:3.20.11'
     implementation 'com.algolia:instantsearch-android:1.7.25'
+    implementation 'com.github.rubensousa:gravitysnaphelper:1.5'
 }
 
 apply plugin: 'com.google.gms.google-services'
