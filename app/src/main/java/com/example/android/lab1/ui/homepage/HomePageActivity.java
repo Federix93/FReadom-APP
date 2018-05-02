@@ -1,9 +1,9 @@
 package com.example.android.lab1.ui.homepage;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Contacts;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
@@ -13,7 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -28,6 +28,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.LoadBookActivity;
+import com.example.android.lab1.ui.ProfileActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -45,7 +47,6 @@ public class HomePageActivity extends AppCompatActivity
     FragmentManager mFragmentManager;
     HomeFragment mHomeFragment;
     DashboardFragment mDashboardFragment;
-    ProfileFragment mProfileFragment;
     AHBottomNavigation mBottomNavigation;
     ImageView mProfileImage;
     TextView mUsernameTextView;
@@ -53,8 +54,9 @@ public class HomePageActivity extends AppCompatActivity
     LinearLayout mSideNavLinearLayout;
 
     private static final int HOME_FRAGMENT = 0;
-    private static final int DASH_FRAGMENT = 1;
-    private static final int PROFILE_FRAGMENT = 2;
+    private static final int ADD_BOOK = 1;
+    private static final int DASH_FRAGMENT = 2;
+    private int oldPosition;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -119,26 +121,31 @@ public class HomePageActivity extends AppCompatActivity
 
         mHomeFragment = new HomeFragment();
         mDashboardFragment = new DashboardFragment();
-        mProfileFragment = new ProfileFragment();
         mBottomNavigation = findViewById(R.id.navigation);
 
         AHBottomNavigationItem homeItem = new AHBottomNavigationItem(getString(R.string.title_home), R.drawable.ic_home_black_24dp);
+        AHBottomNavigationItem addBook = new AHBottomNavigationItem(getString(R.string.add_book_fragment_title), R.drawable.ic_add_box_black_24dp);
         AHBottomNavigationItem dashItem = new AHBottomNavigationItem(getString(R.string.title_dashboard), R.drawable.ic_dashboard_black_24dp);
-        AHBottomNavigationItem profileItem = new AHBottomNavigationItem(getString(R.string.title_profile), R.drawable.ic_person_black_24dp);
 
         ArrayList<AHBottomNavigationItem> items = new ArrayList<>();
 
         items.add(homeItem);
+        items.add(addBook);
         items.add(dashItem);
-        items.add(profileItem);
-
+        oldPosition = 0;
         mBottomNavigation.addItems(items);
         mBottomNavigation.setBehaviorTranslationEnabled(false);
+        mBottomNavigation.setAccentColor(Color.parseColor("#F63D2B"));
+
+        mFragmentManager.beginTransaction()
+                .replace(R.id.fragment_frame, mHomeFragment)
+                .commit();
 
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
 
+                Log.d("LULLO", "Position:  " + oldPosition);
                 if (wasSelected) {
                     return true;
                 } else {
@@ -146,38 +153,25 @@ public class HomePageActivity extends AppCompatActivity
                     switch (position) {
                         case HOME_FRAGMENT:
                             ft.replace(R.id.fragment_frame, mHomeFragment).commit();
+                            oldPosition = position;
+                            break;
+
+                        case ADD_BOOK:
+                            Intent intent = new Intent(getApplicationContext(), LoadBookActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            startActivity(intent);
                             break;
 
                         case DASH_FRAGMENT:
                             ft.replace(R.id.fragment_frame, mDashboardFragment).commit();
+                            oldPosition = position;
                             break;
-
-                        case PROFILE_FRAGMENT:
-                            ft.replace(R.id.fragment_frame, mProfileFragment).commit();
-                            break;
-
                     }
                 }
 
                 return true;
             }
         });
-
-        if (savedInstanceState == null) {
-
-            if (getIntent().getBooleanExtra("ApplyChanges", false)) {
-
-                mFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_frame, mProfileFragment)
-                        .commit();
-
-                mBottomNavigation.setCurrentItem(PROFILE_FRAGMENT);
-            } else {
-                mFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_frame, mHomeFragment)
-                        .commit();
-            }
-        }
     }
 
     @Override
@@ -199,6 +193,9 @@ public class HomePageActivity extends AppCompatActivity
         if (id == R.id.nav_settings) {
 
         } else if (id == R.id.nav_profile) {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
 
         } else if (id == R.id.nav_logout) {
 

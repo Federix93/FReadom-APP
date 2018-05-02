@@ -81,6 +81,8 @@
 
     <string name="search_books_hint">Titolo, autore, editore, tags...</string>
 
+    <string name="add_book_fragment_title">Aggiungi libro</string>
+
     <string-array name="genre">
         <item>Arte e spettacoli</item>
         <item>Biografie e diari</item>
