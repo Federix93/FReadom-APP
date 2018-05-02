@@ -9,19 +9,24 @@
     android:orientation="vertical"
     tools:context=".ui.searchbooks.SearchBookActivity">
 
-    <com.algolia.instantsearch.ui.views.SearchBox
-        android:id="@+id/test_searchbox"
-        app:queryHint="@string/search_books_hint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
-    <com.algolia.instantsearch.ui.views.Hits
-        android:id="@+id/search_hits"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout3"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:autoHideKeyboard="true"
-        app:hitsPerPage="30"
-        app:remainingItemsBeforeLoading="10"
-        algolia:itemLayout="@layout/book_search_item"/>
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@+id/toolbar_search_books"
+            layout="@layout/toolbar" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/results_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:padding="4dp" />
 
 </LinearLayout>

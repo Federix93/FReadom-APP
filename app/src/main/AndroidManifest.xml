@@ -97,9 +97,18 @@
         <activity
             android:name=".ui.homepage.HomePageActivity"
             android:label="@string/title_activity_home_page"
-            android:theme="@style/ThemeDrawer"></activity>
-        <activity android:name=".ui.GenreBooksActivity"></activity>
-        <activity android:name=".ui.searchbooks.SearchBookActivity" />
+            android:theme="@style/ThemeDrawer"/>
+
+        <activity android:name=".ui.GenreBooksActivity"/>
+
+        <activity android:name=".ui.searchbooks.SearchBookActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+        </activity>
+
     </application>
 
 </manifest>
