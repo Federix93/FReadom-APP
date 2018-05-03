@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lab2</string>
+    <string name="app_name">Bookique</string>
     <string name="username">Nome</string>
     <string name="email">Email</string>
     <string name="phoneNumber">Numero di telefono</string>
@@ -81,6 +81,8 @@
     <string name="book_thumbnail_content_description">Anteprima del libro</string>
     <string name="add_to_favorite">Aggiungi ai preferiti</string>
     <string name="share">Condividi</string>
+    <string name="preview">Anteprima</string>
+    <string name="book">Prenota</string>
 
     <string name="search_books_hint">Titolo, autore, editore, tags...</string>
 

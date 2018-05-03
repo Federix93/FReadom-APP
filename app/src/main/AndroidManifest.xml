@@ -76,18 +76,18 @@
         <activity
             android:name=".ui.PositionActivity"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.GlobalShowProfileActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".ui.GlobalShowProfileActivity"/>
 
         <service
             android:name=".utils.FetchAddressIntentService"
             android:exported="false" />
 
-        <activity android:name=".ui.BookDetailsActivity"></activity>
+        <activity android:name=".ui.BookDetailsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity android:name=".ui.BookPhotoDetailActivity"/>
 
@@ -104,6 +104,7 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+
 
         <activity
             android:name=".ui.homepage.HomePageActivity"
