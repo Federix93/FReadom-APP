@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.lab1.R;
@@ -41,6 +42,9 @@ public class HomeFragment extends Fragment {
     View mRootView;
     Toolbar mToolbar;
     AppCompatButton mGenreFilterButton;
+    AppCompatButton mPositionFilterButton;
+    TextView mFirstOtherTextView;
+    TextView mSecondOtherTextView;
 
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
@@ -64,6 +68,9 @@ public class HomeFragment extends Fragment {
         mFirstRecyclerView = mRootView.findViewById(R.id.first_recycler_books);
         mSecondRecyclerView = mRootView.findViewById(R.id.second_recycler_books);
         mGenreFilterButton = mRootView.findViewById(R.id.genre_filter_button);
+        mPositionFilterButton = mRootView.findViewById(R.id.position_filter_button);
+        mFirstOtherTextView = mRootView.findViewById(R.id.button_first_recycler_view);
+        mSecondOtherTextView = mRootView.findViewById(R.id.button_second_recycler_view);
 
         mToolbar.setTitle(getString(R.string.toolbar_title_home));
         mToolbar.getMenu().clear();
@@ -85,10 +92,34 @@ public class HomeFragment extends Fragment {
         mGenreFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), GenreBooksActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(getActivity(), GenreBooksActivity.class);
+//                startActivity(intent);
+                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
             }
         });
+
+        mPositionFilterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mFirstOtherTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mSecondOtherTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
 
         mFirstRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));

@@ -1027,7 +1027,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             book.put("publishYear", bookToLoad.getPublishYear());
             book.put("conditions", bookToLoad.getCondition());
             book.put("uid", bookToLoad.getUid());
-            book.put("address", bookToLoad.getAddress());
+//            book.put("address", bookToLoad.getAddress());
 
             if(bookToLoad.getIsbn() != null)
             {

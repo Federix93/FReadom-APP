@@ -1,6 +1,7 @@
 package com.example.android.lab1.ui.searchbooks;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
@@ -81,7 +83,7 @@ public class SearchBookActivity extends AppCompatActivity {
                             .title(R.string.filter_dialog_title)
                             .items(R.array.searchFilters)
                             .itemsCallbackMultiChoice(
-                                    new Integer[]{1},
+                                    new Integer[]{0,1,2,3},
                                     new MaterialDialog.ListCallbackMultiChoice() {
                                         @Override
                                         public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
@@ -99,6 +101,12 @@ public class SearchBookActivity extends AppCompatActivity {
                             .positiveText(R.string.confirm)
                             .alwaysCallMultiChoiceCallback() // the callback will always be called, to check if
                             // (un)selection is still allowed
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    Toast.makeText(getApplicationContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                                }
+                            })
                             .show();
                 }
             }

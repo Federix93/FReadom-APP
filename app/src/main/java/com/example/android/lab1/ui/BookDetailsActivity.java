@@ -10,6 +10,7 @@ import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -21,6 +22,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -55,6 +57,11 @@ public class BookDetailsActivity extends AppCompatActivity {
     TextView mRatingTextView;
     ImageView mUserImageView;
     ImageView mStarImageView;
+    AppCompatButton mPreviewButton;
+    AppCompatButton mBookButton;
+    ImageView mShareImageView;
+    ImageView mFavoritesImageView;
+
 
     private String mBookId;
     private User mUser;
@@ -74,10 +81,15 @@ public class BookDetailsActivity extends AppCompatActivity {
         mRatingTextView = findViewById(R.id.rating_book_owner);
         mUserImageView = findViewById(R.id.profile_image_book_detail);
         mStarImageView = findViewById(R.id.star_book_owner);
+        mPreviewButton = findViewById(R.id.preview_button);
+        mBookButton = findViewById(R.id.book_button);
+        mShareImageView = findViewById(R.id.share_icon);
+        mFavoritesImageView = findViewById(R.id.add_to_favorite);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
         Utilities.setupStatusBarColor(this);
+        setupOnClickListeners();
 
         mToolbar = findViewById(R.id.toolbar_book_detail);
 
@@ -240,5 +252,38 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void setupOnClickListeners()
+    {
+
+        mPreviewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mBookButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mShareImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mFavoritesImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 }

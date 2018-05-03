@@ -54,7 +54,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 finish();
-                
+
             }
         });
 

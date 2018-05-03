@@ -34,6 +34,7 @@ public class FirebaseManager {
                         userLocal.setUsername(user.getDisplayName());
                         userLocal.setPhone(user.getPhoneNumber());
                         userLocal.setEmail(user.getEmail());
+                        userLocal.setRating(0.0f);
                         documentReference.set(userLocal).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {

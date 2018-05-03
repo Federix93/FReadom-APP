@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Address;
@@ -28,7 +29,6 @@ public abstract class Utilities {
     public static boolean checkPermissionActivity(Activity activity, String permission){
 
         return ContextCompat.checkSelfPermission(activity.getApplicationContext(), permission) == PackageManager.PERMISSION_GRANTED;
-
     }
 
     public static void askPermissionActivity(Activity activity, String permission, final int callbackRequest)
