@@ -30,7 +30,7 @@ public class SearchBookActivity extends AppCompatActivity {
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
     private final static String ALGOLIA_INDEX_NAME = "books";
-    
+
     private FloatingSearchView mSearchView;
     private Index index;
     private Query query;
