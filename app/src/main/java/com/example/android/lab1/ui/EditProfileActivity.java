@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -14,7 +15,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -24,10 +24,10 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
+import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
-import com.example.android.lab1.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -77,6 +77,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     ListenerRegistration mUserListenerRegistration;
     SharedPreferencesManager mSharedPreferencesManager;
     Bundle mSavedInstanceState;
+    private Activity mSelf;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,10 +209,11 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             }
         });
 
+        mSelf = this;
         mPositionImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), PositionActivity.class);
+                Intent intent = Utilities.getPositionActivityIntent(mSelf, false);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivityForResult(intent, POSITION_REQUEST);
             }
@@ -220,7 +222,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         mAddressTextInputLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), PositionActivity.class);
+                Intent intent = Utilities.getPositionActivityIntent(mSelf, false);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivityForResult(intent, POSITION_REQUEST);
             }

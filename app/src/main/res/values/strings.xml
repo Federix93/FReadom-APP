@@ -77,5 +77,6 @@
     <string name="title_activity_lullo">LulloActivity</string>
     <string name="title_notifications">Notifications</string>
     <string name="dialog_isbn_search">Cerca su Internet</string>
+    <string name="dialog_isbn_scan">Leggi da codice a barre</string>
 
 </resources>

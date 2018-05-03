@@ -1,10 +1,14 @@
 package com.example.android.lab1.utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 
 import com.example.android.lab1.model.Address;
 import com.example.android.lab1.ui.PositionActivity;
@@ -29,9 +33,9 @@ public abstract class Utilities {
         ActivityCompat.requestPermissions(activity, new String[] {permission}, callbackRequest);
     }
 
-    public static Intent getSearchBarIntent(Activity activity, LatLng center, Double radius) throws GooglePlayServicesNotAvailableException, GooglePlayServicesRepairableException {
+    public static Intent getSearchBarIntent(Activity activity, LatLng center, Double radius, int selectedFilter) throws GooglePlayServicesNotAvailableException, GooglePlayServicesRepairableException {
         return new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                .setFilter(new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS).build())
+                .setFilter(new AutocompleteFilter.Builder().setTypeFilter(selectedFilter).build())
                 .setBoundsBias(Utilities.toBounds(center, radius))
                 .build(activity);
     }
@@ -69,6 +73,36 @@ public abstract class Utilities {
         isbn13 += sum;
 
         return isbn13;
+    }
+
+    public static Intent getPositionActivityIntent(Activity currentActivity, boolean searchCities) {
+        Intent intent = new Intent(currentActivity, PositionActivity.class);
+        if (searchCities)
+            intent.putExtra(PositionActivity.SEARCH_CITY_EXTRA, true);
+        return intent;
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        } else {
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
+
     }
 
 }

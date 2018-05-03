@@ -63,5 +63,7 @@
     <string name="access_without_login">CONTINUE WITHOUT SIGNIN</string>
     <string name="activate_position">Please activate position</string>
     <string name="activate">Activate</string>
+    <string name="dialog_isbn_search">Search on internet</string>
+    <string name="dialog_isbn_scan">Scan through barcode</string>
 
 </resources>
