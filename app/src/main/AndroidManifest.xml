@@ -78,7 +78,7 @@
         <activity
             android:name=".ui.PositionActivity"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.ShowProfileActivity">
+        <activity android:name=".ui.GlobalShowProfileActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -89,7 +89,7 @@
             android:name=".utils.FetchAddressIntentService"
             android:exported="false" />
 
-        <activity android:name=".ui.BookDetailsActivity"/>
+        <activity android:name=".ui.BookDetailsActivity"></activity>
 
         <activity android:name=".ui.BookPhotoDetailActivity"/>
 

@@ -16,7 +16,6 @@ import java.util.List;
 
 public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.MyViewHolder> {
 
-    private Context mContext;
     private List<Book> mBooks;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -25,7 +24,6 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
         public TextView mBookEditor;
         public TextView mBookCity;
         public ImageView mBookThumbnail;
-        public TextView mBookReview;
 
         public MyViewHolder (View itemView) {
             super (itemView);
@@ -33,11 +31,9 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
             mBookEditor = itemView.findViewById(R.id.rv_book_editor);
             mBookCity = itemView.findViewById(R.id.rv_book_city);
             mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail);
-            mBookReview = itemView.findViewById(R.id.rv_book_review);
         }
     }
-    public ProfileBookAdapter (Context context, List<Book> books) {
-        this.mContext = context;
+    public ProfileBookAdapter (List<Book> books) {
         this.mBooks = books;
     }
 

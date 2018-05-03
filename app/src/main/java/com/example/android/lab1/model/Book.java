@@ -16,17 +16,15 @@ public class Book
     private String mThumbnail;
     private String mTags;
     private String mEditor;
-    private String mReview;
     private String mCity;
     private List<String> bookImagesUrls;
 
     public Book(){}
-    public Book (String title, String editor, String image, String city, String review) {
+    public Book (String title, String editor, String image, String city) {
         mTitle = title;
         mEditor = editor;
         mThumbnail = image;
         mCity = city;
-        mReview = review;
     }
 
     public String getThumbnail() {
@@ -120,18 +118,14 @@ public class Book
     }
     public static List<Book> getRandomBook () {
         List<Book> books = new ArrayList<>();
-        Book a = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", "\"Il cacciatore di aquiloni” è un romanzo profondo che tocca le coscienze di tutti e che usa un linguaggio semplice e molto scorrevole. Non è mai pesante anche se gli argomenti affrontati potrebbero portarlo ad essere. \" ");
-        books.add(a);
 
-        Book b = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", "\"Il cacciatore di aquiloni” è un romanzo profondo che tocca le coscienze di tutti e che usa un linguaggio semplice e molto scorrevole. Non è mai pesante anche se gli argomenti affrontati potrebbero portarlo ad essere. \" ");
-        books.add(b);
-        Book c = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", "\"Il cacciatore di aquiloni” è un romanzo profondo che tocca le coscienze di tutti e che usa un linguaggio semplice e molto scorrevole. Non è mai pesante anche se gli argomenti affrontati potrebbero portarlo ad essere. \" ");
+        Book c = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
         books.add(c);
-        Book d = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", "\"Il cacciatore di aquiloni” è un romanzo profondo che tocca le coscienze di tutti e che usa un linguaggio semplice e molto scorrevole. Non è mai pesante anche se gli argomenti affrontati potrebbero portarlo ad essere. \" ");
+        Book d = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
         books.add(d);
-        Book e = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", "\"Il cacciatore di aquiloni” è un romanzo profondo che tocca le coscienze di tutti e che usa un linguaggio semplice e molto scorrevole. Non è mai pesante anche se gli argomenti affrontati potrebbero portarlo ad essere. \" ");
+        Book e = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
         books.add(e);
-        Book f = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", "\"Il cacciatore di aquiloni” è un romanzo profondo che tocca le coscienze di tutti e che usa un linguaggio semplice e molto scorrevole. Non è mai pesante anche se gli argomenti affrontati potrebbero portarlo ad essere. \" ");
+        Book f = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
         books.add(f);
 
 

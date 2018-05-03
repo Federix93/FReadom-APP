@@ -11,19 +11,19 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ProfileBookAdapter;
 import com.example.android.lab1.model.Book;
 
-public class ShowProfileActivity extends AppCompatActivity{
+public class GlobalShowProfileActivity extends AppCompatActivity{
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_show_profile);
+        setContentView(R.layout.activity_global_show_profile);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         RecyclerView recyclerView = findViewById(R.id.rv_books);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
-
-        ProfileBookAdapter adapter = new ProfileBookAdapter(this, Book.getRandomBook());
+        recyclerView.setNestedScrollingEnabled(false);
+        ProfileBookAdapter adapter = new ProfileBookAdapter(Book.getRandomBook());
         recyclerView.setAdapter(adapter);
     }
 
