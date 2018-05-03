@@ -9,8 +9,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.List;
 
@@ -18,21 +20,6 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
 
     private List<Book> mBooks;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-
-        public TextView mBookTitle;
-        public TextView mBookEditor;
-        public TextView mBookCity;
-        public ImageView mBookThumbnail;
-
-        public MyViewHolder (View itemView) {
-            super (itemView);
-            mBookTitle = itemView.findViewById(R.id.rv_book_title);
-            mBookEditor = itemView.findViewById(R.id.rv_book_editor);
-            mBookCity = itemView.findViewById(R.id.rv_book_city);
-            mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail);
-        }
-    }
     public ProfileBookAdapter (List<Book> books) {
         this.mBooks = books;
     }
@@ -49,7 +36,7 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-
+        holder.bind(mBooks.get(position));
     }
 
     @Override
@@ -57,5 +44,33 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
         return mBooks.size();
     }
 
+    public class MyViewHolder extends RecyclerView.ViewHolder {
 
+        TextView mBookTitle;
+        TextView mBookEditor;
+        TextView mBookCity;
+        ImageView mBookThumbnail;
+
+        public MyViewHolder (View itemView) {
+            super (itemView);
+            mBookTitle = itemView.findViewById(R.id.rv_book_title);
+            mBookEditor = itemView.findViewById(R.id.rv_book_editor);
+            mBookCity = itemView.findViewById(R.id.rv_book_city);
+            mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail);
+        }
+        public void bind(Book book){
+
+            mBookTitle.setText(book.getTitle());
+            mBookEditor.setText(book.getPublisher());
+            if (book.getThumbnail() != null) {
+                Glide.with(itemView.getContext()).load(book.getThumbnail()).into(mBookThumbnail);
+            } /*else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
+                mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getBookImagesUrls().get(0));
+                Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
+            }*/ else
+                Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mBookThumbnail);
+
+        }
+
+    }
 }

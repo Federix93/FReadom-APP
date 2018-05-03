@@ -187,7 +187,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void updateUI(Book book) {
+    private void updateUI(final Book book) {
         if(book.getTitle() != null)
             mBookTitleTextView.setText(book.getTitle());
         if(book.getAuthor() != null)
@@ -236,6 +236,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                                     Bundle bundle = new Bundle();
                                     intent.putExtra("UserObject", mUser);
+                                    intent.putExtra("UserID", book.getUid());
                                     startActivity(intent);
                                 }
                             });
