@@ -8,18 +8,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,12 +30,9 @@ import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -140,7 +133,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
-            View photoView = inflater.inflate(R.layout.book_image_item, parent, false);
+            View photoView = inflater.inflate(R.layout.book_detail_gallery_item, parent, false);
             int width = (parent.getMeasuredWidth() / 3) - 8;
             int height = parent.getMeasuredHeight();
             photoView.setLayoutParams(new RecyclerView.LayoutParams(width, height));
@@ -221,9 +214,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                         mUser = task.getResult().toObject(User.class);
                         if(mUser != null) {
                             if (mUser.getImage() == null) {
-                                Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
+                                /*Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
                                         .apply(bitmapTransform(new CircleCrop()))
-                                        .into(mUserImageView);
+                                        .into(mUserImageView);*/
                             } else {
                                 Glide.with(getApplicationContext()).load(mUser.getImage())
                                         .apply(bitmapTransform(new CircleCrop()))

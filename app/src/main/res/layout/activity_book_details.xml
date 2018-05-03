@@ -25,23 +25,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="5dp">
-
+            android:orientation="vertical">
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp">
 
                 <ImageView
                     android:id="@+id/book_thumbnail"
                     android:layout_width="116dp"
                     android:layout_height="180dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
                     android:contentDescription="@string/book_thumbnail_content_description"
                     android:scaleType="centerCrop"
                     android:src="@drawable/book_placeholder_thumbnail"
@@ -54,9 +50,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="start"
                     android:textColor="@color/black"
                     android:textSize="20sp"
@@ -71,8 +66,7 @@
                     android:id="@+id/author"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:textColor="@color/black"
                     android:textSize="16sp"
@@ -84,8 +78,7 @@
                     android:id="@+id/editor"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
@@ -95,24 +88,23 @@
                     android:id="@+id/publication_date"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="4dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toBottomOf="@+id/editor" />
-                </android.support.constraint.ConstraintLayout>
+            </android.support.constraint.ConstraintLayout>
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp">
+                android:layout_marginTop="16dp">
 
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/preview_button"
                     android:layout_width="0dp"
-                    android:layout_height="35dp"
-                    android:layout_marginBottom="15dp"
+                    android:layout_height="36dp"
+                    android:layout_marginBottom="16dp"
                     android:layout_marginStart="8dp"
                     android:background="@drawable/custom_border_button"
                     android:text="@string/preview"
@@ -126,8 +118,8 @@
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/book_button"
                     android:layout_width="0dp"
-                    android:layout_height="35dp"
-                    android:layout_marginBottom="15dp"
+                    android:layout_height="36dp"
+                    android:layout_marginBottom="16dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginStart="8dp"
                     android:background="@color/colorSecondaryAccent"
@@ -139,34 +131,21 @@
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toEndOf="@+id/preview_button" />
 
-                <!--<ImageView-->
-                <!--android:id="@+id/add_to_favorite_small_icon"-->
-                <!--android:layout_width="26dp"-->
-                <!--android:layout_height="30dp"-->
-                <!--android:layout_marginEnd="8dp"-->
-                <!--android:layout_marginTop="18dp"-->
-                <!--app:layout_constraintEnd_toEndOf="parent"-->
-                <!--app:layout_constraintHorizontal_bias="0.5"-->
-                <!--app:layout_constraintStart_toEndOf="@+id/bookTitle"-->
-                <!--app:layout_constraintTop_toTopOf="parent"-->
-                <!--app:srcCompat="@drawable/bookmark"-->
-                <!--android:contentDescription="Add to favorite"/>-->
             </android.support.constraint.ConstraintLayout>
 
             <RelativeLayout
                 android:id="@+id/activity_main"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rv_images"
                     android:layout_width="match_parent"
                     android:layout_height="121dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="16dp"
                     android:horizontalSpacing="10dp"
                     android:orientation="horizontal"
-                    android:verticalSpacing="20dp"
-                    app:reverseLayout="true" />
+                    android:verticalSpacing="20dp"/>
             </RelativeLayout>
 
             <LinearLayout
