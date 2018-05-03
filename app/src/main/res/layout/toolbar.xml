@@ -6,4 +6,4 @@
     android:background="#FAFAFA"
     android:elevation="0dp"
     android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-    app:titleTextColor="#000" />
+    app:titleTextColor="@color/black" />

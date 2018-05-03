@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.BookDetailsActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayoutBookDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@+id/toolbar_loadbook"
+            layout="@layout/toolbar" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp">
+
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/book_thumbnail"
+                    android:layout_width="115dp"
+                    android:layout_height="180dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/book_thumbnail_content_description"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/book_placeholder_thumbnail"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/bookTitle"
+                    android:layout_width="160dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="16dp"
+                    android:gravity="start"
+                    android:text="Il Signore degli anelli: le due torri"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:paddingLeft="10dp" />
+
+                <TextView
+                    android:id="@+id/author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="8dp"
+                    android:text=" J. R. R. Tolkien"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@+id/bookTitle" />
+
+                <TextView
+                    android:id="@+id/editor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="4dp"
+                    android:text="Giunti Editore"
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@+id/author" />
+
+                <TextView
+                    android:id="@+id/publication_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="2dp"
+                    android:text="10 Gennaio 2002"
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@+id/editor" />
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/preview_button"
+                    android:layout_width="0dp"
+                    android:layout_height="35dp"
+                    android:layout_marginBottom="25dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/custom_border_button"
+                    android:text="Preview"
+                    android:textColor="#03a5e4"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/book_button"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/book_thumbnail" />
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/book_button"
+                    android:layout_width="0dp"
+                    android:layout_height="35dp"
+                    android:layout_marginBottom="25dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#03a5e4"
+                    android:text="Book"
+                    android:textColor="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@+id/preview_button" />
+
+                <!--<ImageView-->
+                <!--android:id="@+id/add_to_favorite_small_icon"-->
+                <!--android:layout_width="26dp"-->
+                <!--android:layout_height="30dp"-->
+                <!--android:layout_marginEnd="8dp"-->
+                <!--android:layout_marginTop="18dp"-->
+                <!--app:layout_constraintEnd_toEndOf="parent"-->
+                <!--app:layout_constraintHorizontal_bias="0.5"-->
+                <!--app:layout_constraintStart_toEndOf="@+id/bookTitle"-->
+                <!--app:layout_constraintTop_toTopOf="parent"-->
+                <!--app:srcCompat="@drawable/bookmark"-->
+                <!--android:contentDescription="Add to favorite"/>-->
+            </android.support.constraint.ConstraintLayout>
+
+            <RelativeLayout
+                android:id="@+id/activity_main"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_images"
+                    android:layout_width="match_parent"
+                    android:layout_height="121dp"
+                    android:layout_marginTop="10dp"
+                    android:horizontalSpacing="10dp"
+                    android:orientation="horizontal"
+                    android:verticalSpacing="20dp"
+                    app:reverseLayout="true" />
+            </RelativeLayout>
+
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:layout_gravity="end"-->
+                <!--android:background="@android:color/darker_gray"-->
+                <!--android:layout_marginTop="5dp"/>-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingBottom="10dp"
+                    android:paddingStart="60dp">
+
+                <ImageView
+                    android:id="@+id/add_to_favorite"
+                    android:layout_width="53dp"
+                    android:layout_height="33dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    app:srcCompat="@drawable/ic_bookmark_border_black_24dp" />
+
+                <TextView
+                    android:id="@+id/add_to_favorite_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/add_to_favorite"
+                    android:textColor="@color/black"
+                    android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingEnd="60dp">
+
+                <ImageView
+                    android:id="@+id/share_icon"
+                    android:layout_width="53dp"
+                    android:layout_height="33dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    app:srcCompat="@drawable/ic_share_black_24dp" />
+
+
+                <TextView
+                    android:id="@+id/add_to_favorite_text2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/share"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"/>
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_gravity="end"
+                android:layout_marginTop="5dp"
+                android:background="@android:color/darker_gray" />
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/profile_image"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="12dp"
+                    android:src="@mipmap/profile_picture"
+                    app:civ_border_color="@color/white"
+                    app:civ_border_width="1dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:elevation="3dp"/>
+
+                <TextView
+                    android:id="@+id/name"
+                    style="@style/Name"
+                    android:layout_width="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignTop="@+id/profile_image"
+                    android:layout_gravity="end"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Vincenzo Savarese"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.472"
+                    app:layout_constraintStart_toEndOf="@+id/profile_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="8dp"
+                    android:text="4.2"
+                    android:textSize="20sp"
+                    app:layout_constraintStart_toStartOf="@+id/guideline"
+                    app:layout_constraintTop_toBottomOf="@+id/name" />
+
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_begin="134dp" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_gravity="end"
+                android:layout_marginTop="5dp"
+                android:background="@android:color/darker_gray" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+
+
+
+
+
+            </LinearLayout>
+
+            <!--<android.support.v7.widget.CardView-->
+            <!--android:id="@+id/card_holder"-->
+            <!--style="@style/Card"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content">-->
+
+            <!--<FrameLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content">-->
+
+            <!--<ImageView-->
+            <!--android:id="@+id/cover"-->
+            <!--style="@style/Cover"-->
+            <!--android:src="@mipmap/profile_cover" />-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/name"-->
+            <!--style="@style/Name"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_gravity="end"-->
+            <!--android:text="Vincenzo Savarese" />-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/sub_title"-->
+            <!--style="@style/SubTitle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_gravity="end"-->
+            <!--android:text="Just a sub title" />-->
+
+
+            <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:orientation="vertical"-->
+            <!--android:paddingBottom="10dp"-->
+            <!--android:paddingLeft="3dp"-->
+            <!--android:paddingRight="3dp">-->
+
+            <!--<com.vansuita.materialabout.views.CircleImageView-->
+            <!--android:id="@+id/photo"-->
+            <!--android:layout_width="80dp"-->
+            <!--android:layout_height="80dp"-->
+            <!--android:layout_gravity="start"-->
+            <!--android:layout_marginStart="5dp"-->
+            <!--android:layout_marginTop="25dp"-->
+            <!--android:scaleType="centerCrop"-->
+            <!--android:src="@mipmap/profile_picture" />-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/sub_description"-->
+            <!--style="@style/Brief"-->
+            <!--android:text="Just a short description" />-->
+
+            <!--</LinearLayout>-->
+            <!--</FrameLayout>-->
+            <!--</android.support.v7.widget.CardView>-->
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
