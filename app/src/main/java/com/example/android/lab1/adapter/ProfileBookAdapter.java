@@ -12,7 +12,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
@@ -64,10 +66,10 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
             mBookEditor.setText(book.getPublisher());
             if (book.getThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getThumbnail()).into(mBookThumbnail);
-            } /*else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
-                mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getBookImagesUrls().get(0));
-                Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
-            }*/ else
+            } else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
+                StorageReference storage = FirebaseStorage.getInstance().getReferenceFromUrl(book.getBookImagesUrls().get(0));
+                Glide.with(itemView.getContext()).load(storage).into(mBookThumbnail);
+            } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mBookThumbnail);
 
         }
