@@ -78,5 +78,15 @@
     <string name="title_notifications">Notifications</string>
     <string name="dialog_isbn_search">Cerca su Internet</string>
     <string name="dialog_isbn_scan">Leggi da codice a barre</string>
+    <string name="load_new_book">Aggiungi un nuovo libro</string>
+    <string-array name="genre">
+        <item>Genere 1</item>
+        <item>Genere 2</item>
+    </string-array>
+
+    <string name="genre_hint">
+        Genere
+    </string>
+    <string name="date">Periodo di prestito</string>
 
 </resources>

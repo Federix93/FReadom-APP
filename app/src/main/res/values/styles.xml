@@ -33,9 +33,15 @@
         <item name="android:background">?android:attr/listDivider</item>
     </style>
 
-    <style name="IsbnDialog">
-        <item name="android:background">@android:color/background_light</item>
-        <item name="android:textColor">@color/colorPrimary</item>
+    <style name="IsbnButton">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">#40FFFFFF</item>
+
+    </style>
+
+    <style name="ActionTextView">
+        <item name="android:textSize">@dimen/text_view_size</item>
+        <item name="android:paddingStart">5dp</item>
     </style>
 
 

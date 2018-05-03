@@ -9,6 +9,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.widget.ArrayAdapter;
 
 import com.example.android.lab1.model.Address;
 import com.example.android.lab1.ui.PositionActivity;
@@ -19,6 +20,10 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class Utilities {
 
@@ -103,6 +108,18 @@ public abstract class Utilities {
         }
 
 
+    }
+
+    public static ArrayAdapter<String> makeDropDownAdapter(Activity containerActivity, String[] items) {
+        List<String> temp;
+        temp = new ArrayList<>(Arrays.asList(items));
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(containerActivity,
+                android.R.layout.simple_spinner_item,
+                temp);
+
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        return arrayAdapter;
     }
 
 }

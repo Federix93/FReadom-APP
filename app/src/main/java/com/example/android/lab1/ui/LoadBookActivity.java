@@ -34,7 +34,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,12 +47,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.android.lab1.adapter.ImagePagerAdapter;
 import com.example.android.lab1.R;
-import com.example.android.lab1.ui.homepage.HomePageActivity;
-import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.adapter.ImagePagerAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
+import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -73,7 +72,6 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -442,12 +440,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         for (int i = Calendar.getInstance().get(Calendar.YEAR), n = 0; n < 200; i--, n++)
             years[n] = Integer.toString(i);
 
-        mPublishYearSpinner.setAdapter(makeDropDownAdapter(years));
+        mPublishYearSpinner.setAdapter(Utilities.makeDropDownAdapter(this, years));
         mPublishYearSpinner.setHint(R.string.publishing_year);
         mPublishYearSpinner.setFloatingLabelText(R.string.publishing_year);
 
         mConditionsSpinner.setHint(R.string.conditions);
-        mConditionsSpinner.setAdapter(makeDropDownAdapter(Condition.getConditions(this).toArray(new String[0])));
+        mConditionsSpinner.setAdapter(Utilities.makeDropDownAdapter(this, Condition.getConditions(this).toArray(new String[0])));
         mConditionsSpinner.setFloatingLabelText(R.string.conditions);
     }
 
@@ -696,18 +694,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         }
-    }
-
-    private ArrayAdapter<String> makeDropDownAdapter(String[] items) {
-        List<String> temp;
-        temp = new ArrayList<>(Arrays.asList(items));
-
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
-                temp);
-
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        return arrayAdapter;
     }
 
     private boolean validateIsbn(EditText isbnView) {
