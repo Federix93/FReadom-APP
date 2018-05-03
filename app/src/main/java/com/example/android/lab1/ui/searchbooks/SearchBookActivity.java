@@ -68,6 +68,8 @@ public class SearchBookActivity extends AppCompatActivity {
         setupSearchListener();
         setupQueryChangeListener();
 
+        mSearchView.setSearchFocused(true);
+
     }
 
     private void setupMenuItemCliclListener()
