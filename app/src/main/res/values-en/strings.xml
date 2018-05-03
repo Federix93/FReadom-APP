@@ -74,4 +74,10 @@
     <string name="preview">Preview</string>
     <string name="book">Book</string>
 
+    <string name="position_filter_home_page">POSITION</string>
+    <string name="genre_filter_home_page">GENRES</string>
+
+    <string name="nearby_home_page">Nearby</string>
+    <string name="latest_arrivals_home_page">Latest arrivals</string>
+
 </resources>
