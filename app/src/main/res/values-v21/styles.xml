@@ -4,4 +4,9 @@
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="android:statusBarColor">@color/background_app</item>
     </style>
+
+    <style name="ThemeDrawer" parent="AppTheme">
+        <item name="android:windowTranslucentStatus">true</item>
+
+    </style>
 </resources>
