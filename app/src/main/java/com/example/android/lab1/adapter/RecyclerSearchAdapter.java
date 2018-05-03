@@ -13,15 +13,12 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
-import com.example.android.lab1.model.Book;
+
 import com.example.android.lab1.model.User;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,13 +44,11 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
     @Override
     public void onBindViewHolder(@NonNull ResultViewHolder holder, int position) {
-        Log.d("TESTBOOK", "Sto a "+position);
         holder.bind(mSearchResults.optJSONObject(position));
     }
 
     @Override
     public int getItemCount() {
-        Log.d("TESTBOOK", String.valueOf(mSearchResults.length()));
         return mSearchResults.length();
     }
 

@@ -27,6 +27,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SearchBookActivity extends AppCompatActivity {
 
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
@@ -36,6 +39,7 @@ public class SearchBookActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private FloatingSearchView mSearchView;
     private Index index;
+    private Query query;
     private RecyclerView mRecyclerView;
     private RecyclerSearchAdapter mAdapter;
 
@@ -73,8 +77,24 @@ public class SearchBookActivity extends AppCompatActivity {
                 if(newQuery.isEmpty())
                     return;
 
-                Query query = new Query();
+                query = new Query();
                 query.setQuery(newQuery);
+
+
+//                List<String> aaa = new ArrayList<>();
+//
+//                aaa.add("title");
+//                aaa.add("tags");
+//
+//                String[] we = new String[aaa.size()];
+//
+//                aaa.toArray(we);
+//
+//                for(int i=0; i<aaa.size(); i++)
+//                    Log.d("TESTBOOKS", we[i]);
+
+
+//                query.setRestrictSearchableAttributes("title");
 
                 index.searchAsync(query, new CompletionHandler() {
                     @Override
