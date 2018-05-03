@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="searchFilters">
+        <item>@string/title</item>
+        <item>@string/author</item>
+        <item>@string/publisher</item>
+        <item>@string/load_book_tags</item>
+    </string-array>
+
+</resources>

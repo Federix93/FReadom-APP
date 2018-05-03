@@ -67,5 +67,7 @@
     <string name="no_name_nav_drawer">No name</string>
     <string name="no_email_nav_drawer">No email</string>
     <string name="button_right_recycler_view">MORE</string>
+    <string name="filter_dialog_title">Filter by</string>
+    <string name="min_selection">Choose at least one item</string>
 
 </resources>

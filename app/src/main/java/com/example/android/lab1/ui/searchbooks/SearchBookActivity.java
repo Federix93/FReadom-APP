@@ -11,8 +11,12 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.CompletionHandler;
@@ -58,6 +62,51 @@ public class SearchBookActivity extends AppCompatActivity {
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         index = client.getIndex(ALGOLIA_INDEX_NAME);
 
+        setupMenuItemCliclListener();
+        setupSearchListener();
+        setupQueryChangeListener();
+
+    }
+
+    private void setupMenuItemCliclListener()
+    {
+        mSearchView.setOnMenuItemClickListener(new FloatingSearchView.OnMenuItemClickListener() {
+            @Override
+            public void onActionMenuItemSelected(MenuItem item) {
+
+                int itemID = item.getItemId();
+                if(itemID == R.id.action_filter)
+                {
+                    new MaterialDialog.Builder(SearchBookActivity.this)
+                            .title(R.string.filter_dialog_title)
+                            .items(R.array.searchFilters)
+                            .itemsCallbackMultiChoice(
+                                    new Integer[]{1},
+                                    new MaterialDialog.ListCallbackMultiChoice() {
+                                        @Override
+                                        public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
+                                            boolean allowSelectionChange =
+                                                    which.length
+                                                            >= 1; // selection count must stay above 1, the new (un)selection is included
+                                            // in the which array
+                                            if (!allowSelectionChange) {
+                                                Toast.makeText(SearchBookActivity.this, getResources().getString(R.string.min_selection), Toast.LENGTH_LONG).show();
+
+                                            }
+                                            return allowSelectionChange;
+                                        }
+                                    })
+                            .positiveText(R.string.confirm)
+                            .alwaysCallMultiChoiceCallback() // the callback will always be called, to check if
+                            // (un)selection is still allowed
+                            .show();
+                }
+            }
+        });
+    }
+
+    private void setupSearchListener()
+    {
         mSearchView.setOnSearchListener(new FloatingSearchView.OnSearchListener() {
             @Override
             public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
@@ -69,7 +118,10 @@ public class SearchBookActivity extends AppCompatActivity {
 
             }
         });
+    }
 
+    private void setupQueryChangeListener()
+    {
         mSearchView.setOnQueryChangeListener(new FloatingSearchView.OnQueryChangeListener() {
             @Override
             public void onSearchTextChanged(String oldQuery, String newQuery) {
@@ -106,16 +158,6 @@ public class SearchBookActivity extends AppCompatActivity {
                 });
             }
         });
-
-
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_search_books, menu);
-
-        return true;
     }
 
     protected void onDestroy() {
