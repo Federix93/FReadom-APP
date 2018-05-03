@@ -2,7 +2,8 @@
 <layout xmlns:tools="http://schemas.android.com/tools"
     xmlns:algolia="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto">
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <LinearLayout
 
         android:layout_width="match_parent"
@@ -24,13 +25,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
-                <com.example.android.lab1.BookCoverHitView
+                <ImageView
+                    android:id="@+id/search_book_thumbnail"
                     android:layout_width="92dp"
                     android:layout_height="142dp"
                     android:layout_margin="17dp"
                     android:scaleType="fitCenter"
-                    android:background="@drawable/border_image"
-                    android:src="@drawable/book_placeholder_thumbnail"/>
+                    android:background="@drawable/border_image"/>
 
                 <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
@@ -47,10 +48,8 @@
                         android:textColor="#000000"
                         android:text="Book Title"
                         android:textSize="18sp"
-                        algolia:attribute='@{"title"}'
-                        algolia:highlighted='@{true}'
-                        algolia:layout_constraintStart_toStartOf="parent"
-                        algolia:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/search_book_author"
@@ -61,23 +60,21 @@
                         android:textColor="#a6a6a6"
                         android:text="Book Author"
                         android:textSize="13sp"
-                        algolia:attribute='@{"author"}'
-                        algolia:highlighted='@{true}'
-                        algolia:layout_constraintTop_toBottomOf="@+id/search_book_title"
+                        app:layout_constraintTop_toBottomOf="@+id/search_book_title"
                         card_view:layout_constraintStart_toStartOf="parent" />
 
-                    <com.example.android.lab1.ui.searchbooks.UserPictureHitView
-                        android:id="@+id/search_user_picture"
+                    <ImageView
+                        android:id="@+id/search_book_user_picture"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:layout_marginBottom="24dp"
                         android:scaleType="fitCenter"
-                        algolia:layout_constraintBottom_toBottomOf="parent"
-                        algolia:layout_constraintStart_toStartOf="parent"
-                        algolia:srcCompat="@drawable/ic_person_black_24dp" />
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:srcCompat="@drawable/ic_person_black_24dp" />
 
-                    <com.example.android.lab1.ui.searchbooks.UserRatingHitView
-                        android:id="@+id/userRatingHitView"
+                    <TextView
+                        android:id="@+id/search_book_user_rating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="30dp"
@@ -85,10 +82,10 @@
                         android:fontFamily="sans-serif-light"
                         android:text="5.0"
                         android:textSize="16sp"
-                        algolia:layout_constraintBottom_toBottomOf="parent"
-                        algolia:layout_constraintEnd_toEndOf="parent"
-                        algolia:layout_constraintHorizontal_bias="0.01"
-                        algolia:layout_constraintStart_toEndOf="@+id/search_user_picture" />
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.01"
+                        app:layout_constraintStart_toEndOf="@+id/search_book_user_picture" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -96,8 +93,8 @@
                         android:layout_marginBottom="34dp"
                         android:layout_marginStart="4dp"
                         android:src="@drawable/ic_star"
-                        algolia:layout_constraintBottom_toBottomOf="parent"
-                        algolia:layout_constraintStart_toEndOf="@+id/userRatingHitView" />
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/search_book_user_rating" />
 
 
                 </android.support.constraint.ConstraintLayout>

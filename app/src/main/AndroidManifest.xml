@@ -68,10 +68,8 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
@@ -102,14 +100,13 @@
             </intent-filter>
         </receiver>
 
-
         <activity
             android:name=".ui.homepage.HomePageActivity"
             android:label="@string/title_activity_home_page"
             android:theme="@style/ThemeDrawer" />
         <activity android:name=".ui.GenreBooksActivity" />
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
-        <activity android:name=".ui.ProfileActivity"></activity>
+        <activity android:name=".ui.ProfileActivity"/>
     </application>
 
 </manifest>

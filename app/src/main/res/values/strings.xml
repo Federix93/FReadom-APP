@@ -83,6 +83,7 @@
     <string name="share">Condividi</string>
     <string name="preview">Anteprima</string>
     <string name="book">Prenota</string>
+    <string name="filter_dialog_title">Filtra per</string>
 
     <string name="search_books_hint">Titolo, autore, editore, tags...</string>
 
@@ -100,4 +101,5 @@
         <item>Economia e finanza</item>
         <item>Fantascienza e fantasy</item>
     </string-array>
+    <string name="min_selection">Seleziona almeno un elemento</string>
 </resources>
