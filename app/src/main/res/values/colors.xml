@@ -6,4 +6,5 @@
     <color name="black">#000000</color>
     <color name="white">#FFF</color>
     <color name="background_app">#FAFAFA</color>
+    <color name="colorSecondaryAccent">#F63D2B</color>
 </resources>

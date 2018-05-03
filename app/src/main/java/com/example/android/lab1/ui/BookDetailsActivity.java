@@ -57,6 +57,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     ImageView mStarImageView;
 
     private String mBookId;
+    private User mUser;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -90,15 +91,6 @@ public class BookDetailsActivity extends AppCompatActivity {
         });
 
         mProfileConstraintLayout = findViewById(R.id.profile_detail);
-
-        mProfileConstraintLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-            }
-        });
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
         RecyclerView recyclerView = findViewById(R.id.rv_images);
@@ -210,28 +202,39 @@ public class BookDetailsActivity extends AppCompatActivity {
                     .build();
             firebaseFirestore.setFirestoreSettings(settings);
             final DocumentReference docRef = firebaseFirestore.collection("users").document(book.getUid());
-            Log.d("LULLO", book.getUid());
             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if(task.isSuccessful()){
-                        User user = task.getResult().toObject(User.class);
-                        if(user != null) {
-                            if (user.getImage() == null) {
+                        mUser = task.getResult().toObject(User.class);
+                        if(mUser != null) {
+                            if (mUser.getImage() == null) {
                                 Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
                                         .apply(bitmapTransform(new CircleCrop()))
                                         .into(mUserImageView);
                             } else {
-                                Glide.with(getApplicationContext()).load(user.getImage())
+                                Glide.with(getApplicationContext()).load(mUser.getImage())
                                         .apply(bitmapTransform(new CircleCrop()))
                                         .into(mUserImageView);
                             }
-                            if (user.getUsername() != null) {
-                                mUsernameTextView.setText(user.getUsername());
+                            if (mUser.getUsername() != null) {
+                                mUsernameTextView.setText(mUser.getUsername());
                             }
-                            if (String.valueOf(user.getRating()) != null) {
-                                mRatingTextView.setText(String.valueOf(user.getRating()));
+                            if (String.valueOf(mUser.getRating()) != null) {
+                                mRatingTextView.setText(String.valueOf(mUser.getRating()));
                             }
+
+                            mProfileConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                    Bundle bundle = new Bundle();
+                                    intent.putExtra("UserObject", mUser);
+                                    startActivity(intent);
+                                }
+                            });
+
                         }
                     }
                 }

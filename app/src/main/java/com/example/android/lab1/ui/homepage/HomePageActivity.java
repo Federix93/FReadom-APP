@@ -129,7 +129,7 @@ public class HomePageActivity extends AppCompatActivity
         oldPosition = 0;
         mBottomNavigation.addItems(items);
         mBottomNavigation.setBehaviorTranslationEnabled(false);
-        mBottomNavigation.setAccentColor(Color.parseColor("#F63D2B"));
+        mBottomNavigation.setAccentColor(getResources().getColor(R.color.colorSecondaryAccent));
 
         mFragmentManager.beginTransaction()
                 .replace(R.id.fragment_frame, mHomeFragment)
@@ -139,7 +139,6 @@ public class HomePageActivity extends AppCompatActivity
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
 
-                Log.d("LULLO", "Position:  " + oldPosition);
                 if (wasSelected) {
                     return true;
                 } else {

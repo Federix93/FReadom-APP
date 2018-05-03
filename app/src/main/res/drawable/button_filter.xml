@@ -11,7 +11,7 @@
                     android:shape="rectangle">
                     <!-- default button color -->
 
-                    <solid android:color="#F63D2B"/>
+                    <solid android:color="@color/colorSecondaryAccent"/>
 
                     <corners android:radius="20dp"/>
 

@@ -102,4 +102,5 @@
         <item>Fantascienza e fantasy</item>
     </string-array>
     <string name="min_selection">Seleziona almeno un elemento</string>
+    <string name="book_owner_text">I libri di %1$s</string>
 </resources>

@@ -1,10 +1,13 @@
 package com.example.android.lab1.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Federico on 20/03/2018.
  */
 
-public class User {
+public class User implements Parcelable {
 
     private static User instance = null;
 
@@ -76,6 +79,43 @@ public class User {
     public void setRating(Float rating)
     {
         mRating = rating;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+        dest.writeString(mUsername);
+        dest.writeString(mEmail);
+        dest.writeString(mPhone);
+        dest.writeString(mAddress);
+        dest.writeString(mImage);
+        dest.writeString(mShortBio);
+        dest.writeFloat(mRating);
+    }
+
+    public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
+
+    private User(Parcel in) {
+        mUsername = in.readString();
+        mEmail = in.readString();
+        mPhone = in.readString();
+        mAddress = in.readString();
+        mImage = in.readString();
+        mShortBio = in.readString();
+        mRating = in.readFloat();
     }
 
     public static class Utils{
