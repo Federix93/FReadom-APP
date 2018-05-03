@@ -1,5 +1,6 @@
 package com.example.android.lab1.adapter;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,6 +16,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.BookDetailsActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -97,7 +99,10 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("ID_BOOK_SELECTED", mBookId);
+            v.getContext().startActivity(intent);
         }
     }
 
