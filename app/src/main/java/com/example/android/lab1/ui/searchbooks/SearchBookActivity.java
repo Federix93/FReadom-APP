@@ -1,21 +1,13 @@
 package com.example.android.lab1.ui.searchbooks;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
@@ -28,7 +20,6 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerSearchAdapter;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -39,8 +30,7 @@ public class SearchBookActivity extends AppCompatActivity {
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
     private final static String ALGOLIA_INDEX_NAME = "books";
-
-    private Toolbar mToolbar;
+    
     private FloatingSearchView mSearchView;
     private Index index;
     private Query query;
