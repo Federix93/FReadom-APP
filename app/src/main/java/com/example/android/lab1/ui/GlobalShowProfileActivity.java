@@ -23,6 +23,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setNestedScrollingEnabled(false);
+
         ProfileBookAdapter adapter = new ProfileBookAdapter(Book.getRandomBook());
         recyclerView.setAdapter(adapter);
     }
