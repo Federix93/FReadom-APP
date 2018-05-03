@@ -1,5 +1,6 @@
 package com.example.android.lab1.adapter;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.ui.BookDetailsActivity;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -24,10 +26,12 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
 
     private List<Book> books;
+    private List<String> IDs;
 
-    public RecyclerBookAdapter(List<Book> books)
+    public RecyclerBookAdapter(List<Book> books, List<String> IDs)
     {
         this.books = books;
+        this.IDs = IDs;
     }
 
     @NonNull
@@ -40,7 +44,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
     @Override
     public void onBindViewHolder(@NonNull final BookViewHolder holder, int position) {
-        holder.bind(books.get(position));
+        holder.bind(books.get(position), position);
     }
 
     /**
@@ -54,13 +58,13 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         return books.size();
     }
 
-    public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class BookViewHolder extends RecyclerView.ViewHolder{
 
         TextView mTitle, mAuthor;
         ImageView mThumbnail, mOverflow;
         StorageReference mStorageReference;
 
-        public BookViewHolder(View itemView) {
+        public BookViewHolder(final View itemView) {
             super(itemView);
 
             mTitle = itemView.findViewById(R.id.title);
@@ -68,10 +72,9 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
             mThumbnail = itemView.findViewById(R.id.thumbnail);
             //mOverflow = itemView.findViewById(R.id.overflow);
 
-            itemView.setOnClickListener(this);
         }
 
-        void bind(Book book)
+        void bind(Book book, final int position)
         {
             mTitle.setText(book.getTitle());
             mAuthor.setText(book.getAuthor());
@@ -82,17 +85,23 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
                 Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
             } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mThumbnail);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("ID_BOOK_SELECTED", IDs.get(position));
+                    v.getContext().startActivity(intent);
+                }
+            });
+
             /*mOverflow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     showPopupMenu(mOverflow);
                 }
             });*/
-        }
-
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
         }
     }
 

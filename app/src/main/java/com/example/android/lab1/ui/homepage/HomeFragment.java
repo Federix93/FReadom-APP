@@ -24,12 +24,14 @@ import com.example.android.lab1.ui.GenreBooksActivity;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -91,11 +93,13 @@ public class HomeFragment extends Fragment {
         mFirstRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         SnapHelper firstSnapHelperStart = new GravitySnapHelper(Gravity.START);
+        mFirstRecyclerView.setNestedScrollingEnabled(true);
         firstSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
 
         mSecondRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         SnapHelper secondSnapHelperStart = new GravitySnapHelper(Gravity.START);
+        mSecondRecyclerView.setNestedScrollingEnabled(true);
         secondSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
@@ -106,16 +110,21 @@ public class HomeFragment extends Fragment {
                 if (e != null) {
                     return;
                 }
+                List<String> IDs = new ArrayList<>();
+                for(DocumentSnapshot d : queryDocumentSnapshots.getDocuments()){
+                    IDs.add(d.getId());
+                }
                 List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
                 if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                     for (int i = 0; i < books.size(); i++) {
                         if (books.get(i).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                             books.remove(i);
+                            IDs.remove(i);
                         }
                     }
                 }
 
-                mAdapter = new RecyclerBookAdapter(books);
+                mAdapter = new RecyclerBookAdapter(books, IDs);
                 mFirstRecyclerView.setAdapter(mAdapter);
                 mSecondRecyclerView.setAdapter(mAdapter);
             }
