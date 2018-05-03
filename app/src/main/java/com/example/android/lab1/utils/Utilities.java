@@ -1,11 +1,18 @@
 package com.example.android.lab1.utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
+import com.example.android.lab1.R;
 import com.example.android.lab1.model.Address;
 import com.example.android.lab1.ui.PositionActivity;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -52,6 +59,26 @@ public abstract class Utilities {
                     i.getDoubleExtra(PositionActivity.LON_KEY, 0));
         }
         return null;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public static  void setupStatusBarColor(Activity activity)
+    {
+        Window window = activity.getWindow();
+
+// clear FLAG_TRANSLUCENT_STATUS flag:
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+// finally change the color
+        window.setStatusBarColor(ContextCompat.getColor(activity.getApplicationContext(), R.color.background_app));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View decor = activity.getWindow().getDecorView();
+
+            decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
     }
 
 }

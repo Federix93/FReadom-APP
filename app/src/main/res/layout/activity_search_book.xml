@@ -33,6 +33,6 @@
             app:floatingSearch_menu="@menu/menu_search_books"
             app:floatingSearch_searchHint="@string/search_books_hint"
             app:floatingSearch_showSearchKey="true"
-            app:floatingSearch_close_search_on_keyboard_dismiss="false"/>
+            app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

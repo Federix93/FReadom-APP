@@ -1,11 +1,17 @@
 package com.example.android.lab1.ui.searchbooks;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -18,6 +24,7 @@ import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerSearchAdapter;
+import com.example.android.lab1.utils.Utilities;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,10 +44,13 @@ public class SearchBookActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerSearchAdapter mAdapter;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_book);
+
+        Utilities.setupStatusBarColor(this);
 
         mSearchView = findViewById(R.id.floating_search_view);
         mRecyclerView = findViewById(R.id.results_recycler_view);

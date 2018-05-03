@@ -81,5 +81,6 @@
 
     <string name="nearby_home_page">Nearby</string>
     <string name="latest_arrivals_home_page">Latest arrivals</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

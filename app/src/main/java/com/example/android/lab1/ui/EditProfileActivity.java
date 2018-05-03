@@ -107,21 +107,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
-        Window window = getWindow();
-
-// clear FLAG_TRANSLUCENT_STATUS flag:
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-// finally change the color
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.background_app));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            View decor = getWindow().getDecorView();
-
-            decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
+        Utilities.setupStatusBarColor(this);
 
         mToolbar = findViewById(R.id.toolbar_edit_activity);
         mToolbar.setTitle(R.string.edit_title_activity);

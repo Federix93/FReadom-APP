@@ -23,6 +23,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.SharedPreferencesManager;
+import com.example.android.lab1.utils.Utilities;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -69,23 +70,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
-        Window window = getWindow();
+        Utilities.setupStatusBarColor(this);
 
-// clear FLAG_TRANSLUCENT_STATUS flag:
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-// finally change the color
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.background_app));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            View decor = getWindow().getDecorView();
-
-            decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-
-
-        }
         mToolbar = findViewById(R.id.toolbar_profile_activity);
         mToolbar.setTitle(R.string.title_profile);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);

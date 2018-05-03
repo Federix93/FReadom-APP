@@ -20,6 +20,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ProfileBookAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.utils.Utilities;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -33,21 +34,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_global_show_profile);
 
-        Window window = getWindow();
-
-// clear FLAG_TRANSLUCENT_STATUS flag:
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-// finally change the color
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.background_app));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            View decor = getWindow().getDecorView();
-
-            decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
+        Utilities.setupStatusBarColor(this);
 
         mImageView = findViewById(R.id.profile_image);
 
