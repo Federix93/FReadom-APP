@@ -38,7 +38,7 @@
 
                 <ImageView
                     android:id="@+id/book_thumbnail"
-                    android:layout_width="115dp"
+                    android:layout_width="116dp"
                     android:layout_height="180dp"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
@@ -49,15 +49,14 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/bookTitle"
-                    android:layout_width="160dp"
+                    android:id="@+id/book_title_detail_activity"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="15dp"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:gravity="start"
-                    android:text="Il Signore degli anelli: le due torri"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold"
@@ -72,11 +71,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="8dp"
-                    android:text=" J. R. R. Tolkien"
                     android:textColor="@color/black"
                     android:textSize="16sp"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
-                    app:layout_constraintTop_toBottomOf="@+id/bookTitle" />
+                    app:layout_constraintTop_toBottomOf="@+id/book_title_detail_activity" />
 
                 <TextView
                     android:id="@+id/editor"
@@ -84,7 +82,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="4dp"
-                    android:text="Giunti Editore"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toBottomOf="@+id/author" />
 
@@ -92,9 +89,10 @@
                     android:id="@+id/publication_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="2dp"
-                    android:text="10 Gennaio 2002"
+                    app:layout_constraintBottom_toTopOf="@+id/guideline2"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toBottomOf="@+id/editor" />
 
@@ -104,7 +102,7 @@
                     android:layout_height="35dp"
                     android:layout_marginBottom="25dp"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="16dp"
                     android:background="@drawable/custom_border_button"
                     android:text="Preview"
                     android:textColor="#F63D2B"
@@ -113,7 +111,7 @@
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/book_thumbnail" />
+                    app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/book_button"
@@ -130,6 +128,13 @@
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toEndOf="@+id/preview_button" />
+
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintGuide_begin="192dp" />
 
                 <!--<ImageView-->
                 <!--android:id="@+id/add_to_favorite_small_icon"-->

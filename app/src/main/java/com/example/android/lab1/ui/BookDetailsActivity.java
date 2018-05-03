@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
@@ -18,12 +19,24 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
+import com.example.android.lab1.model.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -32,21 +45,37 @@ public class BookDetailsActivity extends AppCompatActivity {
     ImageView mImageView;
     ConstraintLayout mProfileConstraintLayout;
     Toolbar mToolbar;
+    TextView mBookTitleTextView;
+    TextView mAuthorTextView;
+    TextView mEditorTextView;
+    TextView mPublicationDateTextView;
+    ImageView mBookThumbnailImageView;
+
+    private String mBookId;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_details);
+
+        mBookTitleTextView = findViewById(R.id.book_title_detail_activity);
+        mAuthorTextView = findViewById(R.id.author);
+        mEditorTextView = findViewById(R.id.editor);
+        mPublicationDateTextView = findViewById(R.id.publication_date);
+        mBookThumbnailImageView = findViewById(R.id.book_thumbnail);
+
+        mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
+
         Window window = getWindow();
 
-// clear FLAG_TRANSLUCENT_STATUS flag:
+        // clear FLAG_TRANSLUCENT_STATUS flag:
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
-// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
+        // add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-// finally change the color
+        // finally change the color
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.background_app));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             View decor = getWindow().getDecorView();
@@ -88,7 +117,24 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         ImageGalleryAdapter adapter = new ImageGalleryAdapter(this, BookPhoto.getSpacePhotos());
         recyclerView.setAdapter(adapter);
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        firebaseFirestore.setFirestoreSettings(settings);
+        final DocumentReference docRef = firebaseFirestore.collection("books").document(mBookId);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    Book book = task.getResult().toObject(Book.class);
+                    updateUI(book);
+                }
+            }
+        });
     }
+
 
     private class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapter.MyViewHolder> {
 
@@ -152,5 +198,20 @@ public class BookDetailsActivity extends AppCompatActivity {
             mContext = context;
             mBookPhoto = bookPhotos;
         }
+    }
+
+    private void updateUI(Book book) {
+        if(book.getTitle() != null)
+            mBookTitleTextView.setText(book.getTitle());
+        if(book.getAuthor() != null)
+            mAuthorTextView.setText(book.getAuthor());
+        if(book.getPublisher() != null)
+            mEditorTextView.setText(book.getPublisher());
+        if(String.valueOf(book.getPublishYear()) != null)
+            mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
+        if(book.getThumbnail() != null)
+            Glide.with(this).load(book.getThumbnail())
+                    .apply(new RequestOptions().centerCrop())
+                    .into(mBookThumbnailImageView);
     }
 }
