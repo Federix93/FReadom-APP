@@ -24,13 +24,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
-                <com.example.android.lab1.BookCoverHitView
+                <ImageView
+                    android:id="@+id/search_book_thumbnail"
                     android:layout_width="92dp"
                     android:layout_height="142dp"
                     android:layout_margin="17dp"
                     android:scaleType="fitCenter"
-                    android:background="@drawable/border_image"
-                    android:src="@drawable/book_placeholder_thumbnail"/>
+                    android:background="@drawable/border_image"/>
 
                 <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
@@ -66,8 +66,8 @@
                         algolia:layout_constraintTop_toBottomOf="@+id/search_book_title"
                         card_view:layout_constraintStart_toStartOf="parent" />
 
-                    <com.example.android.lab1.ui.searchbooks.UserPictureHitView
-                        android:id="@+id/search_user_picture"
+                    <ImageView
+                        android:id="@+id/search_book_user_picture"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:layout_marginBottom="24dp"
@@ -76,8 +76,8 @@
                         algolia:layout_constraintStart_toStartOf="parent"
                         algolia:srcCompat="@drawable/ic_person_black_24dp" />
 
-                    <com.example.android.lab1.ui.searchbooks.UserRatingHitView
-                        android:id="@+id/userRatingHitView"
+                    <TextView
+                        android:id="@+id/search_book_user_rating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="30dp"
@@ -88,7 +88,7 @@
                         algolia:layout_constraintBottom_toBottomOf="parent"
                         algolia:layout_constraintEnd_toEndOf="parent"
                         algolia:layout_constraintHorizontal_bias="0.01"
-                        algolia:layout_constraintStart_toEndOf="@+id/search_user_picture" />
+                        algolia:layout_constraintStart_toEndOf="@+id/search_book_user_picture" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -97,7 +97,7 @@
                         android:layout_marginStart="4dp"
                         android:src="@drawable/ic_star"
                         algolia:layout_constraintBottom_toBottomOf="parent"
-                        algolia:layout_constraintStart_toEndOf="@+id/userRatingHitView" />
+                        algolia:layout_constraintStart_toEndOf="@+id/search_book_user_rating" />
 
 
                 </android.support.constraint.ConstraintLayout>
