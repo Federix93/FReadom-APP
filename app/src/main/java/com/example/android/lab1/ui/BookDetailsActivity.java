@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,6 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class BookDetailsActivity extends AppCompatActivity {
 
-    ImageView mImageView;
     ConstraintLayout mProfileConstraintLayout;
     Toolbar mToolbar;
     TextView mBookTitleTextView;
@@ -50,6 +50,10 @@ public class BookDetailsActivity extends AppCompatActivity {
     TextView mEditorTextView;
     TextView mPublicationDateTextView;
     ImageView mBookThumbnailImageView;
+    TextView mUsernameTextView;
+    TextView mRatingTextView;
+    ImageView mUserImageView;
+    ImageView mStarImageView;
 
     private String mBookId;
 
@@ -64,6 +68,10 @@ public class BookDetailsActivity extends AppCompatActivity {
         mEditorTextView = findViewById(R.id.editor);
         mPublicationDateTextView = findViewById(R.id.publication_date);
         mBookThumbnailImageView = findViewById(R.id.book_thumbnail);
+        mUsernameTextView = findViewById(R.id.name_book_owner);
+        mRatingTextView = findViewById(R.id.rating_book_owner);
+        mUserImageView = findViewById(R.id.profile_image_book_detail);
+        mStarImageView = findViewById(R.id.star_book_owner);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -93,7 +101,6 @@ public class BookDetailsActivity extends AppCompatActivity {
                 finish();
             }
         });
-        mImageView = findViewById(R.id.profile_image_book_detail);
 
         mProfileConstraintLayout = findViewById(R.id.profile_detail);
 
@@ -105,10 +112,6 @@ public class BookDetailsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        Glide.with(this).load(R.mipmap.profile_picture)
-                .apply(bitmapTransform(new CircleCrop()))
-                .into(mImageView);
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
         RecyclerView recyclerView = findViewById(R.id.rv_images);
@@ -213,5 +216,39 @@ public class BookDetailsActivity extends AppCompatActivity {
             Glide.with(this).load(book.getThumbnail())
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
+        if(book.getUid() != null){
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                    .setPersistenceEnabled(true)
+                    .build();
+            firebaseFirestore.setFirestoreSettings(settings);
+            final DocumentReference docRef = firebaseFirestore.collection("users").document(book.getUid());
+            Log.d("LULLO", book.getUid());
+            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.isSuccessful()){
+                        User user = task.getResult().toObject(User.class);
+                        if(user != null) {
+                            if (user.getImage() == null) {
+                                Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
+                                        .apply(bitmapTransform(new CircleCrop()))
+                                        .into(mUserImageView);
+                            } else {
+                                Glide.with(getApplicationContext()).load(user.getImage())
+                                        .apply(bitmapTransform(new CircleCrop()))
+                                        .into(mUserImageView);
+                            }
+                            if (user.getUsername() != null) {
+                                mUsernameTextView.setText(user.getUsername());
+                            }
+                            if (String.valueOf(user.getRating()) != null) {
+                                mRatingTextView.setText(String.valueOf(user.getRating()));
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 }
