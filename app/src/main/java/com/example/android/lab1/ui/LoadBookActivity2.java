@@ -3,11 +3,13 @@ package com.example.android.lab1.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -20,7 +22,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +33,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -53,7 +59,9 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import fr.ganfra.materialspinner.MaterialSpinner;
 
@@ -83,11 +91,12 @@ public class LoadBookActivity2 extends AppCompatActivity implements View.OnClick
     private ImageButton mRemoveAuthorButton;
     private TextView mConfirmedIsbn;
     private ProgressBar mProgressBar;
-    private GridView mPhotosGrid;
+    private RecyclerView mPhotosGrid;
     private ImageButton mAddPhotos;
     private Book result;
     private AlertDialog.Builder mAlertDialogBuilder;
     private File mPhotoFile;
+    private Activity mSelf;
 
 
     @Override
@@ -106,7 +115,10 @@ public class LoadBookActivity2 extends AppCompatActivity implements View.OnClick
     }
 
     private void setupGallery() {
+        LinearLayoutManager MyLayoutManager = new LinearLayoutManager(this);
+        MyLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         mPhotosGrid.setAdapter(new PhotosAdapter(this));
+        mPhotosGrid.setLayoutManager(MyLayoutManager);
     }
 
     private void isbnInserted(boolean isbnScanned) {
@@ -147,7 +159,7 @@ public class LoadBookActivity2 extends AppCompatActivity implements View.OnClick
                     }
                 }
                 break;
-            case CAPTURE_IMAGE:
+            case Constants.CAPTURE_IMAGE:
                 if (resultCode == Activity.RESULT_OK && mPhotoFile != null) {
                     ((PhotosAdapter) mPhotosGrid.getAdapter()).addItem(mPhotoFile.getAbsolutePath());
                 } else if (resultCode == RESULT_CANCELED && mPhotoFile != null) {
@@ -155,7 +167,7 @@ public class LoadBookActivity2 extends AppCompatActivity implements View.OnClick
                         mPhotoFile.delete();
                 }
                 break;
-            case RESULT_LOAD_IMAGE:
+            case Constants.RESULT_LOAD_IMAGE:
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     if (data.getData() != null) {
                         PhotosAdapter adapter = (PhotosAdapter) mPhotosGrid.getAdapter();
@@ -217,7 +229,7 @@ public class LoadBookActivity2 extends AppCompatActivity implements View.OnClick
         mRemoveAuthorButton = findViewById(R.id.load_book_remove_author);
         mProgressBar = findViewById(R.id.load_book_progress_bar);
         mPhotosGrid = findViewById(R.id.load_book_loaded_photos);
-        mAddPhotos = findViewById(R.id.load_book_add_photos_icon);
+        mAddPhotos = findViewById(R.id.load_book_add_photos);
     }
 
     private void setupToolBar() {
@@ -506,64 +518,71 @@ public class LoadBookActivity2 extends AppCompatActivity implements View.OnClick
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.load_book_add_photos_icon:
-                captureImage();
+            case R.id.load_book_add_photos:
+                final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
+                mAlertDialogBuilder = new AlertDialog.Builder(LoadBookActivity2.this);
+                mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+
+                mAlertDialogBuilder.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case 0:
+                                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+                                    try {
+                                        mPhotoFile = saveThumbnail();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    if (mPhotoFile != null) {
+                                        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                                                "com.example.android.fileprovider",
+                                                mPhotoFile);
+                                        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                                    }
+                                    if (!Utilities.checkPermissionActivity(LoadBookActivity2.this, Manifest.permission.CAMERA)) {
+                                        Utilities.askPermissionActivity(LoadBookActivity2.this, Manifest.permission.CAMERA, Constants.CAPTURE_IMAGE);
+                                    } else {
+                                        startActivityForResult(cameraIntent, Constants.CAPTURE_IMAGE);
+                                    }
+
+                                }
+                                break;
+                            case 1:
+                                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                galleryIntent.setType("image/*");
+                                startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
+                                break;
+                            default:
+                                dialogInterface.cancel();
+                        }
+                    }
+                }).show();
                 break;
         }
-    }
-
-    private void captureImage() {
-        final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
-        mAlertDialogBuilder = new AlertDialog.Builder(getApplicationContext());
-        mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-        final Activity mSelf = this;
-        mAlertDialogBuilder.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                switch (i) {
-                    case Constants.CAPTURE_IMAGE:
-                        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-                            try {
-                                mPhotoFile = Utilities.saveThumbnail(getApplicationContext());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            if (mPhotoFile != null) {
-                                Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
-                                        "com.example.android.fileprovider",
-                                        mPhotoFile);
-                                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                            }
-                            if (!Utilities.checkPermissionActivity(mSelf, Manifest.permission.CAMERA)) {
-                                Utilities.askPermissionActivity(mSelf, Manifest.permission.CAMERA, Constants.CAPTURE_IMAGE);
-                            } else {
-                                startActivityForResult(cameraIntent, Constants.CAPTURE_IMAGE);
-                            }
-
-                        }
-                        break;
-                    case RESULT_LOAD_IMAGE:
-                        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        galleryIntent.setType("image/*");
-                        startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
-                        break;
-                    default:
-                        dialogInterface.cancel();
-                }
-            }
-        }).show();
     }
 
     @Override
     public void removePhoto(int position) {
         PhotosAdapter adapter = (PhotosAdapter) mPhotosGrid.getAdapter();
         adapter.removeItem(position);
+    }
+
+    public File saveThumbnail() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
     }
 }

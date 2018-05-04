@@ -1,6 +1,9 @@
 package com.example.android.lab1.adapter;
 
 import android.app.Activity;
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +15,7 @@ import com.example.android.lab1.R;
 
 import java.util.ArrayList;
 
-public class PhotosAdapter extends BaseAdapter {
+public class PhotosAdapter extends RecyclerView.Adapter<PhotosViewHolder> {
 
     ArrayList<String> mPhotospaths;
     Activity mContainer;
@@ -22,63 +25,32 @@ public class PhotosAdapter extends BaseAdapter {
         mContainer = c;
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        return mPhotospaths.size() + 1;
+    public PhotosViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.add_photo_square, parent, false);
+        return new PhotosViewHolder(v, mContainer);
     }
 
     @Override
-    public Object getItem(int position) {
-
-        return mPhotospaths.get(position);
+    public void onBindViewHolder(@NonNull PhotosViewHolder holder, int position) {
+        holder.setmRemovePhotoButton(position, (RemovePhotoClickListener) mContainer);
+        holder.setPhoto(mPhotospaths.get(position), mContainer.getApplicationContext());
     }
 
     @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        LayoutInflater layoutInflater = LayoutInflater.from(mContainer.getApplicationContext());
-        /*if (position == getCount() - 1) {
-            // get add new photo view
-            convertView = layoutInflater.inflate(R.layout.add_new_photo_square, null);
-            View viewById = convertView.findViewById(R.id.add_new_user_photo);
-            if (viewById != null)
-                viewById.setOnClickListener((View.OnClickListener) mContainer);
-            convertView.setVisibility(View.VISIBLE);
-        } else {*/
-        // standard gallery item
-        if (getCount() > 0) {
-            if (convertView == null)
-                convertView = layoutInflater.inflate(R.layout.add_photo_square, null);
-            ImageView photo = convertView.findViewById(R.id.load_book_user_photo);
-            Glide.with(mContainer.getApplicationContext())
-                    .load(mPhotospaths.get(position))
-                    .into(photo);
-            photo.setOnClickListener((View.OnClickListener) mContainer);
-            convertView.findViewById(R.id.load_book_remove_user_photo).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mContainer instanceof RemovePhotoClickListener) {
-                        ((RemovePhotoClickListener) mContainer).removePhoto(position);
-                    }
-                }
-            });
-            convertView.setVisibility(View.VISIBLE);
-            //}
-        }
-        return convertView;
+    public int getItemCount() {
+        return mPhotospaths.size();
     }
 
     public void addItem(String newPath) {
         mPhotospaths.add(newPath);
-        notifyDataSetChanged();
+        notifyItemChanged(getItemCount() - 1);
     }
 
     public void removeItem(int position) {
         mPhotospaths.remove(position);
-        notifyDataSetChanged();
+        notifyItemChanged(position);
     }
 }
