@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -154,7 +155,6 @@ public class HomeFragment extends Fragment {
                         }
                     }
                 }
-
                 mAdapter = new RecyclerBookAdapter(books, IDs);
                 mFirstRecyclerView.setAdapter(mAdapter);
                 mSecondRecyclerView.setAdapter(mAdapter);

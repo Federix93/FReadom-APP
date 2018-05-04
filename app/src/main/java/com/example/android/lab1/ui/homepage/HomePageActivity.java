@@ -66,6 +66,9 @@ public class HomePageActivity extends AppCompatActivity
     private static final int ADD_BOOK = 1;
     private static final int DASH_FRAGMENT = 2;
     private int oldPosition;
+    private int comeBackPosition;
+
+    public static final int ADD_BOOK_ACTIVITY = 22847;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -131,32 +134,37 @@ public class HomePageActivity extends AppCompatActivity
         mBottomNavigation.setBehaviorTranslationEnabled(false);
         mBottomNavigation.setAccentColor(getResources().getColor(R.color.colorSecondaryAccent));
 
+
         mFragmentManager.beginTransaction()
                 .replace(R.id.fragment_frame, mHomeFragment)
                 .commit();
-
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-
                 if (wasSelected) {
                     return true;
                 } else {
-                    android.support.v4.app.FragmentTransaction ft = mFragmentManager.beginTransaction();
                     switch (position) {
                         case HOME_FRAGMENT:
-                            ft.replace(R.id.fragment_frame, mHomeFragment).commit();
+                            if(oldPosition != ADD_BOOK) {
+                                mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mHomeFragment).commit();
+                            }
+
                             oldPosition = position;
                             break;
 
                         case ADD_BOOK:
+                            comeBackPosition = oldPosition;
+                            oldPosition = position;
                             Intent intent = new Intent(getApplicationContext(), LoadBookActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            startActivity(intent);
+                            startActivityForResult(intent, ADD_BOOK_ACTIVITY);
                             break;
 
                         case DASH_FRAGMENT:
-                            ft.replace(R.id.fragment_frame, mDashboardFragment).commit();
+                            if(oldPosition != ADD_BOOK) {
+                                mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mDashboardFragment).commit();
+                            }
                             oldPosition = position;
                             break;
                     }
@@ -236,4 +244,9 @@ public class HomePageActivity extends AppCompatActivity
         }
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ADD_BOOK_ACTIVITY) {
+                mBottomNavigation.setCurrentItem(comeBackPosition);
+        }
+    }
 }
