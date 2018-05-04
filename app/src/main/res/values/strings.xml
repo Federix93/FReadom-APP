@@ -88,5 +88,8 @@
         Genere
     </string>
     <string name="date">Periodo di prestito</string>
+    <string name="isbn_hint">Inserire il codice ISBN</string>
+    <string name="add_your_photos">Aggiungi le foto del libro</string>
+    <string name="insert_book">Inserisci il libro</string>
 
 </resources>

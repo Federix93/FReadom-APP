@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -13,6 +14,7 @@ import android.widget.ArrayAdapter;
 
 import com.example.android.lab1.model.Address;
 import com.example.android.lab1.ui.PositionActivity;
+import com.example.android.lab1.ui.ScanBarCodeActivity;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
@@ -21,9 +23,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+
+import static com.example.android.lab1.utils.Constants.SCAN_REQUEST_TAG;
 
 public abstract class Utilities {
 
@@ -122,6 +130,21 @@ public abstract class Utilities {
         return arrayAdapter;
     }
 
+    public static void startBarcodeScanner(Activity activity) {
+        Intent i = new Intent(activity, ScanBarCodeActivity.class);
+        activity.startActivityForResult(i, SCAN_REQUEST_TAG);
+    }
+
+    public static File saveThumbnail(Context c) throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = c.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+    }
 }
 
 
