@@ -87,7 +87,8 @@
         <activity android:name=".ui.BookPhotoDetailActivity"/>
 
 
-        <activity android:name=".ui.SignInActivity">
+        <activity android:name=".ui.SignInActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
