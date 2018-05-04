@@ -30,6 +30,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
+import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -61,6 +62,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     AppCompatButton mBookButton;
     ImageView mShareImageView;
     ImageView mFavoritesImageView;
+    TextView mBookDetailCondition;
 
 
     private String mBookId;
@@ -85,6 +87,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookButton = findViewById(R.id.book_button);
         mShareImageView = findViewById(R.id.share_icon);
         mFavoritesImageView = findViewById(R.id.add_to_favorite);
+        mBookDetailCondition = findViewById(R.id.book_detail_conditions);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -201,8 +204,10 @@ public class BookDetailsActivity extends AppCompatActivity {
             mAuthorTextView.setText(book.getAuthor());
         if(book.getPublisher() != null)
             mEditorTextView.setText(book.getPublisher());
-        if(String.valueOf(book.getPublishYear()) != null)
+        if(!String.valueOf(book.getPublishYear()).isEmpty())
             mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
+        if (!String.valueOf(book.getCondition()).isEmpty())
+            mBookDetailCondition.setText(Condition.getCondition(getApplicationContext(), book.getCondition()));
         if(book.getThumbnail() != null)
             Glide.with(this).load(book.getThumbnail())
                     .apply(new RequestOptions().centerCrop())

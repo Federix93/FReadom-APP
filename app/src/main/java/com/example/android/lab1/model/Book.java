@@ -20,11 +20,12 @@ public class Book
     private List<String> bookImagesUrls;
 
     public Book(){}
-    public Book (String title, String editor, String image, String city) {
+    public Book (String title, String editor, String image, String city, int condition) {
         mTitle = title;
         mEditor = editor;
         mThumbnail = image;
         mCity = city;
+        mCondition = condition;
     }
 
     public String getThumbnail() {
@@ -119,13 +120,13 @@ public class Book
     public static List<Book> getRandomBook () {
         List<Book> books = new ArrayList<>();
 
-        Book c = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
+        Book c = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", 4);
         books.add(c);
-        Book d = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
+        Book d = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", 4);
         books.add(d);
-        Book e = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
+        Book e = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", 4);
         books.add(e);
-        Book f = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
+        Book f = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli", 5);
         books.add(f);
 
 

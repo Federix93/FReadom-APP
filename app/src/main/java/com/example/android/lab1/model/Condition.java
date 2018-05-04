@@ -16,8 +16,7 @@ import java.util.Map;
 
 public abstract class Condition {
 
-
-    public static final Map<String, Integer> mMapcondition = new HashMap<String, Integer>();;
+    public static final Map<String, Integer> mMapcondition = new HashMap<String, Integer>();
 
     public static ArrayList<String> getConditions(Context pContext)
     {
@@ -28,5 +27,22 @@ public abstract class Condition {
         list.add(pContext.getResources().getString(R.string.condition_near_mint));
         list.add(pContext.getResources().getString(R.string.condition_mint));
         return list;
+    }
+    public static String getCondition (Context pContext, int cond) {
+        switch (cond) {
+            case 1:
+                return pContext.getResources().getString(R.string.condition_poor);
+            case 2:
+                return pContext.getResources().getString(R.string.condition_fair);
+            case 3:
+                return pContext.getResources().getString(R.string.condition_good);
+            case 4:
+                return pContext.getResources().getString(R.string.condition_near_mint);
+            case 5:
+                return pContext.getResources().getString(R.string.condition_mint);
+            default:
+                break;
+        }
+        return null;
     }
 }
