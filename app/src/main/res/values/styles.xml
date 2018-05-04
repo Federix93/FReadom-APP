@@ -51,4 +51,10 @@
         <item name="android:minWidth">0dp</item>
     </style>
 
+    <style name="ButtonSignIn" parent="FirebaseUI.Button.AccountChooser.GoogleButton">
+
+        <item name="android:background">@color/white</item>
+        <item name="android:textColor">@color/colorSecondaryAccent</item>
+    </style>
+
 </resources>
