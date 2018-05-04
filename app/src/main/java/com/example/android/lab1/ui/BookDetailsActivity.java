@@ -202,7 +202,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         if(!String.valueOf(book.getPublishYear()).isEmpty())
             mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
         if (!String.valueOf(book.getCondition()).isEmpty())
-            mBookDetailCondition.setText(Condition.getCondition(getApplicationContext(), book.getCondition()));
+            mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
         if(book.getThumbnail() != null)
             Glide.with(this).load(book.getThumbnail())
                     .apply(new RequestOptions().centerCrop())

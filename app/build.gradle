@@ -4,12 +4,13 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.android.lab1"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -55,7 +56,7 @@ dependencies {
     implementation 'com.github.rubensousa:gravitysnaphelper:1.5'
     implementation 'com.github.arimorty:floatingsearchview:2.1.1'
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
-    implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
+    implementation 'com.android.support:multidex:1.0.3'
 }
 
 apply plugin: 'com.google.gms.google-services'
