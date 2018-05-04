@@ -94,6 +94,7 @@
 
     <string name="nearby_home_page">Nelle tue vicinanze</string>
     <string name="latest_arrivals_home_page">Nuovi arrivi</string>
+    <string name="condition">Condizioni</string>
 
     <string-array name="genre">
         <item>Arte e spettacoli</item>
