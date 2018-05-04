@@ -1038,6 +1038,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             {
                 book.put("thumbnail", bookToLoad.getThumbnail());
             }
+            else if(bookToLoad.getBookImagesUrls().size() > 0)
+            {
+                book.put("thumbnail", bookToLoad.getBookImagesUrls().get(0));
+            }
 
             if(bookToLoad.getTags() != null)
             {
