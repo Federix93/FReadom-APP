@@ -395,7 +395,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
         bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
         bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
-        bookToLoad.setConditions(condition);
+        bookToLoad.setCondition(condition);
         bookToLoad.setAddress(mPositionEditText.getText().toString());
         bookToLoad.setTags(mTagsEditText.getEditText().getText().toString());
         bookToLoad.setUid(mFirebaseAuth.getCurrentUser().getUid());

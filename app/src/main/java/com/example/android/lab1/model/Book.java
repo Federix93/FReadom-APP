@@ -20,12 +20,6 @@ public class Book
     private List<String> bookImagesUrls;
 
     public Book(){}
-    public Book (String title, String editor, String image, String city) {
-        mTitle = title;
-        mEditor = editor;
-        mThumbnail = image;
-        mCity = city;
-    }
 
     public String getThumbnail() {
         return mThumbnail;
@@ -87,7 +81,7 @@ public class Book
         return mCondition;
     }
 
-    public void setConditions(int condition) {
+    public void setCondition(int condition) {
         mCondition = condition;
     }
 
@@ -115,20 +109,5 @@ public class Book
 
     public void setBookImagesUrls(ArrayList<String> bookImagesUrls) {
         this.bookImagesUrls = bookImagesUrls;
-    }
-    public static List<Book> getRandomBook () {
-        List<Book> books = new ArrayList<>();
-
-        Book c = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
-        books.add(c);
-        Book d = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
-        books.add(d);
-        Book e = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
-        books.add(e);
-        Book f = new Book("Il Cacciatore di Aquiloni", "Riverhead Books", "@drawable/book_placeholder_thumbnail", "Napoli");
-        books.add(f);
-
-
-        return books;
     }
 }
