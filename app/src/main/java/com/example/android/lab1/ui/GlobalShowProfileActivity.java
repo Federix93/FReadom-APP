@@ -31,7 +31,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -96,18 +98,14 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
                 .setPersistenceEnabled(true)
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
-        firebaseFirestore.collection("books").whereEqualTo("uid", userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()){
-                    List<Book> mListBooksOfUser = task.getResult().toObjects(Book.class);
+        firebaseFirestore.collection("books").whereEqualTo("uid", userID)
+                .addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
+                    List<Book> mListBooksOfUser = queryDocumentSnapshots.toObjects(Book.class);
                     updateListOfBooks(mListBooksOfUser);
                 }
-            }
         });
-
-
-
     }
 
     private void updateListOfBooks(List<Book> mListBooksOfUser) {

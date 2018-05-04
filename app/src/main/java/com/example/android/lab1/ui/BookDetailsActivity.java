@@ -32,7 +32,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -207,16 +209,16 @@ public class BookDetailsActivity extends AppCompatActivity {
                     .build();
             firebaseFirestore.setFirestoreSettings(settings);
             final DocumentReference docRef = firebaseFirestore.collection("users").document(book.getUid());
-            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if(task.isSuccessful()){
-                        mUser = task.getResult().toObject(User.class);
+                public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
+                    if(snapshot.exists()){
+                        mUser = snapshot.toObject(User.class);
                         if(mUser != null) {
                             if (mUser.getImage() == null) {
-                                /*Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
+                                Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
                                         .apply(bitmapTransform(new CircleCrop()))
-                                        .into(mUserImageView);*/
+                                        .into(mUserImageView);
                             } else {
                                 Glide.with(getApplicationContext()).load(mUser.getImage())
                                         .apply(bitmapTransform(new CircleCrop()))
@@ -229,20 +231,21 @@ public class BookDetailsActivity extends AppCompatActivity {
                                 mRatingTextView.setText(String.valueOf(mUser.getRating()));
                             }
 
-                            mProfileConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                    Bundle bundle = new Bundle();
-                                    intent.putExtra("UserObject", mUser);
-                                    intent.putExtra("UserID", book.getUid());
-                                    startActivity(intent);
-                                }
-                            });
 
                         }
                     }
+                }
+            });
+
+            mProfileConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    Bundle bundle = new Bundle();
+                    intent.putExtra("UserObject", mUser);
+                    intent.putExtra("UserID", book.getUid());
+                    startActivity(intent);
                 }
             });
         }
