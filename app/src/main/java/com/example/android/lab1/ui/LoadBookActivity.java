@@ -12,12 +12,14 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -160,6 +162,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("RestrictedApi")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -184,6 +187,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
         // TODO add recieve intent to modify book
 
+        Utilities.setupStatusBarColor(this);
         //initialize Algolia connection
         setupAlgolia();
         // complex listeners are handled in separate function
@@ -264,7 +268,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private void setupToolBar() {
         // toolbar
         mToolbar.setTitle(R.string.load_book_toolbar_title);
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.black));
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

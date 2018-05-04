@@ -35,7 +35,8 @@
 
         <activity
             android:name=".ui.LoadBookActivity"
-            android:parentActivityName=".ui.homepage.HomePageActivity">
+            android:parentActivityName=".ui.homepage.HomePageActivity"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.homepage.HomePageActivity" />
