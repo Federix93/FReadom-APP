@@ -5,8 +5,10 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.android.lab1.FirebaseManager;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.utils.glideimageloader.GlideApp;
 import com.example.android.lab1.utils.NetworkConnectionReceiver;
 import com.example.android.lab1.R;
@@ -47,6 +50,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +68,8 @@ public class SignInActivity extends AppCompatActivity {
         mRootConstraintLayout = findViewById(R.id.root);
         mLoginButton = findViewById(R.id.open_firebase_ui_button);
         mWithoutLoginButton = findViewById(R.id.open_without_login_button);
+
+        Utilities.setupStatusBarColor(this);
 
         GlideApp.with(this).load(R.drawable.background).diskCacheStrategy(DiskCacheStrategy.DATA).into(new SimpleTarget<Drawable>() {
             @Override
