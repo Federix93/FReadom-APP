@@ -97,7 +97,7 @@ public class HomePageActivity extends AppCompatActivity
 
         //header.setBackgroundResource(R.drawable.background);
 
-        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+        final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
@@ -154,6 +154,10 @@ public class HomePageActivity extends AppCompatActivity
                             break;
 
                         case ADD_BOOK:
+                            if(mFirebaseAuth.getCurrentUser() == null){
+                                Toast.makeText(getApplicationContext(), "Devi essere loggato", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
                             comeBackPosition = oldPosition;
                             oldPosition = position;
                             Intent intent = new Intent(getApplicationContext(), LoadBookActivity.class);

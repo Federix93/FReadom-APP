@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -82,14 +83,18 @@ public class ProfileActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 int clickedId = item.getItemId();
                 if (clickedId == R.id.action_edit) {
-                    Intent intent = new Intent(getApplicationContext(), EditProfileActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    if (mFirebaseAuth.getCurrentUser() != null) {
-                        if (mUser != null) {
-                            intent.putExtra(ADDRESS_KEY, mUser.getAddress());
+                    if(mFirebaseAuth.getCurrentUser() != null) {
+                        Intent intent = new Intent(getApplicationContext(), EditProfileActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        if (mFirebaseAuth.getCurrentUser() != null) {
+                            if (mUser != null) {
+                                intent.putExtra(ADDRESS_KEY, mUser.getAddress());
+                            }
                         }
+                        startActivity(intent);
+                    }else{
+                        Toast.makeText(getApplicationContext(), "Devi essere loggato", Toast.LENGTH_SHORT).show();
                     }
-                    startActivity(intent);
                 }
                 return true;
             }

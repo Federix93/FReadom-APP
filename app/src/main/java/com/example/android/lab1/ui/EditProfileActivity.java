@@ -19,6 +19,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -164,8 +165,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         /*Firebase*/
         mFirebaseAuth = FirebaseAuth.getInstance();
 
+        if (mFirebaseAuth == null || mFirebaseAuth.getCurrentUser() == null) {
 
-        if (mFirebaseAuth.getCurrentUser() == null) {
             Intent intent = new Intent(this, SignInActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
