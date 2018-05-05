@@ -84,6 +84,11 @@
         <item>Genere 2</item>
     </string-array>
 
+    <string-array name="search_by_address_or_current_position_items">
+        <item>Tramite ricerca indirizzo</item>
+        <item>Tramite la posizione corrente</item>
+    </string-array>
+
     <string name="genre_hint">
         Genere
     </string>
@@ -91,5 +96,10 @@
     <string name="isbn_hint">Inserire il codice ISBN</string>
     <string name="add_your_photos">Aggiungi le foto del libro</string>
     <string name="insert_book">Inserisci il libro</string>
+    <string name="add_isbn_code">Aggiungi il codice ISBN</string>
+    <string name="insert_manually">Inserisci manualmente</string>
+    <string name="insert_isbn_code">Inserisci il codice ISBN del libro</string>
+    <string name="search_by_address_or_current_position">Scegliere il metodo di condivisione della posizione</string>
+    <string name="yes">Si</string>
 
 </resources>

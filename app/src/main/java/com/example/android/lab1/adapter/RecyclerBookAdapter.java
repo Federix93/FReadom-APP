@@ -74,12 +74,13 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         void bind(Book book)
         {
             mTitle.setText(book.getTitle());
-            mAuthor.setText(book.getAuthor());
+            mAuthor.setText(book.getAuthors().get(0));
             /*if (book.getThumbnail() != null) {
                 mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getThumbnail());
                 Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
-            } else */if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
-                mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getBookImagesUrls().get(0));
+            } else */
+            if (book.getUserBookPhotosWebStoragePath() != null && book.getUserBookPhotosWebStoragePath().size() > 0) {
+                mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getUserBookPhotosWebStoragePath().get(0));
                 Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
             } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mThumbnail);

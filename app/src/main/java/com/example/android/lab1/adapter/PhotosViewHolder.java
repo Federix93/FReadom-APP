@@ -1,6 +1,5 @@
 package com.example.android.lab1.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -15,20 +14,16 @@ public class PhotosViewHolder extends RecyclerView.ViewHolder
     private final ImageButton mRemovePhotoButton;
     private ImageView mPhotoImageView;
 
-    public PhotosViewHolder(View v, final Activity container)
+    public PhotosViewHolder(View v, View.OnClickListener photoTouch, final RemovePhotoClickListener removePhotoClickListener)
     {
         super(v);
         mPhotoImageView = v.findViewById(R.id.load_book_user_photo);
         mRemovePhotoButton = v.findViewById(R.id.load_book_remove_user_photo);
-        mPhotoImageView.setOnClickListener((View.OnClickListener) container);
-    }
-
-    public void setmRemovePhotoButton(final int position, final RemovePhotoClickListener listener)
-    {
-        mRemovePhotoButton.findViewById(R.id.load_book_remove_user_photo).setOnClickListener(new View.OnClickListener() {
+        mPhotoImageView.setOnClickListener(photoTouch);
+        mRemovePhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.removePhoto(position);
+                removePhotoClickListener.removePhoto(getAdapterPosition());
             }
         });
     }

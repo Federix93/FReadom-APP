@@ -1,6 +1,8 @@
 package com.example.android.lab1.model;
 
-public class Address {
+import java.io.Serializable;
+
+public class Address implements Serializable {
     String address;
     Double lat;
     Double lon;

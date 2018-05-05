@@ -49,6 +49,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ImagePagerAdapter;
+import com.example.android.lab1.model.Address;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
@@ -380,18 +381,17 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         final Book bookToLoad = new Book();
         bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
         bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
-        bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
+        bookToLoad.addAuthor(mAuthorEditText.getEditText().getText().toString());
         bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
         bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
         bookToLoad.setConditions(condition);
-        bookToLoad.setAddress(mPositionEditText.getText().toString());
-        bookToLoad.setTags(mTagsEditText.getEditText().getText().toString());
+        bookToLoad.setAddress(new Address(mPositionEditText.getText().toString(), 0.0, 0.0));
         bookToLoad.setUid(mFirebaseAuth.getCurrentUser().getUid());
 
         if (mWebThumbnail != null)
-            bookToLoad.setThumbnail(mWebThumbnail);
+            bookToLoad.setWebThumbnail(mWebThumbnail);
         if (mDownloadUrls != null)
-            bookToLoad.setBookImagesUrls(mDownloadUrls);
+            bookToLoad.setUserBookPhotosWebStoragePath(mDownloadUrls);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         mDocumentUploaded = true;
         db.collection("books").add(bookToLoad).addOnSuccessListener(this, new OnSuccessListener<DocumentReference>() {

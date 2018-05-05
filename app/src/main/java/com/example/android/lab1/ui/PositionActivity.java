@@ -71,6 +71,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 11;
     public static final String SEARCH_CITY_EXTRA = "SEARCH_CITIES_EXTRA";
+    public static final String START_SEARCH = "START_SEARCH";
 
     private Toolbar mToolbar;
     private GoogleMap mMap;
@@ -93,6 +94,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private Location mResolveLater;
 
     private boolean mSearchCities;
+    private boolean mStartSearchImmediately;
 
 
     @Override
@@ -121,11 +123,17 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             }
         });
 
-        mSearchCities = getIntent() != null && getIntent().hasExtra(SEARCH_CITY_EXTRA);
-        if (mSearchCities) {
-            mPositionIcon.setImageResource(R.drawable.ic_location_city_24dp);
-            mCurrentPositionTextView.setTextSize(getResources().getDimension(R.dimen.search_cities_text_size));
+        if (getIntent() != null) {
+            mSearchCities = getIntent().hasExtra(SEARCH_CITY_EXTRA);
+            if (mSearchCities) {
+                mPositionIcon.setImageResource(R.drawable.ic_location_city_24dp);
+                mCurrentPositionTextView.setTextSize(getResources().getDimension(R.dimen.search_cities_text_size));
+            }
+
+            mStartSearchImmediately = getIntent().hasExtra(START_SEARCH);
         }
+
+
 
         mConfirmPosition.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -350,6 +358,20 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                                             return;
                                         }
                                         final Location location = locationResult.getLocations().get(0);
+                                        if (mStartSearchImmediately) {
+                                            Intent intent = null;
+                                            try {
+                                                intent = Utilities.getSearchBarIntent(mSelf,
+                                                        new LatLng(location.getLatitude(), location.getLongitude()),
+                                                        (double) getResources().getInteger(R.integer.position_radius_address),
+                                                        mSearchCities ? AutocompleteFilter.TYPE_FILTER_CITIES : AutocompleteFilter.TYPE_FILTER_ADDRESS);
+                                            } catch (GooglePlayServicesNotAvailableException e) {
+                                                e.printStackTrace();
+                                            } catch (GooglePlayServicesRepairableException e) {
+                                                e.printStackTrace();
+                                            }
+                                            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                                        }
                                         mSearchAddressImageView.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {

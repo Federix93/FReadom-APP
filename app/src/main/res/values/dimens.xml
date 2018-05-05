@@ -23,4 +23,6 @@
     <dimen name="nav_header_height">176dp</dimen>
     <dimen name="search_cities_text_size">5sp</dimen>
     <dimen name="text_view_size">18sp</dimen>
+    <dimen name="user_photos_max_height">200dp</dimen>
+    <dimen name="user_photos_margin">5dp</dimen>
 </resources>

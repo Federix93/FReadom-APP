@@ -1,30 +1,30 @@
 package com.example.android.lab1.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Book
+public class Book implements Serializable
 {
     private String mIsbn;
     private String mTitle;
-    private String mAuthor;
+    private ArrayList<String> mAuthors;
     private String mPublisher;
-    private int    mPublishYear;
+    private Integer mPublishYear;
     private int mCondition;
-    private String mAddress;
+    private Address mAddress;
     private String mUid; // user id
-    private String mThumbnail;
-    private String mTags;
-    private List<String> bookImagesUrls;
+    private String mWebThumbnail;
+    private List<String> mUserBookPhotosWebStoragePath;
 
     public Book(){}
 
-    public String getThumbnail() {
-        return mThumbnail;
+    public String getWebThumbnail() {
+        return mWebThumbnail;
     }
 
-    public void setThumbnail(String thumbnail) {
-        mThumbnail = thumbnail;
+    public void setWebThumbnail(String thumbnail) {
+        mWebThumbnail = thumbnail;
     }
 
     public String getUid() {
@@ -51,14 +51,6 @@ public class Book
         mTitle = title;
     }
 
-    public String getAuthor() {
-        return mAuthor;
-    }
-
-    public void setAuthor(String author) {
-        mAuthor = author;
-    }
-
     public String getPublisher() {
         return mPublisher;
     }
@@ -67,11 +59,11 @@ public class Book
         mPublisher = publisher;
     }
 
-    public int getPublishYear() {
+    public Integer getPublishYear() {
         return mPublishYear;
     }
 
-    public void setPublishYear(int publishYear) {
+    public void setPublishYear(Integer publishYear) {
         mPublishYear = publishYear;
     }
 
@@ -83,29 +75,30 @@ public class Book
         mCondition = condition;
     }
 
-    public String getAddress() {
+    public Address getAddress() {
         return mAddress;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(Address address) {
         mAddress = address;
     }
 
-    public String getTags()
-    {
-        return mTags;
+
+    public List<String> getUserBookPhotosWebStoragePath() {
+        return mUserBookPhotosWebStoragePath;
     }
 
-    public void setTags(String tags)
-    {
-        this.mTags = tags;
+    public void setUserBookPhotosWebStoragePath(ArrayList<String> mUserBookPhotosWebStoragePath) {
+        this.mUserBookPhotosWebStoragePath = mUserBookPhotosWebStoragePath;
     }
 
-    public List<String> getBookImagesUrls() {
-        return bookImagesUrls;
+    public void addAuthor(String author) {
+        if (mAuthors == null)
+            mAuthors = new ArrayList<>();
+        mAuthors.add(author);
     }
 
-    public void setBookImagesUrls(ArrayList<String> bookImagesUrls) {
-        this.bookImagesUrls = bookImagesUrls;
+    public ArrayList<String> getAuthors() {
+        return mAuthors;
     }
 }
