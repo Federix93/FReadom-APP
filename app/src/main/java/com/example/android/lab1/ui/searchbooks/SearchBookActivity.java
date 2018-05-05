@@ -29,6 +29,7 @@ import com.example.android.lab1.adapter.RecyclerSearchAdapter;
 import com.example.android.lab1.utils.Utilities;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class SearchBookActivity extends AppCompatActivity {
     private Query query;
     private RecyclerView mRecyclerView;
     private RecyclerSearchAdapter mAdapter;
+    private String lastSearchResult;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -64,15 +66,34 @@ public class SearchBookActivity extends AppCompatActivity {
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         index = client.getIndex(ALGOLIA_INDEX_NAME);
 
-        setupMenuItemCliclListener();
+        setupMenuItemClickListener();
         setupSearchListener();
         setupQueryChangeListener();
 
-        mSearchView.setSearchFocused(true);
+        if(savedInstanceState != null)
+        {
+            if(savedInstanceState.getString("LAST_SEARCH") != null)
+            {
+                lastSearchResult = savedInstanceState.getString("LAST_SEARCH");
+                try {
+                    mAdapter = new RecyclerSearchAdapter(new JSONArray(lastSearchResult));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                mRecyclerView.setAdapter(mAdapter);
+            }
+        }
+        else
+        {
+            mSearchView.setSearchFocused(true);
+        }
+
+
+
 
     }
 
-    private void setupMenuItemCliclListener()
+    private void setupMenuItemClickListener()
     {
         mSearchView.setOnMenuItemClickListener(new FloatingSearchView.OnMenuItemClickListener() {
             @Override
@@ -137,10 +158,20 @@ public class SearchBookActivity extends AppCompatActivity {
             public void onSearchTextChanged(String oldQuery, String newQuery) {
 
                 if(newQuery.isEmpty())
+                {
+                    mRecyclerView.swapAdapter(null, true);
                     return;
+                }
 
-                query = new Query();
-                query.setQuery(newQuery);
+                search(newQuery);
+            }
+        });
+    }
+
+    private void search(String searchString)
+    {
+        query = new Query();
+        query.setQuery(searchString);
 
 
 //                List<String> aaa = new ArrayList<>();
@@ -158,19 +189,22 @@ public class SearchBookActivity extends AppCompatActivity {
 
 //                query.setRestrictSearchableAttributes("title");
 
-                index.searchAsync(query, new CompletionHandler() {
-                    @Override
-                    public void requestCompleted(JSONObject result, AlgoliaException error) {
-                        JSONArray hits = result.optJSONArray("hits");
-                        mAdapter = new RecyclerSearchAdapter(hits);
-                        mRecyclerView.setAdapter(mAdapter);
-                    }
-                });
-            }
+        index.searchAsync(query, new CompletionHandler() {
+            @Override
+            public void requestCompleted(JSONObject result, AlgoliaException error) {
+                JSONArray hits = result.optJSONArray("hits");
+                lastSearchResult = hits.toString();
+                mAdapter = new RecyclerSearchAdapter(hits);
+                mRecyclerView.setAdapter(mAdapter);
+                }
         });
     }
 
-    protected void onDestroy() {
-        super.onDestroy();
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        if(!mSearchView.getQuery().isEmpty())
+            outState.putString("LAST_SEARCH", lastSearchResult);
+        super.onSaveInstanceState(outState);
     }
 }
