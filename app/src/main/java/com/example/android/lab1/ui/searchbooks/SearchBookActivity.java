@@ -6,6 +6,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -42,6 +44,9 @@ public class SearchBookActivity extends AppCompatActivity {
     private final static String ALGOLIA_INDEX_NAME = "books";
 
     private FloatingSearchView mSearchView;
+    private TextView mNoConnectionTextViewTop;
+    private TextView mNoConnectionTextViewBottom;
+    private AppCompatButton mNoConnectionButton;
     private Index index;
     private Query query;
     private RecyclerView mRecyclerView;
@@ -57,6 +62,9 @@ public class SearchBookActivity extends AppCompatActivity {
         Utilities.setupStatusBarColor(this);
 
         mSearchView = findViewById(R.id.floating_search_view);
+        mNoConnectionTextViewTop = findViewById(R.id.search_book_no_connection_top);
+        mNoConnectionTextViewBottom = findViewById(R.id.search_book_no_connection_bottom);
+        mNoConnectionButton = findViewById(R.id.search_book_no_connection_try_again);
         mRecyclerView = findViewById(R.id.results_recycler_view);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -69,6 +77,7 @@ public class SearchBookActivity extends AppCompatActivity {
         setupMenuItemClickListener();
         setupSearchListener();
         setupQueryChangeListener();
+        setupNoConnectionButtonClickListener();
 
         if(savedInstanceState != null)
         {
@@ -89,8 +98,16 @@ public class SearchBookActivity extends AppCompatActivity {
         }
 
 
+    }
 
+    private void setupNoConnectionButtonClickListener() {
 
+        mNoConnectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                search(mSearchView.getQuery());
+            }
+        });
     }
 
     private void setupMenuItemClickListener()
@@ -147,6 +164,14 @@ public class SearchBookActivity extends AppCompatActivity {
             @Override
             public void onSearchAction(String currentQuery) {
 
+                if(currentQuery.isEmpty())
+                {
+                    mRecyclerView.swapAdapter(null, true);
+                    return;
+                }
+
+                search(currentQuery);
+
             }
         });
     }
@@ -187,17 +212,32 @@ public class SearchBookActivity extends AppCompatActivity {
 //                    Log.d("TESTBOOKS", we[i]);
 
 
-//                query.setRestrictSearchableAttributes("title");
+//                query.setRestrictSearchableAttributes(we);
 
-        index.searchAsync(query, new CompletionHandler() {
-            @Override
-            public void requestCompleted(JSONObject result, AlgoliaException error) {
-                JSONArray hits = result.optJSONArray("hits");
-                lastSearchResult = hits.toString();
-                mAdapter = new RecyclerSearchAdapter(hits);
-                mRecyclerView.setAdapter(mAdapter);
+        if(Utilities.isOnline(SearchBookActivity.this)) {
+            mSearchView.showProgress();
+            mNoConnectionTextViewTop.setVisibility(View.GONE);
+            mNoConnectionTextViewBottom.setVisibility(View.GONE);
+            mNoConnectionButton.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            index.searchAsync(query, new CompletionHandler() {
+                @Override
+                public void requestCompleted(JSONObject result, AlgoliaException error) {
+                    JSONArray hits = result.optJSONArray("hits");
+                    lastSearchResult = hits.toString();
+                    mAdapter = new RecyclerSearchAdapter(hits);
+                    mRecyclerView.setAdapter(mAdapter);
+                    mSearchView.hideProgress();
                 }
-        });
+            });
+        }
+        else
+        {
+            mRecyclerView.setVisibility(View.GONE);
+            mNoConnectionTextViewTop.setVisibility(View.VISIBLE);
+            mNoConnectionTextViewBottom.setVisibility(View.VISIBLE);
+            mNoConnectionButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

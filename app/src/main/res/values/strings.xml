@@ -104,5 +104,8 @@
     </string-array>
     <string name="min_selection">Seleziona almeno un elemento</string>
     <string name="book_owner_text">I libri di %1$s</string>
+    <string name="search_no_connection_1">Connessione a Internet assente</string>
+    <string name="search_no_connection_2">Controlla la connessione ai dati mobili o al Wi-Fi</string>
+    <string name="try_again">Riprova</string>
 
 </resources>
