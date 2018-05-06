@@ -37,6 +37,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.storage.FirebaseStorage;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -205,6 +206,10 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
         if(book.getThumbnail() != null)
             Glide.with(this).load(book.getThumbnail())
+                    .apply(new RequestOptions().centerCrop())
+                    .into(mBookThumbnailImageView);
+        else
+            Glide.with(this).load(R.drawable.book_thumbnail_placeholder)
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
         if(book.getUid() != null){

@@ -22,6 +22,7 @@ import java.util.List;
 public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.MyViewHolder> {
 
     private List<Book> mBooks;
+    Context mContext;
 
     public ProfileBookAdapter (List<Book> books) {
         this.mBooks = books;
@@ -30,8 +31,8 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
-        LayoutInflater inflater = LayoutInflater.from(context);
+        mContext = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         View cardView = inflater.inflate(R.layout.recycler_book_item_profile, parent, false);
 
         return new MyViewHolder(cardView);
@@ -64,7 +65,9 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
         public void bind(Book book){
 
             mBookTitle.setText(book.getTitle());
+            mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
             mBookEditor.setText(book.getPublisher());
+            mBookCity.setText(book.getAddress());
             if (book.getThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getThumbnail()).into(mBookThumbnail);
             } else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {

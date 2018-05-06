@@ -48,6 +48,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
     TextView mRating;
     TextView mOwnerName;
     Toolbar mToolbar;
+    TextView mShortBio;
 
     private RecyclerView mRecyclerView;
 
@@ -78,6 +79,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         mUserName = findViewById(R.id.global_profile_name);
         mRating = findViewById(R.id.global_profile_rating);
         mOwnerName = findViewById(R.id.global_profile_books_owner);
+        mShortBio = findViewById(R.id.global_profile_bio);
 
         mRecyclerView = findViewById(R.id.rv_books);
 
@@ -92,6 +94,13 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         mUserName.setText(mUser.getUsername());
         mRating.setText(String.format(getResources().getConfiguration().locale, "%.1f", mUser.getRating()));
         mOwnerName.setText(String.format(getResources().getString(R.string.book_owner_text), mUser.getUsername()));
+        if (mUser.getShortBio() != null) {
+            mShortBio.setText(mUser.getShortBio());
+        } else {
+            mShortBio.setVisibility(View.GONE);
+        }
+
+
 
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
