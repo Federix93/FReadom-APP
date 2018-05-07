@@ -108,4 +108,11 @@
     <string name="search_no_connection_2">Controlla la connessione ai dati mobili o al Wi-Fi</string>
     <string name="try_again">Riprova</string>
 
+    <string-array name="search_filters">
+        <item>Titolo</item>
+        <item>Autore</item>
+        <item>Editore</item>
+        <item>Tags</item>
+    </string-array>
+
 </resources>

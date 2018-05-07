@@ -88,4 +88,12 @@
     <string name="search_no_connection_2">Check mobile data or Wi-Fi connection</string>
     <string name="try_again">Try again</string>
 
+    <string-array name="search_filters">
+        <item>Title</item>
+        <item>Author</item>
+        <item>Publisher</item>
+        <item>Tags</item>
+    </string-array>
+
+
 </resources>

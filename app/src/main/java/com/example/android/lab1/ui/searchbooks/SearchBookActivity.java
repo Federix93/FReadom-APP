@@ -1,25 +1,21 @@
 package com.example.android.lab1.ui.searchbooks;
 
+import android.content.DialogInterface;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ProgressBar;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.CompletionHandler;
@@ -38,11 +34,15 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class SearchBookActivity extends AppCompatActivity {
 
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
     private final static String ALGOLIA_INDEX_NAME = "books";
+
+    boolean[] checkedItems = {true, true, true, true};
+    boolean[] oldCheckedItems = {true, true, true, true};
 
     private FloatingSearchView mSearchView;
     private TextView mNoConnectionTextViewTop;
@@ -52,6 +52,7 @@ public class SearchBookActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerSearchAdapter mAdapter;
     private String lastSearchResult;
+    private Query query = new Query();
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -133,32 +134,56 @@ public class SearchBookActivity extends AppCompatActivity {
                 int itemID = item.getItemId();
                 if(itemID == R.id.action_filter)
                 {
-                    new MaterialDialog.Builder(SearchBookActivity.this)
-                            .title(R.string.filter_dialog_title)
-                            .items(R.array.searchFilters)
-                            .itemsCallbackMultiChoice(
-                                    new Integer[]{0,1,2,3},
-                                    new MaterialDialog.ListCallbackMultiChoice() {
-                                        @Override
-                                        public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
-                                            boolean allowSelectionChange =
-                                                    which.length
-                                                            >= 1; // selection count must stay above 1, the new (un)selection is included
-                                            // in the which array
-                                            if (!allowSelectionChange) {
-                                                Toast.makeText(SearchBookActivity.this, getResources().getString(R.string.min_selection), Toast.LENGTH_LONG).show();
-
-                                            }
-                                            return allowSelectionChange;
-                                        }
-                                    })
-                            .positiveText(R.string.confirm)
-                            .alwaysCallMultiChoiceCallback() // the callback will always be called, to check if
-                            // (un)selection is still allowed
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    oldCheckedItems = checkedItems.clone();
+                    String[] multiChoiceItems = getResources().getStringArray(R.array.search_filters);
+                    new AlertDialog.Builder(SearchBookActivity.this)
+                            .setTitle("Select your favourite movies")
+                            .setMultiChoiceItems(multiChoiceItems, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
                                 @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    Toast.makeText(getApplicationContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                                public void onClick(DialogInterface dialog, int index, boolean isChecked) {
+                                    if(!checkedItems[0] && !checkedItems[1] && !checkedItems[2] && !checkedItems[3])
+                                    {
+                                        final AlertDialog alert = (AlertDialog)dialog;
+                                        final ListView list = alert.getListView();
+                                        list.setItemChecked(index, true);
+                                        Toast.makeText(SearchBookActivity.this, getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            })
+                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    List<String> searchFields = new ArrayList<>();
+                                    if(checkedItems[0])
+                                    {
+                                        searchFields.add("title");
+                                    }
+                                    if(checkedItems[1])
+                                    {
+                                        searchFields.add("author");
+                                    }
+                                    if(checkedItems[2])
+                                    {
+                                        searchFields.add("publisher");
+                                    }
+                                    if(checkedItems[3])
+                                    {
+                                        searchFields.add("tags");
+                                    }
+
+                                    query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    checkedItems = oldCheckedItems;
+                                }
+                            })
+                            .setOnCancelListener( new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    checkedItems = oldCheckedItems;
                                 }
                             })
                             .show();
@@ -209,24 +234,7 @@ public class SearchBookActivity extends AppCompatActivity {
 
     private void search(String searchString)
     {
-        Query query = new Query();
         query.setQuery(searchString);
-
-
-//                List<String> aaa = new ArrayList<>();
-//
-//                aaa.add("title");
-//                aaa.add("tags");
-//
-//                String[] we = new String[aaa.size()];
-//
-//                aaa.toArray(we);
-//
-//                for(int i=0; i<aaa.size(); i++)
-//                    Log.d("TESTBOOKS", we[i]);
-
-
-//                query.setRestrictSearchableAttributes(we);
 
         if(Utilities.isOnline(SearchBookActivity.this)) {
             mSearchView.showProgress();
