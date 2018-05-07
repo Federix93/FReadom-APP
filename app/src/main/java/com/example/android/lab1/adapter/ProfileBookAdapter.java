@@ -1,6 +1,7 @@
 package com.example.android.lab1.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.ui.BookDetailsActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -22,9 +24,14 @@ import java.util.List;
 public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.MyViewHolder> {
 
     private List<Book> mBooks;
+    private List<String> mBookIds;
     Context mContext;
 
-    public ProfileBookAdapter (List<Book> books) {
+    public ProfileBookAdapter (List<Book> books, List<String> mBookIds) {
+        this.mBooks = books;
+        this.mBookIds = mBookIds;
+    }
+    public  ProfileBookAdapter (List<Book> books) {
         this.mBooks = books;
     }
 
@@ -40,7 +47,7 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.bind(mBooks.get(position));
+        holder.bind(mBooks.get(position), position);
     }
 
     @Override
@@ -62,7 +69,7 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
             mBookCity = itemView.findViewById(R.id.rv_book_city);
             mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail);
         }
-        public void bind(Book book){
+        public void bind(Book book, final int position){
 
             mBookTitle.setText(book.getTitle());
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
@@ -75,6 +82,16 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
                 Glide.with(itemView.getContext()).load(storage).into(mBookThumbnail);
             } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mBookThumbnail);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("ID_BOOK_SELECTED", mBookIds.get(position));
+                    v.getContext().startActivity(intent);
+                }
+            });
 
         }
 

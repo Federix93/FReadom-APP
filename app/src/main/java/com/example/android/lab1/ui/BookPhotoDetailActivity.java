@@ -1,12 +1,9 @@
 package com.example.android.lab1.ui;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.graphics.Palette;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -43,17 +40,9 @@ public class BookPhotoDetailActivity extends AppCompatActivity{
 
                     @Override
                     public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                        onPalette(Palette.from(resource).generate());
                         mImageView.setImageBitmap(resource);
 
                         return false;
-                    }
-
-                    public void onPalette(Palette palette) {
-                        if (null != palette) {
-                            ViewGroup parent = (ViewGroup) mImageView.getParent().getParent();
-                            parent.setBackgroundColor(palette.getDarkVibrantColor(Color.GRAY));
-                        }
                     }
                 })
                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL).error(R.drawable.ic_cloud_off_black_24dp))

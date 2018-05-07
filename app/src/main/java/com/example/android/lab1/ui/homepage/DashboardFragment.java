@@ -40,7 +40,7 @@ public class DashboardFragment extends Fragment {
 
         mToolbar = getActivity().findViewById(R.id.toolbar_home_page_activity);
 
-        mToolbar.setTitle(R.string.title_dashboard);
+        mToolbar.setTitle(R.string.app_name);
         mToolbar.getMenu().clear();
 
         ViewPager viewPager = rootView.findViewById(R.id.viewpager);

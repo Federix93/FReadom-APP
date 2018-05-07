@@ -12,17 +12,22 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ProfileBookAdapter;
 import com.example.android.lab1.model.Book;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DashboardFragmentLibraryItem extends Fragment {
 
     private RecyclerView mRecyclerView;
+    List<Book> mBookIds;
+
 
     public DashboardFragmentLibraryItem() {
 
@@ -40,26 +45,32 @@ public class DashboardFragmentLibraryItem extends Fragment {
                 .setPersistenceEnabled(true)
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
+
         firebaseFirestore.collection("books").whereEqualTo("uid", mFirebaseAuth.getCurrentUser().getUid())
                 .addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                        List<Book> mListBooksOfUser = queryDocumentSnapshots.toObjects(Book.class);
-                        updateListOfBooks(mListBooksOfUser);
+                        mBookIds = queryDocumentSnapshots.toObjects(Book.class);
+                        List<String> IDs = new ArrayList<>();
+                        for(DocumentSnapshot d : queryDocumentSnapshots.getDocuments()){
+                            IDs.add(d.getId());
+                        }
+                        updateListOfBooks(mBookIds, IDs);
+
                     }
                 });
         return view;
     }
-    public void updateListOfBooks(List<Book> mListBooksOfUser) {
+    public void updateListOfBooks(List<Book> mListBooksOfUser, List<String> bookIds) {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        ProfileBookAdapter adapter = new ProfileBookAdapter(mListBooksOfUser);
+        ProfileBookAdapter adapter = new ProfileBookAdapter(mListBooksOfUser, bookIds);
         mRecyclerView.setAdapter(adapter);
     }
 
-
 }
+
