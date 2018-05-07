@@ -1,7 +1,7 @@
 package com.example.android.lab1.ui.homepage;
 
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -10,19 +10,19 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.ui.GenreBooksActivity;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,9 +36,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
+import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
+
 public class HomeFragment extends Fragment {
 
     private static final int ADD_BOOK_REQUEST = 1;
+    private static final String SHOWCASE_ID = "HomeFragment";
 
     View mRootView;
     Toolbar mToolbar;
@@ -46,6 +50,7 @@ public class HomeFragment extends Fragment {
     AppCompatButton mPositionFilterButton;
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
+    ImageView mSearchImageView;
 
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
@@ -161,6 +166,29 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        ShowcaseConfig config = new ShowcaseConfig();
+        config.setDelay(100); // half second between each showcase view
+        config.setRenderOverNavigationBar(true);
+        config.setFadeDuration(900);
+        config.setShapePadding(8);
+        config.setMaskColor(Color.parseColor("#AA000000"));
+        config.setContentTextColor(getResources().getColor(R.color.white));
+        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(getActivity(), SHOWCASE_ID);
+
+        sequence.setConfig(config);
+
+
+        sequence.addSequenceItem(mGenreFilterButton,
+                        "Filtra i libri per i tuoi generi preferiti", "HO CAPITO");
+
+        sequence.addSequenceItem(mPositionFilterButton,
+                "Filtra in base alla tua posizione", "HO CAPITO");
+
+        /*sequence.addSequenceItem(mToolbar.getMenu().findItem(R.id.action_search).getActionView(),
+                "LULLO", "GOT IT");
+        */
+        sequence.start();
+
         return mRootView;
     }
 
@@ -169,4 +197,10 @@ public class HomeFragment extends Fragment {
         super.onDestroyView();
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        getActivity().getMenuInflater().inflate(R.menu.fragment_home, menu);
+        mSearchImageView = (ImageView) menu.findItem(R.id.action_search).getActionView();
+    }
 }
