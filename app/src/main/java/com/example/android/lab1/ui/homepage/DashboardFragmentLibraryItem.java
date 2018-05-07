@@ -55,7 +55,7 @@ public class DashboardFragmentLibraryItem extends Fragment {
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setNestedScrollingEnabled(false);
+        mRecyclerView.setNestedScrollingEnabled(true);
 
         ProfileBookAdapter adapter = new ProfileBookAdapter(mListBooksOfUser);
         mRecyclerView.setAdapter(adapter);
