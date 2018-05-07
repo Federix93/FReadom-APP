@@ -20,9 +20,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.utils.SharedPreferencesManager;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,8 +41,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
-import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 public class HomeFragment extends Fragment {
 
@@ -51,6 +54,8 @@ public class HomeFragment extends Fragment {
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
+
+    View mBottomView;
 
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
@@ -165,29 +170,46 @@ public class HomeFragment extends Fragment {
                 mSecondRecyclerView.setAdapter(mAdapter);
             }
         });
+        if(SharedPreferencesManager.getInstance(getActivity()).isFirstRun()){
+            TapTargetSequence tapTargetSequence = new TapTargetSequence(getActivity());
+            tapTargetSequence.continueOnCancel(true);
+            tapTargetSequence.targets(
+                            TapTarget.forToolbarMenuItem(mToolbar, R.id.action_search,
+                                    "Cerca i tuoi libri", "Puoi cercare tutti i libri che vuoi quando vuoi")
+                                    .outerCircleColor(R.color.colorAccent)
+                                    .targetCircleColor(R.color.background_app)
+                                    .transparentTarget(true)
+                                    .textColor(R.color.white),
+                            TapTarget.forView(mGenreFilterButton,
+                                    "Cerca i tuoi generi preferiti", "Vincenzo è un pezzo di merda")
+                                    .outerCircleColor(R.color.colorAccent)
+                                    .targetCircleColor(R.color.background_app)
+                                    .transparentTarget(true)
+                                    .textColor(R.color.white),
+            TapTarget.forView(mPositionFilterButton,
+                    "Cerca i libri in base alla tua posizione", "Vincenzo è un pezzo di merda")
+                    .outerCircleColor(R.color.colorAccent)
+                    .targetCircleColor(R.color.background_app)
+                    .transparentTarget(true)
+                    .textColor(R.color.white));
+            tapTargetSequence.listener(new TapTargetSequence.Listener() {
+                @Override
+                public void onSequenceFinish() {
 
-        ShowcaseConfig config = new ShowcaseConfig();
-        config.setDelay(100); // half second between each showcase view
-        config.setRenderOverNavigationBar(true);
-        config.setFadeDuration(900);
-        config.setShapePadding(8);
-        config.setMaskColor(Color.parseColor("#AA000000"));
-        config.setContentTextColor(getResources().getColor(R.color.white));
-        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(getActivity(), SHOWCASE_ID);
+                }
 
-        sequence.setConfig(config);
+                @Override
+                public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
 
+                }
 
-        sequence.addSequenceItem(mGenreFilterButton,
-                        "Filtra i libri per i tuoi generi preferiti", "HO CAPITO");
+                @Override
+                public void onSequenceCanceled(TapTarget lastTarget) {
 
-        sequence.addSequenceItem(mPositionFilterButton,
-                "Filtra in base alla tua posizione", "HO CAPITO");
-
-        /*sequence.addSequenceItem(mToolbar.getMenu().findItem(R.id.action_search).getActionView(),
-                "LULLO", "GOT IT");
-        */
-        sequence.start();
+                }
+            });
+                tapTargetSequence.start();
+        }
 
         return mRootView;
     }

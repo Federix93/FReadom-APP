@@ -17,6 +17,7 @@ public class SharedPreferencesManager {
 
     private final String IMAGE_KEY = "Image";
     private final String ADDRESS_KEY = "Address";
+    private final String FIRST_RUN_KEY = "FirstRun";
 
     private SharedPreferencesManager(){}
 
@@ -46,5 +47,15 @@ public class SharedPreferencesManager {
 
     public String getAddress(){
         return mSharedPreferences.getString(ADDRESS_KEY, mContext.getResources().getString(R.string.selection_position));
+    }
+
+    public void setFirstRun(Boolean isFirstRun){
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(ADDRESS_KEY, isFirstRun);
+        editor.apply();
+    }
+
+    public Boolean isFirstRun(){
+        return mSharedPreferences.getBoolean(FIRST_RUN_KEY, true);
     }
 }
