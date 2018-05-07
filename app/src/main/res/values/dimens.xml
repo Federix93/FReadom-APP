@@ -25,4 +25,5 @@
     <dimen name="text_view_size">18sp</dimen>
     <dimen name="user_photos_max_height">200dp</dimen>
     <dimen name="user_photos_margin">5dp</dimen>
+    <dimen name="photo_gallery_item_height">110dp</dimen>
 </resources>

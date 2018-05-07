@@ -1,13 +1,46 @@
 package com.example.android.lab1.model;
 
-import java.io.Serializable;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.firebase.firestore.GeoPoint;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class Book implements Serializable
-{
+public class Book implements Parcelable {
+
+    public static final Creator<Book> CREATOR = new Creator<Book>() {
+        @Override
+        public Book createFromParcel(Parcel in) {
+            return new Book(in);
+        }
+
+        @Override
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
+    private static final String ISBN = "ISBN";
+    private static final String TITLE = "TITLE";
+    private static final String PHOTOS_PATH = "PHOTOS_PATH";
+    private static final String WEB_THUMBNAIL = "WEB_THUMBNAIL";
+    private static final String UUID = "UUID";
+    private static final String ADDRESS = "ADDRESS";
+    private static final String PUBLISHER = "PUBLISHER";
+    private static final String AUTHORS = "AUTHORS";
+    private static final String LAT = "LAT";
+    private static final String LON = "LON";
+    private static final String PUBLISH_YEAR = "PY";
+    private static final String LOAN_START = "LS";
+    private static final String LOAN_END = "LE";
+    private static final String INFO_LINK = "IL";
+    private static final String CONDITIONS = "CONDITIONS";
+    private static final String GENRE = "GENRE";
+
     private String mIsbn;
     private String mTitle;
     private String mAuthors;
@@ -15,16 +48,17 @@ public class Book implements Serializable
     private Integer mPublishYear;
     private int mCondition;
     private String mAddress;
-    private Double lon;
-    private Double lat;
+    private GeoPoint mGeoPoint;
     private String mUid; // user id
     private String mWebThumbnail;
-    private List<String> mBookPhotosPaths;
+    private ArrayList<String> mBookPhotosPaths;
     private Date mLoanStart;
     private Date mLoanEnd;
-    private int genre;
+    private int mGenre;
+    private String mInfoLink;
 
-    public Book(){}
+    public Book() {
+    }
 
     public String getWebThumbnail() {
         return mWebThumbnail;
@@ -90,22 +124,6 @@ public class Book implements Serializable
         this.mAddress = mAddress;
     }
 
-    public Double getLon() {
-        return lon;
-    }
-
-    public void setLon(Double lon) {
-        this.lon = lon;
-    }
-
-    public Double getLat() {
-        return lat;
-    }
-
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
     public List<String> getUserBookPhotosStoragePath() {
         return mBookPhotosPaths;
     }
@@ -141,11 +159,106 @@ public class Book implements Serializable
         this.mLoanEnd = loanEnd != null ? loanEnd.getTime() : null;
     }
 
+    protected Book(Parcel in) {
+        Bundle bundle = in.readBundle(getClass().getClassLoader());
+        mIsbn = bundle.containsKey(ISBN) ? bundle.getString(ISBN) : null;
+        mTitle = bundle.containsKey(TITLE) ? bundle.getString(TITLE) : null;
+        mBookPhotosPaths = bundle.containsKey(PHOTOS_PATH) ? bundle.getStringArrayList(PHOTOS_PATH) : null;
+        mWebThumbnail = bundle.containsKey(WEB_THUMBNAIL) ? bundle.getString(WEB_THUMBNAIL) : null;
+        mUid = bundle.containsKey(UUID) ? bundle.getString(UUID) : null;
+        mAddress = bundle.containsKey(ADDRESS) ? bundle.getString(ADDRESS) : null;
+        mPublisher = bundle.containsKey(PUBLISHER) ? bundle.getString(PUBLISHER) : null;
+        mAuthors = bundle.containsKey(AUTHORS) ? bundle.getString(AUTHORS) : null;
+        mPublishYear = bundle.containsKey(PUBLISH_YEAR) ? bundle.getInt(PUBLISH_YEAR) : null;
+        mLoanStart = bundle.containsKey(LOAN_START) ? (Date) bundle.getSerializable(LOAN_START) : null;
+        mLoanEnd = bundle.containsKey(LOAN_END) ? (Date) bundle.getSerializable(LOAN_END) : null;
+        mInfoLink = bundle.containsKey(INFO_LINK) ? bundle.getString(INFO_LINK) : null;
+        if (bundle.containsKey(CONDITIONS))
+            mCondition = bundle.getInt(CONDITIONS);
+        if (bundle.containsKey(GENRE))
+            mGenre = bundle.getInt(GENRE);
+        if (bundle.containsKey(LAT) && bundle.containsKey(LON))
+            mGeoPoint = new GeoPoint(bundle.getDouble(LAT),
+                    bundle.getDouble(LON));
+
+    }
+
     public int getGenre() {
-        return genre;
+        return mGenre;
     }
 
     public void setGenre(int genre) {
-        this.genre = genre;
+        this.mGenre = genre;
     }
+
+    public String getInfoLink() {
+        return mInfoLink;
+    }
+
+    public void setInfoLink(String infoLink) {
+        this.mInfoLink = infoLink;
+    }
+
+    public GeoPoint getGeoPoint() {
+        return mGeoPoint;
+    }
+
+    public void setGeoPoint(GeoPoint mGeoPoint) {
+        this.mGeoPoint = mGeoPoint;
+    }
+
+    public void setGeoPoint(Double lat, Double lon) {
+        setGeoPoint(new GeoPoint(lat, lon));
+    }
+
+    public String getAuthor(int i) {
+        if (getAuthors() != null) {
+            String[] splitted = getAuthors().split(",");
+            return i >= 0 && i < splitted.length ? splitted[i] : null;
+
+        }
+        return null;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        Bundle bundle = new Bundle();
+        if (mIsbn != null)
+            bundle.putString(ISBN, mIsbn);
+        if (mTitle != null)
+            bundle.putString(TITLE, mTitle);
+        if (mBookPhotosPaths != null && !mBookPhotosPaths.isEmpty())
+            bundle.putStringArrayList(PHOTOS_PATH, mBookPhotosPaths);
+        if (mWebThumbnail != null)
+            bundle.putString(WEB_THUMBNAIL, mWebThumbnail);
+        if (mUid != null)
+            bundle.putString(UUID, mUid);
+        if (mAddress != null)
+            bundle.putString(ADDRESS, mAddress);
+        if (mPublisher != null)
+            bundle.putString(PUBLISHER, mPublisher);
+        if (mAuthors != null)
+            bundle.putString(AUTHORS, mAuthors);
+        if (mGeoPoint != null) {
+            bundle.putDouble(LAT, mGeoPoint.getLatitude());
+            bundle.putDouble(LON, mGeoPoint.getLongitude());
+        }
+        if (mPublishYear != null)
+            bundle.putInt(PUBLISH_YEAR, mPublishYear);
+        if (mLoanStart != null)
+            bundle.putSerializable(LOAN_START, mLoanStart);
+        if (mLoanEnd != null)
+            bundle.putSerializable(LOAN_END, mLoanEnd);
+        if (mInfoLink != null)
+            bundle.putString(INFO_LINK, mInfoLink);
+        bundle.putInt(CONDITIONS, mCondition);
+        bundle.putInt(GENRE, mGenre);
+    }
+
+
 }
