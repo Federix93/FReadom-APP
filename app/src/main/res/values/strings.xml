@@ -102,7 +102,14 @@
         <item>Economia e finanza</item>
         <item>Fantascienza e fantasy</item>
     </string-array>
+
+    <string name="tutorial_title_genre">Cerca i libri in base al tuo genere preferito</string>
+    <string name="tutorial_title_position">Cerca i libri in base alla tua posizione attuale</string>
+    <string name="tutorial_title_search">Cerca uno specifico libro</string>
+
+
     <string name="min_selection">Seleziona almeno un elemento</string>
     <string name="book_owner_text">I libri di %1$s</string>
+    <string name="search_by_title">Cerca per:</string>
 
 </resources>

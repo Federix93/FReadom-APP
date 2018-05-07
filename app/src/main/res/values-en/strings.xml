@@ -85,4 +85,9 @@
     <string name="book_owner_text">%1$s\'s books</string>
     <string name="condition">Conditions:  %1$s</string>
 
+    <string name="tutorial_title_genre">Search books by your favourite genre</string>
+    <string name="tutorial_title_position">Search books around your current location</string>
+    <string name="tutorial_title_search">Search for a specific book</string>
+    <string name="search_by_title">Search by:</string>
+
 </resources>

@@ -1,6 +1,7 @@
 package com.example.android.lab1.ui.homepage;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -171,47 +172,28 @@ public class HomeFragment extends Fragment {
             }
         });
         if(SharedPreferencesManager.getInstance(getActivity()).isFirstRun()){
+            Resources res = getResources();
             SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
             TapTargetSequence tapTargetSequence = new TapTargetSequence(getActivity());
             tapTargetSequence.continueOnCancel(true);
             tapTargetSequence.targets(
                 TapTarget.forToolbarMenuItem(mToolbar, R.id.action_search,
-                        "Cerca i tuoi libri", "Puoi cercare tutti i libri che vuoi quando vuoi")
-                        .outerCircleColor(R.color.colorAccent)
+                        res.getString(R.string.tutorial_title_search))
+                            .outerCircleColor(R.color.colorAccent)
                         .targetCircleColor(R.color.background_app)
-                        .transparentTarget(true)
-                        .textColor(R.color.white)
-                        .descriptionTextColor(R.color.white),
+                        .textColor(R.color.white),
                 TapTarget.forView(mGenreFilterButton,
-                        "Cerca i tuoi generi preferiti", "Filtra i libri in base al genere che preferisci")
+                        res.getString(R.string.tutorial_title_genre))
                         .outerCircleColor(R.color.colorAccent)
                         .targetCircleColor(R.color.background_app)
                         .transparentTarget(true)
-                        .textColor(R.color.white)
-                        .descriptionTextColor(R.color.white),
+                        .textColor(R.color.white),
                 TapTarget.forView(mPositionFilterButton,
-                        "Cerca i libri in base alla tua posizione", "Filtra i libri in base alla posizione attuale in cui ti trovi")
+                        res.getString(R.string.tutorial_title_position))
                         .outerCircleColor(R.color.colorAccent)
                         .targetCircleColor(R.color.background_app)
                         .transparentTarget(true)
-                        .textColor(R.color.white)
-                        .descriptionTextColor(R.color.white));
-                tapTargetSequence.listener(new TapTargetSequence.Listener() {
-                    @Override
-                    public void onSequenceFinish() {
-
-                    }
-
-                    @Override
-                    public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
-
-                    }
-
-                    @Override
-                    public void onSequenceCanceled(TapTarget lastTarget) {
-
-                    }
-                });
+                        .textColor(R.color.white));
                 tapTargetSequence.start();
         }
 
