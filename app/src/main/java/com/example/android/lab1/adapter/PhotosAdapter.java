@@ -16,9 +16,15 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosViewHolder> {
     ArrayList<String> mPhotospaths;
     Activity mContainer;
 
+    public PhotosAdapter(Activity container, ArrayList<String> model) {
+        mContainer = container;
+        mPhotospaths = model;
+    }
+
     public PhotosAdapter(Activity c) {
-        mPhotospaths = new ArrayList<>();
         mContainer = c;
+        mPhotospaths = new ArrayList<>();
+        notifyDataSetChanged();
     }
 
     @NonNull

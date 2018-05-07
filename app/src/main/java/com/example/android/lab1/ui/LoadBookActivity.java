@@ -70,7 +70,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -135,21 +134,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private boolean mImagesUploaded;
     private boolean mDocumentUploaded;
 
-    public static String getSha1Hex(String clearString) {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            messageDigest.update(clearString.getBytes("UTF-8"));
-            byte[] bytes = messageDigest.digest();
-            StringBuilder buffer = new StringBuilder();
-            for (byte b : bytes) {
-                buffer.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-            }
-            return buffer.toString();
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
-            return null;
-        }
-    }
+
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -319,7 +304,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         ByteArrayOutputStream out;
-        Bitmap bitmap = null;
+        Bitmap bitmap;
         if (filePathUri.getScheme() != null && filePathUri.getScheme().equals("content")) {
             try {
                 bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(filePathUri));
@@ -346,7 +331,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private String generateStorageRef(String path) {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         String lastPathSegment = Uri.fromFile(new File(path)).getLastPathSegment();
-        String lastPathHash = getSha1Hex(lastPathSegment);
+        String lastPathHash = Utilities.getSha1Hex(lastPathSegment);
 
         return uid + "/images/books/" + lastPathHash + "-" + lastPathSegment + ".jpg";
     }
@@ -391,7 +376,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         if (mWebThumbnail != null)
             bookToLoad.setWebThumbnail(mWebThumbnail);
         if (mDownloadUrls != null)
-            bookToLoad.setUserBookPhotosWebStoragePath(mDownloadUrls);
+            bookToLoad.setUserBookPhotosStoragePath(mDownloadUrls);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         mDocumentUploaded = true;
         db.collection("books").add(bookToLoad).addOnSuccessListener(this, new OnSuccessListener<DocumentReference>() {

@@ -87,7 +87,9 @@
 
         </activity>
 
-        <activity android:name=".ui.LoadBookActivity2">
+        <activity
+            android:name=".ui.LoadBookActivity2"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -105,6 +107,8 @@
             android:label="@string/title_activity_home_page"
             android:theme="@style/AppTheme">
         </activity>
+
+        <activity android:name=".ui.CalendarActivity" />
     </application>
 
 </manifest>

@@ -52,6 +52,7 @@ dependencies {
     implementation 'com.github.ganfra:material-spinner:2.0.0'
     implementation 'com.google.firebase:firebase-storage:12.0.1'
     implementation 'com.google.maps.android:android-maps-utils:0.4.4'
+    implementation 'com.applandeo:material-calendar-view:1.4.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
 }
 

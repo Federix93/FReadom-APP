@@ -101,5 +101,8 @@
     <string name="insert_isbn_code">Inserisci il codice ISBN del libro</string>
     <string name="search_by_address_or_current_position">Scegliere il metodo di condivisione della posizione</string>
     <string name="yes">Si</string>
+    <string name="choose_initial_date">Seleziona la data iniziale</string>
+    <string name="ok">Ok</string>
+    <string name="choose_end_date">Seleziona la data finale</string>
 
 </resources>

@@ -1,9 +1,14 @@
 package com.example.android.lab1.utils;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
@@ -23,8 +28,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,6 +152,51 @@ public abstract class Utilities {
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
+    }
+
+    public static String getSha1Hex(String clearString) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+            messageDigest.update(clearString.getBytes("UTF-8"));
+            byte[] bytes = messageDigest.digest();
+            StringBuilder buffer = new StringBuilder();
+            for (byte b : bytes) {
+                buffer.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+            }
+            return buffer.toString();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+            return null;
+        }
+    }
+
+    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver) {
+        Uri filePathUri = Uri.parse(filePath);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        ByteArrayOutputStream out;
+        Bitmap bitmap = null;
+        if (filePathUri.getScheme() != null && filePathUri.getScheme().equals("content")) {
+            try {
+                bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(filePathUri));
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        } else
+            bitmap = BitmapFactory.decodeFile(filePath, options);
+        // rotate bitmap
+        Matrix m = new Matrix();
+        m.postRotate(90);
+        Bitmap compressedRotated = Bitmap.createBitmap(bitmap,
+                0,
+                0,
+                bitmap.getWidth(),
+                bitmap.getHeight(),
+                m,
+                true);
+        out = new ByteArrayOutputStream();
+        compressedRotated.compress(Bitmap.CompressFormat.JPEG, 75, out);
+        return out.toByteArray();
     }
 }
 
