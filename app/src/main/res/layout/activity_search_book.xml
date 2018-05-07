@@ -1,38 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:fitsSystemWindows="true"
+    android:background="#e9e9e9"
+    tools:context=".ui.searchbooks.SearchBookActivity">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/parent_view"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        tools:context=".MainActivity">
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/results_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="5dp"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="5dp"
-            android:paddingTop="60dp"
-            android:clipToPadding="false"/>
+            android:layout_marginStart="5dp"
+            android:clipToPadding="false"
+            android:paddingTop="50dp"/>
 
-        <com.arlib.floatingsearchview.FloatingSearchView
-            android:id="@+id/floating_search_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:floatingSearch_dismissOnOutsideTouch="true"
-            app:floatingSearch_leftActionMode="showSearch"
-            app:floatingSearch_menu="@menu/menu_search_books"
-            app:floatingSearch_searchHint="@string/search_books_hint"
-            app:floatingSearch_showSearchKey="true"
-            app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
-    </RelativeLayout>
-</android.support.design.widget.CoordinatorLayout>
+        <ProgressBar
+            android:id="@+id/search_book_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="200dp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/search_book_no_connection_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="200dp"
+            android:text="@string/search_no_connection_1"
+            android:textColor="@color/black"
+            android:fontFamily="sans-serif-bold"
+            android:textSize="18sp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/search_book_no_connection_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:text="@string/search_no_connection_2"
+            android:textColor="@color/black"
+            android:fontFamily="sans-serif-light"
+            android:textSize="14sp"
+            android:visibility="gone"/>
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/search_book_no_connection_try_again"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="20dp"
+            android:elevation="2dp"
+            android:text="@string/try_again"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/colorSecondaryAccent"
+            android:visibility="gone"/>
+
+
+    </LinearLayout>
+
+
+    <com.arlib.floatingsearchview.FloatingSearchView
+        android:id="@+id/floating_search_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:floatingSearch_close_search_on_keyboard_dismiss="true"
+        app:floatingSearch_dismissOnOutsideTouch="true"
+        app:floatingSearch_leftActionMode="showHome"
+        app:floatingSearch_menu="@menu/menu_search_books"
+        app:floatingSearch_dimBackground="false"
+        app:floatingSearch_searchBarMarginLeft="5dp"
+        app:floatingSearch_searchBarMarginRight="5dp"
+        app:floatingSearch_searchBarMarginTop="5dp"
+        app:floatingSearch_searchHint="@string/search_books_hint"
+        app:floatingSearch_showSearchKey="true" />
+</RelativeLayout>

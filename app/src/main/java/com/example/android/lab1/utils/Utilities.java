@@ -2,10 +2,10 @@ package com.example.android.lab1.utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.graphics.Bitmap;
@@ -54,7 +54,6 @@ public abstract class Utilities {
     public static boolean checkPermissionActivity(Activity activity, String permission){
 
         return ContextCompat.checkSelfPermission(activity.getApplicationContext(), permission) == PackageManager.PERMISSION_GRANTED;
-
     }
 
     public static void askPermissionActivity(Activity activity, String permission, final int callbackRequest)
@@ -105,6 +104,12 @@ public abstract class Utilities {
 
             decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
+    }
+
+    public static boolean isOnline(Context context) {
+        ConnectivityManager cm =(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     public static String Isbn10ToIsbn13(String isbn10) {

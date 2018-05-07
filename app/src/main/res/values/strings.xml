@@ -113,6 +113,17 @@
 
     <string name="min_selection">Seleziona almeno un elemento</string>
     <string name="book_owner_text">I libri di %1$s</string>
+    <string name="search_no_connection_1">Connessione a Internet assente</string>
+    <string name="search_no_connection_2">Controlla la connessione ai dati mobili o al Wi-Fi</string>
+    <string name="try_again">Riprova</string>
+
+    <string-array name="search_filters">
+        <item>Titolo</item>
+        <item>Autore</item>
+        <item>Editore</item>
+        <item>Tags</item>
+    </string-array>
+    <string name="search_by">Ricerca per</string>
     <string name="search_by_title">Cerca per:</string>
     <string name="dialog_isbn_search">Cerca su Internet</string>
     <string name="dialog_isbn_scan">Leggi da codice a barre</string>

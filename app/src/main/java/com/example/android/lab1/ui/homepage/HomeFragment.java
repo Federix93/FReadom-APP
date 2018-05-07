@@ -163,6 +163,7 @@ public class HomeFragment extends Fragment {
                         if (books.get(i).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                             books.remove(i);
                             IDs.remove(i);
+                            i--;
                         }
                     }
                 }

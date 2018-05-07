@@ -45,4 +45,22 @@ public abstract class Condition {
         }
         return null;
     }
+
+    public static int getConditionColor (Context pContext, int cond) {
+        switch (cond) {
+            case 1:
+                return pContext.getResources().getColor(R.color.poor);
+            case 2:
+                return pContext.getResources().getColor(R.color.fair);
+            case 3:
+                return pContext.getResources().getColor(R.color.good);
+            case 4:
+                return pContext.getResources().getColor(R.color.near_mint);
+            case 5:
+                return pContext.getResources().getColor(R.color.mint);
+            default:
+                break;
+        }
+        return 0;
+    }
 }
