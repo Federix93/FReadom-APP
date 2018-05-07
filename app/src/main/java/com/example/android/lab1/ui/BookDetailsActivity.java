@@ -195,16 +195,16 @@ public class BookDetailsActivity extends AppCompatActivity {
     private void updateUI(final Book book) {
         if (book.getTitle() != null)
             mBookTitleTextView.setText(book.getTitle());
-        if (book.getAuthor() != null)
-            mAuthorTextView.setText(book.getAuthor());
+        if (book.getAuthors() != null)
+            mAuthorTextView.setText(book.getAuthors());
         if (book.getPublisher() != null)
             mEditorTextView.setText(book.getPublisher());
         if (!String.valueOf(book.getPublishYear()).isEmpty())
             mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
         if (!String.valueOf(book.getCondition()).isEmpty())
             mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
-        if (book.getThumbnail() != null)
-            Glide.with(this).load(book.getThumbnail())
+        if (book.getWebThumbnail() != null)
+            Glide.with(this).load(book.getWebThumbnail())
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
         else
@@ -213,10 +213,10 @@ public class BookDetailsActivity extends AppCompatActivity {
                     .into(mBookThumbnailImageView);
         // storage photos
         RecyclerView recyclerView = findViewById(R.id.rv_images);
-        if (recyclerView != null && book.getBookImagesUrls()!= null && book.getBookImagesUrls().size() > 0) {
-            BookPhoto[] bookPhotos = new BookPhoto[book.getBookImagesUrls().size()];
-            for (int i = 0; i < book.getBookImagesUrls().size(); i++) {
-                bookPhotos[i] = new BookPhoto(book.getBookImagesUrls().get(i), book.getTitle());
+        if (recyclerView != null && book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
+            BookPhoto[] bookPhotos = new BookPhoto[book.getUserBookPhotosStoragePath().size()];
+            for (int i = 0; i < book.getUserBookPhotosStoragePath().size(); i++) {
+                bookPhotos[i] = new BookPhoto(book.getUserBookPhotosStoragePath().get(i), book.getTitle());
             }
             recyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
         } else {
@@ -250,8 +250,6 @@ public class BookDetailsActivity extends AppCompatActivity {
                             if (String.valueOf(mUser.getRating()) != null) {
                                 mRatingTextView.setText(String.valueOf(mUser.getRating()));
                             }
-
-
                         }
                     }
                 }

@@ -68,10 +68,10 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
             mBookEditor.setText(book.getPublisher());
             mBookCity.setText(book.getAddress());
-            if (book.getThumbnail() != null) {
-                Glide.with(itemView.getContext()).load(book.getThumbnail()).into(mBookThumbnail);
-            } else if (book.getBookImagesUrls() != null && book.getBookImagesUrls().size() > 0) {
-                StorageReference storage = FirebaseStorage.getInstance().getReferenceFromUrl(book.getBookImagesUrls().get(0));
+            if (book.getWebThumbnail() != null) {
+                Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mBookThumbnail);
+            } else if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
+                StorageReference storage = FirebaseStorage.getInstance().getReferenceFromUrl(book.getUserBookPhotosStoragePath().get(0));
                 Glide.with(itemView.getContext()).load(storage).into(mBookThumbnail);
             } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mBookThumbnail);

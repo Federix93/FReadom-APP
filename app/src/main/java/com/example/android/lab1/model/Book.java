@@ -112,7 +112,7 @@ public class Book implements Parcelable {
         return mCondition;
     }
 
-    public void setConditions(int condition) {
+    public void setCondition(int condition) {
         mCondition = condition;
     }
 

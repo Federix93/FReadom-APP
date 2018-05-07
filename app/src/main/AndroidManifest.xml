@@ -33,14 +33,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity
-            android:name=".ui.LoadBookActivity"
-            android:parentActivityName=".ui.homepage.HomePageActivity"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.homepage.HomePageActivity" />
-        </activity>
         <activity android:name=".ui.ScanBarCodeActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -69,37 +61,40 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ui.PositionActivity"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.GlobalShowProfileActivity"/>
+        <activity android:name=".ui.GlobalShowProfileActivity" />
 
         <service
             android:name=".utils.FetchAddressIntentService"
             android:exported="false" />
 
-        <activity android:name=".ui.BookDetailsActivity"/>
+        <activity android:name=".ui.BookDetailsActivity" />
 
-        <activity android:name=".ui.BookPhotoDetailActivity"/>
-
-
-        <activity android:name=".ui.SignInActivity"
-            android:screenOrientation="portrait"/>
+        <activity android:name=".ui.BookPhotoDetailActivity" />
 
 
         <activity
-            android:name=".ui.LoadBookActivity2"
-            android:configChanges="orientation|screenSize|keyboardHidden">
+            android:name=".ui.SignInActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+        <activity
+            android:name=".ui.LoadBookActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
 
         <receiver android:name=".utils.NetworkConnectionReceiver">
             <intent-filter>
@@ -113,7 +108,7 @@
             android:theme="@style/ThemeDrawer" />
         <activity android:name=".ui.GenreBooksActivity" />
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
-        <activity android:name=".ui.ProfileActivity"/>
+        <activity android:name=".ui.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
     </application>
 
