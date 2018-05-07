@@ -95,5 +95,7 @@
         <item>Tags</item>
     </string-array>
 
+    <string name="search_by">Search by</string>
+
 
 </resources>

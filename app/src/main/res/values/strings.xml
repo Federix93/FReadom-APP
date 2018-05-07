@@ -114,5 +114,6 @@
         <item>Editore</item>
         <item>Tags</item>
     </string-array>
+    <string name="search_by">Ricerca per</string>
 
 </resources>

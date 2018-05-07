@@ -137,7 +137,7 @@ public class SearchBookActivity extends AppCompatActivity {
                     oldCheckedItems = checkedItems.clone();
                     String[] multiChoiceItems = getResources().getStringArray(R.array.search_filters);
                     new AlertDialog.Builder(SearchBookActivity.this)
-                            .setTitle("Select your favourite movies")
+                            .setTitle(getResources().getString(R.string.search_by))
                             .setMultiChoiceItems(multiChoiceItems, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int index, boolean isChecked) {
