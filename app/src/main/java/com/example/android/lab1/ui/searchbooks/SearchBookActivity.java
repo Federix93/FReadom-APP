@@ -26,6 +26,8 @@ import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerSearchAdapter;
 import com.example.android.lab1.utils.Utilities;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,6 +55,7 @@ public class SearchBookActivity extends AppCompatActivity {
     private RecyclerSearchAdapter mAdapter;
     private String lastSearchResult;
     private Query query = new Query();
+    private String mCurrentUserId;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -67,6 +70,10 @@ public class SearchBookActivity extends AppCompatActivity {
         mNoConnectionTextViewBottom = findViewById(R.id.search_book_no_connection_bottom);
         mNoConnectionButton = findViewById(R.id.search_book_no_connection_try_again);
         mRecyclerView = findViewById(R.id.results_recycler_view);
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(currentUser != null)
+            mCurrentUserId = currentUser.getUid();
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
@@ -107,9 +114,6 @@ public class SearchBookActivity extends AppCompatActivity {
         mSearchView.setOnHomeActionClickListener(new FloatingSearchView.OnHomeActionClickListener() {
             @Override
             public void onHomeClicked() {
-                if(mSearchView.isFocused())
-                    mSearchView.setSearchFocused(false);
-                else
                     SearchBookActivity.this.finish();
             }
         });
@@ -150,7 +154,7 @@ public class SearchBookActivity extends AppCompatActivity {
                                     }
                                 }
                             })
-                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            .setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     List<String> searchFields = new ArrayList<>();
@@ -174,7 +178,7 @@ public class SearchBookActivity extends AppCompatActivity {
                                     query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
                                 }
                             })
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            .setNegativeButton(getResources().getString(R.string.negative_button_dialog), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     checkedItems = oldCheckedItems;
@@ -247,6 +251,14 @@ public class SearchBookActivity extends AppCompatActivity {
                 public void requestCompleted(JSONObject result, AlgoliaException error) {
                     JSONArray hits = result.optJSONArray("hits");
                     lastSearchResult = hits.toString();
+                    for(int i=0; i<hits.length(); i++)
+                    {
+                        if(hits.optJSONObject(i).optString("uid").equals(mCurrentUserId))
+                        {
+                            hits.remove(i);
+                            i--;
+                        }
+                    }
                     mAdapter = new RecyclerSearchAdapter(hits);
                     mRecyclerView.setAdapter(mAdapter);
                     mSearchView.hideProgress();
