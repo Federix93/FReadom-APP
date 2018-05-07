@@ -118,7 +118,7 @@
                     android:id="@+id/thumbnail"
                     android:layout_width="116dp"
                     android:layout_height="180dp"
-                    android:layout_marginBottom="32dp"
+                    android:layout_marginBottom="48dp"
                     android:layout_marginTop="32dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_no_book_photo"
