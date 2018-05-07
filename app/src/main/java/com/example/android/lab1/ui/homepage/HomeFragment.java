@@ -171,43 +171,47 @@ public class HomeFragment extends Fragment {
             }
         });
         if(SharedPreferencesManager.getInstance(getActivity()).isFirstRun()){
+            SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
             TapTargetSequence tapTargetSequence = new TapTargetSequence(getActivity());
             tapTargetSequence.continueOnCancel(true);
             tapTargetSequence.targets(
-                            TapTarget.forToolbarMenuItem(mToolbar, R.id.action_search,
-                                    "Cerca i tuoi libri", "Puoi cercare tutti i libri che vuoi quando vuoi")
-                                    .outerCircleColor(R.color.colorAccent)
-                                    .targetCircleColor(R.color.background_app)
-                                    .transparentTarget(true)
-                                    .textColor(R.color.white),
-                            TapTarget.forView(mGenreFilterButton,
-                                    "Cerca i tuoi generi preferiti", "Vincenzo è un pezzo di merda")
-                                    .outerCircleColor(R.color.colorAccent)
-                                    .targetCircleColor(R.color.background_app)
-                                    .transparentTarget(true)
-                                    .textColor(R.color.white),
-            TapTarget.forView(mPositionFilterButton,
-                    "Cerca i libri in base alla tua posizione", "Vincenzo è un pezzo di merda")
-                    .outerCircleColor(R.color.colorAccent)
-                    .targetCircleColor(R.color.background_app)
-                    .transparentTarget(true)
-                    .textColor(R.color.white));
-            tapTargetSequence.listener(new TapTargetSequence.Listener() {
-                @Override
-                public void onSequenceFinish() {
+                TapTarget.forToolbarMenuItem(mToolbar, R.id.action_search,
+                        "Cerca i tuoi libri", "Puoi cercare tutti i libri che vuoi quando vuoi")
+                        .outerCircleColor(R.color.colorAccent)
+                        .targetCircleColor(R.color.background_app)
+                        .transparentTarget(true)
+                        .textColor(R.color.white)
+                        .descriptionTextColor(R.color.white),
+                TapTarget.forView(mGenreFilterButton,
+                        "Cerca i tuoi generi preferiti", "Filtra i libri in base al genere che preferisci")
+                        .outerCircleColor(R.color.colorAccent)
+                        .targetCircleColor(R.color.background_app)
+                        .transparentTarget(true)
+                        .textColor(R.color.white)
+                        .descriptionTextColor(R.color.white),
+                TapTarget.forView(mPositionFilterButton,
+                        "Cerca i libri in base alla tua posizione", "Filtra i libri in base alla posizione attuale in cui ti trovi")
+                        .outerCircleColor(R.color.colorAccent)
+                        .targetCircleColor(R.color.background_app)
+                        .transparentTarget(true)
+                        .textColor(R.color.white)
+                        .descriptionTextColor(R.color.white));
+                tapTargetSequence.listener(new TapTargetSequence.Listener() {
+                    @Override
+                    public void onSequenceFinish() {
 
-                }
+                    }
 
-                @Override
-                public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
+                    @Override
+                    public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
 
-                }
+                    }
 
-                @Override
-                public void onSequenceCanceled(TapTarget lastTarget) {
+                    @Override
+                    public void onSequenceCanceled(TapTarget lastTarget) {
 
-                }
-            });
+                    }
+                });
                 tapTargetSequence.start();
         }
 

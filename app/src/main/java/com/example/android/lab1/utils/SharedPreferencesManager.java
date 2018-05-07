@@ -49,9 +49,9 @@ public class SharedPreferencesManager {
         return mSharedPreferences.getString(ADDRESS_KEY, mContext.getResources().getString(R.string.selection_position));
     }
 
-    public void setFirstRun(Boolean isFirstRun){
+    public void putFirstRun(Boolean isFirstRun){
         SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putBoolean(ADDRESS_KEY, isFirstRun);
+        editor.putBoolean(FIRST_RUN_KEY, isFirstRun);
         editor.apply();
     }
 
