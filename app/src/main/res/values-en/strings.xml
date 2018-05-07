@@ -47,7 +47,7 @@
     <string name="verification_email_confirm">OK</string>
     <string name="load_book_fill_fields">Fill all the fields before confirming</string>
     <string name="confirm">Confirm</string>
-    <string name="dashboard_library_item">Library</string>
+    <string name="dashboard_library_item">Your books</string>
     <string name="dashboard_borrowed_item">Borrowed</string>
     <string name="dashboard_lended_item">Lended</string>
     <string name="load_book_upload">Uploading book</string>

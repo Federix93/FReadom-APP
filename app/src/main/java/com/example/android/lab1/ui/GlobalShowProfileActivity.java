@@ -37,6 +37,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -65,7 +67,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
 
         mToolbar = findViewById(R.id.global_profile_toolbar);
 
-        mToolbar.setTitle(getResources().getString(R.string.app_name));
+        mToolbar.setTitle(getResources().getString(R.string.title_profile));
         mToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp));
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,20 +117,24 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
                 @Override
                 public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
                     List<Book> mListBooksOfUser = queryDocumentSnapshots.toObjects(Book.class);
+                    List<String> IDs = new ArrayList<>();
+                    for(DocumentSnapshot d : queryDocumentSnapshots.getDocuments()){
+                        IDs.add(d.getId());
+                    }
                     int numOfBooks = mListBooksOfUser.size();
-                    updateListOfBooks(mListBooksOfUser, numOfBooks);
+                    updateListOfBooks(mListBooksOfUser, numOfBooks, IDs);
                 }
         });
     }
 
-    private void updateListOfBooks(List<Book> mListBooksOfUser, int numOfBooks) {
+    private void updateListOfBooks(List<Book> mListBooksOfUser, int numOfBooks, List<String> bookIds) {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(false);
 
-        ProfileBookAdapter adapter = new ProfileBookAdapter(mListBooksOfUser);
+        ProfileBookAdapter adapter = new ProfileBookAdapter(mListBooksOfUser, bookIds);
         mRecyclerView.setAdapter(adapter);
         mBookNumber.setText(String.valueOf(numOfBooks));
     }
