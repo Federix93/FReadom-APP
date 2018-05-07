@@ -11,6 +11,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -37,6 +38,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.storage.FirebaseStorage;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -102,13 +104,11 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         mProfileConstraintLayout = findViewById(R.id.profile_detail);
 
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         RecyclerView recyclerView = findViewById(R.id.rv_images);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
-        ImageGalleryAdapter adapter = new ImageGalleryAdapter(this, BookPhoto.getSpacePhotos());
-        recyclerView.setAdapter(adapter);
 
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
@@ -119,7 +119,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()){
+                if (task.isSuccessful()) {
                     Book book = task.getResult().toObject(Book.class);
                     updateUI(book);
                 }
@@ -133,13 +133,18 @@ public class BookDetailsActivity extends AppCompatActivity {
         private BookPhoto[] mBookPhoto;
         private Context mContext;
 
+        public ImageGalleryAdapter(BookPhoto[] mBookPhoto, Context mContext) {
+            this.mBookPhoto = mBookPhoto;
+            this.mContext = mContext;
+        }
+
         @Override
         public ImageGalleryAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
             View photoView = inflater.inflate(R.layout.book_detail_gallery_item, parent, false);
-            int width = (parent.getMeasuredWidth() / 3) - 8;
+            int width = (parent.getMeasuredWidth() / 3) - 16;
             int height = parent.getMeasuredHeight();
             photoView.setLayoutParams(new RecyclerView.LayoutParams(width, height));
 
@@ -156,7 +161,7 @@ public class BookDetailsActivity extends AppCompatActivity {
             Glide.with(mContext)
                     .load(bookPhoto.getUrl())
                     .apply(new RequestOptions().override(400, 400).fitCenter()
-                    .placeholder(R.drawable.ic_no_book_photo))
+                            .placeholder(R.drawable.ic_no_book_photo))
                     .into(imageView);
         }
 
@@ -169,15 +174,15 @@ public class BookDetailsActivity extends AppCompatActivity {
 
             public ImageView mPhotoImageView;
 
-            public MyViewHolder (View itemView) {
-                super (itemView);
+            public MyViewHolder(View itemView) {
+                super(itemView);
                 mPhotoImageView = itemView.findViewById(R.id.iv_photo);
                 itemView.setOnClickListener(this);
             }
 
-            public void onClick (View view){
+            public void onClick(View view) {
                 int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION){
+                if (position != RecyclerView.NO_POSITION) {
                     BookPhoto bookPhoto = mBookPhoto[position];
                     Intent intent = new Intent(mContext, BookPhotoDetailActivity.class);
                     intent.putExtra(BookPhotoDetailActivity.BOOK_PHOTO, bookPhoto);
@@ -185,29 +190,39 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         }
-
-        public ImageGalleryAdapter (Context context, BookPhoto[] bookPhotos) {
-            mContext = context;
-            mBookPhoto = bookPhotos;
-        }
     }
 
     private void updateUI(final Book book) {
-        if(book.getTitle() != null)
+        if (book.getTitle() != null)
             mBookTitleTextView.setText(book.getTitle());
-        if(book.getAuthor() != null)
+        if (book.getAuthor() != null)
             mAuthorTextView.setText(book.getAuthor());
-        if(book.getPublisher() != null)
+        if (book.getPublisher() != null)
             mEditorTextView.setText(book.getPublisher());
-        if(!String.valueOf(book.getPublishYear()).isEmpty())
+        if (!String.valueOf(book.getPublishYear()).isEmpty())
             mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
         if (!String.valueOf(book.getCondition()).isEmpty())
             mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
-        if(book.getThumbnail() != null)
+        if (book.getThumbnail() != null)
             Glide.with(this).load(book.getThumbnail())
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
-        if(book.getUid() != null){
+        else
+            Glide.with(this).load(R.drawable.book_thumbnail_placeholder)
+                    .apply(new RequestOptions().centerCrop())
+                    .into(mBookThumbnailImageView);
+        // storage photos
+        RecyclerView recyclerView = findViewById(R.id.rv_images);
+        if (recyclerView != null && book.getBookImagesUrls()!= null && book.getBookImagesUrls().size() > 0) {
+            BookPhoto[] bookPhotos = new BookPhoto[book.getBookImagesUrls().size()];
+            for (int i = 0; i < book.getBookImagesUrls().size(); i++) {
+                bookPhotos[i] = new BookPhoto(book.getBookImagesUrls().get(i), book.getTitle());
+            }
+            recyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
+        } else {
+            recyclerView.setVisibility(View.GONE);
+        }
+        if (book.getUid() != null) {
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
             FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                     .setPersistenceEnabled(true)
@@ -217,9 +232,9 @@ public class BookDetailsActivity extends AppCompatActivity {
             docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
                 @Override
                 public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
-                    if(snapshot.exists()){
+                    if (snapshot.exists()) {
                         mUser = snapshot.toObject(User.class);
-                        if(mUser != null) {
+                        if (mUser != null) {
                             if (mUser.getImage() == null) {
                                 Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
                                         .apply(bitmapTransform(new CircleCrop()))
@@ -256,8 +271,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void setupOnClickListeners()
-    {
+    private void setupOnClickListeners() {
 
         mPreviewButton.setOnClickListener(new View.OnClickListener() {
             @Override

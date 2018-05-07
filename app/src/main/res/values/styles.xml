@@ -8,6 +8,12 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:statusBarColor" tools:targetApi="lollipop">@color/background_app</item>
     </style>
+    <!--<style name="AppThemeDark" parent="ThemeOverlay.AppCompat.Dark">-->
+        <!--<item name="colorPrimary">@color/white</item>-->
+        <!--<item name="colorPrimaryDark">@color/background_app</item>-->
+        <!--<item name="colorAccent">@color/colorAccent</item>-->
+        <!--<item name="android:statusBarColor" tools:targetApi="lollipop">#212121</item>-->
+    <!--</style>-->
 
     <style name="LoginTheme" parent="FirebaseUI">
         <item name="colorPrimary">@color/colorPrimary</item>

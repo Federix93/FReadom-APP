@@ -29,7 +29,7 @@ public class BookPhotoDetailActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_full_detail);
 
-        mImageView = (ImageView) findViewById(R.id.image);
+        mImageView = findViewById(R.id.image);
         BookPhoto spacePhoto = getIntent().getParcelableExtra(BOOK_PHOTO);
 
         Glide.with(this)
