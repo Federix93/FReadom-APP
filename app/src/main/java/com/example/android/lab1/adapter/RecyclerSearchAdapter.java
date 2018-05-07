@@ -78,7 +78,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             mTitle.setText(book.optString("title"));
             mAuthor.setText(book.optString("author"));
             if(book.optString("thumbnail").isEmpty())
-                Glide.with(itemView.getContext()).load(R.drawable.book_thumbnail_placeholder).into(mThumbnail);
+                Glide.with(itemView.getContext()).load(R.drawable.book_placeholder_thumbnail).into(mThumbnail);
             else
                 Glide.with(itemView.getContext()).load(book.optString("thumbnail")).into(mThumbnail);
 

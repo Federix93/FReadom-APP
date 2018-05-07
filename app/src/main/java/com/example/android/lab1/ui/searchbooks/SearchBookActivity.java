@@ -172,7 +172,7 @@ public class SearchBookActivity extends AppCompatActivity {
                                     }
                                     if(checkedItems[3])
                                     {
-                                        searchFields.add("tags");
+//                                        searchFields.add("tags");
                                     }
 
                                     query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
