@@ -24,7 +24,6 @@ import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -72,6 +71,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -92,8 +92,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String GENRE_SPINNER = "GENRE_SPINNER";
     private static final String ISBN = "ISBN";
     private static final String CURRENT_PHOTO = "CURRENT_PHOTO";
-    private static final String KEY_RECYCLER_STATE = "KEY_RECYCLER";
     private static final String UPLOADING = "UPLOADING";
+    private static final String AUTHORS = "AUTHORS";
+    private static final String AUTHORS_EDITABLE = "A_EDITABLE";
     private Toolbar mToolbar;
     private LinearLayoutCompat mIsbnContainer;
     private MaterialSpinner mPublishYearSpinner;
@@ -173,6 +174,14 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             outState.putInt(GENRE_SPINNER, mGenreSpinner.getSelectedItemPosition());
         if (mPhotoFile != null)
             outState.putString(CURRENT_PHOTO, mPhotoFile.getAbsolutePath());
+        if (mAuthorsListView != null && mAuthorsListView.getAdapter() != null) {
+            AuthorAdapter ph = (AuthorAdapter) mAuthorsListView.getAdapter();
+            if (ph.getAuthors() != null) {
+                outState.putStringArrayList(AUTHORS, ph.getAuthors());
+                outState.putBoolean(AUTHORS_EDITABLE, ph.getEditable());
+            }
+        }
+
         outState.putBoolean(UPLOADING, mUploading);
     }
 
@@ -184,42 +193,43 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mActivityState = State.valueOf(savedInstanceState.getString(ACTIVITY_STATE));
         if (savedInstanceState.containsKey(ISBN) && mIsbnEditText != null)
             mIsbnEditText.setText(savedInstanceState.getString(ISBN));
-        if (savedInstanceState.containsKey(CURRENT_PHOTO))
-            mPhotoFile = new File(savedInstanceState.getString(CURRENT_PHOTO));
+        if (savedInstanceState.containsKey(CURRENT_PHOTO)) {
+            if (savedInstanceState.getString(CURRENT_PHOTO) != null)
+                mPhotoFile = new File(savedInstanceState.getString(CURRENT_PHOTO));
+        }
         if (savedInstanceState.containsKey(RESULT_BOOK)) {
             mResultBook = savedInstanceState.getParcelable(RESULT_BOOK);
-            if (mResultBook.getWebThumbnail() != null && mBookWebThumbnailImageView != null)
+            if (mResultBook != null && mResultBook.getWebThumbnail() != null && mBookWebThumbnailImageView != null)
                 Glide.with(getApplicationContext())
                         .load(mResultBook.getWebThumbnail())
                         .into(mBookWebThumbnailImageView);
 
-            if (mResultBook.getIsbn() != null && mIsbnEditText != null)
+            if (mResultBook != null && mResultBook.getIsbn() != null && mIsbnEditText != null)
                 mIsbnEditText.setText(mResultBook.getIsbn());
-            if (mResultBook.getTitle() != null) {
+            if (mResultBook != null && mResultBook.getTitle() != null) {
                 mCurrentTitle = mResultBook.getTitle();
                 if (mTitleTextInputLayout != null && mTitleTextInputLayout.getEditText() != null) {
                     mTitleTextInputLayout.getEditText().setText(mCurrentTitle);
                     mTitleTextInputLayout.getEditText().setEnabled(false);
                 }
             }
-            String[] authors = mResultBook.getAuthors().split(",");
-            ArrayList<String> authorsList = new ArrayList<>();
-            for (String author : authors) {
-                authorsList.add(author);
+            if (mResultBook != null && mResultBook.getAuthors() != null) {
+                String[] authors = mResultBook.getAuthors().split(",");
+                ArrayList<String> authorsList = new ArrayList<>();
+                Collections.addAll(authorsList, authors);
+                mAuthorsListView.setAdapter(new AuthorAdapter(getLayoutInflater(), authorsList));
             }
 
-            mAuthorsListView.setAdapter(new AuthorAdapter(getLayoutInflater(), authorsList));
-
-            if (mResultBook.getPublisher() != null && mPublisherTextInputLayout != null &&
+            if (mResultBook != null && mResultBook.getPublisher() != null && mPublisherTextInputLayout != null &&
                     mPublisherTextInputLayout.getEditText() != null) {
                 mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
                 mPublisherTextInputLayout.getEditText().setEnabled(false);
             }
 
-            if (mResultBook.getPublishYear() != null && mPublishYearSpinner != null)
+            if (mResultBook != null && mResultBook.getPublishYear() != null && mPublishYearSpinner != null)
                 mPublishYearSpinner.setEnabled(false);
 
-            if (mResultBook.getAddress() != null && mPositionTextView != null)
+            if (mResultBook != null && mResultBook.getAddress() != null && mPositionTextView != null)
                 mPositionTextView.setText(mResultBook.getAddress());
         }
 
@@ -229,11 +239,14 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mConditionsSpinner.setSelection(savedInstanceState.getInt(CONDITION_SPINNER));
         if (savedInstanceState.containsKey(GENRE_SPINNER) && mGenreSpinner != null)
             mGenreSpinner.setSelection(savedInstanceState.getInt(GENRE_SPINNER));
-        /*if (savedInstanceState.containsKey(PHOTOS_KEY) && mPhotosGrid != null)
-        {
-            mPhotosGrid.setAdapter(new PhotosAdapter(LoadBookActivity2.this,
-                    savedInstanceState.getStringArrayList(PHOTOS_KEY)));
-        }*/
+
+        if (savedInstanceState.containsKey(AUTHORS) && savedInstanceState.containsKey(AUTHORS_EDITABLE)) {
+            AuthorAdapter authorAdapter = new AuthorAdapter(getLayoutInflater(),
+                    savedInstanceState.getStringArrayList(AUTHORS));
+            authorAdapter.setEditable(savedInstanceState.getBoolean(AUTHORS_EDITABLE));
+            mAuthorsListView.setAdapter(authorAdapter);
+        }
+
         setActivityState();
     }
 
@@ -268,6 +281,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mScanBarcodeButton.setVisibility(View.GONE);
                 mIsbnExplanationImageView.setVisibility(View.VISIBLE);
                 mInfoContainerScrollView.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.GONE);
                 break;
             case ISBN_ACQUIRED:
                 mProgressBar.setVisibility(View.GONE);
@@ -277,6 +291,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mInfoContainerScrollView.setVisibility(View.VISIBLE);
                 break;
             default:
+                mProgressBar.setVisibility(View.GONE);
                 mCurrentTitle = getString(R.string.insert_isbn_code);
                 mInsertManuallyButton.setText(R.string.insert_manually);
                 mInsertManuallyButton.setOnClickListener(new View.OnClickListener() {
@@ -356,11 +371,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                     last = data.hasExtra(CalendarActivity.LAST_DATE) ?
                             (Calendar) data.getSerializableExtra(CalendarActivity.LAST_DATE) : null;
                     if (mResultBook != null) {
-                        if(first != null)
+                        if (first != null)
                             mResultBook.setLoanStart(first.getTimeInMillis());
                         else
                             mResultBook.setLoanStart(null);
-                        if(last != null)
+                        if (last != null)
                             mResultBook.setLoanEnd(last.getTimeInMillis());
                         else
                             mResultBook.setLoanEnd(null);
@@ -601,6 +616,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + readIsbn;
         else
             url = "https://www.googleapis.com/books/v1/volumes?q=ISBN:" + readIsbn;
+
         final String finalReadIsbn = readIsbn;
         JsonObjectRequest jsonRequest = new JsonObjectRequest(
                 Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -631,7 +647,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
                         mResultBook.setPublisher(book.optString("publisher"));
                         mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
-                        mPublisherTextInputLayout.getEditText().setEnabled(false);
+                        if (mResultBook.getPublisher() != null)
+                            mPublisherTextInputLayout.getEditText().setEnabled(false);
 
                         if (book.has("authors") &&
                                 book.getJSONArray("authors").length() > 0) {
@@ -641,9 +658,17 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                                 mResultBook.addAuthor(authors.getString(i));
                                 authorsList.add(mResultBook.getAuthor(i));
                             }
-                            mAuthorsListView.setAdapter(new AuthorAdapter(getLayoutInflater(),
-                                    authorsList));
+
+                            AuthorAdapter authorAdapter = new AuthorAdapter(getLayoutInflater(),
+                                    authorsList);
+                            authorAdapter.setEditable(false);
+                            mAuthorsListView.setAdapter(authorAdapter);
                             mAuthorsListView.getAdapter().notifyDataSetChanged();
+
+                        } else {
+                            AuthorAdapter authorAdapter = new AuthorAdapter(getLayoutInflater(), null);
+                            authorAdapter.setEditable(true);
+                            mAuthorsListView.setAdapter(authorAdapter);
                         }
 
                         if (book.has("publishedDate")) {
@@ -653,7 +678,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             publishYear = mResultBook.getPublishYear();
                             mPublishYearSpinner.setSelection(currentYear - publishYear);
                         }
-                        mPublishYearSpinner.setEnabled(false);
+
 
                         if (book.has("imageLinks")) {
 
@@ -775,6 +800,13 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    public void removePhotoPath(String path) {
+        if (!path.contains("content")) {
+            File file = new File(path);
+            file.delete();
+        }
+    }
+
     public File saveThumbnail() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -819,6 +851,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                     if (++mUploadedImagesCount >= userBookPhotosStoragePath.size()) {
                         // upload ended move uploading book info
                         mProgressBar.setIndeterminate(true);
+
                         uploadBookInfo();
                     } else {
                         uploadPhotos(userBookPhotosStoragePath);
@@ -846,6 +879,13 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 // using documentReference create a folder on storage for storing photos
+                //  clean photos
+                PhotosAdapter ph = (PhotosAdapter) mPhotosGrid.getAdapter();
+                if (ph.getModel() != null)
+                    for (String s : ph.getModel()) {
+                        removePhotoPath(s);
+                    }
+
                 Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);

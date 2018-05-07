@@ -19,13 +19,22 @@
         android:id="@+id/author_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/author_icon">
+        android:layout_toEndOf="@id/author_icon">
 
         <android.support.design.widget.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
             android:hint="@string/author" />
-
     </android.support.design.widget.TextInputLayout>
+
+    <ImageView
+        android:id="@+id/remove_author_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@id/author_edit"
+        android:clickable="true"
+        android:padding="@dimen/icon_padding"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_remove_black_24dp" />
 </RelativeLayout>

@@ -35,7 +35,10 @@ public class PositionActivityOpenerListener implements View.OnClickListener {
                             case 0:
                                 i.putExtra(PositionActivity.START_SEARCH, true);
                             default:
-                                mContainerActivity.startActivityForResult(i, Constants.POSITION_ACTIVITY_REQUEST);
+                                if (Utilities.checkPermissionActivity(mContainerActivity, android.Manifest.permission.ACCESS_FINE_LOCATION))
+                                    mContainerActivity.startActivityForResult(i, Constants.POSITION_ACTIVITY_REQUEST);
+                                else
+                                    Utilities.askPermissionActivity(mContainerActivity, android.Manifest.permission.ACCESS_FINE_LOCATION, Constants.POSITION_ACTIVITY_REQUEST);
 
                         }
                     }

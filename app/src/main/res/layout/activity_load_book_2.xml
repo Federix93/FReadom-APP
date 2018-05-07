@@ -110,22 +110,15 @@
                     android:orientation="vertical"
                     app:layout_constraintGuide_percent="0.75" />
 
-                <android.support.constraint.Guideline
-                    android:id="@+id/load_book_thumbnail_size"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:layout_constraintGuide_percent="0.21" />
 
                 <ImageView
                     android:id="@+id/thumbnail"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     android:src="@drawable/ic_no_book_photo"
                     app:layout_constraintEnd_toStartOf="@id/guideline_right"
                     app:layout_constraintStart_toStartOf="@id/guideline_left"
-                    app:layout_constraintBottom_toTopOf="@id/load_book_thumbnail_size"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
