@@ -149,16 +149,16 @@
             <RelativeLayout
                 android:id="@+id/activity_main"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp">
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rv_images"
                     android:layout_width="match_parent"
                     android:layout_height="121dp"
                     android:layout_marginTop="16dp"
-                    android:horizontalSpacing="10dp"
-                    android:orientation="horizontal"
-                    android:verticalSpacing="20dp"/>
+                    android:orientation="horizontal" />
             </RelativeLayout>
 
             <LinearLayout
@@ -234,7 +234,8 @@
                 android:id="@+id/profile_detail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp">
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="24dp">
 
                 <ImageView
                     android:id="@+id/profile_image_book_detail"

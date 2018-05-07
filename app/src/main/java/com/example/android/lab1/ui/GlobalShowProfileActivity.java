@@ -49,6 +49,8 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
     TextView mOwnerName;
     Toolbar mToolbar;
     TextView mShortBio;
+    TextView mBookNumber;
+    TextView mReviewDone;
 
     private RecyclerView mRecyclerView;
 
@@ -80,6 +82,8 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         mRating = findViewById(R.id.global_profile_rating);
         mOwnerName = findViewById(R.id.global_profile_books_owner);
         mShortBio = findViewById(R.id.global_profile_bio);
+        mBookNumber = findViewById(R.id.global_profile_books_published);
+        mReviewDone = findViewById(R.id.global_profile_reviews_published);
 
         mRecyclerView = findViewById(R.id.rv_books);
 
@@ -93,14 +97,13 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
 
         mUserName.setText(mUser.getUsername());
         mRating.setText(String.format(getResources().getConfiguration().locale, "%.1f", mUser.getRating()));
+        mReviewDone.setText("0");
         mOwnerName.setText(String.format(getResources().getString(R.string.book_owner_text), mUser.getUsername()));
         if (mUser.getShortBio() != null) {
             mShortBio.setText(mUser.getShortBio());
         } else {
             mShortBio.setVisibility(View.GONE);
         }
-
-
 
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
@@ -112,12 +115,13 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
                 @Override
                 public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
                     List<Book> mListBooksOfUser = queryDocumentSnapshots.toObjects(Book.class);
-                    updateListOfBooks(mListBooksOfUser);
+                    int numOfBooks = mListBooksOfUser.size();
+                    updateListOfBooks(mListBooksOfUser, numOfBooks);
                 }
         });
     }
 
-    private void updateListOfBooks(List<Book> mListBooksOfUser) {
+    private void updateListOfBooks(List<Book> mListBooksOfUser, int numOfBooks) {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mRecyclerView.setHasFixedSize(true);
@@ -126,6 +130,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
 
         ProfileBookAdapter adapter = new ProfileBookAdapter(mListBooksOfUser);
         mRecyclerView.setAdapter(adapter);
+        mBookNumber.setText(String.valueOf(numOfBooks));
     }
 
 }
