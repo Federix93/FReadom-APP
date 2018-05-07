@@ -3,18 +3,17 @@ package com.example.android.lab1.adapter;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 
+import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -56,8 +55,8 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
     public class ResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        TextView mTitle, mAuthor, mRating;
-        ImageView mThumbnail, mUserPicture;
+        TextView mTitle, mAuthor, mRating, mConditionsText;
+        ImageView mThumbnail, mUserPicture, mConditionsImage;
         String mBookId;
 
         public ResultViewHolder(View itemView) {
@@ -68,6 +67,8 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             mThumbnail = itemView.findViewById(R.id.search_book_thumbnail);
             mUserPicture = itemView.findViewById(R.id.search_book_user_picture);
             mRating = itemView.findViewById(R.id.search_book_user_rating);
+            mConditionsText = itemView.findViewById(R.id.search_book_conditions_text);
+            mConditionsImage = itemView.findViewById(R.id.search_book_conditions_image);
 
             itemView.setOnClickListener(this);
         }
@@ -93,6 +94,11 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
                     }
                 });
             }
+
+            int condition = book.optInt("conditions");
+
+            mConditionsText.setText(Condition.getCondition(itemView.getContext(), condition));
+            mConditionsImage.setColorFilter(Condition.getConditionColor(itemView.getContext(), condition), android.graphics.PorterDuff.Mode.SRC_IN);
 
             mBookId = book.optString("objectID");
         }

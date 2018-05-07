@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +49,6 @@ public class SearchBookActivity extends AppCompatActivity {
     private TextView mNoConnectionTextViewBottom;
     private AppCompatButton mNoConnectionButton;
     private Index index;
-    private Query query;
     private RecyclerView mRecyclerView;
     private RecyclerSearchAdapter mAdapter;
     private String lastSearchResult;
@@ -77,6 +77,7 @@ public class SearchBookActivity extends AppCompatActivity {
         setupMenuItemClickListener();
         setupSearchListener();
         setupQueryChangeListener();
+        setupLeftItemListener();
         setupNoConnectionButtonClickListener();
 
         if(savedInstanceState != null)
@@ -98,6 +99,19 @@ public class SearchBookActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    private void setupLeftItemListener() {
+
+        mSearchView.setOnHomeActionClickListener(new FloatingSearchView.OnHomeActionClickListener() {
+            @Override
+            public void onHomeClicked() {
+                if(mSearchView.isFocused())
+                    mSearchView.setSearchFocused(false);
+                else
+                    SearchBookActivity.this.finish();
+            }
+        });
     }
 
     private void setupNoConnectionButtonClickListener() {
@@ -195,7 +209,7 @@ public class SearchBookActivity extends AppCompatActivity {
 
     private void search(String searchString)
     {
-        query = new Query();
+        Query query = new Query();
         query.setQuery(searchString);
 
 

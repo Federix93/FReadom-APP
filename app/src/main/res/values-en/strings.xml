@@ -27,8 +27,8 @@
     <string name="publisher">Publisher</string>
     <string name="publishing_year">Publishing year</string>
     <string name="conditions">Conditions</string>
-    <string name="bad">Bad</string>
-    <string name="decent">Decent</string>
+    <string name="bad">Poor</string>
+    <string name="decent">Fair</string>
     <string name="good">Good</string>
     <string name="great">Near Mint</string>
     <string name="neww">Mint</string>
