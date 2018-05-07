@@ -71,7 +71,7 @@
 
     <style name="IsbnButton">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:background">#40FFFFFF</item>
+        <item name="android:background">@color/colorAccent</item>
 
     </style>
 

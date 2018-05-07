@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
@@ -18,9 +20,11 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -91,7 +95,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String KEY_RECYCLER_STATE = "KEY_RECYCLER";
     private static final String UPLOADING = "UPLOADING";
     private Toolbar mToolbar;
-    private Toolbar mIsbnToolbar;
+    private LinearLayoutCompat mIsbnContainer;
     private MaterialSpinner mPublishYearSpinner;
     private MaterialSpinner mConditionsSpinner;
     private MaterialSpinner mGenreSpinner;
@@ -125,6 +129,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private ArrayList<Object> mDownloadUrls;
     private StorageReference mStorageRef;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +139,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mActivityState = State.ISBN_CHOICE;
         setActivityState();
         mUploading = false;
+        Utilities.setupStatusBarColor(this);
         setupToolBar();
         setupSpinners();
         setupListeners();
@@ -253,7 +259,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 });
-                mIsbnToolbar.setVisibility(View.VISIBLE);
+                mIsbnContainer.setVisibility(View.VISIBLE);
                 mIsbnEditText.setText(null);
                 TextInputLayout isbnContainer = findViewById(R.id.load_book_isbn);
                 isbnContainer.setVisibility(View.VISIBLE);
@@ -265,7 +271,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case ISBN_ACQUIRED:
                 mProgressBar.setVisibility(View.GONE);
-                mIsbnToolbar.setVisibility(View.GONE);
+                mIsbnContainer.setVisibility(View.GONE);
                 mIsbnEditText.setEnabled(false);
                 mIsbnExplanationImageView.setVisibility(View.GONE);
                 mInfoContainerScrollView.setVisibility(View.VISIBLE);
@@ -280,7 +286,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         setActivityState();
                     }
                 });
-                mIsbnToolbar.setVisibility(View.VISIBLE);
+                mIsbnContainer.setVisibility(View.VISIBLE);
                 mScanBarcodeButton.setVisibility(View.VISIBLE);
                 findViewById(R.id.load_book_isbn).setVisibility(View.GONE);
                 mIsbnExplanationImageView.setVisibility(View.VISIBLE);
@@ -350,8 +356,15 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                     last = data.hasExtra(CalendarActivity.LAST_DATE) ?
                             (Calendar) data.getSerializableExtra(CalendarActivity.LAST_DATE) : null;
                     if (mResultBook != null) {
-                        mResultBook.setLoanStart(first);
-                        mResultBook.setLoanEnd(last);
+                        if(first != null)
+                            mResultBook.setLoanStart(first.getTimeInMillis());
+                        else
+                            mResultBook.setLoanStart(null);
+                        if(last != null)
+                            mResultBook.setLoanEnd(last.getTimeInMillis());
+                        else
+                            mResultBook.setLoanEnd(null);
+
                         DateFormat dmy = android.text.format.DateFormat.getDateFormat(getApplicationContext());
                         if (first != null) {
                             if (last != null)
@@ -442,10 +455,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void initializeWidgets() {
-        mToolbar = findViewById(R.id.toolbar);
+        mToolbar = findViewById(R.id.toolbar_load_book);
         TextInputLayout isbnTextContainer = findViewById(R.id.load_book_isbn);
         mIsbnEditText = isbnTextContainer.getEditText();
-        mIsbnToolbar = findViewById(R.id.load_book_toolbar_isbn);
+        mIsbnContainer = findViewById(R.id.load_book_toolbar_isbn);
         mInsertManuallyButton = findViewById(R.id.load_book_search_manually);
         mIsbnExplanationImageView = findViewById(R.id.load_book_isbn_explanation);
         mInfoContainerScrollView = findViewById(R.id.load_book_info_container);
@@ -471,8 +484,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void setupToolBar() {
-        // toolbar
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.black));
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -490,7 +502,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-        setSupportActionBar(mToolbar);
     }
 
     @Override

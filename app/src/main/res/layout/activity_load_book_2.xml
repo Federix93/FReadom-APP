@@ -11,9 +11,8 @@
         android:animateLayoutChanges="true"
         android:orientation="vertical">
 
-        <!-- custom toolbar -->
         <include
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar_load_book"
             layout="@layout/toolbar" />
 
 
@@ -32,24 +31,17 @@
             android:src="@drawable/isbn10digit"
             android:visibility="visible" />
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/load_book_toolbar_isbn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
-            android:elevation="2dp"
-            android:paddingLeft="@dimen/activity_load_book_content_padding"
-            android:paddingRight="0dp"
-            android:paddingTop="@dimen/activity_load_book_content_padding"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            android:visibility="visible"
-            app:titleTextColor="@color/white">
-
             <android.support.v7.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:animateLayoutChanges="true">
+                android:animateLayoutChanges="true"
+                android:id="@+id/load_book_toolbar_isbn"
+                android:paddingStart="@dimen/activity_load_book_content_padding"
+                android:paddingEnd="@dimen/activity_load_book_content_padding"
+                android:paddingTop="@dimen/activity_load_book_content_padding"
+                android:paddingBottom="@dimen/activity_load_book_content_padding"
+                android:visibility="visible">
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/load_book_isbn"
@@ -58,8 +50,6 @@
                     android:layout_marginEnd="16dp"
                     android:layout_marginStart="16dp"
                     android:maxLength="13"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/white"
                     android:visibility="gone"
                     app:counterEnabled="true"
                     app:counterMaxLength="13">
@@ -68,12 +58,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:backgroundTint="@color/white"
                         android:hint="@string/isbn_hint"
                         android:inputType="number"
-                        android:maxLength="13"
-                        android:textColor="@color/white"
-                        android:textColorHint="@color/white" />
+                        android:maxLength="13"/>
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.v7.widget.AppCompatButton
@@ -93,8 +80,6 @@
                     android:text="@string/dialog_isbn_scan" />
             </android.support.v7.widget.LinearLayoutCompat>
 
-
-        </android.support.v7.widget.Toolbar>
 
 
         <android.support.v4.widget.NestedScrollView

@@ -7,8 +7,6 @@ import android.os.Parcelable;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class Book implements Parcelable {
@@ -52,8 +50,8 @@ public class Book implements Parcelable {
     private String mUid; // user id
     private String mWebThumbnail;
     private ArrayList<String> mBookPhotosPaths;
-    private Date mLoanStart;
-    private Date mLoanEnd;
+    private Long mLoanStart;
+    private Long mLoanEnd;
     private int mGenre;
     private String mInfoLink;
 
@@ -143,20 +141,25 @@ public class Book implements Parcelable {
         return mAuthors;
     }
 
-    public Date getLoanStart() {
+    public void setAuthors(String authors)
+    {
+        this.mAuthors = authors;
+    }
+
+    public Long getLoanStart() {
         return mLoanStart;
     }
 
-    public void setLoanStart(Calendar loanStart) {
-        this.mLoanStart = loanStart != null ? loanStart.getTime() : null;
+    public void setLoanStart(Long loanStart) {
+        this.mLoanStart = loanStart;
     }
 
-    public Date getLoanEnd() {
+    public Long getLoanEnd() {
         return mLoanEnd;
     }
 
-    public void setLoanEnd(Calendar loanEnd) {
-        this.mLoanEnd = loanEnd != null ? loanEnd.getTime() : null;
+    public void setLoanEnd(Long loanEnd) {
+        this.mLoanEnd = loanEnd;
     }
 
     protected Book(Parcel in) {
@@ -170,8 +173,8 @@ public class Book implements Parcelable {
         mPublisher = bundle.containsKey(PUBLISHER) ? bundle.getString(PUBLISHER) : null;
         mAuthors = bundle.containsKey(AUTHORS) ? bundle.getString(AUTHORS) : null;
         mPublishYear = bundle.containsKey(PUBLISH_YEAR) ? bundle.getInt(PUBLISH_YEAR) : null;
-        mLoanStart = bundle.containsKey(LOAN_START) ? (Date) bundle.getSerializable(LOAN_START) : null;
-        mLoanEnd = bundle.containsKey(LOAN_END) ? (Date) bundle.getSerializable(LOAN_END) : null;
+        mLoanStart = bundle.containsKey(LOAN_START) ? bundle.getLong(LOAN_START) : null;
+        mLoanEnd = bundle.containsKey(LOAN_END) ? bundle.getLong(LOAN_END) : null;
         mInfoLink = bundle.containsKey(INFO_LINK) ? bundle.getString(INFO_LINK) : null;
         if (bundle.containsKey(CONDITIONS))
             mCondition = bundle.getInt(CONDITIONS);
@@ -251,9 +254,9 @@ public class Book implements Parcelable {
         if (mPublishYear != null)
             bundle.putInt(PUBLISH_YEAR, mPublishYear);
         if (mLoanStart != null)
-            bundle.putSerializable(LOAN_START, mLoanStart);
+            bundle.putLong(LOAN_START, mLoanStart);
         if (mLoanEnd != null)
-            bundle.putSerializable(LOAN_END, mLoanEnd);
+            bundle.putLong(LOAN_END, mLoanEnd);
         if (mInfoLink != null)
             bundle.putString(INFO_LINK, mInfoLink);
         bundle.putInt(CONDITIONS, mCondition);
