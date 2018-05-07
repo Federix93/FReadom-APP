@@ -41,7 +41,7 @@
                     android:layout_marginStart="16dp"
                     android:contentDescription="@string/book_thumbnail_content_description"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/book_placeholder_thumbnail"
+                    android:src="@drawable/book_thumbnail_placeholder"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
