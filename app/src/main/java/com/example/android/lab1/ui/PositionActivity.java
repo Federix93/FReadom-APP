@@ -13,9 +13,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -42,6 +40,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -71,47 +70,32 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 11;
+    public static final String SEARCH_CITY_EXTRA = "SEARCH_CITIES_EXTRA";
+    public static final String START_SEARCH = "START_SEARCH";
 
     private Toolbar mToolbar;
     private GoogleMap mMap;
     private TextView mCurrentPositionTextView;
     private ImageView mConfirmPosition;
+    private SupportMapFragment mMapFragment;
 
     private Float mInitialZoom;
     private ImageView mSearchAddressImageView;
+    private ImageView mPositionIcon;
     private Activity mSelf;
     private Address mResultAddress;
     private LocationManager manager;
     private boolean mLocationSettingWasEnabled;
 
-    private BroadcastReceiver mNetworkAvaiable;
+    private BroadcastReceiver mNetworkAvailable;
     private NetworkReceiver mNetworkReceiver;
     private GeoCodingTask mCurrentlyExecuting;
     private Location mCurrentlyResolving;
     private Location mResolveLater;
 
-    public static boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
-        String locationProviders;
+    private boolean mSearchCities;
+    private boolean mStartSearchImmediately;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            try {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-
-            } catch (Settings.SettingNotFoundException e) {
-                e.printStackTrace();
-                return false;
-            }
-
-            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
-
-        } else {
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !TextUtils.isEmpty(locationProviders);
-        }
-
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +112,9 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
         mCurrentPositionTextView = findViewById(R.id.current_position_text_view);
         mConfirmPosition = findViewById(R.id.confirm_position_image_view);
+        mPositionIcon = findViewById(R.id.current_location_image_view);
+
+        mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,6 +122,18 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 onBackPressed();
             }
         });
+
+        if (getIntent() != null) {
+            mSearchCities = getIntent().hasExtra(SEARCH_CITY_EXTRA);
+            if (mSearchCities) {
+                mPositionIcon.setImageResource(R.drawable.ic_location_city_24dp);
+                mCurrentPositionTextView.setTextSize(getResources().getDimension(R.dimen.search_cities_text_size));
+            }
+
+            mStartSearchImmediately = getIntent().hasExtra(START_SEARCH);
+        }
+
+
 
         mConfirmPosition.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,7 +153,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         mSelf = this;
 
         // network listener setup
-        mNetworkAvaiable = new BroadcastReceiver() {
+        mNetworkAvailable = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 // called on network updates
@@ -194,14 +193,14 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mNetworkAvaiable, new IntentFilter(INTERNET_AVAILABLE_BROAD_KEY));
+        registerReceiver(mNetworkAvailable, new IntentFilter(INTERNET_AVAILABLE_BROAD_KEY));
         registerReceiver(mNetworkReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mNetworkAvaiable);
+        unregisterReceiver(mNetworkAvailable);
         unregisterReceiver(mNetworkReceiver);
     }
 
@@ -213,6 +212,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             outState.putDouble(LAT_KEY, mResultAddress.getLat());
             outState.putDouble(LON_KEY, mResultAddress.getLon());
         }
+        outState.putBoolean(SEARCH_CITY_EXTRA, mSearchCities);
     }
 
     @Override
@@ -224,6 +224,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             mResultAddress = new Address(savedInstanceState.getString(ADDRESS_KEY),
                     savedInstanceState.getDouble(LAT_KEY),
                     savedInstanceState.getDouble(LON_KEY));
+        if (savedInstanceState.containsKey(SEARCH_CITY_EXTRA))
+            mSearchCities = savedInstanceState.getBoolean(SEARCH_CITY_EXTRA);
 
     }
 
@@ -235,12 +237,16 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 getCurrentLocation();
         } else if (requestCode == ADDRESS_SEARCH_BAR_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-                setMarker(place.getLatLng());
-                mResultAddress = new Address(place.getAddress().toString(),
-                        place.getLatLng().latitude,
-                        place.getLatLng().longitude);
-                mCurrentPositionTextView.setText(place.getAddress());
+                if (!mSearchCities) {
+                    Place place = PlaceAutocomplete.getPlace(this, data);
+                    setMarker(place.getLatLng());
+                    mResultAddress = new Address(place.getAddress().toString(),
+                            place.getLatLng().latitude,
+                            place.getLatLng().longitude);
+                    mCurrentPositionTextView.setText(place.getAddress());
+                } else {
+                    resolveLatLng(PlaceAutocomplete.getPlace(this, data).getLatLng());
+                }
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
 
             } else if (resultCode == RESULT_CANCELED) {
@@ -291,7 +297,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (mMap != null && !mMap.isMyLocationEnabled())
                         mMap.setMyLocationEnabled(true);
-                    if (!isLocationEnabled(getApplicationContext()))
+                    if (!Utilities.isLocationEnabled(getApplicationContext()))
                         enableLoc();
                     else
                         getCurrentLocation();
@@ -315,7 +321,17 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         });
         if (Utilities.checkPermissionActivity(mSelf, Manifest.permission.ACCESS_FINE_LOCATION))
             mMap.setMyLocationEnabled(true);
-        getCurrentLocation();
+        if (mSearchCities) {
+            // map must be hidden because cities are being selected
+            mMapFragment.getView().setVisibility(View.GONE);
+            getSupportFragmentManager().beginTransaction()
+                    .hide(mMapFragment)
+                    .commit();
+        }
+        if (mCurrentPositionTextView != null &&
+                (mCurrentPositionTextView.getText() == null ||
+                        mCurrentPositionTextView.getText().equals("")))
+            getCurrentLocation();
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
@@ -323,12 +339,13 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 return true;
             }
         });
+
     }
 
     @SuppressLint("MissingPermission")
     private void getCurrentLocation() {
         if (Utilities.checkPermissionActivity(mSelf, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            if (!isLocationEnabled(getApplicationContext()))
+            if (!Utilities.isLocationEnabled(getApplicationContext()))
                 enableLoc();
             else
                 // make one time position request
@@ -341,6 +358,20 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                                             return;
                                         }
                                         final Location location = locationResult.getLocations().get(0);
+                                        if (mStartSearchImmediately) {
+                                            Intent intent = null;
+                                            try {
+                                                intent = Utilities.getSearchBarIntent(mSelf,
+                                                        new LatLng(location.getLatitude(), location.getLongitude()),
+                                                        (double) getResources().getInteger(R.integer.position_radius_address),
+                                                        mSearchCities ? AutocompleteFilter.TYPE_FILTER_CITIES : AutocompleteFilter.TYPE_FILTER_ADDRESS);
+                                            } catch (GooglePlayServicesNotAvailableException e) {
+                                                e.printStackTrace();
+                                            } catch (GooglePlayServicesRepairableException e) {
+                                                e.printStackTrace();
+                                            }
+                                            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                                        }
                                         mSearchAddressImageView.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -348,7 +379,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                                                     // load address bar
                                                     Intent intent = Utilities.getSearchBarIntent(mSelf,
                                                             new LatLng(location.getLatitude(), location.getLongitude()),
-                                                            (double) getResources().getInteger(R.integer.position_radius_address));
+                                                            (double) getResources().getInteger(R.integer.position_radius_address),
+                                                            mSearchCities ? AutocompleteFilter.TYPE_FILTER_CITIES : AutocompleteFilter.TYPE_FILTER_ADDRESS);
                                                     startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
                                                 } catch (GooglePlayServicesRepairableException e) {
                                                     // TODO: Handle the error.
@@ -387,6 +419,11 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 loc.getLongitude()));
     }
 
+    private void resolveLatLng(LatLng latLng) {
+        mCurrentlyExecuting = new GeoCodingTask(mCurrentPositionTextView);
+        mCurrentlyExecuting.execute(latLng);
+    }
+
     private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
 
         private TextView mTarget;
@@ -416,16 +453,20 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 if (fromLocation == null || fromLocation.size() == 0)
                     return null;
                 else {
-                    android.location.Address address = fromLocation.get(0);
-                    ArrayList<String> addressFragments = new ArrayList<String>();
+                    if (mSearchCities) {
+                        return fromLocation.get(0).getLocality();
+                    } else {
+                        android.location.Address address = fromLocation.get(0);
+                        ArrayList<String> addressFragments = new ArrayList<String>();
 
-                    // Fetch the address lines using getAddressLine,
-                    // join them, and send them to the thread.
-                    for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
-                        addressFragments.add(address.getAddressLine(i));
+                        // Fetch the address lines using getAddressLine,
+                        // join them, and send them to the thread.
+                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                            addressFragments.add(address.getAddressLine(i));
+                        }
+                        return TextUtils.join(System.getProperty("line.separator"),
+                                addressFragments);
                     }
-                    return TextUtils.join(System.getProperty("line.separator"),
-                            addressFragments);
                 }
             }
             return null;

@@ -92,5 +92,7 @@
     <string name="tutorial_title_position">Search books around your current location</string>
     <string name="tutorial_title_search">Search for a specific book</string>
     <string name="search_by_title">Search by:</string>
+    <string name="dialog_isbn_search">Search on internet</string>
+    <string name="dialog_isbn_scan">Scan through barcode</string>
 
 </resources>

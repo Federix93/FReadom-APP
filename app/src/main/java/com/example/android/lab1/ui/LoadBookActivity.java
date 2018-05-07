@@ -12,14 +12,12 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -36,7 +34,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -44,20 +41,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.algolia.search.saas.Client;
-import com.algolia.search.saas.Index;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.android.lab1.adapter.ImagePagerAdapter;
 import com.example.android.lab1.R;
-import com.example.android.lab1.ui.homepage.HomePageActivity;
-import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.adapter.ImagePagerAdapter;
+import com.example.android.lab1.model.Address;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
+import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -74,10 +70,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -125,6 +119,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private TextView mPositionEditText;
     private ImageView mPositionIcon;
     private Toolbar mToolbar;
+    private ImageView mConfirmImageView;
     private AlertDialog.Builder mAlertDialogBuilder;
     private File mPhotoFile; // last photo thumbnail
     private LinearLayout mDotsContainer;
@@ -139,30 +134,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private boolean mImagesUploaded;
     private boolean mDocumentUploaded;
 
-    //Algolia connection parameters
-    Client algoliaClient;
-    Index algoliaIndex;
-    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
-    private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
-    private final static String ALGOLIA_BOOK_INDEX = "books";
 
-    public static String getSha1Hex(String clearString) {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            messageDigest.update(clearString.getBytes("UTF-8"));
-            byte[] bytes = messageDigest.digest();
-            StringBuilder buffer = new StringBuilder();
-            for (byte b : bytes) {
-                buffer.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-            }
-            return buffer.toString();
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
-            return null;
-        }
-    }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("RestrictedApi")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -183,13 +156,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mTagsEditText = findViewById(R.id.load_book_tags);
         mPositionIcon = findViewById(R.id.load_book_location);
         mToolbar = findViewById(R.id.toolbar_loadbook);
+        mConfirmImageView = findViewById(R.id.icon_check_toolbar);
         mDotsContainer = findViewById(R.id.dots_container);
 
         // TODO add recieve intent to modify book
 
-        Utilities.setupStatusBarColor(this);
-        //initialize Algolia connection
-        setupAlgolia();
+
         // complex listeners are handled in separate function
         mUploading = false;
         mImagesUploaded = false;
@@ -268,7 +240,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private void setupToolBar() {
         // toolbar
         mToolbar.setTitle(R.string.load_book_toolbar_title);
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.black));
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -293,7 +265,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 // preventing double, using threshold of 1000 ms
                 lastClickTime = SystemClock.elapsedRealtime();
                 if (clickedItem == R.id.action_confirm) {
-                    //Initialize book uploading
                     if (checkObligatoryFields()) {
                         mToolbar.setOnMenuItemClickListener(null);
 
@@ -333,7 +304,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         ByteArrayOutputStream out;
-        Bitmap bitmap = null;
+        Bitmap bitmap;
         if (filePathUri.getScheme() != null && filePathUri.getScheme().equals("content")) {
             try {
                 bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(filePathUri));
@@ -360,7 +331,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private String generateStorageRef(String path) {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         String lastPathSegment = Uri.fromFile(new File(path)).getLastPathSegment();
-        String lastPathHash = getSha1Hex(lastPathSegment);
+        String lastPathHash = Utilities.getSha1Hex(lastPathSegment);
 
         return uid + "/images/books/" + lastPathHash + "-" + lastPathSegment + ".jpg";
     }
@@ -395,26 +366,23 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         final Book bookToLoad = new Book();
         bookToLoad.setIsbn(mIsbnEditText.getEditText().getText().toString());
         bookToLoad.setTitle(mTitleEditText.getEditText().getText().toString());
-        List<String> authors = new ArrayList<>();
-        bookToLoad.setAuthor(mAuthorEditText.getEditText().getText().toString());
+        bookToLoad.addAuthor(mAuthorEditText.getEditText().getText().toString());
         bookToLoad.setPublisher(mPublisherEditText.getEditText().getText().toString());
         bookToLoad.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
-        bookToLoad.setCondition(condition);
-        bookToLoad.setAddress(mPositionEditText.getText().toString());
-        bookToLoad.setTags(mTagsEditText.getEditText().getText().toString());
+        bookToLoad.setConditions(condition);
+        bookToLoad.setAddress(new Address(mPositionEditText.getText().toString(), 0.0, 0.0));
         bookToLoad.setUid(mFirebaseAuth.getCurrentUser().getUid());
 
         if (mWebThumbnail != null)
-            bookToLoad.setThumbnail(mWebThumbnail);
+            bookToLoad.setWebThumbnail(mWebThumbnail);
         if (mDownloadUrls != null)
-            bookToLoad.setBookImagesUrls(mDownloadUrls);
+            bookToLoad.setUserBookPhotosStoragePath(mDownloadUrls);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         mDocumentUploaded = true;
         db.collection("books").add(bookToLoad).addOnSuccessListener(this, new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 // using documentReference create a folder on storage for storing photos
-                uploadOnAlgloia(bookToLoad, documentReference.getId());
                 Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
@@ -432,11 +400,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 finish();
             }
         });
-
-
     }
-
-
 
     private void lockUI(boolean doIt) {
         // this methods disable all UI controls while downloads or uploads are happening
@@ -461,12 +425,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         for (int i = Calendar.getInstance().get(Calendar.YEAR), n = 0; n < 200; i--, n++)
             years[n] = Integer.toString(i);
 
-        mPublishYearSpinner.setAdapter(makeDropDownAdapter(years));
+        mPublishYearSpinner.setAdapter(Utilities.makeDropDownAdapter(this, years));
         mPublishYearSpinner.setHint(R.string.publishing_year);
         mPublishYearSpinner.setFloatingLabelText(R.string.publishing_year);
 
         mConditionsSpinner.setHint(R.string.conditions);
-        mConditionsSpinner.setAdapter(makeDropDownAdapter(Condition.getConditions(this).toArray(new String[0])));
+        mConditionsSpinner.setAdapter(Utilities.makeDropDownAdapter(this, Condition.getConditions(this).toArray(new String[0])));
         mConditionsSpinner.setFloatingLabelText(R.string.conditions);
     }
 
@@ -715,18 +679,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         }
-    }
-
-    private ArrayAdapter<String> makeDropDownAdapter(String[] items) {
-        List<String> temp;
-        temp = new ArrayList<>(Arrays.asList(items));
-
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
-                temp);
-
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        return arrayAdapter;
     }
 
     private boolean validateIsbn(EditText isbnView) {
@@ -1010,54 +962,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             StorageReference child = storageReference.child(generateStorageRef(mPhotosPath.get(i)));
             child.delete();
         }
-
-    }
-
-    private void setupAlgolia()
-    {
-        algoliaClient = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
-        algoliaIndex = algoliaClient.getIndex(ALGOLIA_BOOK_INDEX);
-    }
-
-    private void uploadOnAlgloia(Book bookToLoad, String bookID) {
-
-        try {
-
-            JSONObject book = new JSONObject();
-
-            book.put("title", bookToLoad.getTitle());
-            book.put("author", bookToLoad.getAuthor());
-            book.put("publisher", bookToLoad.getPublisher());
-            book.put("publishYear", bookToLoad.getPublishYear());
-            book.put("conditions", bookToLoad.getCondition());
-            book.put("uid", bookToLoad.getUid());
-//            book.put("address", bookToLoad.getAddress());
-
-            if(bookToLoad.getIsbn() != null)
-            {
-                book.put("isbn", bookToLoad.getIsbn());
-            }
-
-            if(bookToLoad.getThumbnail() != null)
-            {
-                book.put("thumbnail", bookToLoad.getThumbnail());
-            }
-            else if(bookToLoad.getBookImagesUrls().size() > 0)
-            {
-                book.put("thumbnail", bookToLoad.getBookImagesUrls().get(0));
-            }
-
-            if(bookToLoad.getTags() != null)
-            {
-                book.put("tags", bookToLoad.getTags());
-            }
-
-            algoliaIndex.addObjectAsync(book, bookID,null);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
 
     }
 }

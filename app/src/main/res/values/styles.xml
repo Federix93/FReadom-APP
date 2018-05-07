@@ -15,6 +15,7 @@
         <!--<item name="android:statusBarColor" tools:targetApi="lollipop">#212121</item>-->
     <!--</style>-->
 
+
     <style name="LoginTheme" parent="FirebaseUI">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -62,5 +63,23 @@
         <item name="android:background">@color/white</item>
         <item name="android:textColor">@color/colorSecondaryAccent</item>
     </style>
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
+    <style name="IsbnButton">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">#40FFFFFF</item>
+
+    </style>
+
+    <style name="ActionTextView">
+        <item name="android:textSize">@dimen/text_view_size</item>
+        <item name="android:paddingStart">5dp</item>
+        <item name="android:textColor">#1e9aaf</item>
+    </style>
+
 
 </resources>

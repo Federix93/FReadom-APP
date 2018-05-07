@@ -89,7 +89,12 @@
 
 
         <activity android:name=".ui.SignInActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"/>
+
+
+        <activity
+            android:name=".ui.LoadBookActivity2"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -109,6 +114,7 @@
         <activity android:name=".ui.GenreBooksActivity" />
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
         <activity android:name=".ui.ProfileActivity"/>
+        <activity android:name=".ui.CalendarActivity" />
     </application>
 
 </manifest>

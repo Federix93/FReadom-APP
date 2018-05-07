@@ -2,20 +2,32 @@ package com.example.android.lab1.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
+import android.text.TextUtils;
+import android.widget.ArrayAdapter;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Address;
 import com.example.android.lab1.ui.PositionActivity;
+import com.example.android.lab1.ui.ScanBarCodeActivity;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
@@ -24,11 +36,25 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import static com.example.android.lab1.utils.Constants.SCAN_REQUEST_TAG;
+
 public abstract class Utilities {
 
     public static boolean checkPermissionActivity(Activity activity, String permission){
 
         return ContextCompat.checkSelfPermission(activity.getApplicationContext(), permission) == PackageManager.PERMISSION_GRANTED;
+
     }
 
     public static void askPermissionActivity(Activity activity, String permission, final int callbackRequest)
@@ -36,9 +62,9 @@ public abstract class Utilities {
         ActivityCompat.requestPermissions(activity, new String[] {permission}, callbackRequest);
     }
 
-    public static Intent getSearchBarIntent(Activity activity, LatLng center, Double radius) throws GooglePlayServicesNotAvailableException, GooglePlayServicesRepairableException {
+    public static Intent getSearchBarIntent(Activity activity, LatLng center, Double radius, int selectedFilter) throws GooglePlayServicesNotAvailableException, GooglePlayServicesRepairableException {
         return new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                .setFilter(new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS).build())
+                .setFilter(new AutocompleteFilter.Builder().setTypeFilter(selectedFilter).build())
                 .setBoundsBias(Utilities.toBounds(center, radius))
                 .build(activity);
     }
@@ -81,6 +107,125 @@ public abstract class Utilities {
         }
     }
 
+    public static String Isbn10ToIsbn13(String isbn10) {
+        // https://stackoverflow.com/questions/17108621/converting-isbn10-to-isbn13
+        int d, sum = 0;
+        String isbn13 = isbn10;
+        isbn13 = "978" + isbn13.substring(0, 9);
+        //if (LOG_D) Log.d(TAG, "ISBN13 without sum" + ISBN13);
+        for (int i = 0; i < isbn13.length(); i++) {
+            d = ((i % 2 == 0) ? 1 : 3);
+            sum += ((((int) isbn13.charAt(i)) - 48) * d);
+            //if (LOG_D) Log.d(TAG, "adding " + ISBN13.charAt(i) + "x" + d + "=" + ((((int) ISBN13.charAt(i)) - 48) * d));
+        }
+        sum = 10 - (sum % 10);
+        isbn13 += sum;
+
+        return isbn13;
+    }
+
+    public static Intent getPositionActivityIntent(Activity currentActivity, boolean searchCities) {
+        Intent intent = new Intent(currentActivity, PositionActivity.class);
+        if (searchCities)
+            intent.putExtra(PositionActivity.SEARCH_CITY_EXTRA, true);
+        return intent;
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        } else {
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
+
+    }
+
+    public static ArrayAdapter<String> makeDropDownAdapter(Activity containerActivity, String[] items) {
+        List<String> temp;
+        temp = new ArrayList<>(Arrays.asList(items));
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(containerActivity,
+                android.R.layout.simple_spinner_item,
+                temp);
+
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        return arrayAdapter;
+    }
+
+    public static void startBarcodeScanner(Activity activity) {
+        Intent i = new Intent(activity, ScanBarCodeActivity.class);
+        activity.startActivityForResult(i, SCAN_REQUEST_TAG);
+    }
+
+    public static File saveThumbnail(Context c) throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = c.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+    }
+
+    public static String getSha1Hex(String clearString) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+            messageDigest.update(clearString.getBytes("UTF-8"));
+            byte[] bytes = messageDigest.digest();
+            StringBuilder buffer = new StringBuilder();
+            for (byte b : bytes) {
+                buffer.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+            }
+            return buffer.toString();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+            return null;
+        }
+    }
+
+    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver) {
+        Uri filePathUri = Uri.parse(filePath);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        ByteArrayOutputStream out;
+        Bitmap bitmap = null;
+        if (filePathUri.getScheme() != null && filePathUri.getScheme().equals("content")) {
+            try {
+                bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(filePathUri));
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        } else
+            bitmap = BitmapFactory.decodeFile(filePath, options);
+        // rotate bitmap
+        Matrix m = new Matrix();
+        m.postRotate(90);
+        Bitmap compressedRotated = Bitmap.createBitmap(bitmap,
+                0,
+                0,
+                bitmap.getWidth(),
+                bitmap.getHeight(),
+                m,
+                true);
+        out = new ByteArrayOutputStream();
+        compressedRotated.compress(Bitmap.CompressFormat.JPEG, 75, out);
+        return out.toByteArray();
+    }
 }
 
 

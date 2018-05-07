@@ -1,32 +1,37 @@
 package com.example.android.lab1.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
-public class Book
+public class Book implements Serializable
 {
     private String mIsbn;
     private String mTitle;
-    private String mAuthor;
+    private String mAuthors;
     private String mPublisher;
-    private int    mPublishYear;
+    private Integer mPublishYear;
     private int mCondition;
     private String mAddress;
+    private Double lon;
+    private Double lat;
     private String mUid; // user id
-    private String mThumbnail;
-    private String mTags;
-    private String mEditor;
-    private String mCity;
-    private List<String> bookImagesUrls;
+    private String mWebThumbnail;
+    private List<String> mBookPhotosPaths;
+    private Date mLoanStart;
+    private Date mLoanEnd;
+    private int genre;
 
     public Book(){}
 
-    public String getThumbnail() {
-        return mThumbnail;
+    public String getWebThumbnail() {
+        return mWebThumbnail;
     }
 
-    public void setThumbnail(String thumbnail) {
-        mThumbnail = thumbnail;
+    public void setWebThumbnail(String thumbnail) {
+        mWebThumbnail = thumbnail;
     }
 
     public String getUid() {
@@ -53,14 +58,6 @@ public class Book
         mTitle = title;
     }
 
-    public String getAuthor() {
-        return mAuthor;
-    }
-
-    public void setAuthor(String author) {
-        mAuthor = author;
-    }
-
     public String getPublisher() {
         return mPublisher;
     }
@@ -69,11 +66,11 @@ public class Book
         mPublisher = publisher;
     }
 
-    public int getPublishYear() {
+    public Integer getPublishYear() {
         return mPublishYear;
     }
 
-    public void setPublishYear(int publishYear) {
+    public void setPublishYear(Integer publishYear) {
         mPublishYear = publishYear;
     }
 
@@ -81,7 +78,7 @@ public class Book
         return mCondition;
     }
 
-    public void setCondition(int condition) {
+    public void setConditions(int condition) {
         mCondition = condition;
     }
 
@@ -89,25 +86,66 @@ public class Book
         return mAddress;
     }
 
-    public void setAddress(String address) {
-        mAddress = address;
+    public void setAddress(String mAddress) {
+        this.mAddress = mAddress;
     }
 
-    public String getTags()
-    {
-        return mTags;
+    public Double getLon() {
+        return lon;
     }
 
-    public void setTags(String tags)
-    {
-        this.mTags = tags;
+    public void setLon(Double lon) {
+        this.lon = lon;
     }
 
-    public List<String> getBookImagesUrls() {
-        return bookImagesUrls;
+    public Double getLat() {
+        return lat;
     }
 
-    public void setBookImagesUrls(ArrayList<String> bookImagesUrls) {
-        this.bookImagesUrls = bookImagesUrls;
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public List<String> getUserBookPhotosStoragePath() {
+        return mBookPhotosPaths;
+    }
+
+    public void setUserBookPhotosStoragePath(ArrayList<String> mUserBookPhotosWebStoragePath) {
+        this.mBookPhotosPaths = mUserBookPhotosWebStoragePath;
+    }
+
+    public void addAuthor(String author) {
+        if (mAuthors == null)
+            mAuthors = author;
+        else
+            mAuthors += "," + author;
+    }
+
+    public String getAuthors() {
+        return mAuthors;
+    }
+
+    public Date getLoanStart() {
+        return mLoanStart;
+    }
+
+    public void setLoanStart(Calendar loanStart) {
+        this.mLoanStart = loanStart != null ? loanStart.getTime() : null;
+    }
+
+    public Date getLoanEnd() {
+        return mLoanEnd;
+    }
+
+    public void setLoanEnd(Calendar loanEnd) {
+        this.mLoanEnd = loanEnd != null ? loanEnd.getTime() : null;
+    }
+
+    public int getGenre() {
+        return genre;
+    }
+
+    public void setGenre(int genre) {
+        this.genre = genre;
     }
 }
