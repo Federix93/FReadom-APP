@@ -113,11 +113,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
     private NestedScrollView mInfoContainerScrollView;
     private ImageView mBookWebThumbnailImageView;
-    private TextInputLayout mTitleTextInputLayout;
+    private TextView mTitleTextView;
     private RecyclerView mAuthorsListView;
     private TextInputLayout mPublisherTextInputLayout;
-    private AppCompatButton mPositionTextView;
-    private AppCompatButton mLoanRangeTextView;
+    private TextView mPositionTextView;
+    private TextView mLoanRangeTextView;
     private AppCompatButton mScanBarcodeButton;
     private AppCompatButton mInsertManuallyButton;
     private ImageView mIsbnExplanationImageView;
@@ -219,9 +219,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mIsbnEditText.setText(mResultBook.getIsbn());
             if (mResultBook != null && mResultBook.getTitle() != null) {
                 mCurrentTitle = mResultBook.getTitle();
-                if (mTitleTextInputLayout != null && mTitleTextInputLayout.getEditText() != null) {
-                    mTitleTextInputLayout.getEditText().setText(mCurrentTitle);
-                    mTitleTextInputLayout.getEditText().setEnabled(false);
+                if (mTitleTextView != null) {
+                    mTitleTextView.setText(mCurrentTitle);
                 }
             }
             if (mResultBook != null && mResultBook.getAuthors() != null) {
@@ -238,7 +237,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             }
 
             if (mResultBook != null && mResultBook.getPublishYear() != null && mPublishYearSpinner != null)
-                mPublishYearSpinner.setEnabled(false);
+                mPublishYearSpinner.setSelection(mResultBook.getPublishYear());
 
             if (mResultBook != null && mResultBook.getAddress() != null && mPositionTextView != null)
                 mPositionTextView.setText(mResultBook.getAddress());
@@ -274,9 +273,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                                 mIsbnEditText.getText() != null &&
                                 mIsbnEditText.getText().length() > 0) {
                             // remove focus
-                            mTitleTextInputLayout.getEditText().clearFocus();
                             mToolbar.requestFocus();
-                            mPublishYearSpinner.clearFocus();
                             mPublishYearSpinner.clearFocus();
                             // make google api request
                             makeRequestBookApi(mIsbnEditText.getText().toString(), false);
@@ -354,7 +351,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                     ((PhotosAdapter) mPhotosGrid.getAdapter()).addItem(mPhotoFile.getAbsolutePath());
                 } else if (resultCode == RESULT_CANCELED && mPhotoFile != null) {
                     if (mPhotoFile.isFile())
-                        mPhotoFile.delete();
+                        getApplicationContext().deleteFile(mPhotoFile.getAbsolutePath());
                 }
                 break;
             case Constants.RESULT_LOAD_IMAGE:
@@ -368,9 +365,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             case Constants.POSITION_ACTIVITY_REQUEST:
                 if (resultCode == RESULT_OK && data != null) {
                     Address address = Utilities.readResultOfPositionActivity(data);
-                    mResultBook.setAddress(address.getAddress());
-                    mResultBook.setGeoPoint(address.getLat(), address.getLon());
-                    mPositionTextView.setText(address.getAddress());
+                    mResultBook.setAddress(address != null? address.getAddress() : null);
+                    mResultBook.setGeoPoint(address != null? address.getLat() : null, address != null? address.getLon() : null);
+                    mPositionTextView.setText(address != null? address.getAddress() : null);
                 }
                 break;
             case Constants.CALENDAR_REQUEST:
@@ -448,9 +445,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                                 mIsbnEditText.getText() != null &&
                                 mIsbnEditText.getText().length() > 0) {
                             // remove focus
-                            mTitleTextInputLayout.getEditText().clearFocus();
                             mIsbnExplanationImageView.requestFocus();
-                            mPublishYearSpinner.clearFocus();
                             mPublishYearSpinner.clearFocus();
                             // make google api request
                             makeRequestBookApi(mIsbnEditText.getText().toString(), false);
@@ -489,7 +484,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mIsbnExplanationImageView = findViewById(R.id.load_book_isbn_explanation);
         mInfoContainerScrollView = findViewById(R.id.load_book_info_container);
         mBookWebThumbnailImageView = findViewById(R.id.thumbnail);
-        mTitleTextInputLayout = findViewById(R.id.load_book_title);
+        mTitleTextView = findViewById(R.id.load_book_title);
         mAuthorsListView = findViewById(R.id.load_book_author_list);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL,
@@ -645,10 +640,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         mActivityState = State.ISBN_ACQUIRED;
                         mCurrentTitle = book.optString("title");
                         mResultBook.setTitle(mCurrentTitle);
-                        mTitleTextInputLayout.getEditText().setText(mCurrentTitle);
-                        if (mTitleTextInputLayout.getEditText().getText() != null &&
-                                mTitleTextInputLayout.getEditText().getText().length() > 0)
-                            mTitleTextInputLayout.getEditText().setEnabled(false);
+                        mTitleTextView.setText(mCurrentTitle);
                         /*if (book.has("authors") &&
                                 book.getJSONArray("authors").length() > 0)
                             mAuthorEditText.getEditText().setText(book.getJSONArray("authors")
@@ -658,8 +650,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
                         mResultBook.setPublisher(book.optString("publisher"));
                         mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
-                        if (mResultBook.getPublisher() != null)
-                            mPublisherTextInputLayout.getEditText().setEnabled(false);
 
                         if (book.has("authors") &&
                                 book.getJSONArray("authors").length() > 0) {
@@ -709,8 +699,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             mResultBook.setInfoLink(book.getString("canonicalVolumeLink"));
 
                         setActivityState();
-                        mTitleTextInputLayout.getEditText().clearFocus();
-                        mPublishYearSpinner.clearFocus();
                         mPublishYearSpinner.clearFocus();
                         mInfoContainerScrollView.requestFocus();
 

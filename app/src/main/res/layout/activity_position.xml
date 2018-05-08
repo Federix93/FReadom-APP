@@ -8,23 +8,11 @@
     android:orientation="vertical"
     >
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_position"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:paddingRight="@dimen/activity_load_book_content_padding"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
 
-        <ImageView
-            android:id="@+id/position_search_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:padding="12dp"
-            app:srcCompat="@drawable/ic_search_white_24dp" />
-    </android.support.v7.widget.Toolbar>
+        <include layout="@layout/toolbar"
+            android:id="@+id/toolbar_position_activity"/>
+
+
 
     <fragment
         android:id="@+id/map"

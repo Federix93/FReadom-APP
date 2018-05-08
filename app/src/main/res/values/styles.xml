@@ -78,7 +78,6 @@
     <style name="ActionTextView">
         <item name="android:textSize">@dimen/text_view_size</item>
         <item name="android:paddingStart">5dp</item>
-        <item name="android:textColor">#1e9aaf</item>
     </style>
 
 
