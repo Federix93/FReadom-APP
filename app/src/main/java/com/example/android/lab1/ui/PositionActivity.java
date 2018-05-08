@@ -13,13 +13,16 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -58,6 +61,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import okhttp3.internal.Util;
+
 public class PositionActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final String ADDRESS_KEY = "ADDRESS_KEY";
@@ -80,7 +85,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private SupportMapFragment mMapFragment;
 
     private Float mInitialZoom;
-    private ImageView mSearchAddressImageView;
     private ImageView mPositionIcon;
     private Activity mSelf;
     private Address mResultAddress;
@@ -97,18 +101,20 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private boolean mStartSearchImmediately;
 
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_position);
 
+        Utilities.setupStatusBarColor(this);
+
         // init toolbar
-        mSearchAddressImageView = findViewById(R.id.position_search_address);
-        mToolbar = findViewById(R.id.toolbar_position);
+
+        mToolbar = findViewById(R.id.toolbar_position_activity);
         mToolbar.setTitle(R.string.text_position_toolbar);
         mToolbar.setNavigationIcon(R.drawable.ic_close_black_24dp);
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
-        setSupportActionBar(mToolbar);
+        mToolbar.inflateMenu(R.menu.activity_position_menu);
 
         mCurrentPositionTextView = findViewById(R.id.current_position_text_view);
         mConfirmPosition = findViewById(R.id.confirm_position_image_view);
@@ -372,23 +378,27 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                                             }
                                             startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
                                         }
-                                        mSearchAddressImageView.setOnClickListener(new View.OnClickListener() {
+                                        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                                             @Override
-                                            public void onClick(View v) {
-                                                try {
-                                                    // load address bar
-                                                    Intent intent = Utilities.getSearchBarIntent(mSelf,
-                                                            new LatLng(location.getLatitude(), location.getLongitude()),
-                                                            (double) getResources().getInteger(R.integer.position_radius_address),
-                                                            mSearchCities ? AutocompleteFilter.TYPE_FILTER_CITIES : AutocompleteFilter.TYPE_FILTER_ADDRESS);
-                                                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-                                                } catch (GooglePlayServicesRepairableException e) {
-                                                    // TODO: Handle the error.
-                                                    e.printStackTrace();
-                                                } catch (GooglePlayServicesNotAvailableException e) {
-                                                    // TODO: Handle the error.
-                                                    e.printStackTrace();
+                                            public boolean onMenuItemClick(MenuItem item) {
+                                                int clickedId = item.getItemId();
+                                                if (clickedId == R.id.action_search_position) {
+                                                    try {
+                                                        // load address bar
+                                                        Intent intent = Utilities.getSearchBarIntent(mSelf,
+                                                                new LatLng(location.getLatitude(), location.getLongitude()),
+                                                                (double) getResources().getInteger(R.integer.position_radius_address),
+                                                                mSearchCities ? AutocompleteFilter.TYPE_FILTER_CITIES : AutocompleteFilter.TYPE_FILTER_ADDRESS);
+                                                        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                                                    } catch (GooglePlayServicesRepairableException e) {
+                                                        // TODO: Handle the error.
+                                                        e.printStackTrace();
+                                                    } catch (GooglePlayServicesNotAvailableException e) {
+                                                        // TODO: Handle the error.
+                                                        e.printStackTrace();
+                                                    }
                                                 }
+                                                return true;
                                             }
                                         });
                                         // translate latlng to address

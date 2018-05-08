@@ -108,4 +108,6 @@
     <string name="dialog_isbn_search">Search on internet</string>
     <string name="dialog_isbn_scan">Scan through barcode</string>
 
+    <string name="click_position_button">Add position</string>
+
 </resources>

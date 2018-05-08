@@ -135,7 +135,7 @@
     </string-array>
 
     <string name="genre_hint">Genere</string>
-    <string name="date">Periodo di prestito</string>
+    <string name="date">Inserisci il periodo di prestito</string>
     <string name="isbn_hint">Inserire il codice ISBN</string>
     <string name="add_your_photos">Aggiungi le foto del libro</string>
     <string name="insert_book">Inserisci il libro</string>
@@ -147,5 +147,7 @@
     <string name="choose_initial_date">Seleziona la data iniziale</string>
     <string name="ok">Ok</string>
     <string name="choose_end_date">Seleziona la data finale</string>
+
+    <string name="click_position_button">Aggiungi posizione</string>
 
 </resources>

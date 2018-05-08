@@ -39,7 +39,7 @@ public class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.AuthorView
         holder.setAuthor(mAuthors != null && position < mAuthors.size() ? mAuthors.get(position) : null);
     }
 
-    public boolean getEditable() {
+    public boolean isEditable() {
         return mEditable;
     }
 

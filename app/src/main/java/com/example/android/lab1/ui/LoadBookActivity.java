@@ -24,7 +24,6 @@ import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -102,7 +101,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String GENRE_SPINNER = "GENRE_SPINNER";
     private static final String ISBN = "ISBN";
     private static final String CURRENT_PHOTO = "CURRENT_PHOTO";
-    private static final String KEY_RECYCLER_STATE = "KEY_RECYCLER";
     private static final String UPLOADING = "UPLOADING";
     private static final String AUTHORS = "AUTHORS";
     private static final String AUTHORS_EDITABLE = "A_EDITABLE";
@@ -115,11 +113,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
     private NestedScrollView mInfoContainerScrollView;
     private ImageView mBookWebThumbnailImageView;
-    private TextInputLayout mTitleTextInputLayout;
+    private TextView mTitleTextView;
     private RecyclerView mAuthorsListView;
     private TextInputLayout mPublisherTextInputLayout;
-    private AppCompatButton mPositionTextView;
-    private AppCompatButton mLoanRangeTextView;
+    private TextView mPositionTextView;
+    private TextView mLoanRangeTextView;
     private AppCompatButton mScanBarcodeButton;
     private AppCompatButton mInsertManuallyButton;
     private ImageView mIsbnExplanationImageView;
@@ -191,7 +189,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             AuthorAdapter ph = (AuthorAdapter) mAuthorsListView.getAdapter();
             if (ph.getAuthors() != null) {
                 outState.putStringArrayList(AUTHORS, ph.getAuthors());
-                outState.putBoolean(AUTHORS_EDITABLE, ph.getEditable());
+                outState.putBoolean(AUTHORS_EDITABLE, ph.isEditable());
             }
         }
 
@@ -221,9 +219,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mIsbnEditText.setText(mResultBook.getIsbn());
             if (mResultBook != null && mResultBook.getTitle() != null) {
                 mCurrentTitle = mResultBook.getTitle();
-                if (mTitleTextInputLayout != null && mTitleTextInputLayout.getEditText() != null) {
-                    mTitleTextInputLayout.getEditText().setText(mCurrentTitle);
-                    mTitleTextInputLayout.getEditText().setEnabled(false);
+                if (mTitleTextView != null) {
+                    mTitleTextView.setText(mCurrentTitle);
                 }
             }
             if (mResultBook != null && mResultBook.getAuthors() != null) {
@@ -240,7 +237,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             }
 
             if (mResultBook != null && mResultBook.getPublishYear() != null && mPublishYearSpinner != null)
-                mPublishYearSpinner.setEnabled(false);
+                mPublishYearSpinner.setSelection(mResultBook.getPublishYear());
 
             if (mResultBook != null && mResultBook.getAddress() != null && mPositionTextView != null)
                 mPositionTextView.setText(mResultBook.getAddress());
@@ -276,9 +273,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                                 mIsbnEditText.getText() != null &&
                                 mIsbnEditText.getText().length() > 0) {
                             // remove focus
-                            mTitleTextInputLayout.getEditText().clearFocus();
                             mToolbar.requestFocus();
-                            mPublishYearSpinner.clearFocus();
                             mPublishYearSpinner.clearFocus();
                             // make google api request
                             makeRequestBookApi(mIsbnEditText.getText().toString(), false);
@@ -356,7 +351,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                     ((PhotosAdapter) mPhotosGrid.getAdapter()).addItem(mPhotoFile.getAbsolutePath());
                 } else if (resultCode == RESULT_CANCELED && mPhotoFile != null) {
                     if (mPhotoFile.isFile())
-                        mPhotoFile.delete();
+                        getApplicationContext().deleteFile(mPhotoFile.getAbsolutePath());
                 }
                 break;
             case Constants.RESULT_LOAD_IMAGE:
@@ -370,9 +365,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             case Constants.POSITION_ACTIVITY_REQUEST:
                 if (resultCode == RESULT_OK && data != null) {
                     Address address = Utilities.readResultOfPositionActivity(data);
-                    mResultBook.setAddress(address.getAddress());
-                    mResultBook.setGeoPoint(address.getLat(), address.getLon());
-                    mPositionTextView.setText(address.getAddress());
+                    mResultBook.setAddress(address != null? address.getAddress() : null);
+                    mResultBook.setGeoPoint(address != null? address.getLat() : null, address != null? address.getLon() : null);
+                    mPositionTextView.setText(address != null? address.getAddress() : null);
                 }
                 break;
             case Constants.CALENDAR_REQUEST:
@@ -450,9 +445,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                                 mIsbnEditText.getText() != null &&
                                 mIsbnEditText.getText().length() > 0) {
                             // remove focus
-                            mTitleTextInputLayout.getEditText().clearFocus();
                             mIsbnExplanationImageView.requestFocus();
-                            mPublishYearSpinner.clearFocus();
                             mPublishYearSpinner.clearFocus();
                             // make google api request
                             makeRequestBookApi(mIsbnEditText.getText().toString(), false);
@@ -491,7 +484,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mIsbnExplanationImageView = findViewById(R.id.load_book_isbn_explanation);
         mInfoContainerScrollView = findViewById(R.id.load_book_info_container);
         mBookWebThumbnailImageView = findViewById(R.id.thumbnail);
-        mTitleTextInputLayout = findViewById(R.id.load_book_title);
+        mTitleTextView = findViewById(R.id.load_book_title);
         mAuthorsListView = findViewById(R.id.load_book_author_list);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL,
@@ -647,10 +640,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         mActivityState = State.ISBN_ACQUIRED;
                         mCurrentTitle = book.optString("title");
                         mResultBook.setTitle(mCurrentTitle);
-                        mTitleTextInputLayout.getEditText().setText(mCurrentTitle);
-                        if (mTitleTextInputLayout.getEditText().getText() != null &&
-                                mTitleTextInputLayout.getEditText().getText().length() > 0)
-                            mTitleTextInputLayout.getEditText().setEnabled(false);
+                        mTitleTextView.setText(mCurrentTitle);
                         /*if (book.has("authors") &&
                                 book.getJSONArray("authors").length() > 0)
                             mAuthorEditText.getEditText().setText(book.getJSONArray("authors")
@@ -660,8 +650,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
                         mResultBook.setPublisher(book.optString("publisher"));
                         mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
-                        if (mResultBook.getPublisher() != null)
-                            mPublisherTextInputLayout.getEditText().setEnabled(false);
 
                         if (book.has("authors") &&
                                 book.getJSONArray("authors").length() > 0) {
@@ -711,8 +699,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             mResultBook.setInfoLink(book.getString("canonicalVolumeLink"));
 
                         setActivityState();
-                        mTitleTextInputLayout.getEditText().clearFocus();
-                        mPublishYearSpinner.clearFocus();
                         mPublishYearSpinner.clearFocus();
                         mInfoContainerScrollView.requestFocus();
 
@@ -807,16 +793,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     public void removePhoto(int position) {
         PhotosAdapter adapter = (PhotosAdapter) mPhotosGrid.getAdapter();
         String removed = adapter.removeItem(position);
-        if (!removed.contains("content")) {
-            File file = new File(removed);
-            file.delete();
-        }
+        removePhotoPath(removed);
     }
 
     public void removePhotoPath(String path) {
         if (!path.contains("content")) {
-            File file = new File(path);
-            file.delete();
+            getApplicationContext().deleteFile(path);
         }
     }
 
@@ -925,9 +907,19 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mAddPhotos.setClickable(false);
         // get photos
         PhotosAdapter photosAdapter = (PhotosAdapter) mPhotosGrid.getAdapter();
-        mResultBook.setUserBookPhotosStoragePath(photosAdapter.getModel().size() > 0 ? photosAdapter.getModel() : null);
+        mResultBook.setUserBookPhotosStoragePath(photosAdapter != null && photosAdapter.getModel().size() > 0 ? photosAdapter.getModel() : null);
         mResultBook.setCondition(mConditionsSpinner.getSelectedItemPosition());
         mResultBook.setGenre(mGenreSpinner.getSelectedItemPosition());
+        AuthorAdapter authorAdapter = (AuthorAdapter) mAuthorsListView.getAdapter();
+        if (authorAdapter != null && authorAdapter.isEditable() && authorAdapter.getAuthors() != null &&
+                !authorAdapter.getAuthors().isEmpty()) {
+            for (String s : authorAdapter.getAuthors()) {
+                mResultBook.addAuthor(s);
+            }
+        }
+        if (mPublishYearSpinner != null && mPublishYearSpinner.isEnabled())
+            mResultBook.setPublishYear(mPublishYearSpinner.getSelectedItemPosition());
+
 
         mProgressBar.setVisibility(View.VISIBLE);
         if (mResultBook.getUserBookPhotosStoragePath() != null) {
