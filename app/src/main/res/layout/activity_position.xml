@@ -9,9 +9,9 @@
     >
 
 
-        <include layout="@layout/toolbar"
-            android:id="@+id/toolbar_position_activity"/>
-
+    <include
+        android:id="@+id/toolbar_position_activity"
+        layout="@layout/toolbar" />
 
 
     <fragment

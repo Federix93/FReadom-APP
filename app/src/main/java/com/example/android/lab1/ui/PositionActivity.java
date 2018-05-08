@@ -61,8 +61,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import okhttp3.internal.Util;
-
 public class PositionActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final String ADDRESS_KEY = "ADDRESS_KEY";
@@ -138,7 +136,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
             mStartSearchImmediately = getIntent().hasExtra(START_SEARCH);
         }
-
 
 
         mConfirmPosition.setOnClickListener(new View.OnClickListener() {

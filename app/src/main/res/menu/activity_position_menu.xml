@@ -4,8 +4,8 @@
 
     <item
         android:id="@+id/action_search_position"
-        android:orderInCategory="1"
-        app:showAsAction="ifRoom"
         android:icon="@drawable/ic_search_black_24dp"
-        android:title="@string/search"/>
+        android:orderInCategory="1"
+        android:title="@string/search"
+        app:showAsAction="ifRoom" />
 </menu>
