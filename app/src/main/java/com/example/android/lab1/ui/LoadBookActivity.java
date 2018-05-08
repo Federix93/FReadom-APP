@@ -24,7 +24,6 @@ import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -102,7 +101,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String GENRE_SPINNER = "GENRE_SPINNER";
     private static final String ISBN = "ISBN";
     private static final String CURRENT_PHOTO = "CURRENT_PHOTO";
-    private static final String KEY_RECYCLER_STATE = "KEY_RECYCLER";
     private static final String UPLOADING = "UPLOADING";
     private static final String AUTHORS = "AUTHORS";
     private static final String AUTHORS_EDITABLE = "A_EDITABLE";
@@ -191,7 +189,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             AuthorAdapter ph = (AuthorAdapter) mAuthorsListView.getAdapter();
             if (ph.getAuthors() != null) {
                 outState.putStringArrayList(AUTHORS, ph.getAuthors());
-                outState.putBoolean(AUTHORS_EDITABLE, ph.getEditable());
+                outState.putBoolean(AUTHORS_EDITABLE, ph.isEditable());
             }
         }
 
@@ -807,16 +805,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     public void removePhoto(int position) {
         PhotosAdapter adapter = (PhotosAdapter) mPhotosGrid.getAdapter();
         String removed = adapter.removeItem(position);
-        if (!removed.contains("content")) {
-            File file = new File(removed);
-            file.delete();
-        }
+        removePhotoPath(removed);
     }
 
     public void removePhotoPath(String path) {
         if (!path.contains("content")) {
-            File file = new File(path);
-            file.delete();
+            getApplicationContext().deleteFile(path);
         }
     }
 
@@ -925,9 +919,19 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mAddPhotos.setClickable(false);
         // get photos
         PhotosAdapter photosAdapter = (PhotosAdapter) mPhotosGrid.getAdapter();
-        mResultBook.setUserBookPhotosStoragePath(photosAdapter.getModel().size() > 0 ? photosAdapter.getModel() : null);
+        mResultBook.setUserBookPhotosStoragePath(photosAdapter != null && photosAdapter.getModel().size() > 0 ? photosAdapter.getModel() : null);
         mResultBook.setCondition(mConditionsSpinner.getSelectedItemPosition());
         mResultBook.setGenre(mGenreSpinner.getSelectedItemPosition());
+        AuthorAdapter authorAdapter = (AuthorAdapter) mAuthorsListView.getAdapter();
+        if (authorAdapter != null && authorAdapter.isEditable() && authorAdapter.getAuthors() != null &&
+                !authorAdapter.getAuthors().isEmpty()) {
+            for (String s : authorAdapter.getAuthors()) {
+                mResultBook.addAuthor(s);
+            }
+        }
+        if (mPublishYearSpinner != null && mPublishYearSpinner.isEnabled())
+            mResultBook.setPublishYear(mPublishYearSpinner.getSelectedItemPosition());
+
 
         mProgressBar.setVisibility(View.VISIBLE);
         if (mResultBook.getUserBookPhotosStoragePath() != null) {
