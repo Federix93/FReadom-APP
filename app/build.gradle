@@ -57,6 +57,7 @@ dependencies {
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.11.0'
     implementation 'com.applandeo:material-calendar-view:1.4.0'
+    implementation 'com.google.firebase:firebase-database:12.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
