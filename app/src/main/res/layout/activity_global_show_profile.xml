@@ -33,11 +33,11 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="300dp">
-                
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="280dp"
+                    android:layout_height="281dp"
                     android:background="@drawable/global_profile_background"
                     android:orientation="vertical">
 
