@@ -890,7 +890,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private void uploadBookInfo() {
         mResultBook.setUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
+        // fix spinners variable
+        mResultBook.setTimeInserted(System.currentTimeMillis());
         db.collection("books").add(mResultBook).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
@@ -932,8 +933,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         if (photosAdapter != null && photosAdapter.getModel() != null) {
             mResultBook.setUserBookPhotosStoragePath(new ArrayList<>(photosAdapter.getModel()));
         }
-        mResultBook.setCondition(mConditionsSpinner.getSelectedItemPosition());
-        mResultBook.setGenre(mGenreSpinner.getSelectedItemPosition());
+        mResultBook.setCondition(mConditionsSpinner.getSelectedItemPosition() - 1);
+        mResultBook.setGenre(mGenreSpinner.getSelectedItemPosition() - 1);
         AuthorAdapter authorAdapter = (AuthorAdapter) mAuthorsListView.getAdapter();
         if (authorAdapter != null && authorAdapter.isEditable() && authorAdapter.getAuthors() != null &&
                 !authorAdapter.getAuthors().isEmpty()) {
@@ -942,7 +943,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             }
         }
         if (mPublishYearSpinner != null && mPublishYearSpinner.isEnabled())
-            mResultBook.setPublishYear(mPublishYearSpinner.getSelectedItemPosition());
+            mResultBook.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
 
 
         mProgressBar.setVisibility(View.VISIBLE);

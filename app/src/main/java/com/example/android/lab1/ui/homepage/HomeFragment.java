@@ -1,11 +1,12 @@
 package com.example.android.lab1.ui.homepage;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,15 +23,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.model.BookFilter;
+import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
-import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -55,15 +56,11 @@ public class HomeFragment extends Fragment {
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
-
-    View mBottomView;
-
+    Query mQuery;
+    FirebaseFirestore mFirebaseFirestore;
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
     private RecyclerBookAdapter mAdapter;
-
-    Query mQuery;
-    FirebaseFirestore mFirebaseFirestore;
 
     public HomeFragment() {
 
@@ -102,13 +99,60 @@ public class HomeFragment extends Fragment {
         });
 
         mGenreFilterButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Intent intent = new Intent(getActivity(), GenreBooksActivity.class);
-//                startActivity(intent);
-                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
-            }
-        });
+                                                  @Override
+                                                  public void onClick(View v) {
+                                                      AlertDialog dialog;
+                                                      // arraylist to keep the selected items
+                                                      final ArrayList selectedItems = new ArrayList();
+                                                      AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                                      builder.setTitle(R.string.select_genres);
+                                                      builder.setMultiChoiceItems(R.array.genre,
+                                                              null,
+                                                              new DialogInterface.OnMultiChoiceClickListener() {
+                                                                  //                 indexSelected contains the index of item (of which checkbox checked)
+                                                                  @Override
+                                                                  public void onClick(DialogInterface dialog, int indexSelected,
+                                                                                      boolean isChecked) {
+                                                                      if (isChecked) {
+                                                                          // If the user checked the item, add it to the selected items
+                                                                          // write your code when user checked the checkbox
+                                                                          selectedItems.add(indexSelected);
+                                                                      } else if (selectedItems.contains(indexSelected)) {
+                                                                          // Else, if the item is already in the array, remove it
+                                                                          //  write your code when user Uchecked the checkbox
+                                                                          selectedItems.remove(Integer.valueOf(indexSelected));
+                                                                      }
+                                                                  }
+                                                              })
+                                                              .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                                                  @Override
+                                                                  public void onClick(DialogInterface dialog, int id) {
+                                                                      // Your code when user clicked on OK
+                                                                      BookFilter bookFilter = BookFilter.buildGenderFilter(selectedItems.isEmpty() ? null : selectedItems);
+                                                                      RecyclerBookAdapter firstRecyclerViewAdapter, secondRecyclerViewAdapter;
+                                                                      if (mFirstRecyclerView != null && mFirstRecyclerView.getAdapter() != null) {
+                                                                          firstRecyclerViewAdapter = (RecyclerBookAdapter) mFirstRecyclerView.getAdapter();
+                                                                          firstRecyclerViewAdapter.setFilter(bookFilter);
+                                                                      }
+
+                                                                      if (mSecondRecyclerView != null && mSecondRecyclerView.getAdapter() != null) {
+                                                                          secondRecyclerViewAdapter = (RecyclerBookAdapter) mSecondRecyclerView.getAdapter();
+                                                                          secondRecyclerViewAdapter.setFilter(bookFilter);
+                                                                      }
+                                                                  }
+                                                              })
+                                                              .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                                                  @Override
+                                                                  public void onClick(DialogInterface dialog, int id) {
+                                                                      //  Your code when user clicked on Cancel
+
+                                                                  }
+                                                              });
+                                                      dialog = builder.create();//AlertDialog dialog; create like this outside onClick
+                                                      dialog.show();
+                                                  }
+                                              }
+        );
 
         mPositionFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,7 +176,6 @@ public class HomeFragment extends Fragment {
         });
 
 
-
         mFirstRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         SnapHelper firstSnapHelperStart = new GravitySnapHelper(Gravity.START);
@@ -154,7 +197,7 @@ public class HomeFragment extends Fragment {
                     return;
                 }
                 List<String> IDs = new ArrayList<>();
-                for(DocumentSnapshot d : queryDocumentSnapshots.getDocuments()){
+                for (DocumentSnapshot d : queryDocumentSnapshots.getDocuments()) {
                     IDs.add(d.getId());
                 }
                 List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
@@ -169,33 +212,53 @@ public class HomeFragment extends Fragment {
                 }
                 mAdapter = new RecyclerBookAdapter(books, IDs);
                 mFirstRecyclerView.setAdapter(mAdapter);
-                mSecondRecyclerView.setAdapter(mAdapter);
+                // order by time stamp
+                List<Book> orderedByTime = new ArrayList<>(books);
+                List<String> orderedByTimeIds = new ArrayList<>(IDs);
+                /*Object temp[] = new Object[2];
+                for (int i = 0; i < orderedByTime.size() - 1; i++) {
+                    for (int i1 = 0; i1 < orderedByTime.size(); i1++) {
+                        if (orderedByTime.get(i).getTimeInserted() > orderedByTime.get(i1).getTimeInserted())
+                        {
+                            temp[0] = orderedByTime.get(i);
+                            temp[1] = orderedByTimeIds.get(i);
+
+                            orderedByTime.set(i, orderedByTime.get(i1));
+                            orderedByTimeIds.set(i, orderedByTimeIds.get(i1));
+
+                            orderedByTime.set(i1, (Book) temp[0]);
+                            orderedByTimeIds.set(i1, (String) temp[1]);
+                        }
+                    }
+                }*/
+
+                mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(orderedByTime, orderedByTimeIds));
             }
         });
-        if(SharedPreferencesManager.getInstance(getActivity()).isFirstRun()){
+        if (SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
             Resources res = getResources();
             SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
             TapTargetSequence tapTargetSequence = new TapTargetSequence(getActivity());
             tapTargetSequence.continueOnCancel(true);
             tapTargetSequence.targets(
-                TapTarget.forToolbarMenuItem(mToolbar, R.id.action_search,
-                        res.getString(R.string.tutorial_title_search))
+                    TapTarget.forToolbarMenuItem(mToolbar, R.id.action_search,
+                            res.getString(R.string.tutorial_title_search))
                             .outerCircleColor(R.color.colorAccent)
-                        .targetCircleColor(R.color.background_app)
-                        .textColor(R.color.white),
-                TapTarget.forView(mGenreFilterButton,
-                        res.getString(R.string.tutorial_title_genre))
-                        .outerCircleColor(R.color.colorAccent)
-                        .targetCircleColor(R.color.background_app)
-                        .transparentTarget(true)
-                        .textColor(R.color.white),
-                TapTarget.forView(mPositionFilterButton,
-                        res.getString(R.string.tutorial_title_position))
-                        .outerCircleColor(R.color.colorAccent)
-                        .targetCircleColor(R.color.background_app)
-                        .transparentTarget(true)
-                        .textColor(R.color.white));
-                tapTargetSequence.start();
+                            .targetCircleColor(R.color.background_app)
+                            .textColor(R.color.white),
+                    TapTarget.forView(mGenreFilterButton,
+                            res.getString(R.string.tutorial_title_genre))
+                            .outerCircleColor(R.color.colorAccent)
+                            .targetCircleColor(R.color.background_app)
+                            .transparentTarget(true)
+                            .textColor(R.color.white),
+                    TapTarget.forView(mPositionFilterButton,
+                            res.getString(R.string.tutorial_title_position))
+                            .outerCircleColor(R.color.colorAccent)
+                            .targetCircleColor(R.color.background_app)
+                            .transparentTarget(true)
+                            .textColor(R.color.white));
+            tapTargetSequence.start();
         }
 
         return mRootView;

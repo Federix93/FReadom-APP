@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.model.BookFilter;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -24,9 +25,9 @@ import java.util.List;
 
 public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapter.BookViewHolder> {
 
-
     private List<Book> books;
     private List<String> IDs;
+    private List<String> filteredIds;
 
     public RecyclerBookAdapter(List<Book> books, List<String> IDs)
     {
@@ -44,7 +45,22 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
     @Override
     public void onBindViewHolder(@NonNull final BookViewHolder holder, int position) {
-        holder.bind(books.get(position), position);
+        if (filteredIds != null && filteredIds.contains(IDs.get(position)))
+            holder.layoutHide();
+        else
+            holder.bind(books.get(position), position);
+    }
+
+    public void setFilter(BookFilter bookFilter)
+    {
+        filteredIds = bookFilter.getFilteredIds(IDs, books);
+        // reupdate
+        for (int i = 0; i < IDs.size(); i++) {
+            if (filteredIds.contains(IDs.get(i)))
+                notifyItemRemoved(i);
+            else
+                notifyItemChanged(i);
+        }
     }
 
     /**
@@ -60,13 +76,15 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
     public class BookViewHolder extends RecyclerView.ViewHolder{
 
+        View mRootView;
         TextView mTitle, mAuthor;
-        ImageView mThumbnail, mOverflow;
+        ImageView mThumbnail;
         StorageReference mStorageReference;
+        private ViewGroup.LayoutParams mOldParams;
 
         public BookViewHolder(final View itemView) {
             super(itemView);
-
+            mRootView = itemView;
             mTitle = itemView.findViewById(R.id.title);
             mAuthor = itemView.findViewById(R.id.author);
             mThumbnail = itemView.findViewById(R.id.thumbnail);
@@ -76,11 +94,13 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
         void bind(Book book, final int position)
         {
+            mRootView.setVisibility(View.VISIBLE);
+            if (mOldParams != null) mRootView.setLayoutParams(mOldParams);
             mTitle.setText(book.getTitle());
             mAuthor.setText(book.getAuthors());
             if (book.getWebThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mThumbnail);
-            } else if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
+            } else if (book.getUserBookPhotosStoragePath() != null && ! book.getUserBookPhotosStoragePath().isEmpty()) {
                 mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(book.getUserBookPhotosStoragePath().get(0));
                 Glide.with(itemView.getContext()).load(mStorageReference).into(mThumbnail);
             } else
@@ -102,6 +122,12 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
                     showPopupMenu(mOverflow);
                 }
             });*/
+        }
+
+        private void layoutHide() {
+            mOldParams = mRootView.getLayoutParams();
+            mRootView.setVisibility(View.GONE);
+            mRootView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
         }
     }
 

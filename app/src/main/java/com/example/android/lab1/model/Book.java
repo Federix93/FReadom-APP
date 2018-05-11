@@ -9,6 +9,7 @@ import com.google.firebase.firestore.GeoPoint;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Book implements Parcelable {
 
     public static final Creator<Book> CREATOR = new Creator<Book>() {
@@ -38,6 +39,7 @@ public class Book implements Parcelable {
     private static final String INFO_LINK = "IL";
     private static final String CONDITIONS = "CONDITIONS";
     private static final String GENRE = "GENRE";
+    private static final String TIMESTAMP = "TIMESTAMP";
 
     private String mIsbn;
     private String mTitle;
@@ -54,6 +56,7 @@ public class Book implements Parcelable {
     private Long mLoanEnd;
     private int mGenre;
     private String mInfoLink;
+    private Long mTimeInserted;
 
     public Book() {
     }
@@ -176,6 +179,7 @@ public class Book implements Parcelable {
         mLoanStart = bundle.containsKey(LOAN_START) ? bundle.getLong(LOAN_START) : null;
         mLoanEnd = bundle.containsKey(LOAN_END) ? bundle.getLong(LOAN_END) : null;
         mInfoLink = bundle.containsKey(INFO_LINK) ? bundle.getString(INFO_LINK) : null;
+        mTimeInserted = bundle.containsKey(TIMESTAMP) ? bundle.getLong(TIMESTAMP) : null;
         if (bundle.containsKey(CONDITIONS))
             mCondition = bundle.getInt(CONDITIONS);
         if (bundle.containsKey(GENRE))
@@ -259,9 +263,18 @@ public class Book implements Parcelable {
             bundle.putLong(LOAN_END, mLoanEnd);
         if (mInfoLink != null)
             bundle.putString(INFO_LINK, mInfoLink);
+        if (mTimeInserted != null)
+            bundle.putLong(TIMESTAMP, mTimeInserted);
         bundle.putInt(CONDITIONS, mCondition);
         bundle.putInt(GENRE, mGenre);
     }
 
 
+    public Long getTimeInserted() {
+        return mTimeInserted;
+    }
+
+    public void setTimeInserted(Long mTimeInserted) {
+        this.mTimeInserted = mTimeInserted;
+    }
 }

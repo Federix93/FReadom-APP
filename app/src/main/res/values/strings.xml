@@ -149,5 +149,7 @@
     <string name="choose_end_date">Seleziona la data finale</string>
 
     <string name="click_position_button">Aggiungi posizione</string>
+    <string name="select_genres">Selezionare i generi che si vogliono visualizzare</string>
+    <string name="cancel">Annulla</string>
 
 </resources>
