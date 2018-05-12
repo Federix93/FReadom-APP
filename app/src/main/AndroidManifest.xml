@@ -82,11 +82,11 @@
         <activity
             android:name=".ui.SignInActivity"
             android:screenOrientation="portrait">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ui.LoadBookActivity"
@@ -107,11 +107,7 @@
         <activity android:name=".ui.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
         <activity android:name=".ui.ChatActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 

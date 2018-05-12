@@ -98,7 +98,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: Send messages on click
-                ChatMessage chatMessage = new ChatMessage("LULLO", mMessageEditText.getText().toString(), null);
+                ChatMessage chatMessage = new ChatMessage(mFirebaseAuth.getCurrentUser().getDisplayName(), mMessageEditText.getText().toString(), null);
 
                 // Clear input box
                 mMessageEditText.setText("");
@@ -158,8 +158,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        Log.d("LULLO", "Dentro on Success" + downloadUrl.toString());
-                        ChatMessage chatMessage = new ChatMessage("LULLO", null, downloadUrl.toString());
+                        ChatMessage chatMessage = new ChatMessage(mFirebaseAuth.getCurrentUser().getDisplayName(), null, downloadUrl.toString());
                         mDatabaseReference.push().setValue(chatMessage);
                     }
                 });

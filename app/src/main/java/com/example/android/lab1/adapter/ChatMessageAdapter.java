@@ -2,6 +2,7 @@ package com.example.android.lab1.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.ChatMessage;
+import com.example.android.lab1.utils.glideimageloader.GlideApp;
 
 import java.util.List;
 
@@ -37,7 +39,8 @@ public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
             if(message.getPhotoURL() != null){
                 messageTextView.setVisibility(View.GONE);
                 photoImageView.setVisibility(View.VISIBLE);
-                Glide.with(photoImageView.getContext()).load(message.getPhotoURL()).into(photoImageView);
+                Log.d("LULLO", message.getPhotoURL());
+                GlideApp.with(photoImageView.getContext()).load(message.getPhotoURL()).into(photoImageView);
                 authorTextView.setText(message.getUsername());
             }else{
                 messageTextView.setVisibility(View.VISIBLE);

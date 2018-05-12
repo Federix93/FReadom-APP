@@ -26,6 +26,7 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.ui.ChatActivity;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -113,7 +114,8 @@ public class HomeFragment extends Fragment {
         mPositionFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), ChatActivity.class);
+                startActivity(intent);
             }
         });
 
