@@ -2,23 +2,23 @@ package com.example.android.lab1.ui;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
-import com.example.android.lab1.model.ChatMessage;
-import com.example.android.lab1.utils.glideimageloader.GlideApp;
+import com.example.android.lab1.model.chatmodels.Chat;
+import com.example.android.lab1.model.chatmodels.Message;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -26,6 +26,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -36,10 +38,19 @@ import java.util.List;
 public class ChatActivity extends AppCompatActivity {
 
     FirebaseDatabase mFirebaseDatabase;
-    DatabaseReference mDatabaseReference;
+
+    DatabaseReference mChatsReference;
+    //DatabaseReference mConversationsReference;
+    DatabaseReference mMessagesReference;
+    //DatabaseReference mUsersReference;
+
     FirebaseAuth mFirebaseAuth;
     FirebaseStorage mFirebaseStorage;
     StorageReference mChatPhotosStorageReference;
+
+    String mChatID;
+    String mUsername;
+    String mPhotoProfileURL;
 
     ListView mMessagesListView;
     EditText mMessageEditText;
@@ -49,8 +60,9 @@ public class ChatActivity extends AppCompatActivity {
     ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
 
+    String dataTitle, dataMessage;
     private final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
-    private static final int RC_PHOTO_PICKER =  2;
+    private static final int RC_PHOTO_PICKER = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +76,18 @@ public class ChatActivity extends AppCompatActivity {
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference().child("messages");
+        mChatsReference = mFirebaseDatabase.getReference().child("chats");
+        /*mUsersReference = mFirebaseDatabase.getReference().child("users");
+        mConversationsReference = mFirebaseDatabase.getReference().child("conversations");*/
+        mMessagesReference = mFirebaseDatabase.getReference().child("messages");
         mFirebaseStorage = FirebaseStorage.getInstance();
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
 
-        List<ChatMessage> chatMessages = new ArrayList<>();
+        mChatID = getIntent().getStringExtra("ChatID");
+        mUsername = getIntent().getStringExtra("Username");
+        mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
+
+        List<Message> chatMessages = new ArrayList<>();
         mChatArrayAdapter = new ChatMessageAdapter(this, R.layout.message_chat_item, chatMessages);
         mMessagesListView.setAdapter(mChatArrayAdapter);
 
@@ -98,11 +117,28 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: Send messages on click
-                ChatMessage chatMessage = new ChatMessage(mFirebaseAuth.getCurrentUser().getDisplayName(), mMessageEditText.getText().toString(), null);
+                Message chatMessage = new Message(mUsername, mMessageEditText.getText().toString(), mPhotoProfileURL,
+                        System.currentTimeMillis() / 1000, null);
+                mMessagesReference.child(mChatID).push().setValue(chatMessage);
+                mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            Chat chat = dataSnapshot.getValue(Chat.class);
+                            if (chat != null) {
+                                chat.setTimestamp(System.currentTimeMillis() / 1000);
+                                chat.setLastMessage(mMessageEditText.getText().toString());
+                            }
+                        }
+                    }
 
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
                 // Clear input box
                 mMessageEditText.setText("");
-                mDatabaseReference.push().setValue(chatMessage);
             }
         });
 
@@ -119,7 +155,7 @@ public class ChatActivity extends AppCompatActivity {
         mChildEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                ChatMessage chatMessage = dataSnapshot.getValue(ChatMessage.class);
+                Message chatMessage = dataSnapshot.getValue(Message.class);
                 mChatArrayAdapter.add(chatMessage);
             }
 
@@ -143,26 +179,72 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         };
-        mDatabaseReference.addChildEventListener(mChildEventListener);
+        mMessagesReference.child(mChatID).addChildEventListener(mChildEventListener);
+
+        /*if (getIntent().getExtras() != null) {
+            for (String key : getIntent().getExtras().keySet()) {
+                if (key.equals("username")) {
+                    dataTitle = (String) getIntent().getExtras().get(key);
+                }
+                if (key.equals("textMessage")) {
+                    dataMessage = (String) getIntent().getExtras().get(key);
+                }
+            }
+
+            showAlertDialog();
+
+        }*/
+
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK){
+        if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
             Uri selectedImageUri = data.getData();
-            if(selectedImageUri != null) {
+            if (selectedImageUri != null) {
                 StorageReference photoRef = mChatPhotosStorageReference.child(selectedImageUri.getLastPathSegment());
                 //Upload file to  Firebase Storage
                 photoRef.putFile(selectedImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        ChatMessage chatMessage = new ChatMessage(mFirebaseAuth.getCurrentUser().getDisplayName(), null, downloadUrl.toString());
-                        mDatabaseReference.push().setValue(chatMessage);
+                        final Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                        Message chatMessage = new Message(mUsername, null, mPhotoProfileURL, System.currentTimeMillis() / 1000,
+                                downloadUrl.toString());
+                        mMessagesReference.child(mChatID).push().setValue(chatMessage);
+                        mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    Chat chat = dataSnapshot.getValue(Chat.class);
+                                    if (chat != null) {
+                                        chat.setTimestamp(System.currentTimeMillis() / 1000);
+                                        chat.setLastMessage(downloadUrl.toString());
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                     }
                 });
             }
         }
+    }
+
+    private void showAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Message");
+        builder.setMessage("title: " + dataTitle + "\n" + "message: " + dataMessage);
+        builder.setPositiveButton("OK", null);
+        builder.show();
+    }
+
+    public void subscribeToTopic(View view) {
+        FirebaseMessaging.getInstance().subscribeToTopic("notifications");
+        Toast.makeText(this, "Subscribed to Topic: Notifications", Toast.LENGTH_SHORT).show();
     }
 }

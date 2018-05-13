@@ -58,6 +58,7 @@ dependencies {
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.11.0'
     implementation 'com.applandeo:material-calendar-view:1.4.0'
     implementation 'com.google.firebase:firebase-database:15.0.1'
+    implementation 'com.google.firebase:firebase-messaging:15.0.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -2,24 +2,22 @@ package com.example.android.lab1.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
-import com.example.android.lab1.model.ChatMessage;
+import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.utils.glideimageloader.GlideApp;
 
 import java.util.List;
 
-public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
+public class ChatMessageAdapter extends ArrayAdapter<Message> {
 
 
-    public ChatMessageAdapter(Context context, int resource, List<ChatMessage> objects) {
+    public ChatMessageAdapter(Context context, int resource, List<Message> objects) {
         super(context, resource, objects);
     }
 
@@ -33,13 +31,12 @@ public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
         TextView authorTextView = convertView.findViewById(R.id.nameTextView);
         ImageView photoImageView = convertView.findViewById(R.id.photoPickerImageView);
 
-        ChatMessage message = getItem(position);
+        Message message = getItem(position);
 
         if (message != null) {
             if(message.getPhotoURL() != null){
                 messageTextView.setVisibility(View.GONE);
                 photoImageView.setVisibility(View.VISIBLE);
-                Log.d("LULLO", message.getPhotoURL());
                 GlideApp.with(photoImageView.getContext()).load(message.getPhotoURL()).into(photoImageView);
                 authorTextView.setText(message.getUsername());
             }else{
