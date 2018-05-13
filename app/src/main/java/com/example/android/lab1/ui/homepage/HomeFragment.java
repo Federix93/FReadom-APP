@@ -1,12 +1,11 @@
 package com.example.android.lab1.ui.homepage;
 
-import android.content.DialogInterface;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,22 +24,28 @@ import android.widget.Toast;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
+import com.example.android.lab1.model.Address;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.model.BookFilter;
+import com.example.android.lab1.ui.GenreBooksActivity;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
+import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.SharedPreferencesManager;
+import com.example.android.lab1.utils.Utilities;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -56,11 +61,14 @@ public class HomeFragment extends Fragment {
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
-    Query mQuery;
+
+
     FirebaseFirestore mFirebaseFirestore;
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
-    private RecyclerBookAdapter mAdapter;
+
+    private Integer mSelectedGenre;
+    private GeoPoint mCurrentPosition;
 
     public HomeFragment() {
 
@@ -101,55 +109,9 @@ public class HomeFragment extends Fragment {
         mGenreFilterButton.setOnClickListener(new View.OnClickListener() {
                                                   @Override
                                                   public void onClick(View v) {
-                                                      AlertDialog dialog;
-                                                      // arraylist to keep the selected items
-                                                      final ArrayList selectedItems = new ArrayList();
-                                                      AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                                      builder.setTitle(R.string.select_genres);
-                                                      builder.setMultiChoiceItems(R.array.genre,
-                                                              null,
-                                                              new DialogInterface.OnMultiChoiceClickListener() {
-                                                                  //                 indexSelected contains the index of item (of which checkbox checked)
-                                                                  @Override
-                                                                  public void onClick(DialogInterface dialog, int indexSelected,
-                                                                                      boolean isChecked) {
-                                                                      if (isChecked) {
-                                                                          // If the user checked the item, add it to the selected items
-                                                                          // write your code when user checked the checkbox
-                                                                          selectedItems.add(indexSelected);
-                                                                      } else if (selectedItems.contains(indexSelected)) {
-                                                                          // Else, if the item is already in the array, remove it
-                                                                          //  write your code when user Uchecked the checkbox
-                                                                          selectedItems.remove(Integer.valueOf(indexSelected));
-                                                                      }
-                                                                  }
-                                                              })
-                                                              .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                                                  @Override
-                                                                  public void onClick(DialogInterface dialog, int id) {
-                                                                      // Your code when user clicked on OK
-                                                                      BookFilter bookFilter = BookFilter.buildGenderFilter(selectedItems.isEmpty() ? null : selectedItems);
-                                                                      RecyclerBookAdapter firstRecyclerViewAdapter, secondRecyclerViewAdapter;
-                                                                      if (mFirstRecyclerView != null && mFirstRecyclerView.getAdapter() != null) {
-                                                                          firstRecyclerViewAdapter = (RecyclerBookAdapter) mFirstRecyclerView.getAdapter();
-                                                                          firstRecyclerViewAdapter.setFilter(bookFilter);
-                                                                      }
-
-                                                                      if (mSecondRecyclerView != null && mSecondRecyclerView.getAdapter() != null) {
-                                                                          secondRecyclerViewAdapter = (RecyclerBookAdapter) mSecondRecyclerView.getAdapter();
-                                                                          secondRecyclerViewAdapter.setFilter(bookFilter);
-                                                                      }
-                                                                  }
-                                                              })
-                                                              .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                                                  @Override
-                                                                  public void onClick(DialogInterface dialog, int id) {
-                                                                      //  Your code when user clicked on Cancel
-
-                                                                  }
-                                                              });
-                                                      dialog = builder.create();//AlertDialog dialog; create like this outside onClick
-                                                      dialog.show();
+                                                      Intent i = new Intent(getActivity(), GenreBooksActivity.class);
+                                                      i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                                      getActivity().startActivityForResult(i, Constants.PICK_GENRE);
                                                   }
                                               }
         );
@@ -157,7 +119,8 @@ public class HomeFragment extends Fragment {
         mPositionFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                Intent positionActivityIntent = Utilities.getPositionActivityIntent(getActivity(), true);
+                getActivity().startActivityForResult(positionActivityIntent, Constants.POSITION_ACTIVITY_REQUEST);
             }
         });
 
@@ -189,8 +152,10 @@ public class HomeFragment extends Fragment {
         secondSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
-        mQuery = mFirebaseFirestore.collection("books");
-        mQuery.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
+
+        queryDatabase();
+
+        /*books.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
                 if (e != null) {
@@ -215,10 +180,18 @@ public class HomeFragment extends Fragment {
                 // order by time stamp
                 List<Book> orderedByTime = new ArrayList<>(books);
                 List<String> orderedByTimeIds = new ArrayList<>(IDs);
-                /*Object temp[] = new Object[2];
+                Object temp[] = new Object[2];
+                Long first, second;
                 for (int i = 0; i < orderedByTime.size() - 1; i++) {
                     for (int i1 = 0; i1 < orderedByTime.size(); i1++) {
-                        if (orderedByTime.get(i).getTimeInserted() > orderedByTime.get(i1).getTimeInserted())
+                        first = orderedByTime.get(i).getTimeInserted();
+                        second = orderedByTime.get(i1).getTimeInserted();
+                        if (first == null)
+                            first = 1 / System.currentTimeMillis();
+                        if (second == null)
+                            second = 1/ System.currentTimeMillis();
+
+                        if (first < second)
                         {
                             temp[0] = orderedByTime.get(i);
                             temp[1] = orderedByTimeIds.get(i);
@@ -230,11 +203,11 @@ public class HomeFragment extends Fragment {
                             orderedByTimeIds.set(i1, (String) temp[1]);
                         }
                     }
-                }*/
+                }
 
                 mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(orderedByTime, orderedByTimeIds));
             }
-        });
+        });*/
         if (SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
             Resources res = getResources();
             SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
@@ -262,6 +235,141 @@ public class HomeFragment extends Fragment {
         }
 
         return mRootView;
+    }
+
+    private void queryDatabase() {
+
+        CollectionReference books = mFirebaseFirestore.collection("books");
+
+
+        Query query1, query2;
+        query1 = query2 = null;
+
+        if (mCurrentPosition != null) {
+            GeoPoint[] geoPoints = buildBoundingBox(mCurrentPosition.getLatitude(),
+                    mCurrentPosition.getLongitude(),
+                    (double) getResources().getInteger(R.integer.position_radius_address) / 1000);
+            query1 = books.whereGreaterThan("geoPoint", geoPoints[0])
+                    .whereLessThan("geoPoint", geoPoints[1]);
+            query2 = books.whereGreaterThan("geoPoint", geoPoints[0])
+                    .whereLessThan("geoPoint", geoPoints[1]);
+        }
+
+        String userId = null;
+        if (FirebaseAuth.getInstance() != null
+                && FirebaseAuth.getInstance().getCurrentUser() != null &&
+                FirebaseAuth.getInstance().getCurrentUser().getUid() != null) {
+            userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+
+        final int homePageBooksNumber = getResources().getInteger(R.integer.homepage_book_number);
+
+        if (query1 == null)
+            query1 = books;
+
+        if (query2 == null) {
+            query2 = books;
+        }
+
+        final String finalUserId = userId;
+        query1.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                List<String> ids = new ArrayList<>();
+                List<Book> books = new ArrayList<>();
+                int size = 0;
+                Book currentBook;
+                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()) {
+                    currentBook = documentSnapshot.toObject(Book.class);
+                    if ((finalUserId != null &&
+                            currentBook.getUid().equals(finalUserId)) ||
+                            (mSelectedGenre != null &&
+                                    !mSelectedGenre.equals(currentBook.getGenre())))
+                        continue;
+                    ids.add(documentSnapshot.getId());
+                    books.add(currentBook);
+                    size++;
+                    if (size > homePageBooksNumber)
+                        break;
+                }
+
+                if (mFirstRecyclerView != null)
+                    mFirstRecyclerView.setAdapter(new RecyclerBookAdapter(books, ids));
+            }
+        });
+
+
+        query2.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                List<String> ids = new ArrayList<>();
+                List<Book> books = new ArrayList<>();
+                int size = 0;
+                Book currentBook;
+                // apply filter
+                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()) {
+                    currentBook = documentSnapshot.toObject(Book.class);
+                    if ((finalUserId != null &&
+                            currentBook.getUid().equals(finalUserId)) ||
+                            (mSelectedGenre != null &&
+                                    !mSelectedGenre.equals(currentBook.getGenre())))
+                        continue;
+                    ids.add(documentSnapshot.getId());
+                    books.add(currentBook);
+                    size++;
+                }
+
+                Collections.sort(books);
+
+                if (mSecondRecyclerView != null)
+                    mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(books.subList(0, Math.min(books.size(), homePageBooksNumber)), ids));
+            }
+        });
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Constants.POSITION_ACTIVITY_REQUEST:
+                if (resultCode == Activity.RESULT_OK) {
+                    Address address = Utilities.readResultOfPositionActivity(data);
+                    mCurrentPosition = new GeoPoint(address.getLat(), address.getLon());
+                    mPositionFilterButton.setText(address.getAddress());
+                    queryDatabase();
+                }
+                break;
+            case Constants.PICK_GENRE:
+                if (resultCode == Activity.RESULT_OK) {
+                    mSelectedGenre = data.hasExtra(GenreBooksActivity.SELECTED_GENRE) ?
+                            data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1) : null;
+                    if (mSelectedGenre != null) {
+                        mGenreFilterButton.setText(getResources().getStringArray(R.array.genre)[mSelectedGenre]);
+                        queryDatabase();
+                    }
+                }
+                break;
+        }
+
+    }
+
+    private GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
+
+        // ~1 mile of lat and lon in degrees
+        Double lat = 0.0144927536231884;
+        Double lon = 0.0181818181818182;
+
+        Double lowerLat = latitude - (lat * distanceInKm);
+        Double lowerLon = longitude - (lon * distanceInKm);
+
+        Double greaterLat = latitude + (lat * distanceInKm);
+        Double greaterLon = longitude + (lon * distanceInKm);
+
+        GeoPoint lesserGeoPoint = new GeoPoint(lowerLat, lowerLon);
+        GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
+
+        return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
     }
 
     @Override

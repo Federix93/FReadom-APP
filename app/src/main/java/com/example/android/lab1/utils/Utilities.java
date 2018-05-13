@@ -5,22 +5,22 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.text.TextUtils;
 import android.widget.ArrayAdapter;
 
 import com.example.android.lab1.R;
@@ -130,6 +130,7 @@ public abstract class Utilities {
 
     public static Intent getPositionActivityIntent(Activity currentActivity, boolean searchCities) {
         Intent intent = new Intent(currentActivity, PositionActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         if (searchCities)
             intent.putExtra(PositionActivity.SEARCH_CITY_EXTRA, true);
         return intent;

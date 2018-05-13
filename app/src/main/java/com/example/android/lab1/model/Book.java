@@ -3,6 +3,7 @@ package com.example.android.lab1.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.firebase.firestore.GeoPoint;
 
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Book implements Parcelable {
+public class Book implements Parcelable, Comparable<Book> {
 
     public static final Creator<Book> CREATOR = new Creator<Book>() {
         @Override
@@ -276,5 +277,20 @@ public class Book implements Parcelable {
 
     public void setTimeInserted(Long mTimeInserted) {
         this.mTimeInserted = mTimeInserted;
+    }
+
+    @Override
+    public int compareTo(@NonNull Book o) {
+        if (getTimeInserted() == null)
+            return -1;
+        if (o.getTimeInserted() == null)
+            return 1;
+        long diff = getTimeInserted() - o.getTimeInserted();
+        if (diff == 0)
+            return 0;
+        if (diff > 0)
+            return 1;
+        else
+            return -1;
     }
 }

@@ -28,6 +28,7 @@ import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.LoadBookActivity;
 import com.example.android.lab1.ui.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
+import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -243,8 +244,15 @@ public class HomePageActivity extends AppCompatActivity
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ADD_BOOK_ACTIVITY) {
+        switch (requestCode) {
+            case ADD_BOOK_ACTIVITY:
                 mBottomNavigation.setCurrentItem(comeBackPosition);
+                break;
+            case Constants.POSITION_ACTIVITY_REQUEST:
+            case Constants.PICK_GENRE:
+                mHomeFragment.onActivityResult(requestCode, resultCode, data);
+                break;
         }
+
     }
 }

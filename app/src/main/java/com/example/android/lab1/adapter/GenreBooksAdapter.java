@@ -3,7 +3,6 @@ package com.example.android.lab1.adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,7 @@ public class GenreBooksAdapter extends RecyclerView.Adapter<GenreBooksAdapter.Ge
     @Override
     public GenreBooksAdapter.GenreViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.genre_book_item, parent, false);
+        View view = inflater.inflate(R.layout.item_book_genre, parent, false);
         return new GenreViewHolder(view);
     }
 

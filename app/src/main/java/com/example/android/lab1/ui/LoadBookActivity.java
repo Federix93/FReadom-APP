@@ -142,7 +142,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_load_book_2);
+        setContentView(R.layout.activity_load_book);
         initializeWidgets();
 
         mActivityState = State.ISBN_CHOICE;
