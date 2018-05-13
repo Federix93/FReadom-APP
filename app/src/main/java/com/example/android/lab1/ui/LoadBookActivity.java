@@ -69,13 +69,13 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import fr.ganfra.materialspinner.MaterialSpinner;
 
@@ -116,7 +116,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private RecyclerView mAuthorsListView;
     private TextInputLayout mPublisherTextInputLayout;
     private TextView mPositionTextView;
-    private TextView mLoanRangeTextView;
     private AppCompatButton mScanBarcodeButton;
     private AppCompatButton mInsertManuallyButton;
     private ImageView mIsbnExplanationImageView;
@@ -128,15 +127,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private String mCurrentTitle;
     private Book mResultBook;
 
-    private AlertDialog.Builder mAlertDialogBuilder;
     private File mPhotoFile;
     private State mActivityState;
     private boolean mUploading;
     private AppCompatButton mConfirmButton;
     private int mProgressRate;
     private int mUploadedImagesCount;
-    private ArrayList<Object> mDownloadUrls;
-    private StorageReference mStorageRef;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -203,10 +199,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mActivityState = State.valueOf(savedInstanceState.getString(ACTIVITY_STATE));
         if (savedInstanceState.containsKey(ISBN) && mIsbnEditText != null)
             mIsbnEditText.setText(savedInstanceState.getString(ISBN));
-        if (savedInstanceState.containsKey(CURRENT_PHOTO)) {
-            if (savedInstanceState.getString(CURRENT_PHOTO) != null)
-                mPhotoFile = new File(savedInstanceState.getString(CURRENT_PHOTO));
-        }
+
+        mPhotoFile = savedInstanceState.containsKey(CURRENT_PHOTO) ?
+                new File(Objects.requireNonNull(savedInstanceState.getString(CURRENT_PHOTO))) : null;
+
         if (savedInstanceState.containsKey(RESULT_BOOK)) {
             mResultBook = savedInstanceState.getParcelable(RESULT_BOOK);
             if (mResultBook != null && mResultBook.getWebThumbnail() != null && mBookWebThumbnailImageView != null)
@@ -321,7 +317,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mConditionsSpinner.setSelection(0);
                 mGenreSpinner.setSelection(0);
                 mPositionTextView.setText(null);
-                mLoanRangeTextView.setText(null);
                 cleanPhotos();
                 break;
         }
@@ -373,47 +368,10 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                     mPositionTextView.setText(address != null ? address.getAddress() : null);
                 }
                 break;
-            case Constants.CALENDAR_REQUEST:
-                if (resultCode == RESULT_OK) {
-                    Calendar first, last;
-
-                    first = data.hasExtra(CalendarActivity.FIRST_DATE) ?
-                            (Calendar) data.getSerializableExtra(CalendarActivity.FIRST_DATE) : null;
-                    last = data.hasExtra(CalendarActivity.LAST_DATE) ?
-                            (Calendar) data.getSerializableExtra(CalendarActivity.LAST_DATE) : null;
-                    if (mResultBook != null) {
-                        if (first != null)
-                            mResultBook.setLoanStart(first.getTimeInMillis());
-                        else
-                            mResultBook.setLoanStart(null);
-                        if (last != null)
-                            mResultBook.setLoanEnd(last.getTimeInMillis());
-                        else
-                            mResultBook.setLoanEnd(null);
-
-                        DateFormat dmy = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-                        if (first != null) {
-                            if (last != null)
-                                mLoanRangeTextView.setText(dmy.format(first.getTime()) + "-" + dmy.format(last.getTime()));
-                            else
-                                mLoanRangeTextView.setText(dmy.format(first.getTime()));
-                        }
-
-                    }
-                }
-                break;
         }
     }
 
     private void setupListeners() {
-
-        mLoanRangeTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoadBookActivity.this, CalendarActivity.class);
-                startActivityForResult(intent, Constants.CALENDAR_REQUEST);
-            }
-        });
 
         mPositionTextView.setOnClickListener(new PositionActivityOpenerListener(this,
                 false));
@@ -474,7 +432,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private boolean checkFields() {
-        // TODO
+
         return true;
     }
 
@@ -496,7 +454,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mAuthorsListView.setLayoutManager(layoutManager);
         mPublisherTextInputLayout = findViewById(R.id.load_book_publisher);
         mPositionTextView = findViewById(R.id.load_book_position);
-        mLoanRangeTextView = findViewById(R.id.load_book_loan_range);
         mScanBarcodeButton = findViewById(R.id.load_book_scan_bar_code);
         mPublishYearSpinner = findViewById(R.id.load_book_publish_year_spinner);
         mConditionsSpinner = findViewById(R.id.load_book_conditions_spinner);
@@ -638,7 +595,17 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         JSONObject book = response.getJSONArray("items")
                                 .getJSONObject(0).getJSONObject("volumeInfo");
 
-                        mResultBook.setIsbn(finalReadIsbn);
+                        if (book.has("industryIdentifiers")) {
+                            JSONArray industryIdentifiers = book.getJSONArray("industryIdentifiers");
+                            for (int i = 0; i < industryIdentifiers.length(); i++) {
+                                if (industryIdentifiers.getJSONObject(i)
+                                        .getString("type")
+                                        .equals("ISBN_13"))
+                                    mResultBook.setIsbn(industryIdentifiers.getJSONObject(i)
+                                            .getString("identifier"));
+                            }
+                        } else
+                            mResultBook.setIsbn(finalReadIsbn);
 
                         mActivityState = State.ISBN_ACQUIRED;
                         mCurrentTitle = book.optString("title");
@@ -652,7 +619,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             mAuthorEditText.getEditText().setText("");*/
 
                         mResultBook.setPublisher(book.optString("publisher"));
-                        mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
+                        if (mPublisherTextInputLayout != null && mPublisherTextInputLayout.getEditText() != null) {
+                            mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
+                            mPublisherTextInputLayout.getEditText().setEnabled(false);
+                        }
+
 
                         if (book.has("authors") &&
                                 book.getJSONArray("authors").length() > 0) {
@@ -688,6 +659,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                                 currentYear = Calendar.getInstance().get(Calendar.YEAR);
                                 publishYear = mResultBook.getPublishYear();
                                 mPublishYearSpinner.setSelection(currentYear - publishYear);
+                                mPublishYearSpinner.setEnabled(false);
                             }
                         }
 
@@ -751,15 +723,15 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         switch (v.getId()) {
             case R.id.load_book_add_photos:
                 final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
-                mAlertDialogBuilder = new AlertDialog.Builder(LoadBookActivity.this);
-                mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoadBookActivity.this);
+                alertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
                     }
                 });
 
-                mAlertDialogBuilder.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
+                alertDialogBuilder.setTitle(R.string.title_dialog).setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
@@ -807,21 +779,23 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         removePhotoPath(removed);
     }
 
-    public void removePhotoPath(String path) {
+    public boolean removePhotoPath(String path) {
         if (!path.contains("content")) {
             File file = new File(path);
-            file.delete();
+            boolean delete = file.delete();
             if (file.exists()) {
                 try {
-                    file.getCanonicalFile().delete();
+                    delete = file.getCanonicalFile().delete();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 if (file.exists()) {
-                    deleteFile(file.getName());
+                    delete = deleteFile(file.getName());
                 }
             }
+            return true;
         }
+        return false;
     }
 
     public File saveThumbnail() throws IOException {
@@ -847,9 +821,14 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageReference = storage.getReference();
         if (userBookPhotosStoragePath.size() > 0) {
-            mStorageRef = storageReference.child(generateStorageRef(userBookPhotosStoragePath.get(mUploadedImagesCount)));
+            StorageReference storageRef = storageReference.child(generateStorageRef(userBookPhotosStoragePath.get(mUploadedImagesCount)));
 
-            byte[] compressedImage = Utilities.compressPhoto(userBookPhotosStoragePath.get(mUploadedImagesCount), getContentResolver());
+            byte[] compressedImage = null;
+            try {
+                compressedImage = Utilities.compressPhoto(userBookPhotosStoragePath.get(mUploadedImagesCount), getContentResolver());
+            } catch (IOException e) {
+                compressedImage = null;
+            }
             if (compressedImage == null) {
                 Toast.makeText(getApplicationContext(),
                         R.string.load_book_upload_error,
@@ -857,12 +836,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 cleanUpload();
                 return;
             }
-            UploadTask uploadTask = mStorageRef.putBytes(compressedImage);
+            UploadTask uploadTask = storageRef.putBytes(compressedImage);
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // TODO upload photo, update count, recall method
-                    mProgressBar.setProgress(mProgressRate * mUploadedImagesCount + 1);
+                    mProgressBar.setProgress(mProgressRate * (mUploadedImagesCount + 1));
                     mResultBook.getUserBookPhotosStoragePath().remove(mUploadedImagesCount);
                     mResultBook.getUserBookPhotosStoragePath().add(mUploadedImagesCount, taskSnapshot.getDownloadUrl().toString());
                     if (++mUploadedImagesCount >= userBookPhotosStoragePath.size()) {
@@ -877,14 +855,26 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     cleanUpload();
-                    showSnackBar(R.string.load_book_upload_error);
+                    Toast.makeText(getApplicationContext(),
+                            R.string.load_book_upload_error,
+                            Toast.LENGTH_LONG);
+                    setResult(RESULT_CANCELED);
+                    finish();
                 }
             });
         }
     }
 
     private void cleanUpload() {
-        // TODO
+        for (int i = mUploadedImagesCount; i > 0; i--) {
+            if (i == mUploadedImagesCount) {
+                // photo which caused upload to fail
+                removePhotoPath(mResultBook.getUserBookPhotosStoragePath().get(i));
+            } else {
+                StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(mResultBook.getUserBookPhotosStoragePath().get(i));
+                storageReference.delete();
+            }
+        }
     }
 
     private void uploadBookInfo() {
@@ -909,6 +899,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
+                setResult(RESULT_OK);
                 finish();
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -926,7 +917,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mConditionsSpinner.setEnabled(false);
         mGenreSpinner.setEnabled(false);
         mPositionTextView.setClickable(false);
-        mLoanRangeTextView.setClickable(false);
         mAddPhotos.setClickable(false);
         // get photos
         PhotosAdapter photosAdapter = (PhotosAdapter) mPhotosGrid.getAdapter();
@@ -942,7 +932,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mResultBook.addAuthor(s);
             }
         }
-        if (mPublishYearSpinner != null && mPublishYearSpinner.isEnabled())
+        if (mPublishYearSpinner != null && mPublishYearSpinner.getSelectedItemPosition() > 0 && mPublishYearSpinner.isEnabled())
             mResultBook.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
 
 
