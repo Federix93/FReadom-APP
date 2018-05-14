@@ -1,4 +1,4 @@
-package com.example.android.lab1.ui;
+package com.example.android.lab1.ui.chat;
 
 import android.content.Intent;
 import android.net.Uri;

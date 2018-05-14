@@ -10,7 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.ui.ChatActivity;
+import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 

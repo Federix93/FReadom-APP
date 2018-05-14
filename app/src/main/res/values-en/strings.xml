@@ -109,5 +109,7 @@
     <string name="dialog_isbn_scan">Scan through barcode</string>
 
     <string name="click_position_button">Add position</string>
+    <string name="conversations_title">Conversations</string>
+
 
 </resources>

@@ -2,12 +2,11 @@ package com.example.android.lab1.utils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Conversation;
 import com.example.android.lab1.model.chatmodels.User;
-import com.example.android.lab1.ui.ChatActivity;
+import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;

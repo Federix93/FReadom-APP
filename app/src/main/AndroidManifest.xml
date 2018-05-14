@@ -106,16 +106,15 @@
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
         <activity android:name=".ui.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
-        <activity android:name=".ui.ChatActivity">
-
-        </activity>
+        <activity android:name=".ui.chat.ChatActivity"></activity>
 
         <service android:name=".utils.FCMService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
+        <activity android:name=".ui.chat.ConversationsActivity"></activity>
     </application>
 
 </manifest>
