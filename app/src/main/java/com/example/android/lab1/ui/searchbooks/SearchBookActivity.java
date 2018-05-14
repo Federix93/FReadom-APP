@@ -45,8 +45,10 @@ public class SearchBookActivity extends AppCompatActivity {
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
     private final static String ALGOLIA_INDEX_NAME = "books";
 
-    boolean[] checkedItems = {true, true, true, true};
-    boolean[] oldCheckedItems = {true, true, true, true};
+    boolean[] searchByFilters = {true, true, true, true};
+    int[] seekBarsFilters = {0, 100};
+    boolean[] orderFilters = {true, false, false, false};
+
     int ratingPreference = 0;
     int oldRatingPreference = 0;
 
@@ -213,8 +215,13 @@ public class SearchBookActivity extends AppCompatActivity {
 
     private void showDialog() {
 
+        Bundle filterData = new Bundle();
+        filterData.putBooleanArray("search_by", searchByFilters);
+        filterData.putIntArray("seek_bars", seekBarsFilters);
+        filterData.putBooleanArray("order_filters", orderFilters);
+
         FragmentManager fm = getSupportFragmentManager();
-        FiltersFragment filtersFragment = FiltersFragment.newInstance("Prova");
+        FiltersFragment filtersFragment = FiltersFragment.newInstance(filterData);
         filtersFragment.show(fm, "filters_fragment");
 
 //        SeekBar ratingPreferenceBar = new SeekBar(this);
