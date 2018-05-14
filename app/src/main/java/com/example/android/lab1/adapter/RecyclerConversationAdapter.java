@@ -2,6 +2,7 @@ package com.example.android.lab1.adapter;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,10 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         mListUsers = listUsers;
     }
 
+    public void setItems(List<User> listUsers){
+        mListUsers = listUsers;
+    }
+
     @NonNull
     @Override
     public ConversationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -40,7 +45,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mListUsers.size();
     }
 
     class ConversationViewHolder extends RecyclerView.ViewHolder{
@@ -55,16 +60,17 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         }
 
         public void bind(User user){
+            Log.d("LULLO", "USERNAME" + user.getUsername());
             mUserNameTextView.setText(user.getUsername());
-            if (user.getImage() == null) {
+            //if (user.getImage() == null) {
                 Glide.with(itemView.getContext()).load(R.mipmap.profile_picture)
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
-            } else {
+            /*} else {
                 Glide.with(itemView.getContext()).load(user.getImage())
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
-            }
+            }*/
         }
     }
 }

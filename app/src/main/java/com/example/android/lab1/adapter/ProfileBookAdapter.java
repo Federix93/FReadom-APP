@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.BookDetailsActivity;
+import com.example.android.lab1.ui.chat.ConversationsActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -86,7 +87,8 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
+                    //Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
+                    Intent intent = new Intent(v.getContext(), ConversationsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.putExtra("ID_BOOK_SELECTED", mBookIds.get(position));
                     v.getContext().startActivity(intent);
