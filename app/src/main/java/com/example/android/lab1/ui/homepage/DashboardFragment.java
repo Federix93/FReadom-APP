@@ -50,7 +50,6 @@ public class DashboardFragment extends Fragment {
         TabLayout tabs = rootView.findViewById(R.id.tabs);
         tabs.addTab(tabs.newTab());
         tabs.addTab(tabs.newTab());
-        tabs.addTab(tabs.newTab());
 
         tabs.setupWithViewPager(viewPager);
 
@@ -60,7 +59,6 @@ public class DashboardFragment extends Fragment {
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(mFt);
         adapter.addFragment(new DashboardFragmentLibraryItem(), getResources().getString(R.string.dashboard_library_item));
-        adapter.addFragment(new DashboardFragmentLendedItem(), getResources().getString(R.string.dashboard_lended_item));
         adapter.addFragment(new DashboardFragmentBorrowedItem(), getResources().getString(R.string.dashboard_borrowed_item));
         viewPager.setAdapter(adapter);
     }

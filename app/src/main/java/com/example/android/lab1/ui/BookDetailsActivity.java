@@ -8,12 +8,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,18 +28,25 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
+import com.example.android.lab1.model.BooksBorrowed;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -60,7 +68,8 @@ public class BookDetailsActivity extends AppCompatActivity {
     ImageView mShareImageView;
     ImageView mFavoritesImageView;
     TextView mBookDetailCondition;
-
+    FirebaseFirestore mFirebaseFirestore;
+    FirebaseAuth mFirebaseAuth;
 
     private String mBookId;
     private User mUser;
@@ -110,12 +119,13 @@ public class BookDetailsActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
+        mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build();
-        firebaseFirestore.setFirestoreSettings(settings);
-        final DocumentReference docRef = firebaseFirestore.collection("books").document(mBookId);
+        mFirebaseFirestore.setFirestoreSettings(settings);
+        final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -281,7 +291,33 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
+                //new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
+                final DocumentReference docRef;
+                if(mFirebaseAuth.getUid() != null) {
+                    docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
+                    docRef.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if(task.isSuccessful()){
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                BooksBorrowed booksBorrowed = documentSnapshot.toObject(BooksBorrowed.class);
+                                if(booksBorrowed != null) {
+                                    booksBorrowed.getBooksID().add(mBookId);
+                                    docRef.set(booksBorrowed);
+                                }
+                                else{
+                                    List<String> list = new ArrayList<>();
+                                    list.add(mBookId);
+                                    booksBorrowed = new BooksBorrowed(list);
+                                    docRef.set(booksBorrowed);
+                                }
+                            }
+                        }
+                    });
+                }
+                else{
+                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
+                }
             }
         });
 
