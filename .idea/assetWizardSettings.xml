@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/image/ic_brightness_1_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_reorder_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -33,12 +33,12 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="f63d2b" />
-                            <entry key="height" value="12" />
-                            <entry key="outputName" value="circular_dot_12dp" />
+                            <entry key="color" value="808080" />
+                            <entry key="height" value="32" />
+                            <entry key="outputName" value="ic_reorder_32dp" />
                             <entry key="overrideSize" value="true" />
                             <entry key="sourceFile" value="C:\Users\mdp11" />
-                            <entry key="width" value="12" />
+                            <entry key="width" value="32" />
                           </map>
                         </option>
                       </PersistentState>

@@ -108,9 +108,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="34dp"
                         android:layout_marginStart="4dp"
-                        android:src="@drawable/ic_star"
+                        app:srcCompat="@drawable/ic_star_full_16dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/search_book_user_rating" />
+                        app:layout_constraintStart_toEndOf="@+id/search_book_user_rating"/>
 
                     <TextView
                         android:layout_width="wrap_content"

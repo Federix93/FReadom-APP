@@ -2,17 +2,19 @@ package com.example.android.lab1.ui.searchbooks;
 
 import android.content.DialogInterface;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +47,8 @@ public class SearchBookActivity extends AppCompatActivity {
 
     boolean[] checkedItems = {true, true, true, true};
     boolean[] oldCheckedItems = {true, true, true, true};
+    int ratingPreference = 0;
+    int oldRatingPreference = 0;
 
     private FloatingSearchView mSearchView;
     private TextView mNoConnectionTextViewTop;
@@ -72,7 +76,7 @@ public class SearchBookActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.results_recycler_view);
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(currentUser != null)
+        if (currentUser != null)
             mCurrentUserId = currentUser.getUid();
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -88,10 +92,8 @@ public class SearchBookActivity extends AppCompatActivity {
         setupLeftItemListener();
         setupNoConnectionButtonClickListener();
 
-        if(savedInstanceState != null)
-        {
-            if(savedInstanceState.getString("LAST_SEARCH") != null)
-            {
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getString("LAST_SEARCH") != null) {
                 lastSearchResult = savedInstanceState.getString("LAST_SEARCH");
                 try {
                     mAdapter = new RecyclerSearchAdapter(new JSONArray(lastSearchResult));
@@ -100,9 +102,7 @@ public class SearchBookActivity extends AppCompatActivity {
                 }
                 mRecyclerView.setAdapter(mAdapter);
             }
-        }
-        else
-        {
+        } else {
             mSearchView.setSearchFocused(true);
         }
 
@@ -114,7 +114,7 @@ public class SearchBookActivity extends AppCompatActivity {
         mSearchView.setOnHomeActionClickListener(new FloatingSearchView.OnHomeActionClickListener() {
             @Override
             public void onHomeClicked() {
-                    SearchBookActivity.this.finish();
+                SearchBookActivity.this.finish();
             }
         });
     }
@@ -129,75 +129,20 @@ public class SearchBookActivity extends AppCompatActivity {
         });
     }
 
-    private void setupMenuItemClickListener()
-    {
+    private void setupMenuItemClickListener() {
         mSearchView.setOnMenuItemClickListener(new FloatingSearchView.OnMenuItemClickListener() {
             @Override
             public void onActionMenuItemSelected(MenuItem item) {
 
                 int itemID = item.getItemId();
-                if(itemID == R.id.action_filter)
-                {
-                    oldCheckedItems = checkedItems.clone();
-                    String[] multiChoiceItems = getResources().getStringArray(R.array.search_filters);
-                    new AlertDialog.Builder(SearchBookActivity.this)
-                            .setTitle(getResources().getString(R.string.search_by))
-                            .setMultiChoiceItems(multiChoiceItems, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int index, boolean isChecked) {
-                                    if(!checkedItems[0] && !checkedItems[1] && !checkedItems[2] && !checkedItems[3])
-                                    {
-                                        final AlertDialog alert = (AlertDialog)dialog;
-                                        final ListView list = alert.getListView();
-                                        list.setItemChecked(index, true);
-                                        Toast.makeText(SearchBookActivity.this, getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            })
-                            .setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    List<String> searchFields = new ArrayList<>();
-                                    if(checkedItems[0])
-                                    {
-                                        searchFields.add("title");
-                                    }
-                                    if(checkedItems[1])
-                                    {
-                                        searchFields.add("author");
-                                    }
-                                    if(checkedItems[2])
-                                    {
-                                        searchFields.add("publisher");
-                                    }
-                                    if(checkedItems[3])
-                                    {
-//                                        searchFields.add("tags");
-                                    }
-
-                                    query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
-                                }
-                            })
-                            .setNegativeButton(getResources().getString(R.string.negative_button_dialog), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    checkedItems = oldCheckedItems;
-                                }
-                            })
-                            .setOnCancelListener( new DialogInterface.OnCancelListener() {
-                                @Override
-                                public void onCancel(DialogInterface dialog) {
-                                    checkedItems = oldCheckedItems;
-                                }
-                            })
-                            .show();
+                if (itemID == R.id.action_filter) {
+                    showDialog();
                 }
             }
         });
     }
 
-    private void setupSearchListener()
-    {
+    private void setupSearchListener() {
         mSearchView.setOnSearchListener(new FloatingSearchView.OnSearchListener() {
             @Override
             public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
@@ -207,8 +152,7 @@ public class SearchBookActivity extends AppCompatActivity {
             @Override
             public void onSearchAction(String currentQuery) {
 
-                if(currentQuery.isEmpty())
-                {
+                if (currentQuery.isEmpty()) {
                     mRecyclerView.swapAdapter(null, true);
                     return;
                 }
@@ -219,14 +163,12 @@ public class SearchBookActivity extends AppCompatActivity {
         });
     }
 
-    private void setupQueryChangeListener()
-    {
+    private void setupQueryChangeListener() {
         mSearchView.setOnQueryChangeListener(new FloatingSearchView.OnQueryChangeListener() {
             @Override
             public void onSearchTextChanged(String oldQuery, String newQuery) {
 
-                if(newQuery.isEmpty())
-                {
+                if (newQuery.isEmpty()) {
                     mRecyclerView.swapAdapter(null, true);
                     return;
                 }
@@ -236,11 +178,10 @@ public class SearchBookActivity extends AppCompatActivity {
         });
     }
 
-    private void search(String searchString)
-    {
+    private void search(String searchString) {
         query.setQuery(searchString);
 
-        if(Utilities.isOnline(SearchBookActivity.this)) {
+        if (Utilities.isOnline(SearchBookActivity.this)) {
             mSearchView.showProgress();
             mNoConnectionTextViewTop.setVisibility(View.GONE);
             mNoConnectionTextViewBottom.setVisibility(View.GONE);
@@ -251,10 +192,8 @@ public class SearchBookActivity extends AppCompatActivity {
                 public void requestCompleted(JSONObject result, AlgoliaException error) {
                     JSONArray hits = result.optJSONArray("hits");
                     lastSearchResult = hits.toString();
-                    for(int i=0; i<hits.length(); i++)
-                    {
-                        if(hits.optJSONObject(i).optString("uid").equals(mCurrentUserId))
-                        {
+                    for (int i = 0; i < hits.length(); i++) {
+                        if (hits.optJSONObject(i).optString("uid").equals(mCurrentUserId)) {
                             hits.remove(i);
                             i--;
                         }
@@ -264,9 +203,7 @@ public class SearchBookActivity extends AppCompatActivity {
                     mSearchView.hideProgress();
                 }
             });
-        }
-        else
-        {
+        } else {
             mRecyclerView.setVisibility(View.GONE);
             mNoConnectionTextViewTop.setVisibility(View.VISIBLE);
             mNoConnectionTextViewBottom.setVisibility(View.VISIBLE);
@@ -274,10 +211,90 @@ public class SearchBookActivity extends AppCompatActivity {
         }
     }
 
+    private void showDialog() {
+
+        FragmentManager fm = getSupportFragmentManager();
+        FiltersFragment filtersFragment = FiltersFragment.newInstance("Prova");
+        filtersFragment.show(fm, "filters_fragment");
+
+//        SeekBar ratingPreferenceBar = new SeekBar(this);
+//        ratingPreferenceBar.setMax(5);
+//        ratingPreferenceBar.setKeyProgressIncrement(1);
+//        ratingPreferenceBar.setProgress(ratingPreference);
+//
+//        oldCheckedItems = checkedItems.clone();
+//        String[] multiChoiceItems = getResources().getStringArray(R.array.search_filters);
+//        new AlertDialog.Builder(SearchBookActivity.this)
+//                .setTitle(getResources().getString(R.string.search_by))
+//                .setMultiChoiceItems(multiChoiceItems, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int index, boolean isChecked) {
+//                        if (!checkedItems[0] && !checkedItems[1] && !checkedItems[2] && !checkedItems[3]) {
+//                            final AlertDialog alert = (AlertDialog) dialog;
+//                            final ListView list = alert.getListView();
+//                            list.setItemChecked(index, true);
+//                            Toast.makeText(SearchBookActivity.this, getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                })
+//                .setView(ratingPreferenceBar)
+//                .setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        List<String> searchFields = new ArrayList<>();
+//                        if (checkedItems[0]) {
+//                            searchFields.add("title");
+//                        }
+//                        if (checkedItems[1]) {
+//                            searchFields.add("author");
+//                        }
+//                        if (checkedItems[2]) {
+//                            searchFields.add("publisher");
+//                        }
+//                        if (checkedItems[3]) {
+////                                        searchFields.add("tags");
+//                        }
+//
+//                        query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
+//                    }
+//                })
+//                .setNegativeButton(getResources().getString(R.string.negative_button_dialog), new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        checkedItems = oldCheckedItems;
+//                    }
+//                })
+//                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+//                    @Override
+//                    public void onCancel(DialogInterface dialog) {
+//                        checkedItems = oldCheckedItems;
+//                    }
+//                })
+//                .show();
+//
+//        ratingPreferenceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//
+//                Toast.makeText(SearchBookActivity.this, "Value of " + progress, Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//        });
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
-        if(!mSearchView.getQuery().isEmpty())
+        if (!mSearchView.getQuery().isEmpty())
             outState.putString("LAST_SEARCH", lastSearchResult);
         super.onSaveInstanceState(outState);
     }
