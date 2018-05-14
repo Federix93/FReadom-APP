@@ -29,6 +29,7 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -63,6 +64,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     private String mBookId;
     private User mUser;
+    private Book mBook;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -118,8 +120,8 @@ public class BookDetailsActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    Book book = task.getResult().toObject(Book.class);
-                    updateUI(book);
+                    mBook = task.getResult().toObject(Book.class);
+                    updateUI(mBook);
                 }
             }
         });
@@ -279,7 +281,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
             }
         });
 

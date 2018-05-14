@@ -78,23 +78,19 @@
             android:exported="false" />
 
         <activity android:name=".ui.BookDetailsActivity" />
-
         <activity android:name=".ui.BookPhotoDetailActivity" />
-
-
         <activity
             android:name=".ui.SignInActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
         <activity
             android:name=".ui.LoadBookActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"/>
+            android:configChanges="orientation|screenSize|keyboardHidden" />
 
         <receiver android:name=".utils.NetworkConnectionReceiver">
             <intent-filter>
@@ -110,6 +106,16 @@
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
         <activity android:name=".ui.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
+        <activity android:name=".ui.ChatActivity">
+
+        </activity>
+
+        <service android:name=".utils.FCMService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

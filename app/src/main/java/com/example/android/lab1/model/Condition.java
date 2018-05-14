@@ -1,14 +1,7 @@
 package com.example.android.lab1.model;
 
 import android.content.Context;
-import android.content.IntentFilter;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.annotation.Nullable;
-
 import com.example.android.lab1.R;
-import com.google.android.gms.internal.zzfgs;
-import com.google.firebase.firestore.Blob;
 
 import java.util.ArrayList;
 import java.util.HashMap;
