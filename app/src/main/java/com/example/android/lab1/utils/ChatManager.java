@@ -2,17 +2,13 @@ package com.example.android.lab1.utils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Conversation;
 import com.example.android.lab1.model.chatmodels.User;
-import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.ChatActivity;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -22,6 +18,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChatManager {
 
@@ -51,7 +50,6 @@ public class ChatManager {
 
         final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
-
         if (firebaseAuth != null && firebaseAuth.getUid() != null) {
             DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseAuth.getUid());
             documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -61,9 +59,11 @@ public class ChatManager {
                     usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            mUserLoggedDatabase = new User(mUserLogged.getUsername(),
-                                    mUserLogged.getImage());
                             if (!dataSnapshot.exists()) {
+                                Map<String, String> map = new HashMap<>();
+                                map.put("Dummy", "");
+                                mUserLoggedDatabase = new User(mUserLogged.getUsername(),
+                                        mUserLogged.getImage(), map);
                                 usersReference.child(firebaseAuth.getUid()).child(mBookID).setValue(mUserLoggedDatabase, new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -76,9 +76,11 @@ public class ChatManager {
                                                     usersReference.child(mBookOwnerUserID).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(DataSnapshot dataSnapshot) {
-                                                            mBookOwnerUserDatabase = new User(userOwnerFromDB.getUsername(),
-                                                                    userOwnerFromDB.getImage());
                                                             if (!dataSnapshot.exists()) {
+                                                                Map<String, String> map = new HashMap<>();
+                                                                map.put("Dummy", "");
+                                                                mBookOwnerUserDatabase = new User(userOwnerFromDB.getUsername(),
+                                                                        userOwnerFromDB.getImage(), map);
                                                                 usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase, new DatabaseReference.CompletionListener() {
                                                                     @Override
                                                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -111,9 +113,11 @@ public class ChatManager {
                                         usersReference.child(mBookOwnerUserID).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                                mBookOwnerUserDatabase = new User(userOwnerFromDB.getUsername(),
-                                                        userOwnerFromDB.getImage());
                                                 if (!dataSnapshot.exists()) {
+                                                    Map<String, String> map = new HashMap<>();
+                                                    map.put("Dummy", "");
+                                                    mBookOwnerUserDatabase = new User(userOwnerFromDB.getUsername(),
+                                                            userOwnerFromDB.getImage(), map);
                                                     usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase, new DatabaseReference.CompletionListener() {
                                                         @Override
                                                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -149,18 +153,16 @@ public class ChatManager {
 }
 
     public void checkChatExists() {
-
-        final boolean[] exists = {false};
-
         usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
                 if (dataSnapshot.exists()) {
-                    User user = dataSnapshot.getValue(User.class);
-                    if (user != null && user.getChatID(mBookOwnerUserID) != null) {
-                        mChatID = user.getChatID(mBookOwnerUserID);
+                    if (user != null && map != null && map.get(mBookOwnerUserID) != null) {
+                        mChatID = map.get(mBookOwnerUserID);
                         openChat();
-                    }else if(user.getChatID(mBookOwnerUserID) == null){
+                    }else if(map != null && map.get(mBookOwnerUserID) == null){
                         createChat();
                     }
                 }

@@ -7,14 +7,14 @@ public class User {
 
     private String mPhotoURL;
     private String mUsername;
-    private static Map<String, String> mMapUserIDChatID = new HashMap<>();;
+    private Map<String, String> mMapUserIDChatID;
 
     public User(){}
 
-    public User(String username, String photoURL){
+    public User(String username, String photoURL, Map<String, String> map){
         mUsername = username;
         mPhotoURL = photoURL;
-
+        mMapUserIDChatID = map;
     }
 
     public String getPhotoURL() {
@@ -37,7 +37,10 @@ public class User {
         mMapUserIDChatID.put(memberID, chatID);
     }
 
+    public Map<String, String> getMapUserIDChatID() { return mMapUserIDChatID; }
+
     public String getChatID(String memberID){
         return mMapUserIDChatID.get(memberID);
     }
+
 }
