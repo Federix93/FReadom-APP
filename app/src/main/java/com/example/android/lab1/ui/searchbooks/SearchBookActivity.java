@@ -39,14 +39,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SearchBookActivity extends AppCompatActivity {
+public class SearchBookActivity extends AppCompatActivity implements FilterDataPass {
 
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
     private final static String ALGOLIA_INDEX_NAME = "books";
 
     boolean[] searchByFilters = {true, true, true, true};
-    int[] seekBarsFilters = {0, 100};
+    int[] seekBarsFilters = {0, 290};
     boolean[] orderFilters = {true, false, false, false};
 
     int ratingPreference = 0;
@@ -304,5 +304,10 @@ public class SearchBookActivity extends AppCompatActivity {
         if (!mSearchView.getQuery().isEmpty())
             outState.putString("LAST_SEARCH", lastSearchResult);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void filterDataPass(Bundle bundle) {
+        Toast.makeText(this, bundle.getString("we"), Toast.LENGTH_SHORT).show();
     }
 }
