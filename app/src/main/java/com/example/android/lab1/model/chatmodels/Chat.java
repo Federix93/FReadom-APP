@@ -8,6 +8,14 @@ public class Chat {
     private long mTimestamp;
     private String mBookID;
 
+    public Chat(){}
+
+    public Chat(String bookID, String lastMessage, long timestamp){
+        mBookID = bookID;
+        mLastMessage = lastMessage;
+        mTimestamp = timestamp;
+    }
+
     public String getBookID() {
         return mBookID;
     }

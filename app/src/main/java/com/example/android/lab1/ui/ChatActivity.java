@@ -51,6 +51,7 @@ public class ChatActivity extends AppCompatActivity {
     String mChatID;
     String mUsername;
     String mPhotoProfileURL;
+    String mBookID;
 
     ListView mMessagesListView;
     EditText mMessageEditText;
@@ -77,8 +78,6 @@ public class ChatActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mChatsReference = mFirebaseDatabase.getReference().child("chats");
-        /*mUsersReference = mFirebaseDatabase.getReference().child("users");
-        mConversationsReference = mFirebaseDatabase.getReference().child("conversations");*/
         mMessagesReference = mFirebaseDatabase.getReference().child("messages");
         mFirebaseStorage = FirebaseStorage.getInstance();
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
@@ -86,8 +85,11 @@ public class ChatActivity extends AppCompatActivity {
         mChatID = getIntent().getStringExtra("ChatID");
         mUsername = getIntent().getStringExtra("Username");
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
+        mBookID = getIntent().getStringExtra("BookID");
 
-        List<Message> chatMessages = new ArrayList<>();
+
+        final List<Message> chatMessages = new ArrayList<>();
+
         mChatArrayAdapter = new ChatMessageAdapter(this, R.layout.message_chat_item, chatMessages);
         mMessagesListView.setAdapter(mChatArrayAdapter);
 
@@ -129,6 +131,7 @@ public class ChatActivity extends AppCompatActivity {
                                 chat.setTimestamp(System.currentTimeMillis() / 1000);
                                 chat.setLastMessage(mMessageEditText.getText().toString());
                             }
+                            mChatsReference.child(mChatID).setValue(chat);
                         }
                     }
 
@@ -221,6 +224,7 @@ public class ChatActivity extends AppCompatActivity {
                                         chat.setTimestamp(System.currentTimeMillis() / 1000);
                                         chat.setLastMessage(downloadUrl.toString());
                                     }
+                                    mChatsReference.child(mChatID).setValue(chat);
                                 }
                             }
 

@@ -5,6 +5,13 @@ public class Conversation {
     private String userID1;
     private String userID2;
 
+    public Conversation(){}
+
+    public Conversation(String userID1, String userID2){
+        this.userID1 = userID1;
+        this.userID2 = userID2;
+    }
+
     public String getUserID1() {
         return userID1;
     }

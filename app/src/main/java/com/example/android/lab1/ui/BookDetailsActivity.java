@@ -283,7 +283,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChatManager.createChat(mBook.getUid(), mBookId, getApplicationContext());
+                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
             }
         });
 

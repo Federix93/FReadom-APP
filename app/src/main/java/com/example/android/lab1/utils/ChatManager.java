@@ -2,6 +2,7 @@ package com.example.android.lab1.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.android.lab1.model.chatmodels.Chat;
@@ -9,7 +10,9 @@ import com.example.android.lab1.model.chatmodels.Conversation;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.ChatActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -22,57 +25,178 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ChatManager {
 
-    public static void createChat(final String receiverUserID, final String bookReferenceID, final Context context) {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+    private String mBookID;
+    private final String mBookOwnerUserID;
+    private com.example.android.lab1.model.User mUserLogged;
+    private Context mContext;
+    private FirebaseAuth firebaseAuth;
+    private String mChatID;
 
-        final DatabaseReference chatsReference = firebaseDatabase.getReference().child("chats");
-        final DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
-        final DatabaseReference conversationsReference = firebaseDatabase.getReference().child("conversations");
-        final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    private User mUserLoggedDatabase;
+    private User mBookOwnerUserDatabase;
+
+    private final DatabaseReference chatsReference;
+    private final DatabaseReference conversationsReference;
+    private final DatabaseReference usersReference;
+
+    public ChatManager(String bookID, final String bookOwnerID, Context context) {
+        mBookID = bookID;
+        mBookOwnerUserID = bookOwnerID;
+        mContext = context;
+
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        chatsReference = firebaseDatabase.getReference().child("chats");
+        conversationsReference = firebaseDatabase.getReference().child("conversations");
+        usersReference = firebaseDatabase.getReference().child("users");
+
+        final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
+
         if (firebaseAuth != null && firebaseAuth.getUid() != null) {
             DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseAuth.getUid());
             documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot snapshot) {
-
-                    final com.example.android.lab1.model.User userAuth = snapshot.toObject(com.example.android.lab1.model.User.class);
-                    usersReference.child(firebaseAuth.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    mUserLogged = snapshot.toObject(com.example.android.lab1.model.User.class);
+                    usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
+                            mUserLoggedDatabase = new User(mUserLogged.getUsername(),
+                                    mUserLogged.getImage());
                             if (!dataSnapshot.exists()) {
-                                User user = new User();
-                                user.setUsername(userAuth.getUsername());
-                                user.setPhotoURL(userAuth.getImage());
-                                usersReference.child(firebaseAuth.getUid()).setValue(user);
+                                usersReference.child(firebaseAuth.getUid()).child(mBookID).setValue(mUserLoggedDatabase, new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                        if(databaseError == null) {
+                                            DocumentReference documentReference = firebaseFirestore.collection("users").document(mBookOwnerUserID);
+                                            documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onSuccess(DocumentSnapshot snapshot) {
+                                                    final com.example.android.lab1.model.User userOwnerFromDB = snapshot.toObject(com.example.android.lab1.model.User.class);
+                                                    usersReference.child(mBookOwnerUserID).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                                            mBookOwnerUserDatabase = new User(userOwnerFromDB.getUsername(),
+                                                                    userOwnerFromDB.getImage());
+                                                            if (!dataSnapshot.exists()) {
+                                                                usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase, new DatabaseReference.CompletionListener() {
+                                                                    @Override
+                                                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                                                        if (databaseError == null) {
+                                                                            checkChatExists();
+                                                                        }
+                                                                    }
+                                                                });
+                                                            }else{
+                                                                checkChatExists();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }else{
+                                DocumentReference documentReference = firebaseFirestore.collection("users").document(mBookOwnerUserID);
+                                documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onSuccess(DocumentSnapshot snapshot) {
+                                        final com.example.android.lab1.model.User userOwnerFromDB = snapshot.toObject(com.example.android.lab1.model.User.class);
+                                        usersReference.child(mBookOwnerUserID).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                mBookOwnerUserDatabase = new User(userOwnerFromDB.getUsername(),
+                                                        userOwnerFromDB.getImage());
+                                                if (!dataSnapshot.exists()) {
+                                                    usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase, new DatabaseReference.CompletionListener() {
+                                                        @Override
+                                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                                            if (databaseError == null) {
+                                                                checkChatExists();
+                                                            }
+                                                        }
+                                                    });
+                                                }else{
+                                                    checkChatExists();
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                });
                             }
                         }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled (DatabaseError databaseError){
 
-                        }
-                    });
-                    Chat chat = new Chat();
-                    chat.setLastMessage("");
-                    chat.setTimestamp(System.currentTimeMillis() / 1000);
-                    chat.setBookID(bookReferenceID);
-                    DatabaseReference newChat = chatsReference.push();
-                    String keyChat = newChat.getKey();
-                    newChat.setValue(chat);
+                    }
+                });
+            }
+        });
+    }
 
-                    Conversation conversation = new Conversation();
-                    conversation.setUserID1(firebaseAuth.getUid());
-                    conversation.setUserID2(receiverUserID);
-                    conversationsReference.child(keyChat).setValue(conversation);
-                    Intent intent = new Intent(context, ChatActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("ChatID", keyChat);
-                    intent.putExtra("Username", userAuth.getUsername());
-                    intent.putExtra("ImageURL", userAuth.getImage());
-                    context.startActivity(intent);
+}
+
+    public void checkChatExists() {
+
+        final boolean[] exists = {false};
+
+        usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    User user = dataSnapshot.getValue(User.class);
+                    if (user != null && user.getChatID(mBookOwnerUserID) != null) {
+                        mChatID = user.getChatID(mBookOwnerUserID);
+                        openChat();
+                    }else if(user.getChatID(mBookOwnerUserID) == null){
+                        createChat();
+                    }
                 }
-            });
-        }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void openChat() {
+        Intent intent = new Intent(mContext, ChatActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("ChatID", mChatID);
+        intent.putExtra("Username", mUserLogged.getUsername());
+        intent.putExtra("ImageURL", mUserLogged.getImage());
+        intent.putExtra("BookID", mBookID);
+        mContext.startActivity(intent);
+    }
+
+    public void createChat() {
+
+        Chat chat = new Chat(mBookID, "", System.currentTimeMillis() / 1000);
+        DatabaseReference newChat = chatsReference.push();
+        mChatID = newChat.getKey();
+        newChat.setValue(chat);
+        Conversation conversation = new Conversation(firebaseAuth.getUid(), mBookOwnerUserID);
+        conversationsReference.child(mChatID).setValue(conversation);
+
+        mUserLoggedDatabase.setMapUserIDChatID(mBookOwnerUserID, mChatID);
+        mBookOwnerUserDatabase.setMapUserIDChatID(firebaseAuth.getUid(), mChatID);
+
+        usersReference.child(firebaseAuth.getUid()).child(mBookID).setValue(mUserLoggedDatabase);
+        usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase);
+        openChat();
     }
 }
