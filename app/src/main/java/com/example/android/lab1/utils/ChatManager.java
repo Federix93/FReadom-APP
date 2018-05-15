@@ -9,6 +9,7 @@ import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,7 +54,7 @@ public class ChatManager {
         linkUsersToChat();
 }
 
-    public void checkChatExists() {
+    private void checkChatExists() {
         usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -117,6 +118,7 @@ public class ChatManager {
                                                                     }
                                                                 });
                                                             }else{
+                                                                mBookOwnerUserDatabase = dataSnapshot.getValue(User.class);
                                                                 checkChatExists();
                                                             }
                                                         }
@@ -154,6 +156,7 @@ public class ChatManager {
                                                         }
                                                     });
                                                 }else{
+                                                    mBookOwnerUserDatabase = dataSnapshot.getValue(User.class);
                                                     checkChatExists();
                                                 }
                                             }
@@ -178,17 +181,18 @@ public class ChatManager {
         }
     }
 
-    public void openChat() {
+    private void openChat() {
+
         Intent intent = new Intent(mContext, ChatActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra("ChatID", mChatID);
-        intent.putExtra("Username", mUserLogged.getUsername());
-        intent.putExtra("ImageURL", mUserLogged.getImage());
+        intent.putExtra("Username", mBookOwnerUserDatabase.getUsername());
+        intent.putExtra("ImageURL", mBookOwnerUserDatabase.getPhotoURL());
         intent.putExtra("BookID", mBookID);
         mContext.startActivity(intent);
     }
 
-    public void createChat() {
+    private void createChat() {
 
         Chat chat = new Chat(mBookID, "", System.currentTimeMillis() / 1000);
         DatabaseReference newChat = chatsReference.push();
