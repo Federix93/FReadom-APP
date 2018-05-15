@@ -17,8 +17,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
@@ -61,6 +66,8 @@ public class ChatActivity extends AppCompatActivity {
     EditText mMessageEditText;
     Button mSendButton;
     ImageButton mPhotoPickerButton;
+    ImageView mToolbarProfileImage;
+    TextView mToolbarProfileUsername;
 
     ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
@@ -95,7 +102,6 @@ public class ChatActivity extends AppCompatActivity {
         mBookID = getIntent().getStringExtra("BookID");
 
         mToolbar = findViewById(R.id.toolbar_chat_activity);
-        mToolbar.setTitle(mUsername);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,6 +109,15 @@ public class ChatActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        mToolbarProfileImage = findViewById(R.id.chat_toolbar_profile_image);
+        mToolbarProfileUsername = findViewById(R.id.chat_toolbar_profile_username);
+
+        mToolbarProfileUsername.setText(mUsername);
+
+        Glide.with(this).load(mPhotoProfileURL).apply(RequestOptions
+                .bitmapTransform(new CircleCrop()))
+                .into(mToolbarProfileImage);
 
         final List<Message> chatMessages = new ArrayList<>();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);

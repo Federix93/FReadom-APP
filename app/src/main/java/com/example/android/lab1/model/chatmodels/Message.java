@@ -19,9 +19,9 @@ public class Message {
         mUsername = pUsername;
         mSenderId = senderId;
         mTextMessage = pTextMessage;
-        mPhotoURL = pPhotoURL;
         mTimestamp = pTimestamp;
         mPhotoProfileURL = pPhotoProfileURL;
+        mPhotoURL = pPhotoURL;
     }
 
     public String getPhotoProfileURL() {

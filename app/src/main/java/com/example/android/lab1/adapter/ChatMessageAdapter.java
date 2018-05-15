@@ -1,15 +1,19 @@
 package com.example.android.lab1.adapter;
 
 import android.content.Context;
+import android.media.Image;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.chatmodels.Message;
+import com.example.android.lab1.utils.glideimageloader.GlideApp;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
@@ -92,48 +96,89 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
     private class SentMessageHolder extends RecyclerView.ViewHolder {
         TextView messageText;
         TextView timeText;
+        ImageView imageSent;
+        TextView timeImageSent;
+        ConstraintLayout constraintLayoutMessage;
 
         SentMessageHolder(View itemView) {
             super(itemView);
 
             messageText = itemView.findViewById(R.id.text_message_body);
             timeText = itemView.findViewById(R.id.text_message_time);
+            imageSent = itemView.findViewById(R.id.image_uploaded_sent);
+            timeImageSent = itemView.findViewById(R.id.time_image_upload);
+            constraintLayoutMessage = itemView.findViewById(R.id.constraint_layout_sent);
         }
 
         void bind(Message message) {
-            messageText.setText(message.getTextMessage());
 
-            // Format the stored timestamp into a readable String using method.
-            Calendar cal1 = Calendar.getInstance();
-            cal1.setTimeInMillis(message.getTimestamp()*1000);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-            timeText.setText(dateFormat.format(cal1.getTime()));
+            if (message.getPhotoURL() != null) {
+                constraintLayoutMessage.setVisibility(View.GONE);
+                timeImageSent.setVisibility(View.VISIBLE);
+
+                imageSent.setVisibility(View.VISIBLE);
+                GlideApp.with(imageSent.getContext()).load(message.getPhotoURL()).into(imageSent);
+
+                Calendar cal1 = Calendar.getInstance();
+                cal1.setTimeInMillis(message.getTimestamp()*1000);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                timeImageSent.setText(dateFormat.format(cal1.getTime()));
+            } else {
+                constraintLayoutMessage.setVisibility(View.VISIBLE);
+                timeImageSent.setVisibility(View.GONE);
+                imageSent.setVisibility(View.GONE);
+
+                messageText.setText(message.getTextMessage());
+
+                Calendar cal1 = Calendar.getInstance();
+                cal1.setTimeInMillis(message.getTimestamp()*1000);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                timeText.setText(dateFormat.format(cal1.getTime()));
+            }
         }
     }
 
     private class ReceivedMessageHolder extends RecyclerView.ViewHolder {
         TextView messageText;
         TextView timeText;
-        TextView nameText;
+        ImageView imageReceived;
+        TextView timeImageReceived;
+        ConstraintLayout constraintLayoutMessage;
 
         ReceivedMessageHolder(View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.text_message_body);
             timeText = itemView.findViewById(R.id.text_message_time);
+            imageReceived = itemView.findViewById(R.id.image_uploaded_received);
+            timeImageReceived = itemView.findViewById(R.id.time_image_upload);
+            constraintLayoutMessage = itemView.findViewById(R.id.constraint_layout_received);
         }
 
         void bind(Message message) {
-            messageText.setText(message.getTextMessage());
 
-            Calendar cal1 = Calendar.getInstance();
-            cal1.setTimeInMillis(message.getTimestamp()*1000);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-            timeText.setText(dateFormat.format(cal1.getTime()));
+            if (message.getPhotoURL() != null) {
+                constraintLayoutMessage.setVisibility(View.GONE);
+                timeImageReceived.setVisibility(View.VISIBLE);
+                imageReceived.setVisibility(View.VISIBLE);
 
+                GlideApp.with(imageReceived.getContext()).load(message.getPhotoURL()).into(imageReceived);
 
-            // Insert the profile image from the URL into the ImageView.
-            //add glide to display round image
-            //Utils.displayRoundImageFromUrl(mContext, message.getSender().getProfileUrl(), profileImage);
+                Calendar cal1 = Calendar.getInstance();
+                cal1.setTimeInMillis(message.getTimestamp()*1000);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                timeImageReceived.setText(dateFormat.format(cal1.getTime()));
+            } else {
+                constraintLayoutMessage.setVisibility(View.VISIBLE);
+                timeImageReceived.setVisibility(View.GONE);
+                imageReceived.setVisibility(View.GONE);
+
+                messageText.setText(message.getTextMessage());
+
+                Calendar cal1 = Calendar.getInstance();
+                cal1.setTimeInMillis(message.getTimestamp()*1000);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                timeText.setText(dateFormat.format(cal1.getTime()));
+            }
         }
     }
 }
