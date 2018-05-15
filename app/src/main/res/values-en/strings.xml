@@ -109,7 +109,7 @@
     <string name="dialog_isbn_scan">Scan through barcode</string>
 
     <string name="click_position_button">Add position</string>
-    <string name="rating_filter">greater than %.1f</string>
+    <string name="rating_filter">%.1f or over</string>
     <string name="rating_filter_zero">any</string>
     <string name="rating_filter_max">5.0</string>
     <string name="position_filter">within %.1f km</string>

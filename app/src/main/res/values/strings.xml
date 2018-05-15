@@ -149,7 +149,7 @@
     <string name="choose_end_date">Seleziona la data finale</string>
 
     <string name="click_position_button">Aggiungi posizione</string>
-    <string name="rating_filter">maggiore di %.1f</string>
+    <string name="rating_filter">da %.1f in su</string>
     <string name="rating_filter_zero">qualunque</string>
     <string name="rating_filter_max">5.0</string>
     <string name="position_filter">nel raggio di %.1f km</string>

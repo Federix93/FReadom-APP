@@ -71,8 +71,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
 
     private JSONArray hits;
-    private HashMap<String, User> userHashMap = new HashMap<>();
-
+    private HashMap<String, User> userBackupHashMap = new HashMap<>();
     private String lastSearchResult;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -112,15 +111,16 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         setupNoConnectionButtonClickListener();
 
         if (savedInstanceState != null) {
-            if (savedInstanceState.getString("LAST_SEARCH") != null) {
+            if (savedInstanceState.getString("LAST_SEARCH_BOOKS") != null) {
                 lastSearchResult = savedInstanceState.getString("LAST_SEARCH_BOOKS");
-                userHashMap = (HashMap<String, User>) savedInstanceState.getSerializable("LAST_SEARCH_USERS");
+                userBackupHashMap = (HashMap<String, User>) savedInstanceState.getSerializable("LAST_SEARCH_USERS");
                 try {
-                    mAdapter = new RecyclerSearchAdapter(new JSONArray(lastSearchResult), userHashMap);
+                    mAdapter = new RecyclerSearchAdapter(new JSONArray(lastSearchResult), userBackupHashMap);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 mRecyclerView.setAdapter(mAdapter);
+                showResultsLayout();
             }
         } else {
             mSearchView.setSearchFocused(true);
@@ -225,6 +225,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         query.setQuery(searchString);
         mSearchView.showProgress();
 
+//        booksIndex.enableSearchCache();
+
         booksIndex.searchAsync(query, new CompletionHandler() {
             @Override
             public void requestCompleted(JSONObject result, AlgoliaException error) {
@@ -254,27 +256,28 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     }
                 }
 
-                userHashMap.clear();
-
                 usersIndex.getObjectsAsync(userIDs, new CompletionHandler() {
                     @Override
                     public void requestCompleted(JSONObject userResult, AlgoliaException e) {
+
+                        HashMap<String, User> usersHashMap = new HashMap<>();
+
                         JSONArray userHits = userResult.optJSONArray("results");
                         for (int i = 0; i < userHits.length(); i++) {
                             User bookUser = new User();
                             bookUser.setRating((float) userHits.optJSONObject(i).optDouble("rating"));
-                            bookUser.setImage(userHits.optJSONObject(i).optString("image"));
-                            if (!userHashMap.containsKey(userHits.optJSONObject(i).optString("objectID")))
-                                userHashMap.put(userHits.optJSONObject(i).optString("objectID"), bookUser);
+                            if(userHits.optJSONObject(i).optString("image") != null)
+                                bookUser.setImage(userHits.optJSONObject(i).optString("image"));
+                            if (!usersHashMap.containsKey(userHits.optJSONObject(i).optString("objectID")))
+                                usersHashMap.put(userHits.optJSONObject(i).optString("objectID"), bookUser);
 
                         }
 
-                        if(seekBarsFilters[FiltersValues.RATING_FILTER] < 100)
+                        if(seekBarsFilters[FiltersValues.RATING_FILTER] > 0)
                         {
                             for (int i = 0; i < hits.length(); i++) {
                                 String bookUid = hits.optJSONObject(i).optString("uid");
-//                                if (userHashMap.get(bookUid).getRating() < seekBarsFilters[FiltersValues.RATING_FILTER]) {
-                                if (userHashMap.get(bookUid).getRating() < 4) {
+                                if (usersHashMap.get(bookUid).getRating() < (float)seekBarsFilters[FiltersValues.RATING_FILTER]/10) {
                                     hits.remove(i);
                                     i--;
                                 }
@@ -282,7 +285,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         }
 
                         lastSearchResult = hits.toString();
-                        mAdapter = new RecyclerSearchAdapter(hits, userHashMap);
+                        userBackupHashMap = new HashMap<>(usersHashMap);
+                        mAdapter = new RecyclerSearchAdapter(hits, usersHashMap);
                         mRecyclerView.setAdapter(mAdapter);
                         mSearchView.hideProgress();
 
@@ -310,7 +314,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         if (mSearchView.getQuery().length() > 2)
         {
             outState.putString("LAST_SEARCH_BOOKS", lastSearchResult);
-            outState.putSerializable("LAST_SEARCH_USERS", userHashMap);
+            outState.putSerializable("LAST_SEARCH_USERS", userBackupHashMap);
         }
 
         super.onSaveInstanceState(outState);
@@ -338,6 +342,18 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 //                        }
 
         query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
+
+        if (Utilities.isOnline(SearchBookActivity.this)) {
+            if (mSearchView.getQuery().isEmpty() || mSearchView.getQuery().length() < 2) {
+                if (!introShown)
+                    showIntroLayout();
+                return;
+            }
+            search(mSearchView.getQuery());
+        } else {
+            if (!offlineShown)
+                showOfflineLayout();
+        }
     }
 
     private void showOfflineLayout() {

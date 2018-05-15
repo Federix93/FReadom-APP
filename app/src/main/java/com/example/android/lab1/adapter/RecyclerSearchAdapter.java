@@ -3,6 +3,7 @@ package com.example.android.lab1.adapter;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,13 +31,12 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
     private JSONArray mSearchResults;
     private HashMap<String, User> mUserHashMap;
-    private FirebaseFirestore mFirebaseFirestore;
 
     public RecyclerSearchAdapter(JSONArray results, HashMap<String, User> userHashMap)
     {
+        Log.d("GNIPPO", "RecyclerSearchAdapter: ECCOMI!");
         mSearchResults = results;
         mUserHashMap = new HashMap<>(userHashMap);
-        mFirebaseFirestore =  FirebaseFirestore.getInstance();
     }
 
     @NonNull
@@ -88,15 +88,10 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
             if(!book.optString("uid").isEmpty()) {
 
-                DocumentReference mDocRef = mFirebaseFirestore.collection("users").document(book.optString("uid"));
-                mDocRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        User mUser = documentSnapshot.toObject(User.class);
-                        Glide.with(itemView.getContext()).load(mUser.getImage()).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
-                        mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", mUser.getRating()));
-                    }
-                });
+                User bookUser = mUserHashMap.get(book.optString("uid"));
+                if(bookUser.getImage() != null)
+                    Glide.with(itemView.getContext()).load(bookUser.getImage()).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
+                mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", bookUser.getRating()));
             }
 
             int condition = book.optInt("conditions");
