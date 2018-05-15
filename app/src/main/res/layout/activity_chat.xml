@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_open_chat_root"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior" >
-
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,8 +11,16 @@
         android:id="@+id/appbar_chat_activity">
         <include
             android:id="@+id/toolbar_chat_activity"
-            layout="@layout/toolbar"/>
+            layout="@layout/toolbar_chat"/>
     </android.support.design.widget.AppBarLayout>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_open_chat_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior" >
 
     <LinearLayout
         android:id="@+id/linearLayoutBottomInput"
@@ -24,16 +28,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="4dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/round_corner_layout"
-        android:minHeight="40dp"
-        android:orientation="horizontal">
+        android:minHeight="44dp"
+        android:orientation="horizontal"
+        android:elevation="3dp">
 
         <ImageButton
             android:id="@+id/buttonUpload"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:background="?attr/selectableItemBackground"
             android:contentDescription="Upload file"
@@ -50,15 +52,15 @@
             android:background="@android:color/transparent"
             android:hint="@string/enter_message"
             android:maxLines="4"
-
             android:textSize="16sp" />
 
         <Button
             android:id="@+id/sendButton"
-            android:layout_width="52dp"
-            android:layout_height="40dp"
+            android:layout_width="64dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:background="?attr/selectableItemBackground"
+            android:clickable="true"
             android:gravity="center_vertical"
             android:text="@string/send"
             android:textColor="@color/colorPrimary"
@@ -82,6 +84,6 @@
         </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>
-
 </RelativeLayout>
+</LinearLayout>
 
