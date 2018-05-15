@@ -152,5 +152,6 @@
     <string name="select_genres">Selezionare i generi che si vogliono visualizzare</string>
     <string name="cancel">Annulla</string>
     <string name="choose_genre">Selezionare il genere a cui si è interessati</string>
+    <string name="no_genre_in_particular">Nessuno in particolare</string>
 
 </resources>

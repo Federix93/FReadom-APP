@@ -8,14 +8,20 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.android.lab1.R;
 
 public class GenreBooksActivity extends AppCompatActivity {
 
     public static final String SELECTED_GENRE = "SELECTED_GENRE";
+    private static final int NO_GENRE_SELECTED = -1;
     Toolbar mToolbar;
     ListView mGenreListView;
+
+    public static boolean isValidGenre(int i) {
+        return i >= 0;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,11 +40,27 @@ public class GenreBooksActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent result = new Intent();
-                result.putExtra(SELECTED_GENRE, position);
+                result.putExtra(SELECTED_GENRE, position - 1);
                 setResult(RESULT_OK, result);
                 finish();
             }
         });
+        TextView noGenreTextView = (TextView) getLayoutInflater()
+                .inflate(R.layout.item_book_genre, null, false);
+        noGenreTextView.setText(R.string.no_genre_in_particular);
+        noGenreTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.setClickable(false);
+                mGenreListView.setOnItemClickListener(null);
+                Intent i = new Intent();
+                i.putExtra(SELECTED_GENRE, NO_GENRE_SELECTED);
+                setResult(RESULT_OK, i);
+                finish();
+            }
+        });
+
+        mGenreListView.addHeaderView(noGenreTextView);
         mGenreListView.setAdapter(ArrayAdapter.createFromResource(getApplicationContext(),
                 R.array.genre,
                 R.layout.item_book_genre));

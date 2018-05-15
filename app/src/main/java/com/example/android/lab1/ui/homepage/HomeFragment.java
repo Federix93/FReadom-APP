@@ -342,12 +342,15 @@ public class HomeFragment extends Fragment {
                 break;
             case Constants.PICK_GENRE:
                 if (resultCode == Activity.RESULT_OK) {
-                    mSelectedGenre = data.hasExtra(GenreBooksActivity.SELECTED_GENRE) ?
+                    Integer oldSelectedGenre = mSelectedGenre;
+                    mSelectedGenre = data.hasExtra(GenreBooksActivity.SELECTED_GENRE) &&
+                            GenreBooksActivity.isValidGenre(data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1)) ?
                             data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1) : null;
-                    if (mSelectedGenre != null) {
-                        mGenreFilterButton.setText(getResources().getStringArray(R.array.genre)[mSelectedGenre]);
+                    mGenreFilterButton.setText(mSelectedGenre != null ?
+                            getResources().getStringArray(R.array.genre)[mSelectedGenre] :
+                            getString(R.string.genre_filter_home_page));
+                    if (mSelectedGenre != oldSelectedGenre)
                         queryDatabase();
-                    }
                 }
                 break;
         }
