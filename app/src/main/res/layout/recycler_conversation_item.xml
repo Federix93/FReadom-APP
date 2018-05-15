@@ -56,7 +56,6 @@
                 android:ellipsize="marquee"
                 android:fontFamily="sans-serif"
                 android:singleLine="true"
-                android:text="dxhkjlòàkhfdgfjgvhbjknkm"
                 android:layout_marginEnd="16dp"
                 android:textSize="14sp"/>
         </LinearLayout>

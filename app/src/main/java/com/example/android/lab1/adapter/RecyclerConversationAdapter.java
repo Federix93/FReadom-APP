@@ -89,17 +89,15 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
         void bind(final User user, final String chatID){
             mUserNameTextView.setText(user.getUsername());
-            //if (user.getImage() == null) {
+            if (user.getImage() == null) {
                 Glide.with(itemView.getContext()).load(R.mipmap.profile_picture)
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
-            /*} else {
+            } else {
                 Glide.with(itemView.getContext()).load(user.getImage())
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
-            }*/
-
-
+            }
             mChildEventListener = new ValueEventListener(){
 
                 @Override
