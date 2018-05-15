@@ -76,7 +76,7 @@ public class ChatManager {
         });
     }
 
-    public void linkUsersToChat(){
+    private void linkUsersToChat(){
         if (firebaseAuth != null && firebaseAuth.getUid() != null) {
             DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseAuth.getUid());
             documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
