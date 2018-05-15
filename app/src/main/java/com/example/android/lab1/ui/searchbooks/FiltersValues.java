@@ -16,4 +16,9 @@ public abstract class FiltersValues {
     public static int ORDER_BY_RATING = 1;
     public static int ORDER_BY_CONDITION = 2;
     public static int ORDER_BY_POSITION = 3;
+
+    public static String FILTER_BUNDLE = "filter_bundle";
+    public static String SEARCH_BY = "search_by";
+    public static String SEEK_BARS = "seek_bars";
+    public static String ORDER_BY = "order_by";
 }

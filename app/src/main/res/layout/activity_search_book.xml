@@ -23,14 +23,54 @@
             android:layout_marginEnd="5dp"
             android:layout_marginStart="5dp"
             android:clipToPadding="false"
-            android:paddingTop="50dp"/>
+            android:paddingTop="50dp"
+            android:visibility="gone"/>
 
-        <ProgressBar
-            android:id="@+id/search_book_progress_bar"
+        <TextView
+            android:id="@+id/search_book_intro_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="200dp"
+            android:text="@string/search_intro"
+            android:textColor="@color/grayed_button"
+            android:fontFamily="sans-serif-light"
+            android:textSize="22sp"/>
+
+        <TextView
+            android:id="@+id/search_book_intro_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:text="Inserisci almeno due caratteri per cominciare"
+            android:textColor="@color/grayed_button"
+            android:fontFamily="sans-serif-light"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/search_book_no_results_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="200dp"
+            android:text="@string/no_results"
+            android:textColor="@color/black"
+            android:fontFamily="sans-serif-bold"
+            android:textSize="18sp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/search_book_no_results_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:text="@string/no_results_try_again"
+            android:textColor="@color/black"
+            android:fontFamily="sans-serif-light"
+            android:textSize="14sp"
             android:visibility="gone"/>
 
         <TextView
@@ -85,5 +125,5 @@
         app:floatingSearch_searchBarMarginRight="5dp"
         app:floatingSearch_searchBarMarginTop="5dp"
         app:floatingSearch_searchHint="@string/search_books_hint"
-        app:floatingSearch_showSearchKey="true" />
+        app:floatingSearch_showSearchKey="true"/>
 </RelativeLayout>

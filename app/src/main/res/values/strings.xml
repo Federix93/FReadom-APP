@@ -153,5 +153,8 @@
     <string name="rating_filter_zero">qualunque</string>
     <string name="rating_filter_max">5.0</string>
     <string name="position_filter">nel raggio di %.1f km</string>
+    <string name="no_results">Nessun risultato per \"%1$s\"</string>
+    <string name="no_results_try_again">Prova con un nuova ricerca</string>
+    <string name="search_intro">Cerca tra i libri caricati dagli utenti</string>
 
 </resources>

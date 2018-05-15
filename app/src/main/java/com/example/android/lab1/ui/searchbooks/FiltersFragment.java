@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -37,13 +38,13 @@ public class FiltersFragment extends DialogFragment {
     private TextView mUserRatingTextView;
     private SeekBar mPositionSeekBar;
     private TextView mPositionTextView;
-    private Button mPublishDateButton;
-    private Button mRatingButton;
-    private Button mConditionsButton;
-    private Button mPositionButton;
-    private Button mApplyButton;
-    private Button mUndoButton;
-    private Button mResetButton;
+    private AppCompatButton mPublishDateButton;
+    private AppCompatButton mRatingButton;
+    private AppCompatButton mConditionsButton;
+    private AppCompatButton mPositionButton;
+    private AppCompatButton mApplyButton;
+    private AppCompatButton mUndoButton;
+    private AppCompatButton mResetButton;
 
     FilterDataPass dataPasser;
     boolean[] searchByFilters;
@@ -59,7 +60,7 @@ public class FiltersFragment extends DialogFragment {
     public static FiltersFragment newInstance(Bundle data) {
         FiltersFragment frag = new FiltersFragment();
         Bundle args = new Bundle();
-        args.putBundle("filter_data", data);
+        args.putBundle(FiltersValues.FILTER_BUNDLE, data);
         frag.setArguments(args);
         return frag;
     }
@@ -73,6 +74,12 @@ public class FiltersFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.search_filter_dialog_fragment, container);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getDialog().getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -96,11 +103,11 @@ public class FiltersFragment extends DialogFragment {
         mUndoButton = view.findViewById(R.id.undo_filter_button);
         mResetButton = view.findViewById(R.id.reset_filters_button);
 
-        Bundle data = getArguments().getBundle("filter_data");
+        Bundle data = getArguments().getBundle(FiltersValues.FILTER_BUNDLE);
 
-        searchByFilters = data.getBooleanArray("search_by").clone();
-        seekBarsFilters = data.getIntArray("seek_bars").clone();
-        orderFilters = data.getBooleanArray("order_filters").clone();
+        searchByFilters = data.getBooleanArray(FiltersValues.SEARCH_BY).clone();
+        seekBarsFilters = data.getIntArray(FiltersValues.SEEK_BARS).clone();
+        orderFilters = data.getBooleanArray(FiltersValues.ORDER_BY).clone();
 
         setupSearchByListeners();
         setupSeekBarsListeners();
@@ -111,9 +118,9 @@ public class FiltersFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 Bundle b = new Bundle();
-                b.putBooleanArray("search_by", searchByFilters);
-                b.putIntArray("seek_bars", seekBarsFilters);
-                b.putBooleanArray("order_filters", orderFilters);
+                b.putBooleanArray(FiltersValues.SEARCH_BY, searchByFilters);
+                b.putIntArray(FiltersValues.SEEK_BARS, seekBarsFilters);
+                b.putBooleanArray(FiltersValues.ORDER_BY, orderFilters);
                 dataPasser.filterDataPass(b);
                 dismiss();
             }
@@ -155,18 +162,20 @@ public class FiltersFragment extends DialogFragment {
 
                 if(!mTitleCheckbox.isChecked())
                 {
-                    if(!mAuthorCheckbox.isChecked() && !mPublisherCheckbox.isChecked() && !mTagsCheckbox.isChecked())
+                    if(mAuthorCheckbox.isChecked() || mPublisherCheckbox.isChecked() || mTagsCheckbox.isChecked())
+                    {
+                        searchByFilters[FiltersValues.SEARCH_BY_TITLE] = false;
+                    }
+                    else
                     {
                         mTitleCheckbox.setChecked(true);
                         Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
                     }
-                    else
-                    {
-                        searchByFilters[FiltersValues.SEARCH_BY_TITLE] = false;
-                    }
 
-                    searchByFilters[FiltersValues.SEARCH_BY_TITLE] = true;
                 }
+                else
+                    searchByFilters[FiltersValues.SEARCH_BY_TITLE] = true;
+
 
             }
         });
@@ -177,18 +186,19 @@ public class FiltersFragment extends DialogFragment {
 
                 if(!mAuthorCheckbox.isChecked())
                 {
-                    if(!mTitleCheckbox.isChecked() && !mPublisherCheckbox.isChecked() && !mTagsCheckbox.isChecked())
+                    if(mTitleCheckbox.isChecked() || mPublisherCheckbox.isChecked() || mTagsCheckbox.isChecked())
                     {
-                        mAuthorCheckbox.setChecked(true);
-                        Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
+                        searchByFilters[FiltersValues.SEARCH_BY_TITLE] = false;
                     }
                     else
                     {
-                        searchByFilters[FiltersValues.SEARCH_BY_AUTHOR] = false;
+                        mTitleCheckbox.setChecked(true);
+                        Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
                     }
 
-                    searchByFilters[FiltersValues.SEARCH_BY_AUTHOR] = true;
                 }
+                else
+                    searchByFilters[FiltersValues.SEARCH_BY_AUTHOR] = true;
 
             }
         });
@@ -199,18 +209,19 @@ public class FiltersFragment extends DialogFragment {
 
                 if(!mPublisherCheckbox.isChecked())
                 {
-                    if(!mAuthorCheckbox.isChecked() && !mTitleCheckbox.isChecked() && !mTagsCheckbox.isChecked())
+                    if(mAuthorCheckbox.isChecked() || mTitleCheckbox.isChecked() || mTagsCheckbox.isChecked())
                     {
-                        mPublisherCheckbox.setChecked(true);
-                        Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
+                        searchByFilters[FiltersValues.SEARCH_BY_TITLE] = false;
                     }
                     else
                     {
-                        searchByFilters[FiltersValues.SEARCH_BY_PUBLISHER] = false;
+                        mTitleCheckbox.setChecked(true);
+                        Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
                     }
 
-                    searchByFilters[FiltersValues.SEARCH_BY_PUBLISHER] = true;
                 }
+                else
+                    searchByFilters[FiltersValues.SEARCH_BY_PUBLISHER] = true;
 
             }
         });
@@ -221,18 +232,19 @@ public class FiltersFragment extends DialogFragment {
 
                 if(!mTagsCheckbox.isChecked())
                 {
-                    if(!mAuthorCheckbox.isChecked() && !mPublisherCheckbox.isChecked() && !mTitleCheckbox.isChecked())
+                    if(mAuthorCheckbox.isChecked() || mPublisherCheckbox.isChecked() || mTitleCheckbox.isChecked())
                     {
-                        mTagsCheckbox.setChecked(true);
-                        Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
+                        searchByFilters[FiltersValues.SEARCH_BY_TITLE] = false;
                     }
                     else
                     {
-                        searchByFilters[FiltersValues.SEARCH_BY_TAGS] = false;
+                        mTitleCheckbox.setChecked(true);
+                        Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
                     }
 
-                    searchByFilters[FiltersValues.SEARCH_BY_TAGS] = true;
                 }
+                else
+                    searchByFilters[FiltersValues.SEARCH_BY_TAGS] = true;
 
             }
         });

@@ -1,22 +1,17 @@
 package com.example.android.lab1.ui.searchbooks;
 
-import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
@@ -27,15 +22,21 @@ import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerSearchAdapter;
+import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.Utilities;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -45,14 +46,20 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
     private final static String ALGOLIA_INDEX_NAME = "books";
 
+    private boolean offlineShown = false;
+    private boolean noResultsShown = false;
+    private boolean introShown = true;
+    private boolean resultsShown = false;
+
     boolean[] searchByFilters = {true, true, true, true};
-    int[] seekBarsFilters = {0, 290};
+    int[] seekBarsFilters = {0, FiltersValues.MAX_POSITION};
     boolean[] orderFilters = {true, false, false, false};
 
-    int ratingPreference = 0;
-    int oldRatingPreference = 0;
-
     private FloatingSearchView mSearchView;
+    private TextView mIntroTextViewTop;
+    private TextView mIntroTextViewBottom;
+    private TextView mNoResultsTextViewTop;
+    private TextView mNoResultsTextViewBottom;
     private TextView mNoConnectionTextViewTop;
     private TextView mNoConnectionTextViewBottom;
     private AppCompatButton mNoConnectionButton;
@@ -72,6 +79,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         Utilities.setupStatusBarColor(this);
 
         mSearchView = findViewById(R.id.floating_search_view);
+        mIntroTextViewTop = findViewById(R.id.search_book_intro_top);
+        mIntroTextViewBottom = findViewById(R.id.search_book_intro_bottom);
+        mNoResultsTextViewTop = findViewById(R.id.search_book_no_results_top);
+        mNoResultsTextViewBottom = findViewById(R.id.search_book_no_results_bottom);
         mNoConnectionTextViewTop = findViewById(R.id.search_book_no_connection_top);
         mNoConnectionTextViewBottom = findViewById(R.id.search_book_no_connection_bottom);
         mNoConnectionButton = findViewById(R.id.search_book_no_connection_try_again);
@@ -126,7 +137,17 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mNoConnectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                search(mSearchView.getQuery());
+                if (Utilities.isOnline(SearchBookActivity.this)) {
+                    if (mSearchView.getQuery().isEmpty() || mSearchView.getQuery().length() < 2) {
+                        if (!introShown)
+                            showIntroLayout();
+                        return;
+                    }
+                    search(mSearchView.getQuery());
+                } else {
+                    if (!offlineShown)
+                        showOfflineLayout();
+                }
             }
         });
     }
@@ -154,12 +175,18 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             @Override
             public void onSearchAction(String currentQuery) {
 
-                if (currentQuery.isEmpty()) {
-                    mRecyclerView.swapAdapter(null, true);
-                    return;
-                }
+                if (Utilities.isOnline(SearchBookActivity.this)) {
+                    if (currentQuery.isEmpty() || currentQuery.length() < 2) {
+                        if (!introShown)
+                            showIntroLayout();
+                        return;
+                    }
 
-                search(currentQuery);
+                    search(currentQuery);
+                } else {
+                    if (!offlineShown)
+                        showOfflineLayout();
+                }
 
             }
         });
@@ -170,132 +197,67 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             @Override
             public void onSearchTextChanged(String oldQuery, String newQuery) {
 
-                if (newQuery.isEmpty()) {
-                    mRecyclerView.swapAdapter(null, true);
-                    return;
+                if (Utilities.isOnline(SearchBookActivity.this)) {
+                    if (newQuery.isEmpty() || newQuery.length() < 2) {
+                        if (!introShown)
+                            showIntroLayout();
+                        return;
+                    }
+                    search(newQuery);
+                } else {
+                    if (!offlineShown)
+                        showOfflineLayout();
                 }
 
-                search(newQuery);
             }
         });
     }
 
-    private void search(String searchString) {
-        query.setQuery(searchString);
+    private void search(final String searchString) {
 
-        if (Utilities.isOnline(SearchBookActivity.this)) {
-            mSearchView.showProgress();
-            mNoConnectionTextViewTop.setVisibility(View.GONE);
-            mNoConnectionTextViewBottom.setVisibility(View.GONE);
-            mNoConnectionButton.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
-            index.searchAsync(query, new CompletionHandler() {
-                @Override
-                public void requestCompleted(JSONObject result, AlgoliaException error) {
-                    JSONArray hits = result.optJSONArray("hits");
-                    lastSearchResult = hits.toString();
-                    for (int i = 0; i < hits.length(); i++) {
-                        if (hits.optJSONObject(i).optString("uid").equals(mCurrentUserId)) {
-                            hits.remove(i);
-                            i--;
-                        }
+        query.setQuery(searchString);
+        mSearchView.showProgress();
+
+        index.searchAsync(query, new CompletionHandler() {
+            @Override
+            public void requestCompleted(JSONObject result, AlgoliaException error) {
+                JSONArray hits = result.optJSONArray("hits");
+                if (hits.length() == 0) {
+                    if (!noResultsShown)
+                        showNoResultsLayout(searchString);
+                    else {
+                        updateNoResultsString(searchString);
                     }
-                    mAdapter = new RecyclerSearchAdapter(hits);
-                    mRecyclerView.setAdapter(mAdapter);
                     mSearchView.hideProgress();
+                    return;
+                } else {
+                    if (!resultsShown)
+                        showResultsLayout();
                 }
-            });
-        } else {
-            mRecyclerView.setVisibility(View.GONE);
-            mNoConnectionTextViewTop.setVisibility(View.VISIBLE);
-            mNoConnectionTextViewBottom.setVisibility(View.VISIBLE);
-            mNoConnectionButton.setVisibility(View.VISIBLE);
-        }
+                lastSearchResult = hits.toString();
+                for (int i = 0; i < hits.length(); i++) {
+                    if (hits.optJSONObject(i).optString("uid").equals(mCurrentUserId)) {
+                        hits.remove(i);
+                        i--;
+                    }
+                }
+                mAdapter = new RecyclerSearchAdapter(hits);
+                mRecyclerView.setAdapter(mAdapter);
+                mSearchView.hideProgress();
+            }
+        });
+
     }
 
     private void showDialog() {
-
         Bundle filterData = new Bundle();
-        filterData.putBooleanArray("search_by", searchByFilters);
-        filterData.putIntArray("seek_bars", seekBarsFilters);
-        filterData.putBooleanArray("order_filters", orderFilters);
+        filterData.putBooleanArray(FiltersValues.SEARCH_BY, searchByFilters);
+        filterData.putIntArray(FiltersValues.SEEK_BARS, seekBarsFilters);
+        filterData.putBooleanArray(FiltersValues.ORDER_BY, orderFilters);
 
         FragmentManager fm = getSupportFragmentManager();
         FiltersFragment filtersFragment = FiltersFragment.newInstance(filterData);
         filtersFragment.show(fm, "filters_fragment");
-
-//        SeekBar ratingPreferenceBar = new SeekBar(this);
-//        ratingPreferenceBar.setMax(5);
-//        ratingPreferenceBar.setKeyProgressIncrement(1);
-//        ratingPreferenceBar.setProgress(ratingPreference);
-//
-//        oldCheckedItems = checkedItems.clone();
-//        String[] multiChoiceItems = getResources().getStringArray(R.array.search_filters);
-//        new AlertDialog.Builder(SearchBookActivity.this)
-//                .setTitle(getResources().getString(R.string.search_by))
-//                .setMultiChoiceItems(multiChoiceItems, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int index, boolean isChecked) {
-//                        if (!checkedItems[0] && !checkedItems[1] && !checkedItems[2] && !checkedItems[3]) {
-//                            final AlertDialog alert = (AlertDialog) dialog;
-//                            final ListView list = alert.getListView();
-//                            list.setItemChecked(index, true);
-//                            Toast.makeText(SearchBookActivity.this, getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                })
-//                .setView(ratingPreferenceBar)
-//                .setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        List<String> searchFields = new ArrayList<>();
-//                        if (checkedItems[0]) {
-//                            searchFields.add("title");
-//                        }
-//                        if (checkedItems[1]) {
-//                            searchFields.add("author");
-//                        }
-//                        if (checkedItems[2]) {
-//                            searchFields.add("publisher");
-//                        }
-//                        if (checkedItems[3]) {
-////                                        searchFields.add("tags");
-//                        }
-//
-//                        query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
-//                    }
-//                })
-//                .setNegativeButton(getResources().getString(R.string.negative_button_dialog), new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        checkedItems = oldCheckedItems;
-//                    }
-//                })
-//                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-//                    @Override
-//                    public void onCancel(DialogInterface dialog) {
-//                        checkedItems = oldCheckedItems;
-//                    }
-//                })
-//                .show();
-//
-//        ratingPreferenceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//
-//                Toast.makeText(SearchBookActivity.this, "Value of " + progress, Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//        });
     }
 
     @Override
@@ -308,6 +270,102 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     @Override
     public void filterDataPass(Bundle bundle) {
-        Toast.makeText(this, bundle.getString("we"), Toast.LENGTH_SHORT).show();
+        searchByFilters = bundle.getBooleanArray(FiltersValues.SEARCH_BY);
+        seekBarsFilters = bundle.getIntArray(FiltersValues.SEEK_BARS);
+        orderFilters = bundle.getBooleanArray(FiltersValues.ORDER_BY);
+
+
+        List<String> searchFields = new ArrayList<>();
+        if (searchByFilters[FiltersValues.SEARCH_BY_TITLE]) {
+            searchFields.add("title");
+        }
+        if (searchByFilters[FiltersValues.SEARCH_BY_AUTHOR]) {
+            searchFields.add("author");
+        }
+        if (searchByFilters[FiltersValues.SEARCH_BY_PUBLISHER]) {
+            searchFields.add("publisher");
+        }
+//                        if (searchByFilters[FiltersValues.SEARCH_BY_TAGS]) {
+//                                        searchFields.add("tags");
+//                        }
+
+        query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
+
+        query.setFilters("conditions>3");
+    }
+
+    private void showOfflineLayout() {
+        offlineShown = true;
+        noResultsShown = false;
+        introShown = false;
+        resultsShown = false;
+
+        mRecyclerView.setVisibility(View.GONE);
+        if (mRecyclerView.getAdapter() == null)
+            mRecyclerView.swapAdapter(null, true);
+        mIntroTextViewTop.setVisibility(View.GONE);
+        mIntroTextViewBottom.setVisibility(View.GONE);
+        mNoResultsTextViewTop.setVisibility(View.GONE);
+        mNoResultsTextViewBottom.setVisibility(View.GONE);
+        mNoConnectionTextViewTop.setVisibility(View.VISIBLE);
+        mNoConnectionTextViewBottom.setVisibility(View.VISIBLE);
+        mNoConnectionButton.setVisibility(View.VISIBLE);
+    }
+
+    private void showResultsLayout() {
+        offlineShown = false;
+        noResultsShown = false;
+        introShown = false;
+        resultsShown = true;
+
+        mNoConnectionTextViewTop.setVisibility(View.GONE);
+        mNoConnectionTextViewBottom.setVisibility(View.GONE);
+        mNoConnectionButton.setVisibility(View.GONE);
+        mIntroTextViewTop.setVisibility(View.GONE);
+        mIntroTextViewBottom.setVisibility(View.GONE);
+        mNoResultsTextViewTop.setVisibility(View.GONE);
+        mNoResultsTextViewBottom.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    private void showNoResultsLayout(String searchString) {
+        offlineShown = false;
+        noResultsShown = true;
+        introShown = false;
+        resultsShown = false;
+
+        mRecyclerView.setVisibility(View.GONE);
+        if (mRecyclerView.getAdapter() == null)
+            mRecyclerView.swapAdapter(null, true);
+        mNoConnectionTextViewTop.setVisibility(View.GONE);
+        mNoConnectionTextViewBottom.setVisibility(View.GONE);
+        mNoConnectionButton.setVisibility(View.GONE);
+        mIntroTextViewTop.setVisibility(View.GONE);
+        mIntroTextViewBottom.setVisibility(View.GONE);
+        mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results), searchString));
+        mNoResultsTextViewTop.setVisibility(View.VISIBLE);
+        mNoResultsTextViewBottom.setVisibility(View.VISIBLE);
+    }
+
+    private void updateNoResultsString(String searchString) {
+        mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results), searchString));
+    }
+
+    private void showIntroLayout() {
+        offlineShown = false;
+        noResultsShown = false;
+        introShown = true;
+        resultsShown = false;
+
+        mRecyclerView.setVisibility(View.GONE);
+        if (mRecyclerView.getAdapter() != null)
+            mRecyclerView.swapAdapter(null, true);
+        mNoConnectionTextViewTop.setVisibility(View.GONE);
+        mNoConnectionTextViewBottom.setVisibility(View.GONE);
+        mNoConnectionButton.setVisibility(View.GONE);
+        mNoResultsTextViewTop.setVisibility(View.GONE);
+        mNoResultsTextViewBottom.setVisibility(View.GONE);
+        mIntroTextViewTop.setVisibility(View.VISIBLE);
+        mIntroTextViewBottom.setVisibility(View.VISIBLE);
     }
 }
