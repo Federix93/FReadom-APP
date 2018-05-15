@@ -9,13 +9,15 @@ public class Message {
     private String mTextMessage;
     private String mPhotoURL;
     private String mUsername;
+    private String mSenderId;
     private long mTimestamp;
     private String mPhotoProfileURL;
 
     public Message(){}
 
-    public Message(String pUsername, String pTextMessage, String pPhotoProfileURL, long pTimestamp, String pPhotoURL){
+    public Message(String pUsername, String senderId, String pTextMessage, String pPhotoProfileURL, long pTimestamp, String pPhotoURL){
         mUsername = pUsername;
+        mSenderId = senderId;
         mTextMessage = pTextMessage;
         mPhotoURL = pPhotoURL;
         mTimestamp = pTimestamp;
@@ -58,6 +60,14 @@ public class Message {
 
     public void setTextMessage(String pTextMessage) {
         this.mTextMessage = pTextMessage;
+    }
+
+    public String getSenderId() {
+        return mSenderId;
+    }
+
+    public void setSenderId(String pSenderId) {
+        this.mSenderId = pSenderId;
     }
 
 

@@ -13,10 +13,10 @@ import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.utils.glideimageloader.GlideApp;
 
 import java.util.List;
-
+/*
 public class ChatMessageAdapter extends ArrayAdapter<Message> {
 
-
+    /*
     public ChatMessageAdapter(Context context, int resource, List<Message> objects) {
         super(context, resource, objects);
     }
@@ -50,5 +50,5 @@ public class ChatMessageAdapter extends ArrayAdapter<Message> {
     }
 }
 
-
+*/
 
