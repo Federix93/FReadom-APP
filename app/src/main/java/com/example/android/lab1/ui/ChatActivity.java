@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -12,11 +14,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.ChatMessageAdapter;
+import com.example.android.lab1.adapter.MessageListAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -53,13 +54,13 @@ public class ChatActivity extends AppCompatActivity {
     String mPhotoProfileURL;
     String mBookID;
 
-    ListView mMessagesListView;
+    RecyclerView mMessagesRecyclerView;
     EditText mMessageEditText;
     Button mSendButton;
     ImageButton mPhotoPickerButton;
 
     ChildEventListener mChildEventListener;
-    private ChatMessageAdapter mChatArrayAdapter;
+    private MessageListAdapter mChatArrayAdapter;
 
     String dataTitle, dataMessage;
     private final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
@@ -70,10 +71,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        mMessagesListView = findViewById(R.id.messageListView);
-        mMessageEditText = findViewById(R.id.messageEditText);
+        mMessagesRecyclerView = findViewById(R.id.chat_recyclerView);
+        mMessageEditText = findViewById(R.id.edittext_chat_message);
         mSendButton = findViewById(R.id.sendButton);
-        mPhotoPickerButton = findViewById(R.id.photoPickerButton);
+        mPhotoPickerButton = findViewById(R.id.buttonUpload);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -87,11 +88,22 @@ public class ChatActivity extends AppCompatActivity {
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
 
-
         final List<Message> chatMessages = new ArrayList<>();
 
-        mChatArrayAdapter = new ChatMessageAdapter(this, R.layout.message_chat_item, chatMessages);
-        mMessagesListView.setAdapter(mChatArrayAdapter);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        mMessagesRecyclerView.setHasFixedSize(true);
+        mMessagesRecyclerView.setLayoutManager(layoutManager);
+        mMessagesRecyclerView.setNestedScrollingEnabled(false);
+
+        mChatArrayAdapter = new MessageListAdapter(this, chatMessages);
+        mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
+
+        mChatArrayAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+            }
+        });
 
         // Enable Send button when there's text to send
         mMessageEditText.addTextChangedListener(new TextWatcher() {
@@ -119,7 +131,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: Send messages on click
-                Message chatMessage = new Message(mUsername, mMessageEditText.getText().toString(), mPhotoProfileURL,
+                Message chatMessage = new Message(mUsername, mFirebaseAuth.getUid(), mMessageEditText.getText().toString(), mPhotoProfileURL,
                         System.currentTimeMillis() / 1000, null);
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);
                 mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -159,7 +171,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Message chatMessage = dataSnapshot.getValue(Message.class);
-                mChatArrayAdapter.add(chatMessage);
+                mChatArrayAdapter.addMessage(chatMessage);
             }
 
             @Override
@@ -212,7 +224,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         final Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        Message chatMessage = new Message(mUsername, null, mPhotoProfileURL, System.currentTimeMillis() / 1000,
+                        Message chatMessage = new Message(mUsername, mFirebaseAuth.getUid(), null, mPhotoProfileURL, System.currentTimeMillis() / 1000,
                                 downloadUrl.toString());
                         mMessagesReference.child(mChatID).push().setValue(chatMessage);
                         mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
