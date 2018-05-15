@@ -85,6 +85,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     Intent intent = new Intent(v.getContext(), ChatActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.putExtra("ChatID", chatID);
+                    intent.putExtra("Username", user.getUsername());
                     intent.putExtra("ImageURL", user.getImage());
                     intent.putExtra("BookID", mBookID);
                     v.getContext().startActivity(intent);

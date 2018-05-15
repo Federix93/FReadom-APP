@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -41,12 +42,11 @@ import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
 
+    Toolbar mToolbar;
     FirebaseDatabase mFirebaseDatabase;
 
     DatabaseReference mChatsReference;
-    //DatabaseReference mConversationsReference;
     DatabaseReference mMessagesReference;
-    //DatabaseReference mUsersReference;
 
     FirebaseAuth mFirebaseAuth;
     FirebaseStorage mFirebaseStorage;
@@ -90,11 +90,21 @@ public class ChatActivity extends AppCompatActivity {
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
 
         mChatID = getIntent().getStringExtra("ChatID");
+        mUsername = getIntent().getStringExtra("Username");
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
 
-        final List<Message> chatMessages = new ArrayList<>();
+        mToolbar = findViewById(R.id.toolbar_chat_activity);
+        mToolbar.setTitle(mUsername);
+        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
+        final List<Message> chatMessages = new ArrayList<>();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mMessagesRecyclerView.setHasFixedSize(true);
@@ -135,7 +145,7 @@ public class ChatActivity extends AppCompatActivity {
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mUsername = mFirebaseAuth.getCurrentUser().getDisplayName();
+
                 Message chatMessage = new Message(mUsername, mFirebaseAuth.getUid(), mMessageEditText.getText().toString(), mPhotoProfileURL,
                         System.currentTimeMillis() / 1000, null);
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);
