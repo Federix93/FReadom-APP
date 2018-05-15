@@ -9,17 +9,14 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
-import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.utils.Utilities;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,21 +24,27 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 public class ConversationsActivity extends AppCompatActivity {
 
     Toolbar mToolbar;
     String mBookID;
-    private RecyclerView mRecyclerView;
+    RecyclerView mRecyclerView;
     private List<com.example.android.lab1.model.User> mUserList;
     private List<String> mListChatID;
     private RecyclerConversationAdapter mAdapter;
+
+    ChildEventListener childEventListener;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -51,6 +54,7 @@ public class ConversationsActivity extends AppCompatActivity {
 
         mUserList = new ArrayList<>();
         mListChatID = new ArrayList<>();
+
         mBookID = getIntent().getStringExtra("ID_BOOK_SELECTED");
         Utilities.setupStatusBarColor(this);
         mToolbar = findViewById(R.id.toolbar_conversations_activity);
@@ -71,7 +75,8 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.setNestedScrollingEnabled(true);
         mAdapter = new RecyclerConversationAdapter(mUserList, mListChatID, mBookID);
         mRecyclerView.setAdapter(mAdapter);
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+
+        final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
@@ -84,7 +89,6 @@ public class ConversationsActivity extends AppCompatActivity {
             usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    User user = dataSnapshot.getValue(User.class);
                     final Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
                     if (map != null) {
                         for (final String uid : map.keySet()) {
@@ -92,15 +96,20 @@ public class ConversationsActivity extends AppCompatActivity {
                                 continue;
                             }
                             DocumentReference documentReference = firebaseFirestore.collection("users").document(uid);
-                            documentReference.get().addOnCompleteListener(ConversationsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                            documentReference.addSnapshotListener(ConversationsActivity.this, new EventListener<DocumentSnapshot>() {
                                 @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                    if (task.isSuccessful()) {
-                                        com.example.android.lab1.model.User user = task.getResult().toObject(com.example.android.lab1.model.User.class);
+                                public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+                                    if (e != null) {
+                                        return;
+                                    }
+                                    if (snapshot != null && snapshot.exists()) {
+                                        com.example.android.lab1.model.User user = snapshot.toObject(com.example.android.lab1.model.User.class);
                                         mUserList.add(user);
                                         mListChatID.add(map.get(uid));
                                         mAdapter.setItems(mUserList, mListChatID);
                                         mAdapter.notifyDataSetChanged();
+
+
                                     }
                                 }
                             });

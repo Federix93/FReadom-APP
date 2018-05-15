@@ -14,12 +14,20 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.ui.BookDetailsActivity;
+import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.ui.chat.ChatActivity;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
 
-import org.w3c.dom.Text;
-
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -27,11 +35,15 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
     private List<User> mListUsers;
     private List<String> mListChatID;
+    private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference mChatsReference;
     private String mBookID;
 
     public RecyclerConversationAdapter(List<User> listUsers, List<String> listChatID, String bookID){
         mListUsers = listUsers;
         mListChatID = listChatID;
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mChatsReference = mFirebaseDatabase.getReference().child("chats");
         mBookID = bookID;
     }
 
@@ -65,8 +77,9 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         ImageView mUserProfileImageView;
         TextView mLastMessageTextView;
         TextView mTimetampTextView;
+        private ValueEventListener mChildEventListener;
 
-        public ConversationViewHolder(View itemView) {
+        ConversationViewHolder(View itemView) {
             super(itemView);
             mUserNameTextView = itemView.findViewById(R.id.username_conversation_text_view);
             mUserProfileImageView = itemView.findViewById(R.id.profile_conversation_image_view);
@@ -74,7 +87,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mTimetampTextView = itemView.findViewById(R.id.timestamp_last_message);
         }
 
-        public void bind(final User user, final String chatID){
+        void bind(final User user, final String chatID){
             mUserNameTextView.setText(user.getUsername());
             //if (user.getImage() == null) {
                 Glide.with(itemView.getContext()).load(R.mipmap.profile_picture)
@@ -85,6 +98,30 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
             }*/
+
+
+            mChildEventListener = new ValueEventListener(){
+
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Chat chat = dataSnapshot.getValue(Chat.class);
+                    if(chat != null) {
+                        Calendar cal1 = Calendar.getInstance();
+                        cal1.setTimeInMillis(chat.getTimestamp() * 1000);
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                        mTimetampTextView.setText(dateFormat.format(cal1.getTime()));
+                        mLastMessageTextView.setText(chat.getLastMessage());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            };
+
+            mChatsReference.child(chatID).addValueEventListener(mChildEventListener);
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
