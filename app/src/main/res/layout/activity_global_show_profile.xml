@@ -151,7 +151,7 @@
 
             <!--<Button-->
             <!--android:textColor="#fff"-->
-            <!--android:background="@drawable/styled_button"-->
+            <!--android:background="@drawable/round_corner_layout"-->
             <!--android:layout_marginTop="30dp"-->
             <!--android:layout_gravity="center_horizontal"-->
             <!--android:layout_width="wrap_content"-->
