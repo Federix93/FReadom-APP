@@ -4,13 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -30,15 +28,13 @@ import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.Utilities;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -64,6 +60,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     private String mBookId;
     private User mUser;
+    private ListenerRegistration mListenerRegistration;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -116,15 +113,29 @@ public class BookDetailsActivity extends AppCompatActivity {
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
         final DocumentReference docRef = firebaseFirestore.collection("books").document(mBookId);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        mListenerRegistration = docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                //Log.d("DEBUGPERSISTANCE", "onComplete: " + documentSnapshot.getMetadata()
+                //        .isFromCache());
+                Book book = documentSnapshot.toObject(Book.class);
+                updateUI(book);
+                if (mListenerRegistration != null)
+                    mListenerRegistration.remove();
+            }
+        });
+
+
+                /*.addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     Book book = task.getResult().toObject(Book.class);
+
                     updateUI(book);
                 }
             }
-        });
+        });*/
     }
 
 

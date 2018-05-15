@@ -45,7 +45,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -318,8 +317,22 @@ public class HomeFragment extends Fragment {
                     books.add(currentBook);
                     size++;
                 }
+                Book temp;
+                String idTemp;
+                for (int i = 0; i < books.size() - 1; i++) {
+                    for (int i1 = 0; i1 < books.size(); i1++) {
+                        if (books.get(i).compareTo(books.get(i1)) < 0) {
+                            temp = books.get(i);
+                            idTemp = ids.get(i);
 
-                Collections.sort(books);
+                            books.set(i, books.get(i1));
+                            ids.set(i, ids.get(i1));
+
+                            books.set(i1, temp);
+                            ids.set(i1, idTemp);
+                        }
+                    }
+                }
 
                 if (mSecondRecyclerView != null)
                     mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(books.subList(0, Math.min(books.size(), homePageBooksNumber)), ids));
