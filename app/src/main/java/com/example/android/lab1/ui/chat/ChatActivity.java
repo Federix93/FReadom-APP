@@ -14,11 +14,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.MessageListAdapter;
+import com.example.android.lab1.adapter.ChatMessageAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -61,7 +60,7 @@ public class ChatActivity extends AppCompatActivity {
     ImageButton mPhotoPickerButton;
 
     ChildEventListener mChildEventListener;
-    private MessageListAdapter mChatArrayAdapter;
+    private ChatMessageAdapter mChatArrayAdapter;
 
     String dataTitle, dataMessage;
     private final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
@@ -96,7 +95,7 @@ public class ChatActivity extends AppCompatActivity {
         mMessagesRecyclerView.setLayoutManager(layoutManager);
         mMessagesRecyclerView.setNestedScrollingEnabled(false);
 
-        mChatArrayAdapter = new MessageListAdapter(this, chatMessages);
+        mChatArrayAdapter = new ChatMessageAdapter(this, chatMessages);
         mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
 
         mChatArrayAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
