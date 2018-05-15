@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
+import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -83,7 +84,7 @@ public class ConversationsActivity extends AppCompatActivity {
             usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    //User user = dataSnapshot.getValue(User.class);
+                    User user = dataSnapshot.getValue(User.class);
                     final Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
                     if (map != null) {
                         for (final String uid : map.keySet()) {

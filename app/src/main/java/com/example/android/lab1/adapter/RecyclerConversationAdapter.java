@@ -17,6 +17,8 @@ import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.chat.ChatActivity;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -61,11 +63,15 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
         TextView mUserNameTextView;
         ImageView mUserProfileImageView;
+        TextView mLastMessageTextView;
+        TextView mTimetampTextView;
 
         public ConversationViewHolder(View itemView) {
             super(itemView);
             mUserNameTextView = itemView.findViewById(R.id.username_conversation_text_view);
             mUserProfileImageView = itemView.findViewById(R.id.profile_conversation_image_view);
+            mLastMessageTextView = itemView.findViewById(R.id.lastmessage_conversation_text_view);
+            mTimetampTextView = itemView.findViewById(R.id.timestamp_last_message);
         }
 
         public void bind(final User user, final String chatID){

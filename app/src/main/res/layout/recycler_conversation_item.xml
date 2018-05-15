@@ -57,8 +57,7 @@
                 android:fontFamily="sans-serif"
                 android:singleLine="true"
                 android:layout_marginEnd="16dp"
-                android:textSize="14sp"
-                android:text="bgdabdfaabgdabdfaaadabgdabdfaaadabgdabdfaaadabgdabdfaaadaada"/>
+                android:textSize="14sp"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -66,7 +65,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:text="11:06"
+        android:id="@+id/timestamp_last_message"
         android:layout_centerVertical="true"
         android:layout_marginEnd="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
