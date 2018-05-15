@@ -1,6 +1,7 @@
 package com.example.android.lab1.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -36,7 +37,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
     // Inflates the appropriate layout according to the ViewType.
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
 
         if (viewType == VIEW_TYPE_MESSAGE_SENT) {
@@ -52,7 +53,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     }
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Message message = mMessageList.get(position);
 
         switch (holder.getItemViewType()) {
@@ -72,7 +73,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     // Determines the appropriate ViewType according to the sender of the message.
     @Override
     public int getItemViewType(int position) {
-        Message message = (Message) mMessageList.get(position);
+        Message message = mMessageList.get(position);
 
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         if (firebaseAuth != null && firebaseAuth.getUid() != null) {
@@ -100,8 +101,8 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         SentMessageHolder(View itemView) {
             super(itemView);
 
-            messageText = (TextView) itemView.findViewById(R.id.text_message_body);
-            timeText = (TextView) itemView.findViewById(R.id.text_message_time);
+            messageText = itemView.findViewById(R.id.text_message_body);
+            timeText = itemView.findViewById(R.id.text_message_time);
         }
 
         void bind(Message message) {
@@ -110,9 +111,8 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             // Format the stored timestamp into a readable String using method.
             Calendar cal1 = Calendar.getInstance();
             cal1.setTimeInMillis(message.getTimestamp()*1000);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a", Locale.ITALY);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
             timeText.setText(dateFormat.format(cal1.getTime()));
-            //timeText.setText(DateUtils.formatDateTime(mContext, message.getTimestamp(), FORMAT_24HOUR));
         }
     }
 
@@ -123,17 +123,19 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
         ReceivedMessageHolder(View itemView) {
             super(itemView);
-            messageText = (TextView) itemView.findViewById(R.id.text_message_body);
-            timeText = (TextView) itemView.findViewById(R.id.text_message_time);
-            nameText = (TextView) itemView.findViewById(R.id.text_message_name);
+            messageText = itemView.findViewById(R.id.text_message_body);
+            timeText = itemView.findViewById(R.id.text_message_time);
+            nameText = itemView.findViewById(R.id.text_message_name);
         }
 
         void bind(Message message) {
             messageText.setText(message.getTextMessage());
 
-            // Format the stored timestamp into a readable String using method.
-            //timeText.setText(Utils.formatDateTime(message.getCreatedAt()));
-            //nameText.setText(message.getName());
+            Calendar cal1 = Calendar.getInstance();
+            cal1.setTimeInMillis(message.getTimestamp()*1000);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+            timeText.setText(dateFormat.format(cal1.getTime()));
+
 
             // Insert the profile image from the URL into the ImageView.
             //add glide to display round image

@@ -150,4 +150,7 @@
 
     <string name="click_position_button">Aggiungi posizione</string>
 
+    <string name="enter_message">Inserisci il messaggio</string>
+    <string name="send">Invia</string>
+
 </resources>
