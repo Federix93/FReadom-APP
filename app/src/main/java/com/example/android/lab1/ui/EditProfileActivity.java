@@ -1,39 +1,35 @@
 package com.example.android.lab1.ui;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
+import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
-import com.example.android.lab1.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -70,7 +66,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
     private final int RESULT_LOAD_IMAGE = 1;
     private final int CAPTURE_IMAGE = 0;
-    private static final int POSITION_REQUEST = 2;
 
     private FirebaseAuth mFirebaseAuth;
     private String mCurrentPhotoPath;
@@ -180,7 +175,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         mCurrentPhotoPath = mSharedPreferencesManager.getImage();
         mCurrentAddress = mSharedPreferencesManager.getAddress();
 
-        final Activity thisActivity = this;
         mCameraImageView.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -199,8 +193,10 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
                             case CAPTURE_IMAGE:
-                                if (!Utilities.checkPermissionActivity(thisActivity, Manifest.permission.CAMERA)) {
-                                    Utilities.askPermissionActivity(thisActivity, Manifest.permission.CAMERA, CAPTURE_IMAGE);
+                                if (!Utilities.checkPermissionActivity(EditProfileActivity.this,
+                                        Manifest.permission.CAMERA)) {
+                                    Utilities.askPermissionActivity(EditProfileActivity.this,
+                                            Manifest.permission.CAMERA, CAPTURE_IMAGE);
                                 } else {
                                     takePicture();
                                 }
@@ -221,23 +217,32 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         mPositionImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), PositionActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivityForResult(intent, POSITION_REQUEST);
+                openPositionActivity(false);
             }
         });
 
         mAddressTextInputLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), PositionActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivityForResult(intent, POSITION_REQUEST);
+                openPositionActivity(false);
             }
         });
         mFocusedView = null;
         resetFocus();
         clearFocusOnViews();
+    }
+
+    private void openPositionActivity(boolean skipCheck) {
+        if (skipCheck ||
+                Utilities.checkPermissionActivity(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            Intent positionActivityIntent = Utilities.getPositionActivityIntent(this, false);
+            startActivityForResult(positionActivityIntent, Constants.POSITION_ACTIVITY_REQUEST);
+        } else {
+            Utilities.askPermissionActivity(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Constants.POSITION_ACTIVITY_REQUEST);
+        }
+
     }
 
     @Override
@@ -282,6 +287,11 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     takePicture();
                 }
+            case Constants.POSITION_ACTIVITY_REQUEST:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    openPositionActivity(true);
+                break;
+
         }
     }
 
@@ -366,7 +376,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 }
                 break;
-            case POSITION_REQUEST:
+            case Constants.POSITION_ACTIVITY_REQUEST:
                 if (resultCode == RESULT_OK) {
                     if (data != null && data.hasExtra(PositionActivity.ADDRESS_KEY)) {
                         mCurrentAddress = data.getStringExtra(PositionActivity.ADDRESS_KEY);
@@ -473,12 +483,11 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
+        return File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-        return image;
     }
 
     private void takePicture() {

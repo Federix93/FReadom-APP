@@ -32,6 +32,13 @@ public class GenreBooksActivity extends AppCompatActivity {
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         mToolbar.setTitle(R.string.choose_genre);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
 
         setSupportActionBar(mToolbar);
         // }
