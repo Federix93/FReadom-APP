@@ -24,18 +24,15 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerSearchAdapter;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.Utilities;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -44,7 +41,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
-    private final static String ALGOLIA_INDEX_NAME = "books";
+    private final static String ALGOLIA_BOOKS_INDEX_NAME = "books";
+    private final static String ALGOLIA_USERS_INDEX_NAME = "users";
 
     private boolean offlineShown = false;
     private boolean noResultsShown = false;
@@ -63,12 +61,19 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private TextView mNoConnectionTextViewTop;
     private TextView mNoConnectionTextViewBottom;
     private AppCompatButton mNoConnectionButton;
-    private Index index;
+    private Index booksIndex;
+    private Index usersIndex;
     private RecyclerView mRecyclerView;
     private RecyclerSearchAdapter mAdapter;
-    private String lastSearchResult;
+
     private Query query = new Query();
     private String mCurrentUserId;
+
+
+    private JSONArray hits;
+    private HashMap<String, User> userHashMap = new HashMap<>();
+
+    private String lastSearchResult;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -97,7 +102,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
-        index = client.getIndex(ALGOLIA_INDEX_NAME);
+        booksIndex = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
+        usersIndex = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
 
         setupMenuItemClickListener();
         setupSearchListener();
@@ -107,9 +113,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getString("LAST_SEARCH") != null) {
-                lastSearchResult = savedInstanceState.getString("LAST_SEARCH");
+                lastSearchResult = savedInstanceState.getString("LAST_SEARCH_BOOKS");
+                userHashMap = (HashMap<String, User>) savedInstanceState.getSerializable("LAST_SEARCH_USERS");
                 try {
-                    mAdapter = new RecyclerSearchAdapter(new JSONArray(lastSearchResult));
+                    mAdapter = new RecyclerSearchAdapter(new JSONArray(lastSearchResult), userHashMap);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -218,10 +225,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         query.setQuery(searchString);
         mSearchView.showProgress();
 
-        index.searchAsync(query, new CompletionHandler() {
+        booksIndex.searchAsync(query, new CompletionHandler() {
             @Override
             public void requestCompleted(JSONObject result, AlgoliaException error) {
-                JSONArray hits = result.optJSONArray("hits");
+                hits = result.optJSONArray("hits");
                 if (hits.length() == 0) {
                     if (!noResultsShown)
                         showNoResultsLayout(searchString);
@@ -230,20 +237,57 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     }
                     mSearchView.hideProgress();
                     return;
-                } else {
-                    if (!resultsShown)
-                        showResultsLayout();
                 }
-                lastSearchResult = hits.toString();
+
+                if (!resultsShown)
+                    showResultsLayout();
+
+                Collection<String> userIDs = new ArrayList<>();
+
                 for (int i = 0; i < hits.length(); i++) {
-                    if (hits.optJSONObject(i).optString("uid").equals(mCurrentUserId)) {
+                    String bookUid = hits.optJSONObject(i).optString("uid");
+                    if (bookUid.equals(mCurrentUserId)) {
                         hits.remove(i);
                         i--;
+                    } else {
+                        userIDs.add(bookUid);
                     }
                 }
-                mAdapter = new RecyclerSearchAdapter(hits);
-                mRecyclerView.setAdapter(mAdapter);
-                mSearchView.hideProgress();
+
+                userHashMap.clear();
+
+                usersIndex.getObjectsAsync(userIDs, new CompletionHandler() {
+                    @Override
+                    public void requestCompleted(JSONObject userResult, AlgoliaException e) {
+                        JSONArray userHits = userResult.optJSONArray("results");
+                        for (int i = 0; i < userHits.length(); i++) {
+                            User bookUser = new User();
+                            bookUser.setRating((float) userHits.optJSONObject(i).optDouble("rating"));
+                            bookUser.setImage(userHits.optJSONObject(i).optString("image"));
+                            if (!userHashMap.containsKey(userHits.optJSONObject(i).optString("objectID")))
+                                userHashMap.put(userHits.optJSONObject(i).optString("objectID"), bookUser);
+
+                        }
+
+                        if(seekBarsFilters[FiltersValues.RATING_FILTER] < 100)
+                        {
+                            for (int i = 0; i < hits.length(); i++) {
+                                String bookUid = hits.optJSONObject(i).optString("uid");
+//                                if (userHashMap.get(bookUid).getRating() < seekBarsFilters[FiltersValues.RATING_FILTER]) {
+                                if (userHashMap.get(bookUid).getRating() < 4) {
+                                    hits.remove(i);
+                                    i--;
+                                }
+                            }
+                        }
+
+                        lastSearchResult = hits.toString();
+                        mAdapter = new RecyclerSearchAdapter(hits, userHashMap);
+                        mRecyclerView.setAdapter(mAdapter);
+                        mSearchView.hideProgress();
+
+                    }
+                });
             }
         });
 
@@ -263,8 +307,12 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
-        if (!mSearchView.getQuery().isEmpty())
-            outState.putString("LAST_SEARCH", lastSearchResult);
+        if (mSearchView.getQuery().length() > 2)
+        {
+            outState.putString("LAST_SEARCH_BOOKS", lastSearchResult);
+            outState.putSerializable("LAST_SEARCH_USERS", userHashMap);
+        }
+
         super.onSaveInstanceState(outState);
     }
 
@@ -290,8 +338,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 //                        }
 
         query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
-
-        query.setFilters("conditions>3");
     }
 
     private void showOfflineLayout() {

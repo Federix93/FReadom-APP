@@ -24,14 +24,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAdapter.ResultViewHolder> {
 
     private JSONArray mSearchResults;
+    private HashMap<String, User> mUserHashMap;
     private FirebaseFirestore mFirebaseFirestore;
 
-    public RecyclerSearchAdapter(JSONArray results)
+    public RecyclerSearchAdapter(JSONArray results, HashMap<String, User> userHashMap)
     {
         mSearchResults = results;
+        mUserHashMap = new HashMap<>(userHashMap);
         mFirebaseFirestore =  FirebaseFirestore.getInstance();
     }
 
