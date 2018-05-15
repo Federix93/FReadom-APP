@@ -83,10 +83,8 @@ public class ChatActivity extends AppCompatActivity {
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
 
         mChatID = getIntent().getStringExtra("ChatID");
-        mUsername = getIntent().getStringExtra("Username");
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
-
 
         final List<Message> chatMessages = new ArrayList<>();
 
@@ -118,7 +116,7 @@ public class ChatActivity extends AppCompatActivity {
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Send messages on click
+                mUsername = mFirebaseAuth.getCurrentUser().getDisplayName();
                 Message chatMessage = new Message(mUsername, mMessageEditText.getText().toString(), mPhotoProfileURL,
                         System.currentTimeMillis() / 1000, null);
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);

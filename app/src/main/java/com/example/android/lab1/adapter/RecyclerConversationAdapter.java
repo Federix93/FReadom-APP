@@ -70,22 +70,21 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
         public void bind(final User user, final String chatID){
             mUserNameTextView.setText(user.getUsername());
-            if (user.getImage() == null) {
+            //if (user.getImage() == null) {
                 Glide.with(itemView.getContext()).load(R.mipmap.profile_picture)
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
-            } else {
+            /*} else {
                 Glide.with(itemView.getContext()).load(user.getImage())
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
-            }
+            }*/
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ChatActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.putExtra("ChatID", chatID);
-                    intent.putExtra("Username", user.getUsername());
                     intent.putExtra("ImageURL", user.getImage());
                     intent.putExtra("BookID", mBookID);
                     v.getContext().startActivity(intent);
