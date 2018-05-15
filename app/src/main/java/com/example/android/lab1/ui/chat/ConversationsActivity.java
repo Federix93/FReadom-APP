@@ -39,6 +39,7 @@ public class ConversationsActivity extends AppCompatActivity {
     String mBookID;
     private RecyclerView mRecyclerView;
     private List<com.example.android.lab1.model.User> mUserList;
+    private List<String> mListChatID;
     private RecyclerConversationAdapter mAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -48,6 +49,7 @@ public class ConversationsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_conversations);
 
         mUserList = new ArrayList<>();
+        mListChatID = new ArrayList<>();
         mBookID = getIntent().getStringExtra("ID_BOOK_SELECTED");
         Utilities.setupStatusBarColor(this);
         mToolbar = findViewById(R.id.toolbar_conversations_activity);
@@ -66,7 +68,7 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
-        mAdapter = new RecyclerConversationAdapter(mUserList);
+        mAdapter = new RecyclerConversationAdapter(mUserList, mListChatID, mBookID);
         mRecyclerView.setAdapter(mAdapter);
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -82,9 +84,9 @@ public class ConversationsActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     //User user = dataSnapshot.getValue(User.class);
-                    Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
+                    final Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
                     if (map != null) {
-                        for (String uid : map.keySet()) {
+                        for (final String uid : map.keySet()) {
                             if(uid.equals("Dummy")){
                                 continue;
                             }
@@ -95,7 +97,8 @@ public class ConversationsActivity extends AppCompatActivity {
                                     if (task.isSuccessful()) {
                                         com.example.android.lab1.model.User user = task.getResult().toObject(com.example.android.lab1.model.User.class);
                                         mUserList.add(user);
-                                        mAdapter.setItems(mUserList);
+                                        mListChatID.add(map.get(uid));
+                                        mAdapter.setItems(mUserList, mListChatID);
                                         mAdapter.notifyDataSetChanged();
                                     }
                                 }

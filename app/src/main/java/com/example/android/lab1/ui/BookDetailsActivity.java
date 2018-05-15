@@ -31,6 +31,7 @@ import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.BooksBorrowed;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -291,7 +292,6 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
                 final DocumentReference docRef;
                 if(mFirebaseAuth.getUid() != null) {
                     docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
@@ -311,6 +311,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     booksBorrowed = new BooksBorrowed(list);
                                     docRef.set(booksBorrowed);
                                 }
+                                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
                             }
                         }
                     });

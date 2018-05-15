@@ -1,5 +1,6 @@
 package com.example.android.lab1.adapter;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,6 +14,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.BookDetailsActivity;
+import com.example.android.lab1.ui.chat.ChatActivity;
 
 import java.util.List;
 
@@ -20,15 +23,21 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerConversationAdapter.ConversationViewHolder> {
 
-    public List<User> mListUsers;
+    private List<User> mListUsers;
+    private List<String> mListChatID;
+    private String mBookID;
 
-    public RecyclerConversationAdapter(List<User> listUsers){
+    public RecyclerConversationAdapter(List<User> listUsers, List<String> listChatID, String bookID){
         mListUsers = listUsers;
+        mListChatID = listChatID;
+        mBookID = bookID;
     }
 
-    public void setItems(List<User> listUsers){
+    public void setItems(List<User> listUsers, List<String> listChatID){
         mListUsers = listUsers;
+        mListChatID = listChatID;
     }
+
 
     @NonNull
     @Override
@@ -40,7 +49,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
-        holder.bind(mListUsers.get(position));
+        holder.bind(mListUsers.get(position), mListChatID.get(position));
     }
 
     @Override
@@ -59,18 +68,29 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mUserProfileImageView = itemView.findViewById(R.id.profile_conversation_image_view);
         }
 
-        public void bind(User user){
-            Log.d("LULLO", "USERNAME" + user.getUsername());
+        public void bind(final User user, final String chatID){
             mUserNameTextView.setText(user.getUsername());
-            //if (user.getImage() == null) {
+            if (user.getImage() == null) {
                 Glide.with(itemView.getContext()).load(R.mipmap.profile_picture)
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
-            /*} else {
+            } else {
                 Glide.with(itemView.getContext()).load(user.getImage())
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
-            }*/
+            }
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("ChatID", chatID);
+                    intent.putExtra("Username", user.getUsername());
+                    intent.putExtra("ImageURL", user.getImage());
+                    intent.putExtra("BookID", mBookID);
+                    v.getContext().startActivity(intent);
+                }
+            });
         }
     }
 }

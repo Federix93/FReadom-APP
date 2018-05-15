@@ -27,12 +27,14 @@ public class ChatManager {
     private final String mBookOwnerUserID;
     private com.example.android.lab1.model.User mUserLogged;
     private Context mContext;
-    private FirebaseAuth firebaseAuth;
     private String mChatID;
 
     private User mUserLoggedDatabase;
     private User mBookOwnerUserDatabase;
 
+    private FirebaseAuth firebaseAuth;
+    private FirebaseDatabase firebaseDatabase;
+    private FirebaseFirestore firebaseFirestore;
     private final DatabaseReference chatsReference;
     private final DatabaseReference conversationsReference;
     private final DatabaseReference usersReference;
@@ -42,13 +44,39 @@ public class ChatManager {
         mBookOwnerUserID = bookOwnerID;
         mContext = context;
 
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
         chatsReference = firebaseDatabase.getReference().child("chats");
         conversationsReference = firebaseDatabase.getReference().child("conversations");
         usersReference = firebaseDatabase.getReference().child("users");
+        linkUsersToChat();
+}
 
-        final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        firebaseAuth = FirebaseAuth.getInstance();
+    public void checkChatExists() {
+        usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
+                if (dataSnapshot.exists()) {
+                    if (user != null && map != null && map.get(mBookOwnerUserID) != null) {
+                        mChatID = map.get(mBookOwnerUserID);
+                        openChat();
+                    }else if(map != null && map.get(mBookOwnerUserID) == null){
+                        createChat();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void linkUsersToChat(){
         if (firebaseAuth != null && firebaseAuth.getUid() != null) {
             DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseAuth.getUid());
             documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -140,38 +168,14 @@ public class ChatManager {
                             }
                         }
 
-                    @Override
-                    public void onCancelled (DatabaseError databaseError){
+                        @Override
+                        public void onCancelled (DatabaseError databaseError){
 
-                    }
-                });
-            }
-        });
-    }
-
-}
-
-    public void checkChatExists() {
-        usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
-                if (dataSnapshot.exists()) {
-                    if (user != null && map != null && map.get(mBookOwnerUserID) != null) {
-                        mChatID = map.get(mBookOwnerUserID);
-                        openChat();
-                    }else if(map != null && map.get(mBookOwnerUserID) == null){
-                        createChat();
-                    }
+                        }
+                    });
                 }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+            });
+        }
     }
 
     public void openChat() {
