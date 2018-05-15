@@ -149,6 +149,7 @@ public class ChatActivity extends AppCompatActivity {
                 Message chatMessage = new Message(mUsername, mFirebaseAuth.getUid(), mMessageEditText.getText().toString(), mPhotoProfileURL,
                         System.currentTimeMillis() / 1000, null);
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);
+                final String messageWritten = mMessageEditText.getText().toString();
                 mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -156,7 +157,7 @@ public class ChatActivity extends AppCompatActivity {
                             Chat chat = dataSnapshot.getValue(Chat.class);
                             if (chat != null) {
                                 chat.setTimestamp(System.currentTimeMillis() / 1000);
-                                chat.setLastMessage(mMessageEditText.getText().toString());
+                                chat.setLastMessage(messageWritten);
                             }
                             mChatsReference.child(mChatID).setValue(chat);
                         }
