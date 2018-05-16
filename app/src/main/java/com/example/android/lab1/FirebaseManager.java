@@ -78,8 +78,9 @@ public class FirebaseManager {
 
             JSONObject user = new JSONObject();
 
-            user.put("image", userToLoad.getImage());
-            user.put("rating", userToLoad.getRating());
+            if(userToLoad.getImage() != null)
+                user.put("image", userToLoad.getImage());
+            user.put("rating", "0");
 
             algoliaIndex.addObjectAsync(user, userID, null);
         } catch (JSONException e) {
