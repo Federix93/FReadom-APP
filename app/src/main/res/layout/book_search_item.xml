@@ -68,11 +68,12 @@
                         card_view:layout_constraintStart_toStartOf="parent" />
 
                     <TextView
+                        android:id="@+id/search_book_distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
                         android:layout_marginTop="8dp"
-                        android:text="A 10 km da te, disponibile fino al 05/08"
+                        android:text="A 10 km da te"
                         android:textSize="12sp"
                         card_view:layout_constraintBottom_toTopOf="@+id/search_book_user_picture"
                         card_view:layout_constraintStart_toStartOf="parent"

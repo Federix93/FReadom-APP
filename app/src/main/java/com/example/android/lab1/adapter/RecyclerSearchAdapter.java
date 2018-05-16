@@ -17,12 +17,14 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.BookDetailsActivity;
+import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -31,12 +33,14 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
     private JSONArray mSearchResults;
     private HashMap<String, User> mUserHashMap;
+    private double mCurrentLat, mCurrentLong;
 
-    public RecyclerSearchAdapter(JSONArray results, HashMap<String, User> userHashMap)
+    public RecyclerSearchAdapter(JSONArray results, HashMap<String, User> userHashMap, double currentLat, double currentLong)
     {
-        Log.d("GNIPPO", "RecyclerSearchAdapter: ECCOMI!");
         mSearchResults = results;
         mUserHashMap = new HashMap<>(userHashMap);
+        mCurrentLat = currentLat;
+        mCurrentLong = currentLong;
     }
 
     @NonNull
@@ -59,7 +63,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
     public class ResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        TextView mTitle, mAuthor, mRating, mConditionsText;
+        TextView mTitle, mAuthor, mRating, mConditionsText, mBookDistance;
         ImageView mThumbnail, mUserPicture, mConditionsImage;
         String mBookId;
 
@@ -70,6 +74,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             mAuthor = itemView.findViewById(R.id.search_book_author);
             mThumbnail = itemView.findViewById(R.id.search_book_thumbnail);
             mUserPicture = itemView.findViewById(R.id.search_book_user_picture);
+            mBookDistance = itemView.findViewById(R.id.search_book_distance);
             mRating = itemView.findViewById(R.id.search_book_user_rating);
             mConditionsText = itemView.findViewById(R.id.search_book_conditions_text);
             mConditionsImage = itemView.findViewById(R.id.search_book_conditions_image);
@@ -77,8 +82,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             itemView.setOnClickListener(this);
         }
 
-        void bind(JSONObject book)
-        {
+        void bind(JSONObject book) {
             mTitle.setText(book.optString("title"));
             mAuthor.setText(book.optString("author"));
             if(book.optString("thumbnail").isEmpty())
@@ -95,6 +99,20 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             }
 
             int condition = book.optInt("conditions");
+            Log.d("WIDO", "book: "+book);
+            Log.d("WIDO", "geoloc: "+book.optJSONObject("_geoloc"));
+            if(book.optJSONObject("_geoloc") != null)
+            {
+                double distance = 0;
+                JSONObject geoLocation = book.optJSONObject("_geoloc");
+                try {
+                    distance = Utilities.distanceBetweenGeoPoints(geoLocation.getDouble("lat"), geoLocation.getDouble("lng"),
+                            mCurrentLat, mCurrentLong, 'K');
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                mBookDistance.setText(String.format("A %.1f km da te", distance));
+            }
 
             mConditionsText.setText(Condition.getCondition(itemView.getContext(), condition));
             mConditionsImage.setColorFilter(Condition.getConditionColor(itemView.getContext(), condition), android.graphics.PorterDuff.Mode.SRC_IN);

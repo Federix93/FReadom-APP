@@ -156,5 +156,6 @@
     <string name="no_results">Nessun risultato per \"%1$s\"</string>
     <string name="no_results_try_again">Prova con un nuova ricerca</string>
     <string name="search_intro">Cerca tra i libri caricati dagli utenti</string>
+    <string name="search_book_distance">A %.1d km da te</string>
 
 </resources>

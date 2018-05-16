@@ -1,7 +1,12 @@
 package com.example.android.lab1.ui.searchbooks;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +17,9 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.algolia.search.saas.AbstractQuery;
 import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.CompletionHandler;
@@ -24,6 +31,9 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerSearchAdapter;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.Utilities;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -31,7 +41,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -44,14 +56,21 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private final static String ALGOLIA_BOOKS_INDEX_NAME = "books";
     private final static String ALGOLIA_USERS_INDEX_NAME = "users";
 
-    private boolean offlineShown = false;
-    private boolean noResultsShown = false;
-    private boolean introShown = true;
-    private boolean resultsShown = false;
+    private final static int INTRO_VIEW = 0;
+    private final static int OFFLINE_VIEW = 1;
+    private final static int NO_RESULTS_VIEW = 2;
+    private final static int RESULTS_VIEW = 3;
+
+    private final static int POSITION_FINE_PERMISSION = 10;
+
+    private boolean[] currentView = {true, false, false, false};
 
     boolean[] searchByFilters = {true, true, true, true};
     int[] seekBarsFilters = {0, FiltersValues.MAX_POSITION};
     boolean[] orderFilters = {true, false, false, false};
+
+    private double currentLat;
+    private double currentLong;
 
     private FloatingSearchView mSearchView;
     private TextView mIntroTextViewTop;
@@ -65,6 +84,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private Index usersIndex;
     private RecyclerView mRecyclerView;
     private RecyclerSearchAdapter mAdapter;
+    private FusedLocationProviderClient mFusedLocationClient;
 
     private Query query = new Query();
     private String mCurrentUserId;
@@ -74,6 +94,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private HashMap<String, User> userBackupHashMap = new HashMap<>();
     private String lastSearchResult;
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,9 +121,20 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        if (!Utilities.checkPermissionActivity(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            Utilities.askPermissionActivity(this, Manifest.permission.ACCESS_FINE_LOCATION, POSITION_FINE_PERMISSION);
+        } else {
+            setCurrentLocation();
+        }
+
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         booksIndex = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
         usersIndex = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
+
+
+        query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
 
         setupMenuItemClickListener();
         setupSearchListener();
@@ -111,22 +143,56 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         setupNoConnectionButtonClickListener();
 
         if (savedInstanceState != null) {
-            if (savedInstanceState.getString("LAST_SEARCH_BOOKS") != null) {
-                lastSearchResult = savedInstanceState.getString("LAST_SEARCH_BOOKS");
-                userBackupHashMap = (HashMap<String, User>) savedInstanceState.getSerializable("LAST_SEARCH_USERS");
-                try {
-                    mAdapter = new RecyclerSearchAdapter(new JSONArray(lastSearchResult), userBackupHashMap);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+            if (savedInstanceState.getInt("CURRENT_VIEW") != 0) {
+                int currentViewIndex = savedInstanceState.getInt("CURRENT_VIEW");
+                currentViewIndex--;
+                Arrays.fill(currentView, false);
+                currentView[currentViewIndex] = true;
+
+                currentLat = savedInstanceState.getDouble("CURRENT_LAT");
+                currentLong = savedInstanceState.getDouble("CURRENT_LONG");
+
+                if(currentView[OFFLINE_VIEW])
+                    showOfflineView();
+                else if(currentView[NO_RESULTS_VIEW])
+                {
+                    mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results),
+                            savedInstanceState.getString("NO_RESULT_SEARCH")));
+                    showNoResultsView();
                 }
-                mRecyclerView.setAdapter(mAdapter);
-                showResultsLayout();
+
+                else if(currentView[RESULTS_VIEW])
+                {
+                    lastSearchResult = savedInstanceState.getString("LAST_SEARCH_BOOKS");
+                    userBackupHashMap = (HashMap<String, User>) savedInstanceState.getSerializable("LAST_SEARCH_USERS");
+                    try {
+                        mAdapter = new RecyclerSearchAdapter(new JSONArray(lastSearchResult), userBackupHashMap, currentLat, currentLong);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    mRecyclerView.setAdapter(mAdapter);
+                    showResultsView();
+                }
             }
         } else {
             mSearchView.setSearchFocused(true);
         }
 
+    }
 
+    @SuppressLint("MissingPermission")
+    private void setCurrentLocation() {
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            currentLat = location.getLatitude();
+                            currentLong = location.getLongitude();
+                            query.setAroundLatLng(new AbstractQuery.LatLng(currentLat, currentLong));
+                        }
+                    }
+                });
     }
 
     private void setupLeftItemListener() {
@@ -144,17 +210,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mNoConnectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utilities.isOnline(SearchBookActivity.this)) {
-                    if (mSearchView.getQuery().isEmpty() || mSearchView.getQuery().length() < 2) {
-                        if (!introShown)
-                            showIntroLayout();
-                        return;
-                    }
-                    search(mSearchView.getQuery());
-                } else {
-                    if (!offlineShown)
-                        showOfflineLayout();
-                }
+                preSearch(mSearchView.getQuery());
             }
         });
     }
@@ -181,20 +237,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
             @Override
             public void onSearchAction(String currentQuery) {
-
-                if (Utilities.isOnline(SearchBookActivity.this)) {
-                    if (currentQuery.isEmpty() || currentQuery.length() < 2) {
-                        if (!introShown)
-                            showIntroLayout();
-                        return;
-                    }
-
-                    search(currentQuery);
-                } else {
-                    if (!offlineShown)
-                        showOfflineLayout();
-                }
-
+                preSearch(currentQuery);
             }
         });
     }
@@ -203,21 +246,23 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mSearchView.setOnQueryChangeListener(new FloatingSearchView.OnQueryChangeListener() {
             @Override
             public void onSearchTextChanged(String oldQuery, String newQuery) {
-
-                if (Utilities.isOnline(SearchBookActivity.this)) {
-                    if (newQuery.isEmpty() || newQuery.length() < 2) {
-                        if (!introShown)
-                            showIntroLayout();
-                        return;
-                    }
-                    search(newQuery);
-                } else {
-                    if (!offlineShown)
-                        showOfflineLayout();
-                }
-
+                preSearch(newQuery);
             }
         });
+    }
+
+    private void preSearch(String searchString) {
+        if (Utilities.isOnline(SearchBookActivity.this)) {
+            if (searchString.isEmpty() || searchString.length() < 2) {
+                if (!currentView[INTRO_VIEW])
+                    showIntroView();
+                return;
+            }
+            search(searchString);
+        } else {
+            if (!currentView[OFFLINE_VIEW])
+                showOfflineView();
+        }
     }
 
     private void search(final String searchString) {
@@ -225,24 +270,21 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         query.setQuery(searchString);
         mSearchView.showProgress();
 
-//        booksIndex.enableSearchCache();
-
         booksIndex.searchAsync(query, new CompletionHandler() {
             @Override
             public void requestCompleted(JSONObject result, AlgoliaException error) {
                 hits = result.optJSONArray("hits");
                 if (hits.length() == 0) {
-                    if (!noResultsShown)
-                        showNoResultsLayout(searchString);
-                    else {
-                        updateNoResultsString(searchString);
-                    }
+                    if (!currentView[NO_RESULTS_VIEW])
+                        showNoResultsView();
+                    mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results), searchString));
+
                     mSearchView.hideProgress();
                     return;
                 }
 
-                if (!resultsShown)
-                    showResultsLayout();
+                if (!currentView[RESULTS_VIEW])
+                    showResultsView();
 
                 Collection<String> userIDs = new ArrayList<>();
 
@@ -266,18 +308,17 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         for (int i = 0; i < userHits.length(); i++) {
                             User bookUser = new User();
                             bookUser.setRating((float) userHits.optJSONObject(i).optDouble("rating"));
-                            if(userHits.optJSONObject(i).optString("image") != null)
+                            if (userHits.optJSONObject(i).optString("image") != null)
                                 bookUser.setImage(userHits.optJSONObject(i).optString("image"));
                             if (!usersHashMap.containsKey(userHits.optJSONObject(i).optString("objectID")))
                                 usersHashMap.put(userHits.optJSONObject(i).optString("objectID"), bookUser);
 
                         }
 
-                        if(seekBarsFilters[FiltersValues.RATING_FILTER] > 0)
-                        {
+                        if (seekBarsFilters[FiltersValues.RATING_FILTER] > 0) {
                             for (int i = 0; i < hits.length(); i++) {
                                 String bookUid = hits.optJSONObject(i).optString("uid");
-                                if (usersHashMap.get(bookUid).getRating() < (float)seekBarsFilters[FiltersValues.RATING_FILTER]/10) {
+                                if (usersHashMap.get(bookUid).getRating() < (float) seekBarsFilters[FiltersValues.RATING_FILTER] / 10) {
                                     hits.remove(i);
                                     i--;
                                 }
@@ -286,7 +327,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
                         lastSearchResult = hits.toString();
                         userBackupHashMap = new HashMap<>(usersHashMap);
-                        mAdapter = new RecyclerSearchAdapter(hits, usersHashMap);
+                        mAdapter = new RecyclerSearchAdapter(hits, usersHashMap, currentLat, currentLong);
                         mRecyclerView.setAdapter(mAdapter);
                         mSearchView.hideProgress();
 
@@ -311,10 +352,25 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
-        if (mSearchView.getQuery().length() > 2)
-        {
+        if (mSearchView.getQuery().length() > 2) {
+            int currentViewIndex;
+            if (currentView[INTRO_VIEW])
+                currentViewIndex = INTRO_VIEW;
+            else if (currentView[OFFLINE_VIEW])
+                currentViewIndex = OFFLINE_VIEW;
+            else if (currentView[NO_RESULTS_VIEW])
+            {
+                currentViewIndex = NO_RESULTS_VIEW;
+                outState.putString("NO_RESULT_SEARCH", mSearchView.getQuery());
+            }
+            else
+                currentViewIndex = RESULTS_VIEW;
+
+            outState.putInt("CURRENT_VIEW", ++currentViewIndex);
             outState.putString("LAST_SEARCH_BOOKS", lastSearchResult);
             outState.putSerializable("LAST_SEARCH_USERS", userBackupHashMap);
+            outState.putDouble("CURRENT_LAT", currentLat);
+            outState.putDouble("CURRENT_LONG", currentLong);
         }
 
         super.onSaveInstanceState(outState);
@@ -342,25 +398,16 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 //                        }
 
         query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
+        query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
 
-        if (Utilities.isOnline(SearchBookActivity.this)) {
-            if (mSearchView.getQuery().isEmpty() || mSearchView.getQuery().length() < 2) {
-                if (!introShown)
-                    showIntroLayout();
-                return;
-            }
-            search(mSearchView.getQuery());
-        } else {
-            if (!offlineShown)
-                showOfflineLayout();
-        }
+        preSearch(mSearchView.getQuery());
     }
 
-    private void showOfflineLayout() {
-        offlineShown = true;
-        noResultsShown = false;
-        introShown = false;
-        resultsShown = false;
+    private void showOfflineView() {
+        currentView[OFFLINE_VIEW] = true;
+        currentView[NO_RESULTS_VIEW] = false;
+        currentView[INTRO_VIEW] = false;
+        currentView[RESULTS_VIEW] = false;
 
         mRecyclerView.setVisibility(View.GONE);
         if (mRecyclerView.getAdapter() == null)
@@ -374,11 +421,11 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mNoConnectionButton.setVisibility(View.VISIBLE);
     }
 
-    private void showResultsLayout() {
-        offlineShown = false;
-        noResultsShown = false;
-        introShown = false;
-        resultsShown = true;
+    private void showResultsView() {
+        currentView[OFFLINE_VIEW] = false;
+        currentView[NO_RESULTS_VIEW] = false;
+        currentView[INTRO_VIEW] = false;
+        currentView[RESULTS_VIEW] = true;
 
         mNoConnectionTextViewTop.setVisibility(View.GONE);
         mNoConnectionTextViewBottom.setVisibility(View.GONE);
@@ -390,11 +437,11 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
-    private void showNoResultsLayout(String searchString) {
-        offlineShown = false;
-        noResultsShown = true;
-        introShown = false;
-        resultsShown = false;
+    private void showNoResultsView() {
+        currentView[OFFLINE_VIEW] = false;
+        currentView[NO_RESULTS_VIEW] = true;
+        currentView[INTRO_VIEW] = false;
+        currentView[RESULTS_VIEW] = false;
 
         mRecyclerView.setVisibility(View.GONE);
         if (mRecyclerView.getAdapter() == null)
@@ -404,20 +451,15 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mNoConnectionButton.setVisibility(View.GONE);
         mIntroTextViewTop.setVisibility(View.GONE);
         mIntroTextViewBottom.setVisibility(View.GONE);
-        mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results), searchString));
         mNoResultsTextViewTop.setVisibility(View.VISIBLE);
         mNoResultsTextViewBottom.setVisibility(View.VISIBLE);
     }
 
-    private void updateNoResultsString(String searchString) {
-        mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results), searchString));
-    }
-
-    private void showIntroLayout() {
-        offlineShown = false;
-        noResultsShown = false;
-        introShown = true;
-        resultsShown = false;
+    private void showIntroView() {
+        currentView[OFFLINE_VIEW] = false;
+        currentView[NO_RESULTS_VIEW] = false;
+        currentView[INTRO_VIEW] = true;
+        currentView[RESULTS_VIEW] = false;
 
         mRecyclerView.setVisibility(View.GONE);
         if (mRecyclerView.getAdapter() != null)
@@ -430,4 +472,17 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mIntroTextViewTop.setVisibility(View.VISIBLE);
         mIntroTextViewBottom.setVisibility(View.VISIBLE);
     }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case POSITION_FINE_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setCurrentLocation();
+                }
+        }
+    }
+
 }
