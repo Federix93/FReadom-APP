@@ -20,12 +20,14 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.BookDetailsActivity;
+import com.example.android.lab1.ui.searchbooks.BookSearchItem;
 import com.example.android.lab1.utils.Utilities;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAdapter.ResultViewHolder> {
@@ -34,19 +36,14 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
     private final static String ALGOLIA_USERS_INDEX_NAME = "users";
 
-    private JSONArray mSearchResults;
+    private ArrayList<BookSearchItem> mBookDataSet;
     private double mCurrentLat, mCurrentLong;
-    private Client mClient;
-    private Index mIndex;
 
-    public RecyclerSearchAdapter(JSONArray results, double currentLat, double currentLong)
+    public RecyclerSearchAdapter(ArrayList<BookSearchItem> bookDataSet, double currentLat, double currentLong)
     {
-        mSearchResults = results;
+        mBookDataSet = new ArrayList<>(bookDataSet);
         mCurrentLat = currentLat;
         mCurrentLong = currentLong;
-
-        mClient = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
-        mIndex = mClient.getIndex(ALGOLIA_USERS_INDEX_NAME);
     }
 
     @NonNull
@@ -59,12 +56,12 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
     @Override
     public void onBindViewHolder(@NonNull ResultViewHolder holder, int position) {
-        holder.bind(mSearchResults.optJSONObject(position));
+        holder.bind(mBookDataSet.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return mSearchResults.length();
+        return mBookDataSet.size();
     }
 
     public class ResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -88,38 +85,30 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             itemView.setOnClickListener(this);
         }
 
-        void bind(JSONObject book) {
-            mTitle.setText(book.optString("title"));
-            mAuthor.setText(book.optString("author"));
+        void bind(BookSearchItem book) {
+            mTitle.setText(book.getTitle());
+            mAuthor.setText(book.getAuthors());
 
-            mBookId = book.optString("objectID");
+            mBookId = book.getBookID();
 
-            if(book.optString("thumbnail").isEmpty())
+            if(book.getWebThumbnail().isEmpty())
                 Glide.with(itemView.getContext()).load(R.drawable.book_placeholder_thumbnail).into(mThumbnail);
             else
-                Glide.with(itemView.getContext()).load(book.optString("thumbnail")).into(mThumbnail);
+                Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mThumbnail);
 
-            mIndex.getObjectAsync(book.optString("uid"), new CompletionHandler() {
-                @Override
-                public void requestCompleted(JSONObject userResult, AlgoliaException e) {
-
-                    Glide.with(itemView.getContext()).load(userResult.optString("image")).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
-                    mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", userResult.optDouble("rating")));
-
-                }
-            });
-
-            int condition = book.optInt("conditions");
-            if(book.optJSONObject("_geoloc") != null)
+            if(!book.getUserImage().isEmpty())
+                Glide.with(itemView.getContext()).load(book.getUserImage()).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
+            else
             {
-                double distance = 0;
-                JSONObject geoLocation = book.optJSONObject("_geoloc");
-                try {
-                    distance = Utilities.distanceBetweenGeoPoints(geoLocation.getDouble("lat"), geoLocation.getDouble("lng"),
+                Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_person_black_24dp)).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
+            }
+            mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", book.getUserRating()));
+
+            int condition = book.getCondition();
+            if(book.getGeoPoint() != null)
+            {
+                double distance = Utilities.distanceBetweenGeoPoints(book.getGeoPoint().getLatitude(), book.getGeoPoint().getLongitude(),
                             mCurrentLat, mCurrentLong, 'K');
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
                 mBookDistance.setText(String.format("A %.1f km da te", distance));
             }
 

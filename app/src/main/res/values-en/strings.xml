@@ -114,7 +114,7 @@
     <string name="rating_filter_max">5.0</string>
     <string name="position_filter">within %.1f km</string>
     <string name="no_results">No results for \"%1$s\"</string>
-    <string name="no_results_try_again">Try with a new search</string>
+    <string name="no_results_try_again">Try with a new search or changing filters</string>
     <string name="search_intro">Search books uploaded by users</string>
     <string name="search_book_distance">Within %.1d km from you</string>
 
