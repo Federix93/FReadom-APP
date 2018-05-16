@@ -10,18 +10,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.algolia.search.saas.AlgoliaException;
+import com.algolia.search.saas.Client;
+import com.algolia.search.saas.CompletionHandler;
+import com.algolia.search.saas.Index;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
-
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.utils.Utilities;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,16 +30,23 @@ import java.util.HashMap;
 
 public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAdapter.ResultViewHolder> {
 
-    private JSONArray mSearchResults;
-    private HashMap<String, User> mUserHashMap;
-    private double mCurrentLat, mCurrentLong;
+    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
+    private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
+    private final static String ALGOLIA_USERS_INDEX_NAME = "users";
 
-    public RecyclerSearchAdapter(JSONArray results, HashMap<String, User> userHashMap, double currentLat, double currentLong)
+    private JSONArray mSearchResults;
+    private double mCurrentLat, mCurrentLong;
+    private Client mClient;
+    private Index mIndex;
+
+    public RecyclerSearchAdapter(JSONArray results, double currentLat, double currentLong)
     {
         mSearchResults = results;
-        mUserHashMap = new HashMap<>(userHashMap);
         mCurrentLat = currentLat;
         mCurrentLong = currentLong;
+
+        mClient = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
+        mIndex = mClient.getIndex(ALGOLIA_USERS_INDEX_NAME);
     }
 
     @NonNull
@@ -93,18 +99,15 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             else
                 Glide.with(itemView.getContext()).load(book.optString("thumbnail")).into(mThumbnail);
 
-            if(!book.optString("uid").isEmpty()) {
+            mIndex.getObjectAsync(book.optString("uid"), new CompletionHandler() {
+                @Override
+                public void requestCompleted(JSONObject userResult, AlgoliaException e) {
 
-                User bookUser = mUserHashMap.get(book.optString("uid"));
+                    Glide.with(itemView.getContext()).load(userResult.optString("image")).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
+                    mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", userResult.optDouble("rating")));
 
-                if(bookUser != null)
-                {
-                    if(bookUser.getImage() != null)
-                        Glide.with(itemView.getContext()).load(bookUser.getImage()).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
-                    mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", bookUser.getRating()));
                 }
-
-            }
+            });
 
             int condition = book.optInt("conditions");
             if(book.optJSONObject("_geoloc") != null)
