@@ -141,6 +141,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         setupQueryChangeListener();
         setupLeftItemListener();
         setupNoConnectionButtonClickListener();
+        mRecyclerView.setAdapter(null);
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getInt("CURRENT_VIEW") != 0) {
@@ -328,7 +329,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         lastSearchResult = hits.toString();
                         userBackupHashMap = new HashMap<>(usersHashMap);
                         mAdapter = new RecyclerSearchAdapter(hits, usersHashMap, currentLat, currentLong);
-                        mRecyclerView.setAdapter(mAdapter);
+                        mRecyclerView.swapAdapter(mAdapter, true);
                         mSearchView.hideProgress();
 
                     }

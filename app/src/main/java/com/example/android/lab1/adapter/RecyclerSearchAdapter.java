@@ -85,6 +85,9 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
         void bind(JSONObject book) {
             mTitle.setText(book.optString("title"));
             mAuthor.setText(book.optString("author"));
+
+            mBookId = book.optString("objectID");
+
             if(book.optString("thumbnail").isEmpty())
                 Glide.with(itemView.getContext()).load(R.drawable.book_placeholder_thumbnail).into(mThumbnail);
             else
@@ -93,14 +96,17 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             if(!book.optString("uid").isEmpty()) {
 
                 User bookUser = mUserHashMap.get(book.optString("uid"));
-                if(bookUser.getImage() != null)
-                    Glide.with(itemView.getContext()).load(bookUser.getImage()).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
-                mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", bookUser.getRating()));
+
+                if(bookUser != null)
+                {
+                    if(bookUser.getImage() != null)
+                        Glide.with(itemView.getContext()).load(bookUser.getImage()).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
+                    mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", bookUser.getRating()));
+                }
+
             }
 
             int condition = book.optInt("conditions");
-            Log.d("WIDO", "book: "+book);
-            Log.d("WIDO", "geoloc: "+book.optJSONObject("_geoloc"));
             if(book.optJSONObject("_geoloc") != null)
             {
                 double distance = 0;
@@ -116,8 +122,6 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
             mConditionsText.setText(Condition.getCondition(itemView.getContext(), condition));
             mConditionsImage.setColorFilter(Condition.getConditionColor(itemView.getContext(), condition), android.graphics.PorterDuff.Mode.SRC_IN);
-
-            mBookId = book.optString("objectID");
         }
 
         @Override
