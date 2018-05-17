@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -23,7 +24,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.example.android.lab1.FirebaseManager;
+import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.utils.glideimageloader.GlideApp;
@@ -31,9 +32,16 @@ import com.example.android.lab1.utils.NetworkConnectionReceiver;
 import com.example.android.lab1.R;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,6 +55,7 @@ public class SignInActivity extends AppCompatActivity {
     ConstraintLayout mRootConstraintLayout;
     Button mLoginButton;
     Button mWithoutLoginButton;
+    private User mUser;
 
     private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
 
@@ -118,10 +127,48 @@ public class SignInActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
             if (resultCode == RESULT_OK) {
-                FirebaseUser user = mFirebaseAuth.getCurrentUser();
-                if (user != null) {
-                    FirebaseManager.addUser(user);
-                    openHomePageActivity();
+                FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
+                if (firebaseUser != null) {
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    if (firebaseUser.getEmail() != null) {
+                        final DocumentReference documentReference = db.collection("users").document(firebaseUser.getUid());
+                         mUser = User.getInstance();
+                        if (firebaseUser.getPhotoUrl() != null)
+                            mUser.setImage(firebaseUser.getPhotoUrl().toString());
+                        else
+                            mUser.setImage(null);
+                        mUser.setUsername(firebaseUser.getDisplayName());
+                        mUser.setPhone(firebaseUser.getPhoneNumber());
+                        mUser.setEmail(firebaseUser.getEmail());
+                        mUser.setRating(0.0f);
+                        final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(this);
+                        progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_signing_in);
+                        documentReference.set(mUser).addOnSuccessListener(this, new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
+                                if(mFirebaseAuth != null && mFirebaseAuth != null) {
+                                    com.example.android.lab1.model.chatmodels.User user =
+                                            new com.example.android.lab1.model.chatmodels.User(mUser.getUsername(), mUser.getImage());
+                                    usersReference.child(mFirebaseAuth.getUid()).setValue(user, new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                            if(databaseError == null) {
+                                                if (progressDialogHolder.isProgressDialogShowing())
+                                                    progressDialogHolder.dismissDialog();
+                                                openHomePageActivity();
+                                            }else{
+                                                if (progressDialogHolder.isProgressDialogShowing())
+                                                    progressDialogHolder.dismissDialog();
+                                                Snackbar.make(mRootConstraintLayout, "Qualcosa è andato storto", Snackbar.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
                 }
             } else {
                 if (response == null) {

@@ -9,7 +9,6 @@ import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -51,7 +50,7 @@ public class ChatManager {
         chatsReference = firebaseDatabase.getReference().child("chats");
         conversationsReference = firebaseDatabase.getReference().child("conversations");
         usersReference = firebaseDatabase.getReference().child("users");
-        linkUsersToChat();
+        //linkUsersToChat();
 }
 
     private void checkChatExists() {
@@ -77,7 +76,7 @@ public class ChatManager {
         });
     }
 
-    private void linkUsersToChat(){
+    /*private void linkUsersToChat(){
         if (firebaseAuth != null && firebaseAuth.getUid() != null) {
             DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseAuth.getUid());
             documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -179,7 +178,7 @@ public class ChatManager {
                 }
             });
         }
-    }
+    }*/
 
     private void openChat() {
 
@@ -201,8 +200,8 @@ public class ChatManager {
         Conversation conversation = new Conversation(firebaseAuth.getUid(), mBookOwnerUserID);
         conversationsReference.child(mChatID).setValue(conversation);
 
-        mUserLoggedDatabase.setMapUserIDChatID(mBookOwnerUserID, mChatID);
-        mBookOwnerUserDatabase.setMapUserIDChatID(firebaseAuth.getUid(), mChatID);
+        //mUserLoggedDatabase.setMapUserIDChatID(mBookOwnerUserID, mChatID);
+        //mBookOwnerUserDatabase.setMapUserIDChatID(firebaseAuth.getUid(), mChatID);
 
         usersReference.child(firebaseAuth.getUid()).child(mBookID).setValue(mUserLoggedDatabase);
         usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase);
