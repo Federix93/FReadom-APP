@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -66,6 +65,9 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private int lastDisplayedPage;
     private boolean endReached;
 
+    private Index booksIndex;
+    private Index usersIndex;
+
     private final static int INTRO_VIEW = 0;
     private final static int OFFLINE_VIEW = 1;
     private final static int NO_RESULTS_VIEW = 2;
@@ -90,8 +92,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private TextView mNoConnectionTextViewTop;
     private TextView mNoConnectionTextViewBottom;
     private AppCompatButton mNoConnectionButton;
-    private Index booksIndex;
-    private Index usersIndex;
+
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private RecyclerSearchAdapter mAdapter;
@@ -484,7 +485,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                                 }
 
                                 if (booksDataSet.size() > 0) {
-                                    backupDataSet = new ArrayList<>(booksDataSet);
+                                    backupDataSet.addAll(booksDataSet);
                                     mAdapter.addAll(booksDataSet);
                                     lastDisplayedPage = lastRequestedPage;
                                     if (!currentView[RESULTS_VIEW])
@@ -518,37 +519,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-
-        if (mSearchView.getQuery().length() >= 2) {
-            int currentViewIndex;
-            if (currentView[INTRO_VIEW])
-                currentViewIndex = INTRO_VIEW;
-            else if (currentView[OFFLINE_VIEW])
-                currentViewIndex = OFFLINE_VIEW;
-            else if (currentView[NO_RESULTS_VIEW]) {
-                currentViewIndex = NO_RESULTS_VIEW;
-                outState.putString("NO_RESULT_SEARCH", mSearchView.getQuery());
-            } else
-                currentViewIndex = RESULTS_VIEW;
-
-            outState.putInt("CURRENT_VIEW", ++currentViewIndex);
-            outState.putSerializable("DATA_SET", backupDataSet);
-            outState.putDouble("CURRENT_LAT", currentLat);
-            outState.putDouble("CURRENT_LONG", currentLong);
-
-            outState.putInt("LAST_SEARCHED_SEQ_NO", lastSearchedSeqNo);
-            outState.putInt("LAST_DISPLAYED_SEQ_NO", lastDisplayedSeqNo);
-            outState.putInt("LAST_REQUESTED_PAGE", lastRequestedPage);
-            outState.putInt("LAST_DISPLAYED_PAGE", lastDisplayedPage);
-            outState.putBoolean("END_REACHED", endReached);
-
-        }
-
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void filterDataPass(Bundle bundle) {
         searchByFilters = bundle.getBooleanArray(FiltersValues.SEARCH_BY).clone();
         seekBarsFilters = bundle.getIntArray(FiltersValues.SEEK_BARS).clone();
@@ -567,8 +537,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         preSearch(mSearchView.getQuery());
     }
 
-    private void applyFilters()
-    {
+    private void applyFilters() {
         List<String> searchFields = new ArrayList<>();
         if (searchByFilters[FiltersValues.SEARCH_BY_TITLE]) {
             searchFields.add("title");
@@ -685,5 +654,37 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     }
                 });
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        if (mSearchView.getQuery().length() >= 2) {
+            int currentViewIndex;
+            if (currentView[INTRO_VIEW])
+                currentViewIndex = INTRO_VIEW;
+            else if (currentView[OFFLINE_VIEW])
+                currentViewIndex = OFFLINE_VIEW;
+            else if (currentView[NO_RESULTS_VIEW]) {
+                currentViewIndex = NO_RESULTS_VIEW;
+                outState.putString("NO_RESULT_SEARCH", mSearchView.getQuery());
+            } else
+                currentViewIndex = RESULTS_VIEW;
+
+            outState.putInt("CURRENT_VIEW", ++currentViewIndex);
+            outState.putSerializable("DATA_SET", backupDataSet);
+            outState.putDouble("CURRENT_LAT", currentLat);
+            outState.putDouble("CURRENT_LONG", currentLong);
+
+            outState.putInt("LAST_SEARCHED_SEQ_NO", lastSearchedSeqNo);
+            outState.putInt("LAST_DISPLAYED_SEQ_NO", lastDisplayedSeqNo);
+            outState.putInt("LAST_REQUESTED_PAGE", lastRequestedPage);
+            outState.putInt("LAST_DISPLAYED_PAGE", lastDisplayedPage);
+            outState.putBoolean("END_REACHED", endReached);
+
+        }
+
+        super.onSaveInstanceState(outState);
+    }
+
 
 }
