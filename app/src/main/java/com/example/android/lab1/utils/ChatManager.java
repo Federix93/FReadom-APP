@@ -91,7 +91,7 @@ public class ChatManager {
         DatabaseReference newChat = chatsReference.push();
         mChatID = newChat.getKey();
         newChat.setValue(chat);
-        conversationsReference.child(mBookID).child(mChatID).setValue(mBookOwnerUserID);
+        conversationsReference.child(mBookID).child(mChatID).setValue(firebaseAuth.getUid());
         openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).setValue(mChatID);
     }
 

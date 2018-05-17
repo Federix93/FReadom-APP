@@ -13,8 +13,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
-import com.example.android.lab1.model.User;
 import com.example.android.lab1.model.chatmodels.Chat;
+import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -89,12 +89,12 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
         void bind(final User user, final String chatID){
             mUserNameTextView.setText(user.getUsername());
-            if (user.getImage() == null) {
+            if (user.getPhotoURL() == null) {
                 Glide.with(itemView.getContext()).load(R.mipmap.profile_picture)
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
             } else {
-                Glide.with(itemView.getContext()).load(user.getImage())
+                Glide.with(itemView.getContext()).load(user.getPhotoURL())
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
             }
@@ -127,7 +127,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.putExtra("ChatID", chatID);
                     intent.putExtra("Username", user.getUsername());
-                    intent.putExtra("ImageURL", user.getImage());
+                    intent.putExtra("ImageURL", user.getPhotoURL());
                     intent.putExtra("BookID", mBookID);
                     v.getContext().startActivity(intent);
                 }

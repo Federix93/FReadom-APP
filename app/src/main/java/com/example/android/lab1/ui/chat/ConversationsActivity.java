@@ -9,17 +9,17 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
-import com.example.android.lab1.model.chatmodels.Chat;
+import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.utils.Utilities;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
@@ -40,7 +40,7 @@ public class ConversationsActivity extends AppCompatActivity {
     Toolbar mToolbar;
     String mBookID;
     RecyclerView mRecyclerView;
-    private List<com.example.android.lab1.model.User> mUserList;
+    private List<User> mUserList;
     private List<String> mListChatID;
     private RecyclerConversationAdapter mAdapter;
 
@@ -77,43 +77,34 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
 
         final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
         if (firebaseAuth != null) {
-            DatabaseReference usersReference = firebaseDatabase.getReference().child("users")
-                    .child(firebaseAuth.getUid()).child(mBookID);
-            usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            firebaseDatabase.getReference().child("conversations").child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    final Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
-                    if (map != null) {
-                        for (final String uid : map.keySet()) {
-                            if(uid.equals("Dummy")){
-                                continue;
+                    for(final DataSnapshot d : dataSnapshot.getChildren()){
+                        String userID = (String) d.getValue();
+                        Log.d("LULLO", "UserID: " + userID);
+                        Log.d("LULLO", "CHAT ID: " + d.getKey());
+                        firebaseDatabase.getReference().child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                mListChatID.add(d.getKey());
+                                mUserList.add(dataSnapshot.getValue(User.class));
+                                mAdapter.setItems(mUserList, mListChatID);
+                                mAdapter.notifyDataSetChanged();
                             }
-                            DocumentReference documentReference = firebaseFirestore.collection("users").document(uid);
-                            documentReference.addSnapshotListener(ConversationsActivity.this, new EventListener<DocumentSnapshot>() {
-                                @Override
-                                public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
-                                    if (e != null) {
-                                        return;
-                                    }
-                                    if (snapshot != null && snapshot.exists()) {
-                                        com.example.android.lab1.model.User user = snapshot.toObject(com.example.android.lab1.model.User.class);
-                                        mUserList.add(user);
-                                        mListChatID.add(map.get(uid));
-                                        mAdapter.setItems(mUserList, mListChatID);
-                                        mAdapter.notifyDataSetChanged();
 
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                                    }
-                                }
-                            });
-                        }
+                            }
+                        });
                     }
                 }
 
