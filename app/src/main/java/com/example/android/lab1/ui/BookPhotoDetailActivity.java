@@ -27,11 +27,11 @@ public class BookPhotoDetailActivity extends AppCompatActivity{
         setContentView(R.layout.activity_photo_full_detail);
 
         mImageView = findViewById(R.id.image);
-        BookPhoto spacePhoto = getIntent().getParcelableExtra(BOOK_PHOTO);
+        BookPhoto photo = getIntent().getParcelableExtra(BOOK_PHOTO);
 
         Glide.with(this)
                 .asBitmap()
-                .load(spacePhoto.getUrl())
+                .load(photo.getUrl())
                 .listener(new RequestListener<Bitmap>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {

@@ -1,10 +1,12 @@
 package com.example.android.lab1.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +14,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.lab1.R;
+import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.chatmodels.Message;
+import com.example.android.lab1.ui.BookPhotoDetailActivity;
 import com.example.android.lab1.utils.glideimageloader.GlideApp;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -33,7 +37,6 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
         mContext = context;
         mMessageList = messageList;
     }
-
     // Inflates the appropriate layout according to the ViewType.
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -93,7 +96,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
         notifyItemInserted(mMessageList.size());
     }
 
-    private class SentMessageHolder extends RecyclerView.ViewHolder {
+    private class SentMessageHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         TextView messageText;
         TextView timeText;
         ImageView imageSent;
@@ -108,6 +111,18 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
             imageSent = itemView.findViewById(R.id.image_uploaded_sent);
             timeImageSent = itemView.findViewById(R.id.time_image_upload);
             constraintLayoutMessage = itemView.findViewById(R.id.constraint_layout_sent);
+
+            imageSent.setOnClickListener(this);
+        }
+
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                BookPhoto bookPhoto = new BookPhoto(mMessageList.get(position).getPhotoURL(), "chat photo");
+                Intent intent = new Intent(mContext, BookPhotoDetailActivity.class);
+                intent.putExtra(BookPhotoDetailActivity.BOOK_PHOTO, bookPhoto);
+                mContext.startActivity(intent);
+            }
         }
 
         void bind(Message message) {
@@ -138,7 +153,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private class ReceivedMessageHolder extends RecyclerView.ViewHolder {
+    private class ReceivedMessageHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         TextView messageText;
         TextView timeText;
         ImageView imageReceived;
@@ -152,6 +167,8 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
             imageReceived = itemView.findViewById(R.id.image_uploaded_received);
             timeImageReceived = itemView.findViewById(R.id.time_image_upload);
             constraintLayoutMessage = itemView.findViewById(R.id.constraint_layout_received);
+
+            imageReceived.setOnClickListener(this);
         }
 
         void bind(Message message) {
@@ -178,6 +195,18 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
                 cal1.setTimeInMillis(message.getTimestamp()*1000);
                 SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
                 timeText.setText(dateFormat.format(cal1.getTime()));
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                BookPhoto bookPhoto =  new BookPhoto(mMessageList.get(position).getPhotoURL(), "chat photo");
+                Intent intent = new Intent(mContext, BookPhotoDetailActivity.class);
+                intent.putExtra(BookPhotoDetailActivity.BOOK_PHOTO, bookPhoto);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                mContext.startActivity(intent);
             }
         }
     }

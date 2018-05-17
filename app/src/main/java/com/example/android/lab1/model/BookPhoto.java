@@ -46,15 +46,6 @@ public class BookPhoto implements Parcelable {
         mTitle = title;
     }
 
-    public static  BookPhoto[] getSpacePhotos() {
-
-        return new BookPhoto[]{
-                new BookPhoto("http://i.imgur.com/qpr5LR2.jpg", "Earth"),
-                new BookPhoto("http://i.imgur.com/pSHXfu5.jpg", "Astronaut"),
-                new BookPhoto("http://i.imgur.com/3wQcZeY.jpg", "Satellite"),
-        };
-    }
-
     @Override
     public int describeContents() {
         return 0;
