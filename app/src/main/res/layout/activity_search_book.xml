@@ -33,7 +33,7 @@
             android:gravity="center"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="200dp"
-            android:text="@string/search_intro"
+            android:text="@string/search_intro_top"
             android:textColor="@color/grayed_button"
             android:fontFamily="sans-serif-light"
             android:textSize="22sp"/>
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp"
-            android:text="Inserisci almeno due caratteri per cominciare"
+            android:text="@string/search_intro_botttom"
             android:textColor="@color/grayed_button"
             android:fontFamily="sans-serif-light"
             android:textSize="16sp"/>
