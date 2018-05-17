@@ -188,11 +188,11 @@ public class FiltersFragment extends DialogFragment {
                 {
                     if(mTitleCheckbox.isChecked() || mPublisherCheckbox.isChecked() || mTagsCheckbox.isChecked())
                     {
-                        searchByFilters[FiltersValues.SEARCH_BY_TITLE] = false;
+                        searchByFilters[FiltersValues.SEARCH_BY_AUTHOR] = false;
                     }
                     else
                     {
-                        mTitleCheckbox.setChecked(true);
+                        mAuthorCheckbox.setChecked(true);
                         Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
                     }
 
@@ -211,11 +211,11 @@ public class FiltersFragment extends DialogFragment {
                 {
                     if(mAuthorCheckbox.isChecked() || mTitleCheckbox.isChecked() || mTagsCheckbox.isChecked())
                     {
-                        searchByFilters[FiltersValues.SEARCH_BY_TITLE] = false;
+                        searchByFilters[FiltersValues.SEARCH_BY_PUBLISHER] = false;
                     }
                     else
                     {
-                        mTitleCheckbox.setChecked(true);
+                        mPublisherCheckbox.setChecked(true);
                         Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
                     }
 
@@ -234,11 +234,11 @@ public class FiltersFragment extends DialogFragment {
                 {
                     if(mAuthorCheckbox.isChecked() || mPublisherCheckbox.isChecked() || mTitleCheckbox.isChecked())
                     {
-                        searchByFilters[FiltersValues.SEARCH_BY_TITLE] = false;
+                        searchByFilters[FiltersValues.SEARCH_BY_TAGS] = false;
                     }
                     else
                     {
-                        mTitleCheckbox.setChecked(true);
+                        mTagsCheckbox.setChecked(true);
                         Toast.makeText(getContext(), getResources().getString(R.string.min_selection), Toast.LENGTH_SHORT).show();
                     }
 

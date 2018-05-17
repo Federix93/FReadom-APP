@@ -179,7 +179,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     showOfflineView();
                 else if (currentView[NO_RESULTS_VIEW]) {
                     showNoResultsView();
-                    updateNoResultsTextView();
+                    updateNoResultsTextView(savedInstanceState.getString("NO_RESULT_SEARCH"));
                 } else if (currentView[RESULTS_VIEW]) {
                     backupDataSet = (ArrayList<BookSearchItem>) savedInstanceState.getSerializable("DATA_SET");
                     mAdapter = new RecyclerSearchAdapter(backupDataSet, currentLat, currentLong);
@@ -203,7 +203,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
 
         query.setQuery(mSearchView.getQuery());
-
+        applyFilters();
         setRecyclerViewScrollListener();
 
 
@@ -224,7 +224,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                 }
 
                 if (currentItemCount - lastVisibleItem <= LOAD_MORE_THRESHOLD) {
-                    Log.d("GNIPPO", "LOAD MORE");
                     loadMore();
                 }
             }
@@ -327,7 +326,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         if (!currentView[NO_RESULTS_VIEW])
                             showNoResultsView();
 
-                        updateNoResultsTextView();
+                        updateNoResultsTextView(query.getQuery());
 
                         mSearchView.hideProgress();
                         return;
@@ -394,7 +393,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                                     endReached = true;
                                     if (!currentView[NO_RESULTS_VIEW])
                                         showNoResultsView();
-                                    updateNoResultsTextView();
+                                    updateNoResultsTextView(query.getQuery());
                                 }
                                 mAdapter.notifyDataSetChanged();
                                 mRecyclerView.smoothScrollToPosition(0);
@@ -452,7 +451,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                             book.setUid(uid);
                             book.setBookID(jsonBook.optString("objectID"));
                             JSONObject geoLocation = jsonBook.optJSONObject("_geoloc");
-                            Log.d("GNIPPO", "requestCompleted: " + book.getTitle());
                             book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
                             booksDataSet.add(book);
                         }
@@ -522,7 +520,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
-        if (mSearchView.getQuery().length() > 2) {
+        if (mSearchView.getQuery().length() >= 2) {
             int currentViewIndex;
             if (currentView[INTRO_VIEW])
                 currentViewIndex = INTRO_VIEW;
@@ -552,9 +550,9 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     @Override
     public void filterDataPass(Bundle bundle) {
-        searchByFilters = bundle.getBooleanArray(FiltersValues.SEARCH_BY);
-        seekBarsFilters = bundle.getIntArray(FiltersValues.SEEK_BARS);
-        orderFilters = bundle.getBooleanArray(FiltersValues.ORDER_BY);
+        searchByFilters = bundle.getBooleanArray(FiltersValues.SEARCH_BY).clone();
+        seekBarsFilters = bundle.getIntArray(FiltersValues.SEEK_BARS).clone();
+        orderFilters = bundle.getBooleanArray(FiltersValues.ORDER_BY).clone();
 
         FilterObject filterObject = new FilterObject(searchByFilters, seekBarsFilters, orderFilters);
 
@@ -564,6 +562,13 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         prefsEditor.putString("FILTERS", filtersJson);
         prefsEditor.apply();
 
+        applyFilters();
+
+        preSearch(mSearchView.getQuery());
+    }
+
+    private void applyFilters()
+    {
         List<String> searchFields = new ArrayList<>();
         if (searchByFilters[FiltersValues.SEARCH_BY_TITLE]) {
             searchFields.add("title");
@@ -581,8 +586,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
         if (currentLat != 0 && currentLong != 0)
             query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
-
-        preSearch(mSearchView.getQuery());
     }
 
     private void showOfflineView() {
@@ -633,8 +636,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mNoResultsTextViewBottom.setVisibility(View.VISIBLE);
     }
 
-    private void updateNoResultsTextView() {
-        mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results), mSearchView.getQuery()));
+    private void updateNoResultsTextView(String text) {
+        mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results), text));
     }
 
     private void showIntroView() {
