@@ -4,19 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.chat.ConversationsActivity;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -59,23 +58,35 @@ public class RecyclerDashboardLibraryAdapter extends RecyclerView.Adapter<Recycl
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView mBookTitle;
-        TextView mBookEditor;
+        TextView mBookAuthor;
         TextView mBookCity;
         ImageView mBookThumbnail;
+        ImageView mEditButton;
+        ImageView mDeleteButton;
+        ImageView mChatButton;
+        TextView mNotification;
 
         public MyViewHolder (View itemView) {
             super (itemView);
             mBookTitle = itemView.findViewById(R.id.rv_book_dash_title);
-            mBookEditor = itemView.findViewById(R.id.rv_book_dash_editor);
+            mBookAuthor = itemView.findViewById(R.id.rv_book_dash_author);
             mBookCity = itemView.findViewById(R.id.rv_book_dash_city);
             mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_dash_library);
+            mEditButton = itemView.findViewById(R.id.dash_edit_item);
+            mDeleteButton = itemView.findViewById(R.id.dash_delete_item);
+            mChatButton = itemView.findViewById(R.id.dash_chat_item);
+            mNotification = itemView.findViewById(R.id.dash_chat_notifications);
         }
         public void bind(Book book, final int position){
 
             mBookTitle.setText(book.getTitle());
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
-            mBookEditor.setText(book.getPublisher());
-            mBookCity.setText(book.getAddress());
+            mBookAuthor.setText(book.getAuthors());
+            if (book.getAddress()==null) {
+                mBookCity.setText(mContext.getResources().getString(R.string.position_not_available));
+            } else {
+                mBookCity.setText(book.getAddress());
+            }
             if (book.getWebThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mBookThumbnail);
             } else if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
@@ -84,11 +95,28 @@ public class RecyclerDashboardLibraryAdapter extends RecyclerView.Adapter<Recycl
             } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mBookThumbnail);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            mChatButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
                     Intent intent = new Intent(v.getContext(), ConversationsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("ID_BOOK_SELECTED", mBookIds.get(position));
+                    v.getContext().startActivity(intent);
+                }
+            });
+
+            mDeleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(v.getContext(),"Function not implemented", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            mEditButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.putExtra("ID_BOOK_SELECTED", mBookIds.get(position));
                     v.getContext().startActivity(intent);

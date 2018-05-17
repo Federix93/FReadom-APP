@@ -46,11 +46,6 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
     public void onBindViewHolder(@NonNull final BookViewHolder holder, int position) {
         holder.bind(books.get(position), position);
     }
-
-    /**
-     * Showing popup menu when tapping on 3 dots
-     */
-
     @Override
     public int getItemCount() {
         if(books == null)
