@@ -103,9 +103,6 @@ public class ChatActivity extends AppCompatActivity {
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
 
-        Log.d("LULLO", "ChatID:  " + mChatID + "  Username: " + mUsername + "  ImageURL: "+ mPhotoProfileURL
-            +"  BookID: " + mBookID);
-
         mToolbar = findViewById(R.id.toolbar_chat_activity);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
