@@ -2,6 +2,8 @@ package com.example.android.lab1.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Conversation;
@@ -38,6 +40,7 @@ public class ChatManager {
     private final DatabaseReference chatsReference;
     private final DatabaseReference conversationsReference;
     private final DatabaseReference usersReference;
+    private final DatabaseReference openedChatReference;
 
     public ChatManager(String bookID, final String bookOwnerID, Context context) {
         mBookID = bookID;
@@ -50,135 +53,40 @@ public class ChatManager {
         chatsReference = firebaseDatabase.getReference().child("chats");
         conversationsReference = firebaseDatabase.getReference().child("conversations");
         usersReference = firebaseDatabase.getReference().child("users");
-        //linkUsersToChat();
+        openedChatReference = firebaseDatabase.getReference().child("openedChats");
+        linkUsersToChat();
 }
 
-    private void checkChatExists() {
-        usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                Map<String, String> map = (Map<String, String>) dataSnapshot.child("mapUserIDChatID").getValue();
-                if (dataSnapshot.exists()) {
-                    if (user != null && map != null && map.get(mBookOwnerUserID) != null) {
-                        mChatID = map.get(mBookOwnerUserID);
-                        openChat();
-                    }else if(map != null && map.get(mBookOwnerUserID) == null){
+    private void linkUsersToChat(){
+        if (firebaseAuth != null && firebaseAuth.getUid() != null) {
+
+            openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot != null && !dataSnapshot.exists()){
                         createChat();
+                        getUserOwner();
+                    }else{
+
+                        openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                               mChatID = (String) dataSnapshot.getValue();
+                               getUserOwner();
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                     }
                 }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    /*private void linkUsersToChat(){
-        if (firebaseAuth != null && firebaseAuth.getUid() != null) {
-            DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseAuth.getUid());
-            documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
-                public void onSuccess(DocumentSnapshot snapshot) {
-                    mUserLogged = snapshot.toObject(com.example.android.lab1.model.User.class);
-                    usersReference.child(firebaseAuth.getUid()).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (!dataSnapshot.exists()) {
-                                Map<String, String> map = new HashMap<>();
-                                map.put("Dummy", "");
-                                mUserLoggedDatabase = new User(mUserLogged.getUsername(),
-                                        mUserLogged.getImage(), map);
-                                usersReference.child(firebaseAuth.getUid()).child(mBookID).setValue(mUserLoggedDatabase, new DatabaseReference.CompletionListener() {
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        if(databaseError == null) {
-                                            DocumentReference documentReference = firebaseFirestore.collection("users").document(mBookOwnerUserID);
-                                            documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                                @Override
-                                                public void onSuccess(DocumentSnapshot snapshot) {
-                                                    final com.example.android.lab1.model.User userOwnerFromDB = snapshot.toObject(com.example.android.lab1.model.User.class);
-                                                    usersReference.child(mBookOwnerUserID).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
-                                                        @Override
-                                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                                            if (!dataSnapshot.exists()) {
-                                                                Map<String, String> map = new HashMap<>();
-                                                                map.put("Dummy", "");
-                                                                mBookOwnerUserDatabase = new User(userOwnerFromDB.getUsername(),
-                                                                        userOwnerFromDB.getImage(), map);
-                                                                usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase, new DatabaseReference.CompletionListener() {
-                                                                    @Override
-                                                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                                                        if (databaseError == null) {
-                                                                            checkChatExists();
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }else{
-                                                                mBookOwnerUserDatabase = dataSnapshot.getValue(User.class);
-                                                                checkChatExists();
-                                                            }
-                                                        }
-
-                                                        @Override
-                                                        public void onCancelled(DatabaseError databaseError) {
-
-                                                        }
-                                                    });
-                                                }
-                                            });
-                                        }
-                                    }
-                                });
-                            }else{
-                                DocumentReference documentReference = firebaseFirestore.collection("users").document(mBookOwnerUserID);
-                                documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onSuccess(DocumentSnapshot snapshot) {
-                                        final com.example.android.lab1.model.User userOwnerFromDB = snapshot.toObject(com.example.android.lab1.model.User.class);
-                                        usersReference.child(mBookOwnerUserID).child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                if (!dataSnapshot.exists()) {
-                                                    Map<String, String> map = new HashMap<>();
-                                                    map.put("Dummy", "");
-                                                    mBookOwnerUserDatabase = new User(userOwnerFromDB.getUsername(),
-                                                            userOwnerFromDB.getImage(), map);
-                                                    usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase, new DatabaseReference.CompletionListener() {
-                                                        @Override
-                                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                                            if (databaseError == null) {
-                                                                checkChatExists();
-                                                            }
-                                                        }
-                                                    });
-                                                }else{
-                                                    mBookOwnerUserDatabase = dataSnapshot.getValue(User.class);
-                                                    checkChatExists();
-                                                }
-                                            }
-
-                                            @Override
-                                            public void onCancelled(DatabaseError databaseError) {
-
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled (DatabaseError databaseError){
-
-                        }
-                    });
+                public void onCancelled(DatabaseError databaseError) {
                 }
             });
         }
-    }*/
+    }
 
     private void openChat() {
 
@@ -192,19 +100,25 @@ public class ChatManager {
     }
 
     private void createChat() {
-
         Chat chat = new Chat(mBookID, "", System.currentTimeMillis() / 1000);
         DatabaseReference newChat = chatsReference.push();
         mChatID = newChat.getKey();
         newChat.setValue(chat);
-        Conversation conversation = new Conversation(firebaseAuth.getUid(), mBookOwnerUserID);
-        conversationsReference.child(mChatID).setValue(conversation);
+        conversationsReference.child(mBookID).child(mChatID).setValue(mBookOwnerUserID);
+        openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).setValue(mChatID);
+    }
 
-        //mUserLoggedDatabase.setMapUserIDChatID(mBookOwnerUserID, mChatID);
-        //mBookOwnerUserDatabase.setMapUserIDChatID(firebaseAuth.getUid(), mChatID);
+    private void getUserOwner(){
+        usersReference.child(mBookOwnerUserID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mBookOwnerUserDatabase = dataSnapshot.getValue(User.class);
+                openChat();
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-        usersReference.child(firebaseAuth.getUid()).child(mBookID).setValue(mUserLoggedDatabase);
-        usersReference.child(mBookOwnerUserID).child(mBookID).setValue(mBookOwnerUserDatabase);
-        openChat();
+            }
+        });
     }
 }

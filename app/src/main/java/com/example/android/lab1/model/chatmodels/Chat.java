@@ -7,6 +7,7 @@ public class Chat {
     private String mLastMessage;
     private long mTimestamp;
     private String mBookID;
+    private int mCounter;
 
     public Chat(){}
 
@@ -40,5 +41,10 @@ public class Chat {
         this.mLastMessage = lastMessage;
     }
 
+    public void setCounter(int counter){
+        mCounter = counter;
+    }
+
+    public int getCounter() { return mCounter; }
 
 }

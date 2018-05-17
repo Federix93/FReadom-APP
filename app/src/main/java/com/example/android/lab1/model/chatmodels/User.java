@@ -7,14 +7,12 @@ public class User {
 
     private String mPhotoURL;
     private String mUsername;
-    private Map<String, String> mMapUserIDChatID;
 
     public User(){}
 
-    public User(String username, String photoURL, Map<String, String> map){
+    public User(String username, String photoURL){
         mUsername = username;
         mPhotoURL = photoURL;
-        mMapUserIDChatID = map;
     }
 
     public String getPhotoURL() {
@@ -33,14 +31,5 @@ public class User {
         this.mUsername = pUsername;
     }
 
-    public void setMapUserIDChatID(String memberID, String chatID){
-        mMapUserIDChatID.put(memberID, chatID);
-    }
-
-    public Map<String, String> getMapUserIDChatID() { return mMapUserIDChatID; }
-
-    public String getChatID(String memberID){
-        return mMapUserIDChatID.get(memberID);
-    }
 
 }
