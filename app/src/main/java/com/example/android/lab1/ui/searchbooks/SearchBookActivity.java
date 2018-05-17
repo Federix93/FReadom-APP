@@ -2,6 +2,8 @@ package com.example.android.lab1.ui.searchbooks;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -13,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -34,6 +37,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,6 +56,15 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
     private final static String ALGOLIA_BOOKS_INDEX_NAME = "books";
     private final static String ALGOLIA_USERS_INDEX_NAME = "users";
+
+    private static final int HITS_PER_PAGE = 25;
+    private static final int LOAD_MORE_THRESHOLD = 10;
+
+    private int lastSearchedSeqNo;
+    private int lastDisplayedSeqNo;
+    private int lastRequestedPage;
+    private int lastDisplayedPage;
+    private boolean endReached;
 
     private final static int INTRO_VIEW = 0;
     private final static int OFFLINE_VIEW = 1;
@@ -80,6 +93,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private Index booksIndex;
     private Index usersIndex;
     private RecyclerView mRecyclerView;
+    private LinearLayoutManager mLinearLayoutManager;
     private RecyclerSearchAdapter mAdapter;
     private FusedLocationProviderClient mFusedLocationClient;
 
@@ -88,6 +102,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private JSONArray hits;
     private ArrayList<BookSearchItem> backupDataSet;
+
+    private SharedPreferences mSharedPref;
 
     @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -112,9 +128,22 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         if (currentUser != null)
             mCurrentUserId = currentUser.getUid();
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mSharedPref = getPreferences(Context.MODE_PRIVATE);
+        Gson filterGson = new Gson();
+        String filterJson = mSharedPref.getString("FILTERS", "");
 
-        mRecyclerView.setLayoutManager(linearLayoutManager);
+
+        if (!filterJson.isEmpty()) {
+            FilterObject filterObject = filterGson.fromJson(filterJson, FilterObject.class);
+            searchByFilters = filterObject.getSearchByFilters().clone();
+            seekBarsFilters = filterObject.getSeekBarFilters().clone();
+            orderFilters = filterObject.getOrderByFilters().clone();
+        }
+
+        mLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+
+        mRecyclerView.setLayoutManager(mLinearLayoutManager);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -128,15 +157,13 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         booksIndex = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
         usersIndex = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
 
-        if (currentLat != 0 && currentLong != 0)
-            query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
-
         setupMenuItemClickListener();
         setupSearchListener();
         setupQueryChangeListener();
         setupLeftItemListener();
         setupNoConnectionButtonClickListener();
-        mRecyclerView.setAdapter(null);
+        mAdapter = new RecyclerSearchAdapter(null, 0, 0);
+        mRecyclerView.setAdapter(mAdapter);
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getInt("CURRENT_VIEW") != 0) {
@@ -151,8 +178,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                 if (currentView[OFFLINE_VIEW])
                     showOfflineView();
                 else if (currentView[NO_RESULTS_VIEW]) {
-                    mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results),
-                            savedInstanceState.getString("NO_RESULT_SEARCH")));
                     showNoResultsView();
                     updateNoResultsTextView();
                 } else if (currentView[RESULTS_VIEW]) {
@@ -161,11 +186,49 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     mRecyclerView.setAdapter(mAdapter);
                     showResultsView();
                 }
+                lastSearchedSeqNo = savedInstanceState.getInt("LAST_SEARCHED_SEQ_NO");
+                lastDisplayedSeqNo = savedInstanceState.getInt("LAST_DISPLAYED_SEQ_NO");
+                lastRequestedPage = savedInstanceState.getInt("LAST_REQUESTED_PAGE");
+                lastDisplayedPage = savedInstanceState.getInt("LAST_DISPLAYED_PAGE");
+                endReached = savedInstanceState.getBoolean("END_REACHED");
+
             }
         } else {
             mSearchView.setSearchFocused(true);
         }
 
+        query.setHitsPerPage(HITS_PER_PAGE);
+
+        if (currentLat != 0 && currentLong != 0)
+            query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
+
+        query.setQuery(mSearchView.getQuery());
+
+        setRecyclerViewScrollListener();
+
+
+    }
+
+    private void setRecyclerViewScrollListener() {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                int currentItemCount = mLinearLayoutManager.getItemCount();
+                int lastVisibleItem = mLinearLayoutManager.findLastVisibleItemPosition();
+                if (currentItemCount == 0 || endReached) {
+                    return;
+                }
+
+                if (lastRequestedPage > lastDisplayedPage) {
+                    return;
+                }
+
+                if (currentItemCount - lastVisibleItem <= LOAD_MORE_THRESHOLD) {
+                    Log.d("GNIPPO", "LOAD MORE");
+                    loadMore();
+                }
+            }
+        });
     }
 
     private void setupLeftItemListener() {
@@ -240,94 +303,209 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private void search(final String searchString) {
 
+        final int currentSearchSeqNo = ++lastSearchedSeqNo;
+        lastRequestedPage = 0;
+        lastDisplayedPage = -1;
+        endReached = false;
+
         query.setQuery(searchString);
         mSearchView.showProgress();
 
         booksIndex.searchAsync(query, new CompletionHandler() {
             @Override
             public void requestCompleted(final JSONObject result, AlgoliaException error) {
-                hits = result.optJSONArray("hits");
-                if (hits.length() == 0) {
-                    if (!currentView[NO_RESULTS_VIEW])
-                        showNoResultsView();
+                if (result != null && error == null) {
 
-                    updateNoResultsTextView();
-
-                    mSearchView.hideProgress();
-                    return;
-                }
-
-                final ArrayList<BookSearchItem> booksDataSet = new ArrayList<>();
-                Set<String> bookUIDs = new HashSet<>();
-
-                for (int i = 0; i < hits.length(); i++) {
-                    JSONObject jsonBook = hits.optJSONObject(i);
-                    String uid = jsonBook.optString("uid");
-                    if (!uid.equals(mCurrentUserId)) {
-
-                        bookUIDs.add(uid);
-                        BookSearchItem book = new BookSearchItem();
-                        book.setTitle(jsonBook.optString("title"));
-                        book.setAuthors(jsonBook.optString("author"));
-                        book.setCondition(jsonBook.optInt("conditions"));
-                        book.setWebThumbnail(jsonBook.optString("thumbnail"));
-                        book.setUid(uid);
-                        book.setBookID(jsonBook.optString("objectID"));
-                        JSONObject geoLocation = jsonBook.optJSONObject("_geoloc");
-                        book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
-                        booksDataSet.add(book);
+                    if (currentSearchSeqNo <= lastDisplayedSeqNo) {
+                        mSearchView.hideProgress();
+                        return;
                     }
-                }
 
-                usersIndex.getObjectsAsync(bookUIDs, new CompletionHandler() {
-                    @Override
-                    public void requestCompleted(JSONObject jsonObject, AlgoliaException e) {
+                    hits = result.optJSONArray("hits");
+                    if (hits.length() == 0) {
+                        endReached = true;
+                        if (!currentView[NO_RESULTS_VIEW])
+                            showNoResultsView();
 
-                        JSONArray usersResult = jsonObject.optJSONArray("results");
-                        HashMap<String, UserInfo> bookUsers = new HashMap<>();
-                        for (int i = 0; i < usersResult.length(); i++) {
-                            JSONObject jsonUser = usersResult.optJSONObject(i);
-                            UserInfo userInfo = new UserInfo();
-                            userInfo.setImage(jsonUser.optString("image"));
-                            userInfo.setRating(jsonUser.optDouble("rating"));
-                            bookUsers.put(jsonUser.optString("objectID"), userInfo);
+                        updateNoResultsTextView();
+
+                        mSearchView.hideProgress();
+                        return;
+                    }
+
+                    final ArrayList<BookSearchItem> booksDataSet = new ArrayList<>();
+                    Set<String> bookUIDs = new HashSet<>();
+
+                    for (int i = 0; i < hits.length(); i++) {
+                        JSONObject jsonBook = hits.optJSONObject(i);
+                        String uid = jsonBook.optString("uid");
+
+                        if (!uid.equals(mCurrentUserId)) {
+                            bookUIDs.add(uid);
+                            BookSearchItem book = new BookSearchItem();
+                            book.setTitle(jsonBook.optString("title"));
+                            book.setAuthors(jsonBook.optString("author"));
+                            book.setCondition(jsonBook.optInt("conditions"));
+                            book.setWebThumbnail(jsonBook.optString("thumbnail"));
+                            book.setUid(uid);
+                            book.setBookID(jsonBook.optString("objectID"));
+                            JSONObject geoLocation = jsonBook.optJSONObject("_geoloc");
+                            book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
+                            booksDataSet.add(book);
                         }
+                    }
 
-                        for (int i = 0; i < booksDataSet.size(); i++) {
+                    usersIndex.getObjectsAsync(bookUIDs, new CompletionHandler() {
+                        @Override
+                        public void requestCompleted(JSONObject jsonObject, AlgoliaException e) {
 
-                            UserInfo bookUser = bookUsers.get(booksDataSet.get(i).getUid());
-                            if (bookUser.getRating() < (float) seekBarsFilters[FiltersValues.RATING_FILTER] / 10) {
-                                booksDataSet.remove(i);
-                                i--;
-                            } else {
-                                booksDataSet.get(i).setUserImage(bookUser.getImage());
-                                booksDataSet.get(i).setUserRating(bookUser.getRating());
+                            if (jsonObject != null && e == null) {
+                                JSONArray usersResult = jsonObject.optJSONArray("results");
+                                HashMap<String, UserInfo> bookUsers = new HashMap<>();
+                                for (int i = 0; i < usersResult.length(); i++) {
+                                    JSONObject jsonUser = usersResult.optJSONObject(i);
+                                    UserInfo userInfo = new UserInfo();
+                                    userInfo.setImage(jsonUser.optString("image"));
+                                    userInfo.setRating(jsonUser.optDouble("rating"));
+                                    bookUsers.put(jsonUser.optString("objectID"), userInfo);
+                                }
+
+                                for (int i = 0; i < booksDataSet.size(); i++) {
+
+                                    UserInfo bookUser = bookUsers.get(booksDataSet.get(i).getUid());
+                                    if (bookUser.getRating() < (float) seekBarsFilters[FiltersValues.RATING_FILTER] / 10) {
+                                        booksDataSet.remove(i);
+                                        i--;
+                                    } else {
+                                        booksDataSet.get(i).setUserImage(bookUser.getImage());
+                                        booksDataSet.get(i).setUserRating(bookUser.getRating());
+                                    }
+                                }
+
+                                mAdapter.clear();
+                                if (booksDataSet.size() > 0) {
+                                    backupDataSet = new ArrayList<>(booksDataSet);
+                                    mAdapter.addAll(booksDataSet);
+                                    lastDisplayedSeqNo = currentSearchSeqNo;
+                                    lastDisplayedPage = 0;
+                                    if (!currentView[RESULTS_VIEW])
+                                        showResultsView();
+                                } else {
+                                    endReached = true;
+                                    if (!currentView[NO_RESULTS_VIEW])
+                                        showNoResultsView();
+                                    updateNoResultsTextView();
+                                }
+                                mAdapter.notifyDataSetChanged();
+                                mRecyclerView.smoothScrollToPosition(0);
+                                mSearchView.hideProgress();
+
                             }
                         }
 
-                        if (booksDataSet.size() > 0) {
-//                            Collections.sort(booksDataSet, BookSearchItem.ratingComp);
-                            backupDataSet = new ArrayList<>(booksDataSet);
-                            mAdapter = new RecyclerSearchAdapter(booksDataSet, currentLat, currentLong);
-                            mRecyclerView.swapAdapter(mAdapter, false);
-
-                            if (!currentView[RESULTS_VIEW])
-                                showResultsView();
-                        } else {
-                            if (!currentView[NO_RESULTS_VIEW])
-                                showNoResultsView();
-                            updateNoResultsTextView();
-                        }
-                        mSearchView.hideProgress();
-
-
-                    }
-                });
+                    });
+                }
 
 
             }
         });
 
+    }
+
+    private void loadMore() {
+        Query loadMoreQuery = new Query(query);
+        loadMoreQuery.setPage(++lastRequestedPage);
+        final int currentSearchSeqNo = lastSearchedSeqNo;
+
+        mSearchView.showProgress();
+
+        booksIndex.searchAsync(loadMoreQuery, new CompletionHandler() {
+            @Override
+            public void requestCompleted(final JSONObject result, AlgoliaException error) {
+                if (result != null && error == null) {
+
+                    if (lastDisplayedSeqNo != currentSearchSeqNo) {
+                        mSearchView.hideProgress();
+                        return;
+                    }
+
+                    hits = result.optJSONArray("hits");
+                    if (hits.length() == 0) {
+                        endReached = true;
+                        mSearchView.hideProgress();
+                        return;
+                    }
+
+                    final ArrayList<BookSearchItem> booksDataSet = new ArrayList<>();
+                    Set<String> bookUIDs = new HashSet<>();
+
+                    for (int i = 0; i < hits.length(); i++) {
+                        JSONObject jsonBook = hits.optJSONObject(i);
+                        String uid = jsonBook.optString("uid");
+                        if (!uid.equals(mCurrentUserId)) {
+                            bookUIDs.add(uid);
+                            BookSearchItem book = new BookSearchItem();
+                            book.setTitle(jsonBook.optString("title"));
+                            book.setAuthors(jsonBook.optString("author"));
+                            book.setCondition(jsonBook.optInt("conditions"));
+                            book.setWebThumbnail(jsonBook.optString("thumbnail"));
+                            book.setUid(uid);
+                            book.setBookID(jsonBook.optString("objectID"));
+                            JSONObject geoLocation = jsonBook.optJSONObject("_geoloc");
+                            Log.d("GNIPPO", "requestCompleted: " + book.getTitle());
+                            book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
+                            booksDataSet.add(book);
+                        }
+                    }
+
+                    usersIndex.getObjectsAsync(bookUIDs, new CompletionHandler() {
+                        @Override
+                        public void requestCompleted(JSONObject jsonObject, AlgoliaException e) {
+
+                            if (jsonObject != null && e == null) {
+                                JSONArray usersResult = jsonObject.optJSONArray("results");
+                                HashMap<String, UserInfo> bookUsers = new HashMap<>();
+                                for (int i = 0; i < usersResult.length(); i++) {
+                                    JSONObject jsonUser = usersResult.optJSONObject(i);
+                                    UserInfo userInfo = new UserInfo();
+                                    userInfo.setImage(jsonUser.optString("image"));
+                                    userInfo.setRating(jsonUser.optDouble("rating"));
+                                    bookUsers.put(jsonUser.optString("objectID"), userInfo);
+                                }
+
+                                for (int i = 0; i < booksDataSet.size(); i++) {
+
+                                    UserInfo bookUser = bookUsers.get(booksDataSet.get(i).getUid());
+                                    if (bookUser.getRating() < (float) seekBarsFilters[FiltersValues.RATING_FILTER] / 10) {
+                                        booksDataSet.remove(i);
+                                        i--;
+                                    } else {
+                                        booksDataSet.get(i).setUserImage(bookUser.getImage());
+                                        booksDataSet.get(i).setUserRating(bookUser.getRating());
+                                    }
+                                }
+
+                                if (booksDataSet.size() > 0) {
+                                    backupDataSet = new ArrayList<>(booksDataSet);
+                                    mAdapter.addAll(booksDataSet);
+                                    lastDisplayedPage = lastRequestedPage;
+                                    if (!currentView[RESULTS_VIEW])
+                                        showResultsView();
+                                } else {
+                                    endReached = true;
+                                }
+                                mAdapter.notifyDataSetChanged();
+                                mSearchView.hideProgress();
+
+                            }
+                        }
+
+                    });
+                }
+
+
+            }
+        });
     }
 
     private void showDialog() {
@@ -360,6 +538,13 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             outState.putSerializable("DATA_SET", backupDataSet);
             outState.putDouble("CURRENT_LAT", currentLat);
             outState.putDouble("CURRENT_LONG", currentLong);
+
+            outState.putInt("LAST_SEARCHED_SEQ_NO", lastSearchedSeqNo);
+            outState.putInt("LAST_DISPLAYED_SEQ_NO", lastDisplayedSeqNo);
+            outState.putInt("LAST_REQUESTED_PAGE", lastRequestedPage);
+            outState.putInt("LAST_DISPLAYED_PAGE", lastDisplayedPage);
+            outState.putBoolean("END_REACHED", endReached);
+
         }
 
         super.onSaveInstanceState(outState);
@@ -371,6 +556,13 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         seekBarsFilters = bundle.getIntArray(FiltersValues.SEEK_BARS);
         orderFilters = bundle.getBooleanArray(FiltersValues.ORDER_BY);
 
+        FilterObject filterObject = new FilterObject(searchByFilters, seekBarsFilters, orderFilters);
+
+        SharedPreferences.Editor prefsEditor = mSharedPref.edit();
+        Gson filtersGson = new Gson();
+        String filtersJson = filtersGson.toJson(filterObject);
+        prefsEditor.putString("FILTERS", filtersJson);
+        prefsEditor.apply();
 
         List<String> searchFields = new ArrayList<>();
         if (searchByFilters[FiltersValues.SEARCH_BY_TITLE]) {
@@ -400,8 +592,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         currentView[RESULTS_VIEW] = false;
 
         mRecyclerView.setVisibility(View.GONE);
-        if (mRecyclerView.getAdapter() == null)
-            mRecyclerView.swapAdapter(null, true);
         mIntroTextViewTop.setVisibility(View.GONE);
         mIntroTextViewBottom.setVisibility(View.GONE);
         mNoResultsTextViewTop.setVisibility(View.GONE);
@@ -434,9 +624,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         currentView[RESULTS_VIEW] = false;
 
         mRecyclerView.setVisibility(View.GONE);
-        if (mRecyclerView.getAdapter() == null)
-            mRecyclerView.swapAdapter(null, true);
-
         mNoConnectionTextViewTop.setVisibility(View.GONE);
         mNoConnectionTextViewBottom.setVisibility(View.GONE);
         mNoConnectionButton.setVisibility(View.GONE);
@@ -457,8 +644,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         currentView[RESULTS_VIEW] = false;
 
         mRecyclerView.setVisibility(View.GONE);
-        if (mRecyclerView.getAdapter() != null)
-            mRecyclerView.swapAdapter(null, true);
         mNoConnectionTextViewTop.setVisibility(View.GONE);
         mNoConnectionTextViewBottom.setVisibility(View.GONE);
         mNoConnectionButton.setVisibility(View.GONE);

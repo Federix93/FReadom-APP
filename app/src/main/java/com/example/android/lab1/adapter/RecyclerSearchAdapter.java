@@ -18,20 +18,30 @@ import com.example.android.lab1.ui.searchbooks.BookSearchItem;
 import com.example.android.lab1.utils.Utilities;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAdapter.ResultViewHolder> {
-
-    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
-    private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
-    private final static String ALGOLIA_USERS_INDEX_NAME = "users";
 
     private ArrayList<BookSearchItem> mBookDataSet;
     private double mCurrentLat, mCurrentLong;
 
     public RecyclerSearchAdapter(ArrayList<BookSearchItem> bookDataSet, double currentLat, double currentLong) {
-        mBookDataSet = new ArrayList<>(bookDataSet);
+        if(bookDataSet != null)
+            mBookDataSet = new ArrayList<>(bookDataSet);
+        else
+            mBookDataSet = new ArrayList<>();
         mCurrentLat = currentLat;
         mCurrentLong = currentLong;
+    }
+
+    public void addAll(Collection<BookSearchItem> items)
+    {
+        mBookDataSet.addAll(items);
+    }
+
+    public void clear()
+    {
+        mBookDataSet.clear();
     }
 
     @NonNull
@@ -113,6 +123,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             v.getContext().startActivity(intent);
         }
     }
+
 
 
 }
