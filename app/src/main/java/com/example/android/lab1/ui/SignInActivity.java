@@ -13,10 +13,14 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.algolia.search.saas.Client;
+import com.algolia.search.saas.Index;
+import com.algolia.search.saas.Request;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -43,6 +47,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,6 +57,11 @@ public class SignInActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 10;
     private FirebaseAuth mFirebaseAuth;
+
+    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
+    private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
+    private final static String ALGOLIA_USER_INDEX = "users";
+    private static Index algoliaIndex;
 
     ImageView mLogoImageView;
     ConstraintLayout mRootConstraintLayout;
@@ -147,8 +159,25 @@ public class SignInActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                Log.d("LULLO", "STO "+mFirebaseAuth+" "+mFirebaseAuth.getUid());
                                 DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
-                                if(mFirebaseAuth != null && mFirebaseAuth != null) {
+                                if(mFirebaseAuth != null && mFirebaseAuth.getUid() != null) {
+                                    Log.d("LULLO", "STO LOGGANDO2");
+                                    setupAlgolia();
+                                    try {
+
+                                        JSONObject algoliaUser = new JSONObject();
+
+                                        if(mUser.getImage() != null)
+                                            algoliaUser.put("image", mUser.getImage());
+                                        algoliaUser.put("rating", mUser.getRating());
+
+                                        algoliaIndex.addObjectAsync(algoliaUser, mFirebaseAuth.getUid(),
+                                                null);
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
                                     com.example.android.lab1.model.chatmodels.User user =
                                             new com.example.android.lab1.model.chatmodels.User(mUser.getUsername(), mUser.getImage());
                                     usersReference.child(mFirebaseAuth.getUid()).setValue(user, new DatabaseReference.CompletionListener() {
@@ -161,7 +190,7 @@ public class SignInActivity extends AppCompatActivity {
                                             }else{
                                                 if (progressDialogHolder.isProgressDialogShowing())
                                                     progressDialogHolder.dismissDialog();
-                                                Snackbar.make(mRootConstraintLayout, "Qualcosa è andato storto", Snackbar.LENGTH_SHORT).show();
+                                                Snackbar.make(mRootConstraintLayout, R.string.error_message, Snackbar.LENGTH_SHORT).show();
                                             }
                                         }
                                     });
@@ -187,6 +216,11 @@ public class SignInActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    private static void setupAlgolia() {
+        Client algoliaClient = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
+        algoliaIndex = algoliaClient.getIndex(ALGOLIA_USER_INDEX);
     }
 
     private void openHomePageActivity() {

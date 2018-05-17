@@ -170,5 +170,6 @@
     <string name="apply_uppercase">APPLICA</string>
     <string name="cancel_uppercase">ANNULLA</string>
     <string name="reset_filters_uppercase">RESETTA FILTRI</string>
+    <string name="error_message">Qualcosa è andato storto</string>
 
 </resources>

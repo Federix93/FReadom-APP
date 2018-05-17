@@ -127,6 +127,7 @@
     <string name="author_not_available">Author not available</string>
     <string name="editor_not_available">Editor not available</string>
     <string name="date_not_available">Pubblication date not available</string>
+    <string name="error_message">Something went wrong</string>
 
 
 </resources>
