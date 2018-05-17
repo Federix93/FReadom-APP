@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -100,6 +101,9 @@ public class ChatActivity extends AppCompatActivity {
         mUsername = getIntent().getStringExtra("Username");
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
+
+        Log.d("LULLO", "ChatID:  " + mChatID + "  Username: " + mUsername + "  ImageURL: "+ mPhotoProfileURL
+            +"  BookID: " + mBookID);
 
         mToolbar = findViewById(R.id.toolbar_chat_activity);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);

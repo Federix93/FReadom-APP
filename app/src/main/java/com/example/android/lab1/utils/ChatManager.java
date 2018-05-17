@@ -3,40 +3,28 @@ package com.example.android.lab1.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.android.lab1.model.chatmodels.Chat;
-import com.example.android.lab1.model.chatmodels.Conversation;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ChatManager {
 
     private String mBookID;
     private final String mBookOwnerUserID;
-    private com.example.android.lab1.model.User mUserLogged;
     private Context mContext;
     private String mChatID;
-
-    private User mUserLoggedDatabase;
     private User mBookOwnerUserDatabase;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase firebaseDatabase;
-    private FirebaseFirestore firebaseFirestore;
     private final DatabaseReference chatsReference;
     private final DatabaseReference conversationsReference;
     private final DatabaseReference usersReference;
@@ -48,7 +36,6 @@ public class ChatManager {
         mContext = context;
 
         firebaseDatabase = FirebaseDatabase.getInstance();
-        firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
         chatsReference = firebaseDatabase.getReference().child("chats");
         conversationsReference = firebaseDatabase.getReference().child("conversations");
