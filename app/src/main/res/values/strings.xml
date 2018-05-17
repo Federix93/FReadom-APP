@@ -82,7 +82,7 @@
     <string name="add_to_favorite">Aggiungi ai preferiti</string>
     <string name="share">Condividi</string>
     <string name="preview">Anteprima</string>
-    <string name="book">Prenota</string>
+    <string name="book_request">Richiedi</string>
     <string name="filter_dialog_title">Filtra per</string>
 
     <string name="search_books_hint">Titolo, autore, editore, tags...</string>
@@ -153,5 +153,10 @@
 
     <string name="enter_message">Inserisci il messaggio</string>
     <string name="send">Invia</string>
+    <string name="position_not_available">Posizione non disponibile</string>
+    <string name="title_not_available">Titolo non disponibile</string>
+    <string name="author_not_available">Autore non disponibile</string>
+    <string name="editor_not_available">Editore non disponibile</string>
+    <string name="date_not_available">Data di pubblicazione non disponibile</string>
 
 </resources>

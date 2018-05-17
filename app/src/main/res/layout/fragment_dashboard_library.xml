@@ -6,5 +6,6 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_fragment_books_library"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"/>
 </android.support.constraint.ConstraintLayout>

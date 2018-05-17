@@ -27,6 +27,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
+import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.utils.Utilities;
@@ -261,6 +262,7 @@ public class ChatActivity extends AppCompatActivity {
                         final Uri downloadUrl = taskSnapshot.getDownloadUrl();
                         Message chatMessage = new Message(mUsername, mFirebaseAuth.getUid(), null, mPhotoProfileURL, System.currentTimeMillis() / 1000,
                                 downloadUrl.toString());
+
                         mMessagesReference.child(mChatID).push().setValue(chatMessage);
                         mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override

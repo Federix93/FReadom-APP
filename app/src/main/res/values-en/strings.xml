@@ -74,7 +74,7 @@
     <string name="min_selection">Choose at least one item</string>
     <string name="add_book_fragment_title">Add book</string>
     <string name="preview">Preview</string>
-    <string name="book">Book</string>
+    <string name="book_request">Request</string>
 
     <string name="position_filter_home_page">POSITION</string>
     <string name="genre_filter_home_page">GENRES</string>
@@ -112,6 +112,11 @@
     <string name="enter_message">Enter message</string>
     <string name="send">Send</string>
     <string name="conversations_title">Conversations</string>
+    <string name="position_not_available">Position not available</string>
+    <string name="title_not_available">Title not available</string>
+    <string name="author_not_available">Author not available</string>
+    <string name="editor_not_available">Editor not available</string>
+    <string name="date_not_available">Pubblication date not available</string>
 
 
 </resources>

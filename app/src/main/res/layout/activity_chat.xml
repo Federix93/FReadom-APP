@@ -39,7 +39,7 @@
             android:layout_gravity="bottom"
             android:background="?attr/selectableItemBackground"
             android:contentDescription="Upload file"
-            app:srcCompat="@drawable/ic_add_black_24dp" />
+            app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
 
         <EditText
             android:id="@+id/edittext_chat_message"
@@ -63,7 +63,7 @@
             android:clickable="true"
             android:gravity="center_vertical"
             android:text="@string/send"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorSecondaryAccent"
             android:textSize="16sp" />
     </LinearLayout>
     <LinearLayout

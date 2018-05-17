@@ -1,8 +1,10 @@
 package com.example.android.lab1.ui;
 
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
@@ -15,23 +17,26 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.BookPhoto;
+import com.example.android.lab1.utils.Utilities;
 
 public class BookPhotoDetailActivity extends AppCompatActivity{
 
     public static final String BOOK_PHOTO = "BOOK_PHOTO_DETAIL";
     private ImageView mImageView;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_full_detail);
 
+        Utilities.setupStatusBarColor(this);
         mImageView = findViewById(R.id.image);
-        BookPhoto spacePhoto = getIntent().getParcelableExtra(BOOK_PHOTO);
+        BookPhoto photo = getIntent().getParcelableExtra(BOOK_PHOTO);
 
         Glide.with(this)
                 .asBitmap()
-                .load(spacePhoto.getUrl())
+                .load(photo.getUrl())
                 .listener(new RequestListener<Bitmap>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {

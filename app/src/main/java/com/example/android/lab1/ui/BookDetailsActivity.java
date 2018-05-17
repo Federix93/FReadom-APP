@@ -69,6 +69,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     ImageView mShareImageView;
     ImageView mFavoritesImageView;
     TextView mBookDetailCondition;
+    ImageView mBookDetailConditionColor;
     FirebaseFirestore mFirebaseFirestore;
     FirebaseAuth mFirebaseAuth;
 
@@ -96,6 +97,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mShareImageView = findViewById(R.id.share_icon);
         mFavoritesImageView = findViewById(R.id.add_to_favorite);
         mBookDetailCondition = findViewById(R.id.book_detail_conditions);
+        mBookDetailConditionColor = findViewById(R.id.book_detail_conditions_color);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -206,14 +208,24 @@ public class BookDetailsActivity extends AppCompatActivity {
     private void updateUI(final Book book) {
         if (book.getTitle() != null)
             mBookTitleTextView.setText(book.getTitle());
+        else
+            mBookTitleTextView.setText(getResources().getString(R.string.title_not_available));
         if (book.getAuthors() != null)
             mAuthorTextView.setText(book.getAuthors());
+        else
+            mAuthorTextView.setText(getResources().getString(R.string.author_not_available));
         if (book.getPublisher() != null)
             mEditorTextView.setText(book.getPublisher());
+        else
+            mEditorTextView.setText(getResources().getString(R.string.editor_not_available));
         if (!String.valueOf(book.getPublishYear()).isEmpty())
             mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
-        if (!String.valueOf(book.getCondition()).isEmpty())
+        else
+            mPublicationDateTextView.setText(getResources().getString(R.string.date_not_available));
+        if (!String.valueOf(book.getCondition()).isEmpty()) {
             mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
+            mBookDetailConditionColor.setColorFilter(Condition.getConditionColor(getApplicationContext(), book.getCondition()));
+        }
         if (book.getWebThumbnail() != null)
             Glide.with(this).load(book.getWebThumbnail())
                     .apply(new RequestOptions().centerCrop())

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ProfileBookAdapter;
+import com.example.android.lab1.adapter.RecyclerDashboardLibraryAdapter;
 import com.example.android.lab1.model.Book;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -17,7 +18,6 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ public class DashboardFragmentLibraryItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        ProfileBookAdapter adapter = new ProfileBookAdapter(mListBooksOfUser, bookIds);
+        RecyclerDashboardLibraryAdapter adapter = new RecyclerDashboardLibraryAdapter(mListBooksOfUser, bookIds);
         mRecyclerView.setAdapter(adapter);
     }
 
