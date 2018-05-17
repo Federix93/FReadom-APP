@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -216,6 +217,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 int currentItemCount = mLinearLayoutManager.getItemCount();
                 int lastVisibleItem = mLinearLayoutManager.findLastVisibleItemPosition();
+
                 if (currentItemCount == 0 || endReached) {
                     return;
                 }

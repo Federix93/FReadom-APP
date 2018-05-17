@@ -52,9 +52,6 @@ public class FiltersFragment extends DialogFragment {
     boolean[] orderFilters;
 
     public FiltersFragment() {
-        // Empty constructor is required for DialogFragment
-        // Make sure not to add arguments to the constructor
-        // Use `newInstance` instead as shown below
     }
 
     public static FiltersFragment newInstance(Bundle data) {
@@ -259,7 +256,7 @@ public class FiltersFragment extends DialogFragment {
         mPublisherCheckbox.setChecked(searchByFilters[FiltersValues.SEARCH_BY_PUBLISHER]);
         mTagsCheckbox.setChecked(searchByFilters[FiltersValues.SEARCH_BY_TAGS]);
 
-        mUserRatingSeekBar.setProgress(seekBarsFilters[FiltersValues.RATING_FILTER]);
+        mUserRatingSeekBar.setProgress(seekBarsFilters[FiltersValues.RATING_FILTER]-10);
         setRatingFilterText(seekBarsFilters[0]);
         mPositionSeekBar.setProgress(seekBarsFilters[FiltersValues.POSITION_FILTER]);
         setPositionFilterText(seekBarsFilters[1]);
@@ -279,7 +276,7 @@ public class FiltersFragment extends DialogFragment {
         mUserRatingSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                setRatingFilterText(progress);
+                setRatingFilterText(progress+10);
             }
 
             @Override
@@ -289,7 +286,7 @@ public class FiltersFragment extends DialogFragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                seekBarsFilters[FiltersValues.RATING_FILTER] = seekBar.getProgress();
+                seekBarsFilters[FiltersValues.RATING_FILTER] = seekBar.getProgress()+10;
             }
         });
 
@@ -314,7 +311,7 @@ public class FiltersFragment extends DialogFragment {
 
     private void setRatingFilterText(int value)
     {
-        if(value == 0)
+        if(value == 10)
             mUserRatingTextView.setText(getResources().getString(R.string.rating_filter_zero));
         else if(value == 50)
             mUserRatingTextView.setText(getResources().getString(R.string.rating_filter_max));
