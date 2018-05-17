@@ -112,8 +112,7 @@ public class HomeFragment extends Fragment {
         mPositionFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), ChatActivity.class);
-                startActivity(intent);
+                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
             }
         });
 
