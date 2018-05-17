@@ -19,7 +19,7 @@ public class User implements Parcelable {
     private String mShortBio;
     private Float mRating;
 
-    private User(){}
+    public User(){}
 
     public static User getInstance(){
         if(instance == null)

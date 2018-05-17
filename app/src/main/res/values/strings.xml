@@ -25,7 +25,7 @@
     <string name="title">Titolo</string>
     <string name="load_book_auto_fill_icon_desc">Icona che permette di scaricare informazioni di un libro da internet</string>
     <string name="author">Autore</string>
-    <string name="publisher">Casa editrice</string>
+    <string name="publisher">Editore</string>
     <string name="publishing_year">Anno di pubblicazione</string>
     <string name="conditions">Condizioni</string>
     <string name="bad">Cattive</string>
@@ -82,6 +82,8 @@
     <string name="add_to_favorite">Aggiungi ai preferiti</string>
     <string name="share">Condividi</string>
     <string name="preview">Anteprima</string>
+    <string name="book">Prenota</string>
+    <string name="filter_by">Filtra per</string>
     <string name="book_request">Richiedi</string>
     <string name="filter_dialog_title">Filtra per</string>
 
@@ -97,7 +99,7 @@
     <string name="condition">Condizioni:  %1$s</string>
     <string name="reviews">Recensioni</string>
     <string name="books">Libri</string>
-    <string name="rating">Voto</string>
+    <string name="rating">Rating</string>
 
     <string-array name="genre">
         <item>Arte e spettacoli</item>
@@ -117,12 +119,6 @@
     <string name="search_no_connection_2">Controlla la connessione ai dati mobili o al Wi-Fi</string>
     <string name="try_again">Riprova</string>
 
-    <string-array name="search_filters">
-        <item>Titolo</item>
-        <item>Autore</item>
-        <item>Editore</item>
-        <item>Tags</item>
-    </string-array>
     <string name="search_by">Ricerca per</string>
     <string name="search_by_title">Cerca per:</string>
     <string name="dialog_isbn_search">Cerca su Internet</string>
@@ -158,5 +154,21 @@
     <string name="author_not_available">Autore non disponibile</string>
     <string name="editor_not_available">Editore non disponibile</string>
     <string name="date_not_available">Data di pubblicazione non disponibile</string>
+    <string name="rating_filter">da %.1f in su</string>
+    <string name="rating_filter_zero">qualunque</string>
+    <string name="rating_filter_max">5.0</string>
+    <string name="position_filter">nel raggio di %.1f km</string>
+    <string name="no_results">Nessun risultato per \"%1$s\"</string>
+    <string name="no_results_try_again">Prova con un nuova ricerca o a cambiare i filtri</string>
+    <string name="search_intro_top">Cerca tra i libri caricati dagli utenti</string>
+    <string name="search_intro_botttom">Inserisci almeno due caratteri per cominciare</string>
+    <string name="search_book_distance">A %.1f km da te</string>
+    <string name="user_rating">Rating utente</string>
+    <string name="order_by">Ordina per</string>
+    <string name="ad_date">Data annuncio</string>
+    <string name="book_conditions">Condizioni libro</string>
+    <string name="apply_uppercase">APPLICA</string>
+    <string name="cancel_uppercase">ANNULLA</string>
+    <string name="reset_filters_uppercase">RESETTA FILTRI</string>
 
 </resources>

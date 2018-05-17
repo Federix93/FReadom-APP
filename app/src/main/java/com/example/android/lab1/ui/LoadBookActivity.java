@@ -89,6 +89,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
     private final static String ALGOLIA_BOOK_INDEX = "books";
+
     private static final String ACTIVITY_STATE = "STATE";
     private static final String RESULT_BOOK = "RESULT";
     private static final String PHOTOS_KEY = "USER_PHOTOS";
@@ -100,9 +101,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private static final String UPLOADING = "UPLOADING";
     private static final String AUTHORS = "AUTHORS";
     private static final String AUTHORS_EDITABLE = "A_EDITABLE";
+
     /*Algolia connection variables*/
     Client algoliaClient;
     Index algoliaIndex;
+
     private Toolbar mToolbar;
     private LinearLayoutCompat mIsbnContainer;
     private MaterialSpinner mPublishYearSpinner;
@@ -976,23 +979,20 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             book.put("publishYear", bookToLoad.getPublishYear());
             book.put("conditions", bookToLoad.getCondition());
             book.put("uid", bookToLoad.getUid());
-//            book.put("address", bookToLoad.getAddress());
+            book.put("genre", bookToLoad.getGenre());
+//            book.put("tags", bookToLoad.getTags());
 
-            if (bookToLoad.getIsbn() != null) {
-                book.put("isbn", bookToLoad.getIsbn());
-            }
+            JSONObject coordinates = new JSONObject();
+            coordinates.put("lat", bookToLoad.getGeoPoint().getLatitude());
+            coordinates.put("lng", bookToLoad.getGeoPoint().getLongitude());
+            book.put("_geloc", coordinates);
+//            book.put("timestamp", bookToLoad.getTimeStamp());
 
             if (bookToLoad.getWebThumbnail() != null) {
                 book.put("thumbnail", bookToLoad.getWebThumbnail());
             } else if (bookToLoad.getUserBookPhotosStoragePath().size() > 0) {
                 book.put("thumbnail", bookToLoad.getUserBookPhotosStoragePath().get(0));
             }
-
-// TODO: set tags
-//            if(bookToLoad.tags() != null)
-//            {
-//                book.put("tags", bookToLoad.getTags());
-//            }
 
             algoliaIndex.addObjectAsync(book, bookID, null);
         } catch (JSONException e) {

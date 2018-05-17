@@ -70,7 +70,7 @@
     <string name="no_name_nav_drawer">No name</string>
     <string name="no_email_nav_drawer">No email</string>
     <string name="button_right_recycler_view">MORE</string>
-    <string name="filter_dialog_title">Filter by</string>
+    <string name="filter_by">Filter by</string>
     <string name="min_selection">Choose at least one item</string>
     <string name="add_book_fragment_title">Add book</string>
     <string name="preview">Preview</string>
@@ -88,13 +88,6 @@
     <string name="search_no_connection_2">Check mobile data or Wi-Fi connection</string>
     <string name="try_again">Try again</string>
 
-    <string-array name="search_filters">
-        <item>Title</item>
-        <item>Author</item>
-        <item>Publisher</item>
-        <item>Tags</item>
-    </string-array>
-
     <string name="search_by">Search by</string>
 
     <string name="reviews">Reviews</string>
@@ -109,6 +102,23 @@
     <string name="dialog_isbn_scan">Scan through barcode</string>
 
     <string name="click_position_button">Add position</string>
+    <string name="rating_filter">%.1f or over</string>
+    <string name="rating_filter_zero">any</string>
+    <string name="rating_filter_max">5.0</string>
+    <string name="position_filter">within %.1f km</string>
+    <string name="no_results">No results for \"%1$s\"</string>
+    <string name="no_results_try_again">Try with a new search or changing filters</string>
+    <string name="search_intro_top">Search books uploaded by users</string>
+    <string name="search_intro_botttom">Insert at least two characters to start</string>
+    <string name="search_book_distance">Within %.1f km from you</string>
+    <string name="user_rating">User rating</string>
+    <string name="order_by">Order by</string>
+    <string name="ad_date">Ad date</string>
+    <string name="book_conditions">Book conditions</string>
+    <string name="apply_uppercase">APPLY</string>
+    <string name="cancel_uppercase">CANCEL</string>
+    <string name="reset_filters_uppercase">RESET FILTERS</string>
+
     <string name="enter_message">Enter message</string>
     <string name="send">Send</string>
     <string name="conversations_title">Conversations</string>

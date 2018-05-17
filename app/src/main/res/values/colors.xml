@@ -12,4 +12,5 @@
     <color name="good">#ffff00</color>
     <color name="near_mint">#b4ff00</color>
     <color name="mint">#00ff00</color>
+    <color name="grayed_button">#808080</color>
 </resources>
