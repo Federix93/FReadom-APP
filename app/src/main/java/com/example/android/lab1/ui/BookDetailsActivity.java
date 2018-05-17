@@ -302,8 +302,10 @@ public class BookDetailsActivity extends AppCompatActivity {
                                 DocumentSnapshot documentSnapshot = task.getResult();
                                 BooksBorrowed booksBorrowed = documentSnapshot.toObject(BooksBorrowed.class);
                                 if(booksBorrowed != null) {
-                                    booksBorrowed.getBooksID().add(mBookId);
-                                    docRef.set(booksBorrowed);
+                                    if(!booksBorrowed.getBooksID().contains(mBookId)) {
+                                        booksBorrowed.getBooksID().add(mBookId);
+                                        docRef.set(booksBorrowed);
+                                    }
                                 }
                                 else{
                                     List<String> list = new ArrayList<>();
