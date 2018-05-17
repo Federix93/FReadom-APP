@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
+import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.utils.Utilities;
 import com.google.firebase.auth.FirebaseAuth;
@@ -87,10 +88,8 @@ public class ConversationsActivity extends AppCompatActivity {
             firebaseDatabase.getReference().child("conversations").child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    for(final DataSnapshot d : dataSnapshot.getChildren()){
+                    for (final DataSnapshot d : dataSnapshot.getChildren()) {
                         String userID = (String) d.getValue();
-                        Log.d("LULLO", "UserID: " + userID);
-                        Log.d("LULLO", "CHAT ID: " + d.getKey());
                         firebaseDatabase.getReference().child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {

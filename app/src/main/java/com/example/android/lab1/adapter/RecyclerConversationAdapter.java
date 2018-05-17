@@ -109,6 +109,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
                         mTimetampTextView.setText(dateFormat.format(cal1.getTime()));
                         mLastMessageTextView.setText(chat.getLastMessage());
+                        Log.d("LULLO", "Counter: " + chat.getCounter());
                     }
                 }
 
@@ -125,6 +126,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ChatActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    mChatsReference.child(chatID).child("counter").setValue(0);
                     intent.putExtra("ChatID", chatID);
                     intent.putExtra("Username", user.getUsername());
                     intent.putExtra("ImageURL", user.getPhotoURL());

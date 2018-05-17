@@ -175,6 +175,8 @@ public class ChatActivity extends AppCompatActivity {
                             if (chat != null) {
                                 chat.setTimestamp(System.currentTimeMillis() / 1000);
                                 chat.setLastMessage(messageWritten);
+                                if(!chat.getLastMessageUserID().equals(mFirebaseAuth.getUid()))
+                                    chat.setCounter(chat.getCounter() + 1);
                             }
                             mChatsReference.child(mChatID).setValue(chat);
                         }
