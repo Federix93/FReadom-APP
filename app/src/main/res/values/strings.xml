@@ -49,7 +49,7 @@
     <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
     <string name="confirm">Conferma</string>
     <string name="dashboard_library_item">I tuoi libri</string>
-    <string name="dashboard_borrowed_item">Presi in prestito</string>
+    <string name="dashboard_borrowed_item">Libri richiesti</string>
     <string name="dashboard_lended_item">Prestati</string>
     <string name="load_book_upload">Upload del libro in corso</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
