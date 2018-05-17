@@ -87,8 +87,7 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
-                    Intent intent = new Intent(v.getContext(), ConversationsActivity.class);
+                    Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.putExtra("ID_BOOK_SELECTED", mBookIds.get(position));
                     v.getContext().startActivity(intent);

@@ -109,17 +109,14 @@ public class RecyclerDashboardLibraryAdapter extends RecyclerView.Adapter<Recycl
             mDeleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(v.getContext(),"Function not implemented", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(),"Function not implemented yet", Toast.LENGTH_SHORT).show();
                 }
             });
 
             mEditButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("ID_BOOK_SELECTED", mBookIds.get(position));
-                    v.getContext().startActivity(intent);
+                    Toast.makeText(v.getContext(),"Function not implemented yet", Toast.LENGTH_SHORT).show();
                 }
             });
 
