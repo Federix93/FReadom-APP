@@ -128,7 +128,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         booksIndex = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
         usersIndex = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
 
-        query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
+        if (currentLat != 0 && currentLong != 0)
+            query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
 
         setupMenuItemClickListener();
         setupSearchListener();
@@ -165,21 +166,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             mSearchView.setSearchFocused(true);
         }
 
-    }
-
-    @SuppressLint("MissingPermission")
-    private void setCurrentLocation() {
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            currentLat = location.getLatitude();
-                            currentLong = location.getLongitude();
-                            query.setAroundLatLng(new AbstractQuery.LatLng(currentLat, currentLong));
-                        }
-                    }
-                });
     }
 
     private void setupLeftItemListener() {
@@ -319,24 +305,20 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                             }
                         }
 
-                        if(booksDataSet.size() > 0)
-                        {
+                        if (booksDataSet.size() > 0) {
+//                            Collections.sort(booksDataSet, BookSearchItem.ratingComp);
                             backupDataSet = new ArrayList<>(booksDataSet);
                             mAdapter = new RecyclerSearchAdapter(booksDataSet, currentLat, currentLong);
                             mRecyclerView.swapAdapter(mAdapter, false);
 
                             if (!currentView[RESULTS_VIEW])
                                 showResultsView();
-                        }
-                        else
-                        {
-                            if(!currentView[NO_RESULTS_VIEW])
+                        } else {
+                            if (!currentView[NO_RESULTS_VIEW])
                                 showNoResultsView();
                             updateNoResultsTextView();
                         }
                         mSearchView.hideProgress();
-
-
 
 
                     }
@@ -405,7 +387,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 //                        }
 
         query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
-        query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
+        if (currentLat != 0 && currentLong != 0)
+            query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
 
         preSearch(mSearchView.getQuery());
     }
@@ -463,8 +446,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mNoResultsTextViewBottom.setVisibility(View.VISIBLE);
     }
 
-    private void updateNoResultsTextView()
-    {
+    private void updateNoResultsTextView() {
         mNoResultsTextViewTop.setText(String.format(getResources().getString(R.string.no_results), mSearchView.getQuery()));
     }
 
@@ -496,6 +478,24 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     setCurrentLocation();
                 }
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void setCurrentLocation() {
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            currentLat = location.getLatitude();
+                            currentLong = location.getLongitude();
+                            query.setAroundLatLng(new AbstractQuery.LatLng(currentLat, currentLong));
+                        } else {
+                            currentLat = 0;
+                            currentLong = 0;
+                        }
+                    }
+                });
     }
 
 }

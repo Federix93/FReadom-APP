@@ -3,32 +3,21 @@ package com.example.android.lab1.adapter;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.algolia.search.saas.AlgoliaException;
-import com.algolia.search.saas.Client;
-import com.algolia.search.saas.CompletionHandler;
-import com.algolia.search.saas.Index;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Condition;
-import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.searchbooks.BookSearchItem;
 import com.example.android.lab1.utils.Utilities;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAdapter.ResultViewHolder> {
 
@@ -39,8 +28,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
     private ArrayList<BookSearchItem> mBookDataSet;
     private double mCurrentLat, mCurrentLong;
 
-    public RecyclerSearchAdapter(ArrayList<BookSearchItem> bookDataSet, double currentLat, double currentLong)
-    {
+    public RecyclerSearchAdapter(ArrayList<BookSearchItem> bookDataSet, double currentLat, double currentLong) {
         mBookDataSet = new ArrayList<>(bookDataSet);
         mCurrentLat = currentLat;
         mCurrentLong = currentLong;
@@ -64,7 +52,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
         return mBookDataSet.size();
     }
 
-    public class ResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView mTitle, mAuthor, mRating, mConditionsText, mBookDistance;
         ImageView mThumbnail, mUserPicture, mConditionsImage;
@@ -91,27 +79,28 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
             mBookId = book.getBookID();
 
-            if(book.getWebThumbnail().isEmpty())
+            if (book.getWebThumbnail().isEmpty())
                 Glide.with(itemView.getContext()).load(R.drawable.book_placeholder_thumbnail).into(mThumbnail);
             else
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mThumbnail);
 
-            if(!book.getUserImage().isEmpty())
+            if (!book.getUserImage().isEmpty())
                 Glide.with(itemView.getContext()).load(book.getUserImage()).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
-            else
-            {
+            else {
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_person_black_24dp)).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
             }
             mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", book.getUserRating()));
 
-            int condition = book.getCondition();
-            if(book.getGeoPoint() != null)
-            {
+            if (mCurrentLat != 0 && mCurrentLong != 0) {
                 double distance = Utilities.distanceBetweenGeoPoints(book.getGeoPoint().getLatitude(), book.getGeoPoint().getLongitude(),
-                            mCurrentLat, mCurrentLong, 'K');
-                mBookDistance.setText(String.format("A %.1f km da te", distance));
+                        mCurrentLat, mCurrentLong, 'K');
+                mBookDistance.setText(String.format(itemView.getResources().getString(R.string.search_book_distance), distance));
+
+            } else {
+                mBookDistance.setVisibility(View.GONE);
             }
 
+            int condition = book.getCondition();
             mConditionsText.setText(Condition.getCondition(itemView.getContext(), condition));
             mConditionsImage.setColorFilter(Condition.getConditionColor(itemView.getContext(), condition), android.graphics.PorterDuff.Mode.SRC_IN);
         }
@@ -124,7 +113,6 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             v.getContext().startActivity(intent);
         }
     }
-
 
 
 }

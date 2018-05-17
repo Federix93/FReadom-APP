@@ -116,6 +116,6 @@
     <string name="no_results">No results for \"%1$s\"</string>
     <string name="no_results_try_again">Try with a new search or changing filters</string>
     <string name="search_intro">Search books uploaded by users</string>
-    <string name="search_book_distance">Within %.1d km from you</string>
+    <string name="search_book_distance">Within %.1f km from you</string>
 
 </resources>
