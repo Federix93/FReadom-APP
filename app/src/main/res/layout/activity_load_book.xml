@@ -1,334 +1,364 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/load_book_coordinator_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appBarLayout3"
+    <android.support.v7.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
 
         <include
-            android:id="@+id/toolbar_loadbook"
+            android:id="@+id/toolbar_load_book"
             layout="@layout/toolbar" />
 
-    </android.support.design.widget.AppBarLayout>
-
-
-    <android.support.design.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/app_bar"
+        <ProgressBar
+            android:id="@+id/load_book_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="6dp">
+            android:visibility="gone" />
 
-            <android.support.design.widget.CollapsingToolbarLayout
-                android:id="@+id/toolbar_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#ededed"
-                app:contentScrim="?attr/colorPrimary"
-                app:layout_scrollFlags="scroll|enterAlwaysCollapsed">
-
-
-                <android.support.constraint.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_collapseMode="parallax"
-                    android:background="@drawable/ic_no_book_photo">
-
-                    <android.support.v4.view.ViewPager
-                        android:id="@+id/load_book_gallery"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/activity_load_book_image_switcher_height"
-                        app:layout_constraintTop_toTopOf="parent"/>
-
-                    <LinearLayout
-                        android:id="@+id/dots_container"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|center"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginStart="16dp"
-                        android:orientation="horizontal"
-                        android:padding="@dimen/activity_load_book_content_padding"
-                        app:layout_constraintBottom_toBottomOf="@+id/load_book_gallery"
-                        app:layout_constraintEnd_toEndOf="@+id/load_book_gallery"
-                        app:layout_constraintStart_toStartOf="@+id/load_book_gallery" />
-
-                </android.support.constraint.ConstraintLayout>
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/add_image_fab"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/load_book_gallery"
-                    android:layout_alignEnd="@id/load_book_gallery"
-                    android:layout_marginBottom="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:padding="@dimen/icon_padding"
-                    app:elevation="6dp"
-                    android:layout_gravity="end|bottom"
-                    app:srcCompat="@drawable/ic_add_a_photo_black_24dp"
-                    app:layout_collapseMode="pin"/>
-
-            </android.support.design.widget.CollapsingToolbarLayout>
-
-        </android.support.design.widget.AppBarLayout>
-
-        <android.support.v4.widget.NestedScrollView
+        <ImageView
+            android:id="@+id/load_book_isbn_explanation"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/isbn10digit"
+            android:visibility="visible" />
 
-            <LinearLayout
+            <android.support.v7.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:animateLayoutChanges="true"
+                android:id="@+id/load_book_toolbar_isbn"
+                android:paddingStart="@dimen/activity_load_book_content_padding"
+                android:paddingEnd="@dimen/activity_load_book_content_padding"
+                android:paddingTop="@dimen/activity_load_book_content_padding"
+                android:paddingBottom="@dimen/activity_load_book_content_padding"
+                android:visibility="visible">
 
-
-                <LinearLayout
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/load_book_isbn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:maxLength="13"
+                    android:visibility="gone"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="13">
 
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/load_book_isbn"
-                        android:layout_width="0dp"
+                    <EditText
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:inputType="phone"
-                        android:maxLength="13"
-                        app:counterEnabled="true"
-                        app:counterMaxLength="13">
+                        android:layout_marginBottom="8dp"
+                        android:hint="@string/isbn_hint"
+                        android:inputType="number"
+                        android:maxLength="13"/>
+                </android.support.design.widget.TextInputLayout>
 
-                        <android.support.design.widget.TextInputEditText
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:inputType="number"
-                            android:maxLength="13"
-                            android:hint="@string/isbn" />
-
-                    </android.support.design.widget.TextInputLayout>
-
-                    <ImageView
-                        android:id="@+id/load_book_auto_fill"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:contentDescription="@string/load_book_auto_fill_icon_desc"
-                        android:padding="@dimen/icon_padding"
-                        app:srcCompat="@drawable/ic_search_black_24dp" />
-
-                    <ProgressBar
-                        android:id="@+id/load_book_progress_bar"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginTop="32dp"
-                        android:layout_marginEnd="40dp"
-                        android:visibility="gone" />
-
-
-
-                    <ImageView
-                        android:id="@+id/load_book_scan_bar_code"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:padding="@dimen/icon_padding"
-                        app:srcCompat="@drawable/ic_camera_scan_primary_24dp"/>
-
-                </LinearLayout>
-
-                <LinearLayout
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/load_book_search_manually"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    style="@style/IsbnButton"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/insert_manually" />
 
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/load_book_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/activity_load_book_content_padding"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:inputType="text">
-
-                        <android.support.design.widget.TextInputEditText
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="@string/title" />
-
-                    </android.support.design.widget.TextInputLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/load_book_scan_bar_code"
+                    style="@style/IsbnButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/dialog_isbn_scan" />
+            </android.support.v7.widget.LinearLayoutCompat>
 
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/load_book_author"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/activity_load_book_content_padding"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:inputType="text">
 
-                        <android.support.design.widget.TextInputEditText
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="@string/author" />
 
-                    </android.support.design.widget.TextInputLayout>
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/load_book_info_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:isScrollContainer="true"
+            android:visibility="visible">
 
-                </LinearLayout>
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
+                android:paddingLeft="@dimen/activity_load_book_content_padding"
+                android:paddingRight="@dimen/activity_load_book_content_padding">
 
-                <LinearLayout
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline_left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.25" />
+
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline_right"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.75" />
+
+
+                <ImageView
+                    android:id="@+id/thumbnail"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="48dp"
+                    android:layout_marginTop="32dp"
+                    android:src="@drawable/ic_no_book_photo"
+                    app:layout_constraintEnd_toStartOf="@id/guideline_right"
+                    app:layout_constraintStart_toStartOf="@id/guideline_left"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/load_book_title_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintBottom_toBottomOf="@id/load_book_title"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/thumbnail"
+                    app:srcCompat="@drawable/ic_title_24dp" />
+
+                <TextView
+                    android:id="@+id/load_book_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    style="@style/TextAppearance.AppCompat.Medium"
+                    android:hint="@string/title"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:maxLines="2"
+                    app:layout_constraintStart_toEndOf="@id/load_book_title_icon"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintTop_toBottomOf="@id/thumbnail" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/load_book_author_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_title" />
 
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/load_book_publisher"
-                        android:layout_width="0dp"
+                <ImageView
+                    android:id="@+id/load_book_publisher_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintBottom_toBottomOf="@id/load_book_publisher"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_author_list"
+                    app:srcCompat="@drawable/ic_account_balance_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/load_book_publisher"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/load_book_publisher_icon"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_author_list">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/activity_load_book_content_padding"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:inputType="text">
+                        android:hint="@string/publisher" />
+                </android.support.design.widget.TextInputLayout>
 
-                        <android.support.design.widget.TextInputEditText
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="@string/publisher" />
+                <ImageView
+                    android:id="@+id/load_book_year_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintBottom_toBottomOf="@id/load_book_publish_year_spinner"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_publisher"
+                    app:srcCompat="@drawable/ic_year_24dp" />
 
-                    </android.support.design.widget.TextInputLayout>
+                <include
+                    android:id="@+id/load_book_publish_year_spinner"
+                    layout="@layout/spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/load_book_year_icon"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_publisher" />
 
-                </LinearLayout>
+                <View
+                    android:id="@+id/divider"
+                    style="@style/Divider"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_publish_year_spinner" />
 
-                <LinearLayout
+                <ImageView
+                    android:id="@+id/load_book_conditions_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintBottom_toBottomOf="@id/load_book_conditions_spinner"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divider"
+                    app:srcCompat="@drawable/ic_fiber_new_24dp" />
+
+                <include
+                    android:id="@+id/load_book_conditions_spinner"
+                    layout="@layout/spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/load_book_conditions_icon"
+                    app:layout_constraintTop_toBottomOf="@id/divider" />
+
+                <ImageView
+                    android:id="@+id/load_book_genre_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintBottom_toBottomOf="@id/load_book_genre"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_conditions_spinner"
+                    app:srcCompat="@drawable/ic_genres_24dp" />
+
+                <include
+                    android:id="@+id/load_book_genre"
+                    layout="@layout/spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/load_book_genre_icon"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_conditions_spinner" />
+
+                <TextView
+                    android:id="@+id/load_book_position"
+                    style="@style/ActionTextView"
+                    android:layout_marginTop="16dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@color/background_app"
+                    android:hint="@string/click_position_button"
+                    android:padding="16dp"
+                    android:textColor="@color/black"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/load_book_location"
+                    app:layout_constraintTop_toBottomOf="@+id/load_book_genre" />
+
+
+                <ImageView
+                    android:id="@+id/load_book_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_genre"
+                    app:srcCompat="@drawable/ic_location_on_black_24dp" />
+
+
+                <ImageView
+                    android:id="@+id/load_book_add_photos_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_rv"
+                    app:srcCompat="@drawable/ic_photo_library_black_24dp" />
+
+                <TextView
+                    style="@style/ActionTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    android:hint="@string/add_your_photos"
+                    app:layout_constraintBottom_toTopOf="@id/load_book_loaded_photos"
+                    app:layout_constraintEnd_toStartOf="@id/load_book_add_photos"
+                    app:layout_constraintStart_toEndOf="@id/load_book_add_photos_icon"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_rv" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/load_book_loaded_photos"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <include
-                        android:id="@+id/load_book_publish_year_spinner"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_margin="20dp"
-                        layout="@layout/spinner" />
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    android:maxHeight="@dimen/user_photos_max_height"
+                    app:layout_constraintStart_toEndOf="@drawable/ic_add_a_photo_black_24dp"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_add_photos_icon" />
 
 
-                    <include
-                        android:id="@+id/load_book_conditions_spinner"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_margin="20dp"
-                        layout="@layout/spinner" />
+                <ImageButton
+                    android:id="@+id/load_book_add_photos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/icon_padding"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_rv"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
 
+                <ImageView
+                    android:id="@+id/load_book_tags_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_location"
+                    app:srcCompat="@drawable/ic_tags_red_24dp" />
 
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/load_book_tags_text_view"
+                    style="@style/ActionTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/load_book_tags"
+                    android:padding="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/load_book_tags_icon"
+                    app:layout_constraintTop_toTopOf="@id/load_book_tags_icon" />
 
-
-
-                <LinearLayout
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/load_book_tags_rv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_icon" />
 
-                    <TextView
-                        android:id="@+id/load_book_position"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:hint="@string/position"
-                        android:paddingStart="5dp"
-                        android:textSize="18sp"
-                        android:layout_marginStart="@dimen/activity_load_book_content_padding"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-                        app:layout_goneMarginTop="@dimen/activity_load_book_edit_text_margin"/>
-
-
-                    <ImageView
-                        android:id="@+id/load_book_location"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="7dp"
-                        android:elevation="6dp"
-                        android:padding="@dimen/icon_padding"
-                        app:srcCompat="@drawable/ic_location_on_black_24dp" />
-
-                </LinearLayout>
-
-                <LinearLayout
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/load_book_confirm_book"
                     android:layout_width="match_parent"
+                    style="@style/IsbnButton"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/load_book_tags"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/activity_load_book_content_padding"
-                        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-                        android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                        android:inputType="text">
-
-                        <android.support.design.widget.TextInputEditText
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="@string/load_book_tags" />
-
-                    </android.support.design.widget.TextInputLayout>
-
-                </LinearLayout>
-
-
-
-            </LinearLayout>
-
+                    android:text="@string/insert_book"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/white"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_loaded_photos" />
+            </android.support.constraint.ConstraintLayout>
         </android.support.v4.widget.NestedScrollView>
 
 
+    </android.support.v7.widget.LinearLayoutCompat>
 
-    </android.support.design.widget.CoordinatorLayout>
-
-
-</LinearLayout>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+</android.support.design.widget.CoordinatorLayout>

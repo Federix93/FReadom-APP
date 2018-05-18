@@ -5,22 +5,23 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.text.TextUtils;
 import android.widget.ArrayAdapter;
 
 import com.example.android.lab1.R;
@@ -130,6 +131,7 @@ public abstract class Utilities {
 
     public static Intent getPositionActivityIntent(Activity currentActivity, boolean searchCities) {
         Intent intent = new Intent(currentActivity, PositionActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         if (searchCities)
             intent.putExtra(PositionActivity.SEARCH_CITY_EXTRA, true);
         return intent;
@@ -202,7 +204,33 @@ public abstract class Utilities {
         }
     }
 
-    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver) {
+    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver) throws IOException {
+        int rotationAngle;
+        ExifInterface ei = new ExifInterface(filePath);
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED);
+
+
+        switch (orientation) {
+
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                rotationAngle = 90;
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                rotationAngle = 180;
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                rotationAngle = 270;
+                break;
+
+            case ExifInterface.ORIENTATION_NORMAL:
+            default:
+                rotationAngle = 0;
+        }
+
+
         Uri filePathUri = Uri.parse(filePath);
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -217,17 +245,22 @@ public abstract class Utilities {
         } else
             bitmap = BitmapFactory.decodeFile(filePath, options);
         // rotate bitmap
-        Matrix m = new Matrix();
-        m.postRotate(90);
-        Bitmap compressedRotated = Bitmap.createBitmap(bitmap,
-                0,
-                0,
-                bitmap.getWidth(),
-                bitmap.getHeight(),
-                m,
-                true);
+        Bitmap compressedRotated;
         out = new ByteArrayOutputStream();
-        compressedRotated.compress(Bitmap.CompressFormat.JPEG, 75, out);
+        if (rotationAngle > 0) {
+            Matrix m = new Matrix();
+            m.postRotate(90);
+            compressedRotated = Bitmap.createBitmap(bitmap,
+                    0,
+                    0,
+                    bitmap.getWidth(),
+                    bitmap.getHeight(),
+                    m,
+                    true);
+            compressedRotated.compress(Bitmap.CompressFormat.JPEG, 60, out);
+        } else
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, out);
+
         return out.toByteArray();
     }
 

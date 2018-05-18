@@ -3,13 +3,15 @@ package com.example.android.lab1.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Book implements Parcelable {
+
+public class Book implements Parcelable, Comparable<Book> {
 
     public static final Creator<Book> CREATOR = new Creator<Book>() {
         @Override
@@ -38,6 +40,8 @@ public class Book implements Parcelable {
     private static final String INFO_LINK = "IL";
     private static final String CONDITIONS = "CONDITIONS";
     private static final String GENRE = "GENRE";
+    private static final String TIMESTAMP = "TIMESTAMP";
+    private static final String TAGS = "TAGS";
 
     private String mIsbn;
     private String mTitle;
@@ -50,10 +54,12 @@ public class Book implements Parcelable {
     private String mUid; // user id
     private String mWebThumbnail;
     private ArrayList<String> mBookPhotosPaths;
+    private String mSearchTags;
     private Long mLoanStart;
     private Long mLoanEnd;
     private int mGenre;
     private String mInfoLink;
+    private Long mTimeInserted;
 
     public Book() {
     }
@@ -176,6 +182,8 @@ public class Book implements Parcelable {
         mLoanStart = bundle.containsKey(LOAN_START) ? bundle.getLong(LOAN_START) : null;
         mLoanEnd = bundle.containsKey(LOAN_END) ? bundle.getLong(LOAN_END) : null;
         mInfoLink = bundle.containsKey(INFO_LINK) ? bundle.getString(INFO_LINK) : null;
+        mTimeInserted = bundle.containsKey(TIMESTAMP) ? bundle.getLong(TIMESTAMP) : null;
+        mSearchTags = bundle.containsKey(TAGS) ? bundle.getString(TAGS) : null;
         if (bundle.containsKey(CONDITIONS))
             mCondition = bundle.getInt(CONDITIONS);
         if (bundle.containsKey(GENRE))
@@ -259,9 +267,43 @@ public class Book implements Parcelable {
             bundle.putLong(LOAN_END, mLoanEnd);
         if (mInfoLink != null)
             bundle.putString(INFO_LINK, mInfoLink);
+        if (mTimeInserted != null)
+            bundle.putLong(TIMESTAMP, mTimeInserted);
+        if (mSearchTags != null)
+            bundle.putString(TAGS, mSearchTags);
         bundle.putInt(CONDITIONS, mCondition);
         bundle.putInt(GENRE, mGenre);
     }
 
 
+    public Long getTimeInserted() {
+        return mTimeInserted;
+    }
+
+    public void setTimeInserted(Long mTimeInserted) {
+        this.mTimeInserted = mTimeInserted;
+    }
+
+    @Override
+    public int compareTo(@NonNull Book o) {
+        if (getTimeInserted() == null)
+            return -1;
+        if (o.getTimeInserted() == null)
+            return 1;
+        long diff = getTimeInserted() - o.getTimeInserted();
+        if (diff == 0)
+            return 0;
+        if (diff > 0)
+            return 1;
+        else
+            return -1;
+    }
+
+    public String getTags() {
+        return mSearchTags;
+    }
+
+    public void setTags(String searchTags) {
+        this.mSearchTags = searchTags;
+    }
 }

@@ -2,13 +2,14 @@ package com.example.android.lab1.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,6 +49,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -75,6 +77,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     private String mBookId;
     private User mUser;
+    private ListenerRegistration mListenerRegistration;
     private Book mBook;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -102,7 +105,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
         Utilities.setupStatusBarColor(this);
-        setupOnClickListeners();
+        //setupOnClickListeners();
 
         mToolbar = findViewById(R.id.toolbar_book_detail);
 
@@ -129,17 +132,187 @@ public class BookDetailsActivity extends AppCompatActivity {
                 .build();
         mFirebaseFirestore.setFirestoreSettings(settings);
         final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        mListenerRegistration = docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                //Log.d("DEBUGPERSISTANCE", "onComplete: " + documentSnapshot.getMetadata()
+                //        .isFromCache());
+                mBook = documentSnapshot.toObject(Book.class);
+                updateUI(mBook);
+                if (mListenerRegistration != null)
+                    mListenerRegistration.remove();
+            }
+        });
+
+
+                /*.addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    mBook = task.getResult().toObject(Book.class);
-                    updateUI(mBook);
+                    Book book = task.getResult().toObject(Book.class);
+
+                    updateUI(book);
+                }
+            }
+        });*/
+    }
+
+    private void updateUI(final Book book) {
+        if (book.getTitle() != null)
+            mBookTitleTextView.setText(book.getTitle());
+        else
+            mBookTitleTextView.setText(getResources().getString(R.string.title_not_available));
+        if (book.getAuthors() != null)
+            mAuthorTextView.setText(book.getAuthors());
+        else
+            mAuthorTextView.setText(getResources().getString(R.string.author_not_available));
+        if (book.getPublisher() != null)
+            mEditorTextView.setText(book.getPublisher());
+        else
+            mEditorTextView.setText(getResources().getString(R.string.editor_not_available));
+        if (!String.valueOf(book.getPublishYear()).isEmpty())
+            mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
+        else
+            mPublicationDateTextView.setText(getResources().getString(R.string.date_not_available));
+        if (!String.valueOf(book.getCondition()).isEmpty()) {
+            mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
+            mBookDetailConditionColor.setColorFilter(Condition.getConditionColor(getApplicationContext(), book.getCondition()));
+        }
+        if (book.getWebThumbnail() != null)
+            Glide.with(this).load(book.getWebThumbnail())
+                    .apply(new RequestOptions().centerCrop())
+                    .into(mBookThumbnailImageView);
+        else
+            Glide.with(this).load(R.drawable.book_thumbnail_placeholder)
+                    .apply(new RequestOptions().centerCrop())
+                    .into(mBookThumbnailImageView);
+        setupOnClickListeners(book);
+
+        // storage photos
+        RecyclerView recyclerView = findViewById(R.id.rv_images);
+        if (recyclerView != null) {
+            if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
+                BookPhoto[] bookPhotos = new BookPhoto[book.getUserBookPhotosStoragePath().size()];
+                for (int i = 0; i < book.getUserBookPhotosStoragePath().size(); i++) {
+                    bookPhotos[i] = new BookPhoto(book.getUserBookPhotosStoragePath().get(i), book.getTitle());
+                }
+                recyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
+            } else {
+                recyclerView.setVisibility(View.GONE);
+            }
+        }
+        if (book.getUid() != null) {
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                    .setPersistenceEnabled(true)
+                    .build();
+            firebaseFirestore.setFirestoreSettings(settings);
+            final DocumentReference docRef = firebaseFirestore.collection("users").document(book.getUid());
+            docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
+                    if (snapshot.exists()) {
+                        mUser = snapshot.toObject(User.class);
+                        if (mUser != null) {
+                            if (mUser.getImage() == null) {
+                                Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
+                                        .apply(bitmapTransform(new CircleCrop()))
+                                        .into(mUserImageView);
+                            } else {
+                                Glide.with(getApplicationContext()).load(mUser.getImage())
+                                        .apply(bitmapTransform(new CircleCrop()))
+                                        .into(mUserImageView);
+                            }
+                            if (mUser.getUsername() != null) {
+                                mUsernameTextView.setText(mUser.getUsername());
+                            }
+                            if (String.valueOf(mUser.getRating()) != null) {
+                                mRatingTextView.setText(String.valueOf(mUser.getRating()));
+                            }
+                        }
+                    }
+                }
+            });
+
+            mProfileConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("UserObject", mUser);
+                    intent.putExtra("UserID", book.getUid());
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
+    private void setupOnClickListeners(final Book book) {
+
+        if (book != null && book.getInfoLink() != null) {
+            mPreviewButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                    CustomTabsIntent customTabsIntent = builder.build();
+                    builder.setToolbarColor(v.getContext()
+                            .getResources()
+                            .getColor(R.color.colorPrimary));
+                    customTabsIntent.launchUrl(v.getContext(), Uri.parse(book.getInfoLink()));
+                }
+            });
+        } else
+            mPreviewButton.setEnabled(false);
+
+        mBookButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final DocumentReference docRef;
+                if(mFirebaseAuth.getUid() != null) {
+                    docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
+                    docRef.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if(task.isSuccessful()){
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                BooksBorrowed booksBorrowed = documentSnapshot.toObject(BooksBorrowed.class);
+                                if(booksBorrowed != null) {
+                                    if(!booksBorrowed.getBooksID().contains(mBookId)) {
+                                        booksBorrowed.getBooksID().add(mBookId);
+                                        docRef.set(booksBorrowed);
+                                    }
+                                }
+                                else{
+                                    List<String> list = new ArrayList<>();
+                                    list.add(mBookId);
+                                    booksBorrowed = new BooksBorrowed(list);
+                                    docRef.set(booksBorrowed);
+                                }
+                                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
+                            }
+                        }
+                    });
+                }
+                else{
+                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
                 }
             }
         });
-    }
 
+        mShareImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mFavoritesImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     private class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapter.MyViewHolder> {
 
@@ -203,152 +376,5 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-    private void updateUI(final Book book) {
-        if (book.getTitle() != null)
-            mBookTitleTextView.setText(book.getTitle());
-        else
-            mBookTitleTextView.setText(getResources().getString(R.string.title_not_available));
-        if (book.getAuthors() != null)
-            mAuthorTextView.setText(book.getAuthors());
-        else
-            mAuthorTextView.setText(getResources().getString(R.string.author_not_available));
-        if (book.getPublisher() != null)
-            mEditorTextView.setText(book.getPublisher());
-        else
-            mEditorTextView.setText(getResources().getString(R.string.editor_not_available));
-        if (!String.valueOf(book.getPublishYear()).isEmpty())
-            mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
-        else
-            mPublicationDateTextView.setText(getResources().getString(R.string.date_not_available));
-        if (!String.valueOf(book.getCondition()).isEmpty()) {
-            mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
-            mBookDetailConditionColor.setColorFilter(Condition.getConditionColor(getApplicationContext(), book.getCondition()));
-        }
-        if (book.getWebThumbnail() != null)
-            Glide.with(this).load(book.getWebThumbnail())
-                    .apply(new RequestOptions().centerCrop())
-                    .into(mBookThumbnailImageView);
-        else
-            Glide.with(this).load(R.drawable.book_thumbnail_placeholder)
-                    .apply(new RequestOptions().centerCrop())
-                    .into(mBookThumbnailImageView);
-        // storage photos
-        RecyclerView recyclerView = findViewById(R.id.rv_images);
-        if (recyclerView != null && book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
-            BookPhoto[] bookPhotos = new BookPhoto[book.getUserBookPhotosStoragePath().size()];
-            for (int i = 0; i < book.getUserBookPhotosStoragePath().size(); i++) {
-                bookPhotos[i] = new BookPhoto(book.getUserBookPhotosStoragePath().get(i), book.getTitle());
-            }
-            recyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
-        } else {
-            recyclerView.setVisibility(View.GONE);
-        }
-        if (book.getUid() != null) {
-            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-            FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                    .setPersistenceEnabled(true)
-                    .build();
-            firebaseFirestore.setFirestoreSettings(settings);
-            final DocumentReference docRef = firebaseFirestore.collection("users").document(book.getUid());
-            docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
-                @Override
-                public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
-                    if (snapshot.exists()) {
-                        mUser = snapshot.toObject(User.class);
-                        if (mUser != null) {
-                            if (mUser.getImage() == null) {
-                                Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
-                                        .apply(bitmapTransform(new CircleCrop()))
-                                        .into(mUserImageView);
-                            } else {
-                                Glide.with(getApplicationContext()).load(mUser.getImage())
-                                        .apply(bitmapTransform(new CircleCrop()))
-                                        .into(mUserImageView);
-                            }
-                            if (mUser.getUsername() != null) {
-                                mUsernameTextView.setText(mUser.getUsername());
-                            }
-                            if (String.valueOf(mUser.getRating()) != null) {
-                                mRatingTextView.setText(String.valueOf(mUser.getRating()));
-                            }
-                        }
-                    }
-                }
-            });
-
-            mProfileConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    Bundle bundle = new Bundle();
-                    intent.putExtra("UserObject", mUser);
-                    intent.putExtra("UserID", book.getUid());
-                    startActivity(intent);
-                }
-            });
-        }
-    }
-
-    private void setupOnClickListeners() {
-
-        mPreviewButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mBookButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final DocumentReference docRef;
-                if(mFirebaseAuth.getUid() != null) {
-                    docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
-                    docRef.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if(task.isSuccessful()){
-                                DocumentSnapshot documentSnapshot = task.getResult();
-                                BooksBorrowed booksBorrowed = documentSnapshot.toObject(BooksBorrowed.class);
-                                if(booksBorrowed != null) {
-                                    if(!booksBorrowed.getBooksID().contains(mBookId)) {
-                                        booksBorrowed.getBooksID().add(mBookId);
-                                        docRef.set(booksBorrowed);
-                                    }
-                                }
-                                else{
-                                    List<String> list = new ArrayList<>();
-                                    list.add(mBookId);
-                                    booksBorrowed = new BooksBorrowed(list);
-                                    docRef.set(booksBorrowed);
-                                }
-                                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
-                            }
-                        }
-                    });
-                }
-                else{
-                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        mShareImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mFavoritesImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
-            }
-        });
-
     }
 }

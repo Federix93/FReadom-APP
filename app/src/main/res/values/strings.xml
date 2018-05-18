@@ -53,7 +53,7 @@
     <string name="dashboard_lended_item">Prestati</string>
     <string name="load_book_upload">Upload del libro in corso</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
-    <string name="load_book_tags">Tags</string>
+    <string name="load_book_tags">Aggiungi parole chiave per la ricerca del libro</string>
 
     <string name="condition_poor">Cattive</string>
     <string name="condition_fair">Discrete</string>
@@ -145,6 +145,11 @@
     <string name="choose_end_date">Seleziona la data finale</string>
 
     <string name="click_position_button">Aggiungi posizione</string>
+    <string name="select_genres">Selezionare i generi che si vogliono visualizzare</string>
+    <string name="cancel">Annulla</string>
+    <string name="choose_genre">Selezionare il genere a cui si è interessati</string>
+    <string name="no_genre_in_particular">Nessuno in particolare</string>
+    <string name="tag">Tag</string>
     <string name="conversations_title">Conversazioni</string>
 
     <string name="enter_message">Inserisci il messaggio</string>
