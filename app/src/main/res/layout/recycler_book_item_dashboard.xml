@@ -129,7 +129,6 @@
                         android:layout_marginEnd="16dp"
                         android:background="@drawable/rounded_textview"
                         android:gravity="center"
-                        android:text="10"
                         android:textColor="@color/white"
                         android:textSize="12sp"
                         app:layout_constraintBottom_toBottomOf="parent"
