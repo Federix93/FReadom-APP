@@ -34,13 +34,14 @@ import com.example.android.lab1.utils.Utilities;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -60,9 +61,8 @@ public class HomeFragment extends Fragment {
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
-
-
     FirebaseFirestore mFirebaseFirestore;
+    private ListenerRegistration mFirstEventListener, mSecondEventListener;
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
 
@@ -271,14 +271,14 @@ public class HomeFragment extends Fragment {
         }
 
         final String finalUserId = userId;
-        query1.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        mFirstEventListener = query1.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
                 List<String> ids = new ArrayList<>();
                 List<Book> books = new ArrayList<>();
                 int size = 0;
                 Book currentBook;
-                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()) {
+                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
                     currentBook = documentSnapshot.toObject(Book.class);
                     if ((finalUserId != null &&
                             currentBook.getUid().equals(finalUserId)) ||
@@ -294,19 +294,22 @@ public class HomeFragment extends Fragment {
 
                 if (mFirstRecyclerView != null)
                     mFirstRecyclerView.setAdapter(new RecyclerBookAdapter(books, ids));
+
+                if (mFirstEventListener != null)
+                    mFirstEventListener.remove();
             }
         });
 
 
-        query2.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        mSecondEventListener = query2.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
                 List<String> ids = new ArrayList<>();
                 List<Book> books = new ArrayList<>();
                 int size = 0;
                 Book currentBook;
                 // apply filter
-                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()) {
+                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
                     currentBook = documentSnapshot.toObject(Book.class);
                     if ((finalUserId != null &&
                             currentBook.getUid().equals(finalUserId)) ||
@@ -336,8 +339,12 @@ public class HomeFragment extends Fragment {
 
                 if (mSecondRecyclerView != null)
                     mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(books.subList(0, Math.min(books.size(), homePageBooksNumber)), ids));
+
+                if (mSecondEventListener != null)
+                    mSecondEventListener.remove();
             }
         });
+
 
     }
 

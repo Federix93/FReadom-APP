@@ -41,6 +41,7 @@ public class Book implements Parcelable, Comparable<Book> {
     private static final String CONDITIONS = "CONDITIONS";
     private static final String GENRE = "GENRE";
     private static final String TIMESTAMP = "TIMESTAMP";
+    private static final String TAGS = "TAGS";
 
     private String mIsbn;
     private String mTitle;
@@ -53,6 +54,7 @@ public class Book implements Parcelable, Comparable<Book> {
     private String mUid; // user id
     private String mWebThumbnail;
     private ArrayList<String> mBookPhotosPaths;
+    private String mSearchTags;
     private Long mLoanStart;
     private Long mLoanEnd;
     private int mGenre;
@@ -181,6 +183,7 @@ public class Book implements Parcelable, Comparable<Book> {
         mLoanEnd = bundle.containsKey(LOAN_END) ? bundle.getLong(LOAN_END) : null;
         mInfoLink = bundle.containsKey(INFO_LINK) ? bundle.getString(INFO_LINK) : null;
         mTimeInserted = bundle.containsKey(TIMESTAMP) ? bundle.getLong(TIMESTAMP) : null;
+        mSearchTags = bundle.containsKey(TAGS) ? bundle.getString(TAGS) : null;
         if (bundle.containsKey(CONDITIONS))
             mCondition = bundle.getInt(CONDITIONS);
         if (bundle.containsKey(GENRE))
@@ -266,6 +269,8 @@ public class Book implements Parcelable, Comparable<Book> {
             bundle.putString(INFO_LINK, mInfoLink);
         if (mTimeInserted != null)
             bundle.putLong(TIMESTAMP, mTimeInserted);
+        if (mSearchTags != null)
+            bundle.putString(TAGS, mSearchTags);
         bundle.putInt(CONDITIONS, mCondition);
         bundle.putInt(GENRE, mGenre);
     }
@@ -292,5 +297,13 @@ public class Book implements Parcelable, Comparable<Book> {
             return 1;
         else
             return -1;
+    }
+
+    public String getTags() {
+        return mSearchTags;
+    }
+
+    public void setTags(String searchTags) {
+        this.mSearchTags = searchTags;
     }
 }

@@ -53,7 +53,7 @@
     <string name="dashboard_lended_item">Prestati</string>
     <string name="load_book_upload">Upload del libro in corso</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
-    <string name="load_book_tags">Tags</string>
+    <string name="load_book_tags">Aggiungi parole chiave per la ricerca del libro</string>
 
     <string name="condition_poor">Cattive</string>
     <string name="condition_fair">Discrete</string>
@@ -153,5 +153,6 @@
     <string name="cancel">Annulla</string>
     <string name="choose_genre">Selezionare il genere a cui si è interessati</string>
     <string name="no_genre_in_particular">Nessuno in particolare</string>
+    <string name="tag">Tag</string>
 
 </resources>

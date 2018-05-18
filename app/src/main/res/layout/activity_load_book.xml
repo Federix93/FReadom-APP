@@ -138,7 +138,7 @@
                     android:layout_height="wrap_content"
                     style="@style/TextAppearance.AppCompat.Medium"
                     android:hint="@string/title"
-                    android:layout_marginBottom="@dimen/activity_load_book_edit_text_margin"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:maxLines="2"
                     app:layout_constraintStart_toEndOf="@id/load_book_title_icon"
@@ -168,7 +168,7 @@
                     android:id="@+id/load_book_publisher"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_load_book_edit_text_margin"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/load_book_publisher_icon"
                     app:layout_constraintTop_toBottomOf="@id/load_book_author_list">
@@ -195,7 +195,7 @@
                     layout="@layout/spinner"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_load_book_edit_text_margin"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/load_book_year_icon"
                     app:layout_constraintTop_toBottomOf="@id/load_book_publisher" />
@@ -203,7 +203,7 @@
                 <View
                     android:id="@+id/divider"
                     style="@style/Divider"
-                    android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
                     app:layout_constraintTop_toBottomOf="@id/load_book_publish_year_spinner" />
 
                 <ImageView
@@ -222,7 +222,7 @@
                     layout="@layout/spinner"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_load_book_edit_text_margin"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/load_book_conditions_icon"
                     app:layout_constraintTop_toBottomOf="@id/divider" />
@@ -243,7 +243,7 @@
                     layout="@layout/spinner"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_load_book_edit_text_margin"
+                    android:layout_marginBottom="@dimen/load_book_field_margin"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/load_book_genre_icon"
                     app:layout_constraintTop_toBottomOf="@id/load_book_conditions_spinner" />
@@ -254,9 +254,7 @@
                     android:layout_marginTop="16dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:background="@color/background_app"
-                    android:elevation="0dp"
                     android:hint="@string/click_position_button"
                     android:padding="16dp"
                     android:textColor="@color/black"
@@ -282,28 +280,28 @@
                     android:id="@+id/load_book_add_photos_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
                     android:padding="@dimen/icon_padding"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/load_book_location"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_rv"
                     app:srcCompat="@drawable/ic_photo_library_black_24dp" />
 
                 <TextView
                     style="@style/ActionTextView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
                     android:hint="@string/add_your_photos"
                     app:layout_constraintBottom_toTopOf="@id/load_book_loaded_photos"
                     app:layout_constraintEnd_toStartOf="@id/load_book_add_photos"
                     app:layout_constraintStart_toEndOf="@id/load_book_add_photos_icon"
-                    app:layout_constraintTop_toBottomOf="@id/load_book_location" />
+                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_rv" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/load_book_loaded_photos"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
                     android:maxHeight="@dimen/user_photos_max_height"
                     app:layout_constraintStart_toEndOf="@drawable/ic_add_a_photo_black_24dp"
                     app:layout_constraintTop_toBottomOf="@id/load_book_add_photos_icon" />
@@ -314,11 +312,39 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/icon_padding"
-                    android:layout_marginBottom="@dimen/activity_load_book_edit_text_margin"
-                    android:layout_marginTop="@dimen/activity_load_book_edit_text_margin"
-                    app:layout_constraintTop_toBottomOf="@id/load_book_location"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_rv"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
+
+                <ImageView
+                    android:id="@+id/load_book_tags_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    android:padding="@dimen/icon_padding"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_location"
+                    app:srcCompat="@drawable/ic_tags_red_24dp" />
+
+                <TextView
+                    android:id="@+id/load_book_tags_text_view"
+                    style="@style/ActionTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/load_book_tags"
+                    android:padding="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/load_book_tags_icon"
+                    app:layout_constraintTop_toTopOf="@id/load_book_tags_icon" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/load_book_tags_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/load_book_field_margin"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_icon" />
 
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/load_book_confirm_book"
@@ -329,8 +355,6 @@
                     android:layout_marginTop="16dp"
                     android:textColor="@color/white"
                     app:layout_constraintTop_toBottomOf="@id/load_book_loaded_photos" />
-
-
             </android.support.constraint.ConstraintLayout>
         </android.support.v4.widget.NestedScrollView>
 
