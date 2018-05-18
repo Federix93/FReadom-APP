@@ -960,7 +960,8 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
 
         mProgressBar.setVisibility(View.VISIBLE);
-        if (mResultBook.getUserBookPhotosStoragePath() != null) {
+        if (mResultBook.getUserBookPhotosStoragePath() != null
+                && !mResultBook.getUserBookPhotosStoragePath().isEmpty()) {
             mProgressRate = 100 / (mResultBook.getUserBookPhotosStoragePath().size() + 1);
             mProgressBar.setIndeterminate(false);
             mProgressBar.setMax(100);
