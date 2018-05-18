@@ -841,19 +841,15 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         StorageReference storageReference = storage.getReference();
         if (userBookPhotosStoragePath.size() > 0) {
             StorageReference storageRef = storageReference.child(generateStorageRef(userBookPhotosStoragePath.get(mUploadedImagesCount)));
-
             byte[] compressedImage = null;
-            try {
-                compressedImage = Utilities.compressPhoto(userBookPhotosStoragePath.get(mUploadedImagesCount), getContentResolver());
-            } catch (IOException e) {
-                compressedImage = null;
-            }
+            compressedImage = Utilities.compressPhoto(userBookPhotosStoragePath.get(mUploadedImagesCount), getContentResolver());
+
             if (compressedImage == null) {
                 Toast.makeText(getApplicationContext(),
                         R.string.load_book_upload_error,
                         Toast.LENGTH_SHORT).show();
                 cleanUpload();
-                return;
+                finish();
             }
             UploadTask uploadTask = storageRef.putBytes(compressedImage);
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
