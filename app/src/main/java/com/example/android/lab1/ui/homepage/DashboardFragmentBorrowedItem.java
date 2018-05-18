@@ -87,10 +87,7 @@ public class DashboardFragmentBorrowedItem extends Fragment {
                                                 @Override
                                                 public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                                                     if (snapshot != null && snapshot.exists()) {
-                                                        Book book = snapshot.toObject(Book.class);
-                                                        listBooks.add(book);
-                                                        String userId = book.getUid();
-                                                        usersID.add(userId);
+                                                        final Book book = snapshot.toObject(Book.class);
                                                         openedChatReference.child(bookID)
                                                                 .child(book.getUid())
                                                                 .child(mFirebaseAuth.getUid())
@@ -99,7 +96,9 @@ public class DashboardFragmentBorrowedItem extends Fragment {
                                                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                                                         String chatID = (String) dataSnapshot.getValue();
                                                                         chatIDs.add(chatID);
-
+                                                                        listBooks.add(book);
+                                                                        String userId = book.getUid();
+                                                                        usersID.add(userId);
                                                                         mAdapter.setItems(listBooks, booksID, chatIDs, usersID);
                                                                         mAdapter.notifyDataSetChanged();
                                                                     }

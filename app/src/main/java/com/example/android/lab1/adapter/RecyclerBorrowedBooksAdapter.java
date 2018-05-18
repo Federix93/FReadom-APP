@@ -122,9 +122,6 @@ public class RecyclerBorrowedBooksAdapter extends RecyclerView.Adapter<RecyclerB
                 @Override
                 public void onClick(final View v) {
 
-                    Log.d("VINCENZO", String.valueOf(position));
-                    Log.d("VINCENZO", mUsersIds.get(position));
-
                     userReference.child(mUsersIds.get(position)).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {

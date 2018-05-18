@@ -98,7 +98,8 @@ public class ChatManager {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mBookOwnerUserDatabase = dataSnapshot.getValue(User.class);
-                openChat();
+                if(mBookOwnerUserDatabase != null)
+                    openChat();
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
