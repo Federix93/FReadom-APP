@@ -204,31 +204,37 @@ public abstract class Utilities {
         }
     }
 
-    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver) throws IOException {
-        int rotationAngle;
-        ExifInterface ei = new ExifInterface(filePath);
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_UNDEFINED);
+    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver) {
+        int rotationAngle = 0;
+        ExifInterface ei = null;
+        try {
+            ei = new ExifInterface(filePath);
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_UNDEFINED);
 
 
-        switch (orientation) {
+            switch (orientation) {
 
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                rotationAngle = 90;
-                break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotationAngle = 90;
+                    break;
 
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                rotationAngle = 180;
-                break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotationAngle = 180;
+                    break;
 
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                rotationAngle = 270;
-                break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotationAngle = 270;
+                    break;
 
-            case ExifInterface.ORIENTATION_NORMAL:
-            default:
-                rotationAngle = 0;
+                case ExifInterface.ORIENTATION_NORMAL:
+                default:
+                    rotationAngle = 0;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
 
 
         Uri filePathUri = Uri.parse(filePath);
