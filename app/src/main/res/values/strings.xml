@@ -102,10 +102,10 @@
     <string name="rating">Rating</string>
 
     <string-array name="genre">
-        <item>Arte e spettacoli</item>
-        <item>Biografie e diari</item>
-        <item>Economia e finanza</item>
-        <item>Fantascienza e fantasy</item>
+        <item>Arte</item>
+        <item>Biografie</item>
+        <item>Economia</item>
+        <item>Fantasy</item>
     </string-array>
 
     <string name="tutorial_title_genre">Cerca i libri in base al tuo genere preferito</string>

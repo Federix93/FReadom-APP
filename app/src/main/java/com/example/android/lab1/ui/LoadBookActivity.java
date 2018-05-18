@@ -993,13 +993,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             book.put("conditions", bookToLoad.getCondition());
             book.put("uid", bookToLoad.getUid());
             book.put("genre", bookToLoad.getGenre());
-//            book.put("tags", bookToLoad.getTags());
 
             JSONObject coordinates = new JSONObject();
             coordinates.put("lat", bookToLoad.getGeoPoint().getLatitude());
             coordinates.put("lng", bookToLoad.getGeoPoint().getLongitude());
             book.put("_geloc", coordinates);
-//            book.put("timestamp", bookToLoad.getTimeStamp());
+            book.put("timestamp", bookToLoad.getTimeInserted());
 
             if (bookToLoad.getWebThumbnail() != null) {
                 book.put("thumbnail", bookToLoad.getWebThumbnail());

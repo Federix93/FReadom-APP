@@ -353,6 +353,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/insert_book"
                     android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
                     android:textColor="@color/white"
                     app:layout_constraintTop_toBottomOf="@id/load_book_loaded_photos" />
             </android.support.constraint.ConstraintLayout>

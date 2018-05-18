@@ -79,6 +79,13 @@
     <string name="position_filter_home_page">POSITION</string>
     <string name="genre_filter_home_page">GENRES</string>
 
+    <string-array name="genre">
+        <item>Art</item>
+        <item>Biography</item>
+        <item>Economy</item>
+        <item>Fantasy</item>
+    </string-array>
+
     <string name="nearby_home_page">Nearby</string>
     <string name="latest_arrivals_home_page">Latest arrivals</string>
     <string name="action_settings">Settings</string>
