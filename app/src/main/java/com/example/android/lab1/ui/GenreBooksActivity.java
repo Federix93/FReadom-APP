@@ -1,7 +1,9 @@
 package com.example.android.lab1.ui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.lab1.R;
+import com.example.android.lab1.utils.Utilities;
 
 public class GenreBooksActivity extends AppCompatActivity {
 
@@ -24,10 +27,13 @@ public class GenreBooksActivity extends AppCompatActivity {
         return i >= 0;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_genre_books);
+
+        Utilities.setupStatusBarColor(this);
 
         mToolbar = findViewById(R.id.genre_toolbar_activity);
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
