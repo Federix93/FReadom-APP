@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -40,8 +41,7 @@ public class GenreBooksActivity extends AppCompatActivity {
             }
         });
 
-        setSupportActionBar(mToolbar);
-        // }
+
         mGenreListView = findViewById(R.id.genre_recycler_view);
         mGenreListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
