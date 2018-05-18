@@ -1,8 +1,8 @@
 package com.example.android.lab1.ui.homepage;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -24,25 +24,17 @@ import android.widget.Toast;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
-import com.example.android.lab1.model.Address;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.ui.chat.ChatActivity;
-import com.example.android.lab1.ui.GenreBooksActivity;
-import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
-import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.SharedPreferencesManager;
-import com.example.android.lab1.utils.Utilities;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
+import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -62,13 +54,15 @@ public class HomeFragment extends Fragment {
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
-    FirebaseFirestore mFirebaseFirestore;
-    private ListenerRegistration mFirstEventListener, mSecondEventListener;
+
+    View mBottomView;
+
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
+    private RecyclerBookAdapter mAdapter;
 
-    private Integer mSelectedGenre;
-    private GeoPoint mCurrentPosition;
+    Query mQuery;
+    FirebaseFirestore mFirebaseFirestore;
 
     public HomeFragment() {
 
@@ -107,20 +101,18 @@ public class HomeFragment extends Fragment {
         });
 
         mGenreFilterButton.setOnClickListener(new View.OnClickListener() {
-                                                  @Override
-                                                  public void onClick(View v) {
-                                                      Intent i = new Intent(getActivity(), GenreBooksActivity.class);
-                                                      i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                                      getActivity().startActivityForResult(i, Constants.PICK_GENRE);
-                                                  }
-                                              }
-        );
+            @Override
+            public void onClick(View v) {
+//                Intent intent = new Intent(getActivity(), GenreBooksActivity.class);
+//                startActivity(intent);
+                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         mPositionFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent positionActivityIntent = Utilities.getPositionActivityIntent(getActivity(), true);
-                getActivity().startActivityForResult(positionActivityIntent, Constants.POSITION_ACTIVITY_REQUEST);
+                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -139,6 +131,7 @@ public class HomeFragment extends Fragment {
         });
 
 
+
         mFirstRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         SnapHelper firstSnapHelperStart = new GravitySnapHelper(Gravity.START);
@@ -152,17 +145,15 @@ public class HomeFragment extends Fragment {
         secondSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
-
-        queryDatabase();
-
-        /*books.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
+        mQuery = mFirebaseFirestore.collection("books");
+        mQuery.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
                 if (e != null) {
                     return;
                 }
                 List<String> IDs = new ArrayList<>();
-                for (DocumentSnapshot d : queryDocumentSnapshots.getDocuments()) {
+                for(DocumentSnapshot d : queryDocumentSnapshots.getDocuments()){
                     IDs.add(d.getId());
                 }
                 List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
@@ -177,38 +168,10 @@ public class HomeFragment extends Fragment {
                 }
                 mAdapter = new RecyclerBookAdapter(books, IDs);
                 mFirstRecyclerView.setAdapter(mAdapter);
-                // order by time stamp
-                List<Book> orderedByTime = new ArrayList<>(books);
-                List<String> orderedByTimeIds = new ArrayList<>(IDs);
-                Object temp[] = new Object[2];
-                Long first, second;
-                for (int i = 0; i < orderedByTime.size() - 1; i++) {
-                    for (int i1 = 0; i1 < orderedByTime.size(); i1++) {
-                        first = orderedByTime.get(i).getTimeInserted();
-                        second = orderedByTime.get(i1).getTimeInserted();
-                        if (first == null)
-                            first = 1 / System.currentTimeMillis();
-                        if (second == null)
-                            second = 1/ System.currentTimeMillis();
-
-                        if (first < second)
-                        {
-                            temp[0] = orderedByTime.get(i);
-                            temp[1] = orderedByTimeIds.get(i);
-
-                            orderedByTime.set(i, orderedByTime.get(i1));
-                            orderedByTimeIds.set(i, orderedByTimeIds.get(i1));
-
-                            orderedByTime.set(i1, (Book) temp[0]);
-                            orderedByTimeIds.set(i1, (String) temp[1]);
-                        }
-                    }
-                }
-
-                mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(orderedByTime, orderedByTimeIds));
+                mSecondRecyclerView.setAdapter(mAdapter);
             }
-        });*/
-        if (SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
+        });
+        if(SharedPreferencesManager.getInstance(getActivity()).isFirstRun()){
             Resources res = getResources();
             SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
             TapTargetSequence tapTargetSequence = new TapTargetSequence(getActivity());
@@ -235,165 +198,6 @@ public class HomeFragment extends Fragment {
         }
 
         return mRootView;
-    }
-
-    private void queryDatabase() {
-
-        CollectionReference books = mFirebaseFirestore.collection("books");
-
-
-        Query query1, query2;
-        query1 = query2 = null;
-
-        if (mCurrentPosition != null) {
-            GeoPoint[] geoPoints = buildBoundingBox(mCurrentPosition.getLatitude(),
-                    mCurrentPosition.getLongitude(),
-                    (double) getResources().getInteger(R.integer.position_radius_address) / 1000);
-            query1 = books.whereGreaterThan("geoPoint", geoPoints[0])
-                    .whereLessThan("geoPoint", geoPoints[1]);
-            query2 = books.whereGreaterThan("geoPoint", geoPoints[0])
-                    .whereLessThan("geoPoint", geoPoints[1]);
-        }
-
-        String userId = null;
-        if (FirebaseAuth.getInstance() != null
-                && FirebaseAuth.getInstance().getCurrentUser() != null &&
-                FirebaseAuth.getInstance().getCurrentUser().getUid() != null) {
-            userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        }
-
-        final int homePageBooksNumber = getResources().getInteger(R.integer.homepage_book_number);
-
-        if (query1 == null)
-            query1 = books;
-
-        if (query2 == null) {
-            query2 = books;
-        }
-
-        final String finalUserId = userId;
-        mFirstEventListener = query1.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                List<String> ids = new ArrayList<>();
-                List<Book> books = new ArrayList<>();
-                int size = 0;
-                Book currentBook;
-                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
-                    currentBook = documentSnapshot.toObject(Book.class);
-                    if ((finalUserId != null &&
-                            currentBook.getUid().equals(finalUserId)) ||
-                            (mSelectedGenre != null &&
-                                    !mSelectedGenre.equals(currentBook.getGenre())))
-                        continue;
-                    ids.add(documentSnapshot.getId());
-                    books.add(currentBook);
-                    size++;
-                    if (size > homePageBooksNumber)
-                        break;
-                }
-
-                if (mFirstRecyclerView != null)
-                    mFirstRecyclerView.setAdapter(new RecyclerBookAdapter(books, ids));
-
-                if (mFirstEventListener != null)
-                    mFirstEventListener.remove();
-            }
-        });
-
-
-        mSecondEventListener = query2.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                List<String> ids = new ArrayList<>();
-                List<Book> books = new ArrayList<>();
-                int size = 0;
-                Book currentBook;
-                // apply filter
-                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
-                    currentBook = documentSnapshot.toObject(Book.class);
-                    if ((finalUserId != null &&
-                            currentBook.getUid().equals(finalUserId)) ||
-                            (mSelectedGenre != null &&
-                                    !mSelectedGenre.equals(currentBook.getGenre())))
-                        continue;
-                    ids.add(documentSnapshot.getId());
-                    books.add(currentBook);
-                    size++;
-                }
-                Book temp;
-                String idTemp;
-                for (int i = 0; i < books.size() - 1; i++) {
-                    for (int i1 = 0; i1 < books.size(); i1++) {
-                        if (books.get(i).compareTo(books.get(i1)) < 0) {
-                            temp = books.get(i);
-                            idTemp = ids.get(i);
-
-                            books.set(i, books.get(i1));
-                            ids.set(i, ids.get(i1));
-
-                            books.set(i1, temp);
-                            ids.set(i1, idTemp);
-                        }
-                    }
-                }
-
-                if (mSecondRecyclerView != null)
-                    mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(books.subList(0, Math.min(books.size(), homePageBooksNumber)), ids));
-
-                if (mSecondEventListener != null)
-                    mSecondEventListener.remove();
-            }
-        });
-
-
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case Constants.POSITION_ACTIVITY_REQUEST:
-                if (resultCode == Activity.RESULT_OK) {
-                    Address address = Utilities.readResultOfPositionActivity(data);
-                    mCurrentPosition = new GeoPoint(address.getLat(), address.getLon());
-                    mPositionFilterButton.setText(address.getAddress());
-                    queryDatabase();
-                }
-                break;
-            case Constants.PICK_GENRE:
-                if (resultCode == Activity.RESULT_OK) {
-                    Integer oldSelectedGenre = mSelectedGenre;
-                    mSelectedGenre = data.hasExtra(GenreBooksActivity.SELECTED_GENRE) &&
-                            GenreBooksActivity.isValidGenre(data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1)) ?
-                            data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1) : null;
-                    mGenreFilterButton.setText(mSelectedGenre != null ?
-                            getResources().getStringArray(R.array.genre)[mSelectedGenre] :
-                            getString(R.string.genre_filter_home_page));
-                    if (mSelectedGenre != oldSelectedGenre)
-                        queryDatabase();
-                }
-                break;
-        }
-
-    }
-
-    private GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
-
-        // ~1 mile of lat and lon in degrees
-        Double lat = 0.0144927536231884;
-        Double lon = 0.0181818181818182;
-
-        Double lowerLat = latitude - (lat * distanceInKm);
-        Double lowerLon = longitude - (lon * distanceInKm);
-
-        Double greaterLat = latitude + (lat * distanceInKm);
-        Double greaterLon = longitude + (lon * distanceInKm);
-
-        GeoPoint lesserGeoPoint = new GeoPoint(lowerLat, lowerLon);
-        GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
-
-        return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
     }
 
     @Override
