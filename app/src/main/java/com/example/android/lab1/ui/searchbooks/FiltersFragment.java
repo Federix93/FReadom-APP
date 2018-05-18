@@ -316,7 +316,7 @@ public class FiltersFragment extends DialogFragment {
         else if(value == 50)
             mUserRatingTextView.setText(getResources().getString(R.string.rating_filter_max));
         else
-        mUserRatingTextView.setText(String.format(getResources().getString(R.string.rating_filter), ((float)value/10)));
+            mUserRatingTextView.setText(String.format(getResources().getString(R.string.rating_filter), ((float)value/10)));
     }
 
     private void setPositionFilterText(int value)

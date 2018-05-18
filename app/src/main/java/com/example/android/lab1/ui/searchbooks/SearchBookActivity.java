@@ -683,7 +683,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             outState.putInt("LAST_DISPLAYED_PAGE", lastDisplayedPage);
             outState.putBoolean("END_REACHED", endReached);
 
-            //Comm
 
         }
 
