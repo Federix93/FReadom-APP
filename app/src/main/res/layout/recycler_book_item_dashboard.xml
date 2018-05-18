@@ -113,9 +113,9 @@
 
                     <ImageView
                         android:id="@+id/dash_chat_item"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginBottom="8dp"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginBottom="12dp"
                         android:layout_marginEnd="24dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -137,9 +137,9 @@
 
                     <ImageView
                         android:id="@+id/dash_delete_item"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginBottom="8dp"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginBottom="12dp"
                         android:layout_marginEnd="24dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/dash_chat_item"
@@ -147,9 +147,9 @@
 
                     <ImageView
                         android:id="@+id/dash_edit_item"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginBottom="8dp"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginBottom="12dp"
                         android:layout_marginEnd="24dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/dash_delete_item"

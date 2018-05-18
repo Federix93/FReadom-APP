@@ -2,7 +2,6 @@ package com.example.android.lab1.utils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.User;
@@ -13,7 +12,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ChatManager {
 
@@ -100,7 +98,8 @@ public class ChatManager {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mBookOwnerUserDatabase = dataSnapshot.getValue(User.class);
-                openChat();
+                if(mBookOwnerUserDatabase != null)
+                    openChat();
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
