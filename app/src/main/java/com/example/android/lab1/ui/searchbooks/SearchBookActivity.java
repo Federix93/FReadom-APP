@@ -201,9 +201,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
         query.setHitsPerPage(HITS_PER_PAGE);
 
-        if (currentLat != 0 && currentLong != 0)
-            query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
-
         query.setQuery(mSearchView.getQuery());
         applyFilters();
         setRecyclerViewScrollListener();
@@ -550,9 +547,9 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         if (searchByFilters[FiltersValues.SEARCH_BY_PUBLISHER]) {
             searchFields.add("publisher");
         }
-//                        if (searchByFilters[FiltersValues.SEARCH_BY_TAGS]) {
-//                                        searchFields.add("tags");
-//                        }
+        if (searchByFilters[FiltersValues.SEARCH_BY_TAGS]) {
+            searchFields.add("tags");
+        }
 
         query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
         if (currentLat != 0 && currentLong != 0)

@@ -136,5 +136,7 @@
     <string name="date_not_available">Pubblication date not available</string>
     <string name="error_message">Something went wrong</string>
 
+    <string name="tags">Tags</string>
+
 
 </resources>

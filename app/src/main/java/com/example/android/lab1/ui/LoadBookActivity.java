@@ -994,7 +994,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             JSONObject coordinates = new JSONObject();
             coordinates.put("lat", bookToLoad.getGeoPoint().getLatitude());
             coordinates.put("lng", bookToLoad.getGeoPoint().getLongitude());
-            book.put("_geloc", coordinates);
+            book.put("_geoloc", coordinates);
             book.put("timestamp", bookToLoad.getTimeInserted());
 
             if (bookToLoad.getWebThumbnail() != null) {
