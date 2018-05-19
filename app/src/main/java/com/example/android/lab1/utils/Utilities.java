@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -14,10 +15,12 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.CursorLoader;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -204,9 +207,22 @@ public abstract class Utilities {
         }
     }
 
-    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver) {
+    private static String getRealPathFromURI(Uri contentUri, Context context) {
+        String[] proj = {MediaStore.Images.Media.DATA};
+        CursorLoader loader = new CursorLoader(context, contentUri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(column_index);
+        cursor.close();
+        return result;
+    }
+
+    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver, Context context) {
         int rotationAngle = 0;
         ExifInterface ei = null;
+        if (filePath.contains("content"))
+            filePath = Utilities.getRealPathFromURI(Uri.parse(filePath), context);
         try {
             ei = new ExifInterface(filePath);
             int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,

@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,7 +28,6 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.model.Address;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.ui.chat.ChatActivity;
 import com.example.android.lab1.ui.GenreBooksActivity;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.example.android.lab1.utils.Constants;
@@ -35,14 +36,12 @@ import com.example.android.lab1.utils.Utilities;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -52,10 +51,8 @@ import java.util.List;
 
 public class HomeFragment extends Fragment {
 
-    private static final int ADD_BOOK_REQUEST = 1;
-    private static final String SHOWCASE_ID = "HomeFragment";
-
     View mRootView;
+    SwipeRefreshLayout mRefreshLayout;
     Toolbar mToolbar;
     AppCompatButton mGenreFilterButton;
     AppCompatButton mPositionFilterButton;
@@ -63,32 +60,28 @@ public class HomeFragment extends Fragment {
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
     FirebaseFirestore mFirebaseFirestore;
-    private ListenerRegistration mFirstEventListener, mSecondEventListener;
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
-
+    private boolean[] mRecyclerUpdating;
     private Integer mSelectedGenre;
     private GeoPoint mCurrentPosition;
-
-    public HomeFragment() {
-
-    }
 
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         mRootView = inflater.inflate(R.layout.fragment_home, container, false);
-
         mToolbar = getActivity().findViewById(R.id.toolbar_home_page_activity);
-
+        mRefreshLayout = mRootView.findViewById(R.id.homepage_refresh_layout);
         mFirstRecyclerView = mRootView.findViewById(R.id.first_recycler_books);
         mSecondRecyclerView = mRootView.findViewById(R.id.second_recycler_books);
         mGenreFilterButton = mRootView.findViewById(R.id.genre_filter_button);
         mPositionFilterButton = mRootView.findViewById(R.id.position_filter_button);
         mFirstOtherTextView = mRootView.findViewById(R.id.button_first_recycler_view);
         mSecondOtherTextView = mRootView.findViewById(R.id.button_second_recycler_view);
-
+        mRecyclerUpdating = new boolean[2];
+        for (int i = 0; i < mRecyclerUpdating.length; i++) {
+            mRecyclerUpdating[i] = false;
+        }
         mToolbar.setTitle(getString(R.string.toolbar_title_home));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
@@ -152,6 +145,18 @@ public class HomeFragment extends Fragment {
         secondSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
+
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        queryDatabase();
+                    }
+                });
+            }
+        });
 
         queryDatabase();
 
@@ -272,9 +277,10 @@ public class HomeFragment extends Fragment {
         }
 
         final String finalUserId = userId;
-        mFirstEventListener = query1.addSnapshotListener(new EventListener<QuerySnapshot>() {
+        query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                mRecyclerUpdating[0] = true;
                 List<String> ids = new ArrayList<>();
                 List<Book> books = new ArrayList<>();
                 int size = 0;
@@ -296,15 +302,17 @@ public class HomeFragment extends Fragment {
                 if (mFirstRecyclerView != null)
                     mFirstRecyclerView.setAdapter(new RecyclerBookAdapter(books, ids));
 
-                if (mFirstEventListener != null)
-                    mFirstEventListener.remove();
+                mRecyclerUpdating[0] = false;
+                if (!mRecyclerUpdating[1])
+                    mRefreshLayout.setRefreshing(false);
             }
         });
 
 
-        mSecondEventListener = query2.addSnapshotListener(new EventListener<QuerySnapshot>() {
+        query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                mRecyclerUpdating[1] = true;
                 List<String> ids = new ArrayList<>();
                 List<Book> books = new ArrayList<>();
                 int size = 0;
@@ -324,7 +332,7 @@ public class HomeFragment extends Fragment {
                 Book temp;
                 String idTemp;
                 for (int i = 0; i < books.size() - 1; i++) {
-                    for (int i1 = 0; i1 < books.size(); i1++) {
+                    for (int i1 = i + 1; i1 < books.size(); i1++) {
                         if (books.get(i).compareTo(books.get(i1)) < 0) {
                             temp = books.get(i);
                             idTemp = ids.get(i);
@@ -341,8 +349,9 @@ public class HomeFragment extends Fragment {
                 if (mSecondRecyclerView != null)
                     mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(books.subList(0, Math.min(books.size(), homePageBooksNumber)), ids));
 
-                if (mSecondEventListener != null)
-                    mSecondEventListener.remove();
+                mRecyclerUpdating[1] = false;
+                if (!mRecyclerUpdating[0])
+                    mRefreshLayout.setRefreshing(false);
             }
         });
 
