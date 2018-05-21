@@ -257,9 +257,9 @@ public class FiltersFragment extends DialogFragment {
         mTagsCheckbox.setChecked(searchByFilters[FiltersValues.SEARCH_BY_TAGS]);
 
         mUserRatingSeekBar.setProgress(seekBarsFilters[FiltersValues.RATING_FILTER]-10);
-        setRatingFilterText(seekBarsFilters[0]);
+        setRatingFilterText(seekBarsFilters[FiltersValues.RATING_FILTER]);
         mPositionSeekBar.setProgress(seekBarsFilters[FiltersValues.POSITION_FILTER]);
-        setPositionFilterText(seekBarsFilters[1]);
+        setPositionFilterText(seekBarsFilters[FiltersValues.POSITION_FILTER]);
 
         if(orderFilters[FiltersValues.ORDER_BY_DATE])
             mPublishDateButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
@@ -311,7 +311,7 @@ public class FiltersFragment extends DialogFragment {
 
     private void setRatingFilterText(int value)
     {
-        if(value == 10)
+        if(value <= 10 )
             mUserRatingTextView.setText(getResources().getString(R.string.rating_filter_zero));
         else if(value == 50)
             mUserRatingTextView.setText(getResources().getString(R.string.rating_filter_max));

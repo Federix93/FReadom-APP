@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -144,7 +143,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
         mLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
-
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -158,6 +156,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         booksIndex = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
         usersIndex = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
+        query.setHitsPerPage(HITS_PER_PAGE);
+
+        booksIndex.enableSearchCache();
+        usersIndex.enableSearchCache();
 
         setupMenuItemClickListener();
         setupSearchListener();
@@ -167,44 +169,13 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mAdapter = new RecyclerSearchAdapter(null, 0, 0);
         mRecyclerView.setAdapter(mAdapter);
 
-        if (savedInstanceState != null) {
-            if (savedInstanceState.getInt("CURRENT_VIEW") != 0) {
-                int currentViewIndex = savedInstanceState.getInt("CURRENT_VIEW");
-                currentViewIndex--;
-                Arrays.fill(currentView, false);
-                currentView[currentViewIndex] = true;
-
-                currentLat = savedInstanceState.getDouble("CURRENT_LAT");
-                currentLong = savedInstanceState.getDouble("CURRENT_LONG");
-
-                if (currentView[OFFLINE_VIEW])
-                    showOfflineView();
-                else if (currentView[NO_RESULTS_VIEW]) {
-                    showNoResultsView();
-                    updateNoResultsTextView(savedInstanceState.getString("NO_RESULT_SEARCH"));
-                } else if (currentView[RESULTS_VIEW]) {
-                    backupDataSet = (ArrayList<BookSearchItem>) savedInstanceState.getSerializable("DATA_SET");
-                    mAdapter = new RecyclerSearchAdapter(backupDataSet, currentLat, currentLong);
-                    mRecyclerView.setAdapter(mAdapter);
-                    showResultsView();
-                }
-                lastSearchedSeqNo = savedInstanceState.getInt("LAST_SEARCHED_SEQ_NO");
-                lastDisplayedSeqNo = savedInstanceState.getInt("LAST_DISPLAYED_SEQ_NO");
-                lastRequestedPage = savedInstanceState.getInt("LAST_REQUESTED_PAGE");
-                lastDisplayedPage = savedInstanceState.getInt("LAST_DISPLAYED_PAGE");
-                endReached = savedInstanceState.getBoolean("END_REACHED");
-
-            }
-        } else {
-            mSearchView.setSearchFocused(true);
-        }
-
-        query.setHitsPerPage(HITS_PER_PAGE);
-
-        query.setQuery(mSearchView.getQuery());
         applyFilters();
         setRecyclerViewScrollListener();
 
+        if(savedInstanceState == null)
+        {
+                mSearchView.setSearchFocused(true);
+        }
 
     }
 
@@ -656,6 +627,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
         if (mSearchView.getQuery().length() >= 2) {
             int currentViewIndex;
@@ -669,7 +641,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             } else
                 currentViewIndex = RESULTS_VIEW;
 
-            outState.putInt("CURRENT_VIEW", ++currentViewIndex);
+            outState.putInt("CURRENT_VIEW", currentViewIndex);
             outState.putSerializable("DATA_SET", backupDataSet);
             outState.putDouble("CURRENT_LAT", currentLat);
             outState.putDouble("CURRENT_LONG", currentLong);
@@ -680,11 +652,40 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             outState.putInt("LAST_DISPLAYED_PAGE", lastDisplayedPage);
             outState.putBoolean("END_REACHED", endReached);
 
+            outState.putBoolean("FIRST_OPEN", false);
 
         }
-
-        super.onSaveInstanceState(outState);
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
 
+            int currentViewIndex = savedInstanceState.getInt("CURRENT_VIEW");
+
+            Arrays.fill(currentView, false);
+            currentView[currentViewIndex] = true;
+
+            currentLat = savedInstanceState.getDouble("CURRENT_LAT");
+            currentLong = savedInstanceState.getDouble("CURRENT_LONG");
+
+            if (currentView[OFFLINE_VIEW])
+                showOfflineView();
+            else if (currentView[NO_RESULTS_VIEW]) {
+                showNoResultsView();
+                updateNoResultsTextView(savedInstanceState.getString("NO_RESULT_SEARCH"));
+                query.setQuery(mSearchView.getQuery());
+            } else if (currentView[RESULTS_VIEW]) {
+                backupDataSet = (ArrayList<BookSearchItem>) savedInstanceState.getSerializable("DATA_SET");
+                mAdapter = new RecyclerSearchAdapter(backupDataSet, currentLat, currentLong);
+                mRecyclerView.setAdapter(mAdapter);
+                showResultsView();
+            }
+            lastSearchedSeqNo = savedInstanceState.getInt("LAST_SEARCHED_SEQ_NO");
+            lastDisplayedSeqNo = savedInstanceState.getInt("LAST_DISPLAYED_SEQ_NO");
+            lastRequestedPage = savedInstanceState.getInt("LAST_REQUESTED_PAGE");
+            lastDisplayedPage = savedInstanceState.getInt("LAST_DISPLAYED_PAGE");
+            endReached = savedInstanceState.getBoolean("END_REACHED");
+
+    }
 }
