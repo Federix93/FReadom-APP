@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
@@ -31,7 +32,6 @@ import com.bumptech.glide.request.transition.Transition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.Utilities;
-import com.example.android.lab1.utils.glideimageloader.GlideApp;
 import com.example.android.lab1.utils.NetworkConnectionReceiver;
 import com.example.android.lab1.R;
 import com.firebase.ui.auth.AuthUI;
@@ -92,7 +92,7 @@ public class SignInActivity extends AppCompatActivity {
 
         Utilities.setupStatusBarColor(this);
 
-        GlideApp.with(this).load(R.drawable.background).diskCacheStrategy(DiskCacheStrategy.DATA).into(new SimpleTarget<Drawable>() {
+        Glide.with(this).load(R.drawable.background).into(new SimpleTarget<Drawable>() {
             @Override
             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                 mRootConstraintLayout.setBackground(resource);
@@ -114,7 +114,8 @@ public class SignInActivity extends AppCompatActivity {
         mWithoutLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openHomePageActivity();
+                //openHomePageActivity();
+                Toast.makeText(getApplicationContext(), "Function not yet implemented", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -162,7 +163,6 @@ public class SignInActivity extends AppCompatActivity {
                                 Log.d("LULLO", "STO "+mFirebaseAuth+" "+mFirebaseAuth.getUid());
                                 DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
                                 if(mFirebaseAuth != null && mFirebaseAuth.getUid() != null) {
-                                    Log.d("LULLO", "STO LOGGANDO2");
                                     setupAlgolia();
                                     try {
 
