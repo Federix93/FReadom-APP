@@ -175,8 +175,22 @@ public class ChatActivity extends AppCompatActivity {
                             if (chat != null) {
                                 chat.setTimestamp(System.currentTimeMillis() / 1000);
                                 chat.setLastMessage(messageWritten);
-                                if(!chat.getLastMessageUserID().equals(mFirebaseAuth.getUid()))
+                                if(chat.getLastMessageUserID() == null){
+                                    Log.d("LULLO", "IF 1:  MATTIA FA I FILTRI");
+                                    chat.setLastMessageUserID(mFirebaseAuth.getUid());
                                     chat.setCounter(chat.getCounter() + 1);
+                                }else{
+                                    Log.d("LULLO", "IF 1:  MATTIA SCORRE FACENDO FINTA");
+                                    if(chat.getLastMessageUserID().equals(mFirebaseAuth.getUid())) {
+                                        Log.d("LULLO", "IF 1:  MATTIA FA I FILTRI DA 3 MESI E NON CI RIESCE");
+                                        chat.setCounter(chat.getCounter() + 1);
+                                    }
+                                    else{
+                                        Log.d("LULLO", "IF 1:  NONOSTANTE CIO' MATTIA E' IL NUMERO 1");
+                                        chat.setCounter(1);
+                                    }
+                                    chat.setLastMessageUserID(mFirebaseAuth.getUid());
+                                }
                             }
                             mChatsReference.child(mChatID).setValue(chat);
                         }
@@ -271,6 +285,7 @@ public class ChatActivity extends AppCompatActivity {
                                     if (chat != null) {
                                         chat.setTimestamp(System.currentTimeMillis() / 1000);
                                         chat.setLastMessage(downloadUrl.toString());
+                                        chat.setLastMessageUserID(mFirebaseAuth.getUid());
                                     }
                                     mChatsReference.child(mChatID).setValue(chat);
                                 }
