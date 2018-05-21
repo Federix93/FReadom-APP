@@ -37,6 +37,7 @@ import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.android.SphericalUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -298,6 +299,24 @@ public abstract class Utilities {
             dist = dist * 0.8684;
         }
         return (dist);
+    }
+
+    private GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
+
+        // ~1 mile of lat and lon in degrees
+        Double lat = 0.0144927536231884;
+        Double lon = 0.0181818181818182;
+
+        Double lowerLat = latitude - (lat * distanceInKm);
+        Double lowerLon = longitude - (lon * distanceInKm);
+
+        Double greaterLat = latitude + (lat * distanceInKm);
+        Double greaterLon = longitude + (lon * distanceInKm);
+
+        GeoPoint lesserGeoPoint = new GeoPoint(lowerLat, lowerLon);
+        GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
+
+        return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
     }
 
     private static double deg2rad(double deg) {

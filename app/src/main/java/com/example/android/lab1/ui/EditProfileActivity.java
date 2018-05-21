@@ -143,46 +143,77 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                                             reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                                 @Override
                                                 public void onSuccess(Uri uri) {
-                                                    if (mUser != null)
+                                                    if (mUser != null) {
                                                         mUser.setImage(uri.toString());
+                                                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                                        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                                                                .setPersistenceEnabled(true)
+                                                                .build();
+                                                        db.setFirestoreSettings(settings);
+                                                        final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+                                                        db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
+                                                                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                                                    @Override
+                                                                    public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                                                                        @Nullable FirebaseFirestoreException e) {
+                                                                        if (e != null) {
+                                                                            return;
+                                                                        }
+                                                                        if (mUsernameTextInputLayout.getEditText() != null)
+                                                                            mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                                                                        if (mEmailTextInputLayout.getEditText() != null)
+                                                                            mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                                                                        if (mPhoneTextInputLayout.getEditText() != null)
+                                                                            mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                                                                        if (mAddressTextInputLayout != null)
+                                                                            mUser.setAddress(mCurrentAddress);
+                                                                        if (mShortBioTextInputLayout.getEditText() != null)
+                                                                            mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                                                                        docRef.set(mUser, SetOptions.merge());
+                                                                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                                                        intent.putExtra("ApplyChanges", true);
+                                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                                        startActivity(intent);
+                                                                    }
+                                                                });
+                                                    }
                                                 }
                                             });
                                         }
                                     });
-                    }
-
-                    FirebaseFirestore db = FirebaseFirestore.getInstance();
-                    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                            .setPersistenceEnabled(true)
-                            .build();
-                    db.setFirestoreSettings(settings);
-                    final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
-                    db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
-                            .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                @Override
-                                public void onEvent(@Nullable QuerySnapshot querySnapshot,
-                                                    @Nullable FirebaseFirestoreException e) {
-                                    if (e != null) {
-                                        return;
+                    } else {
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                                .setPersistenceEnabled(true)
+                                .build();
+                        db.setFirestoreSettings(settings);
+                        final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+                        db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
+                                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                                        @Nullable FirebaseFirestoreException e) {
+                                        if (e != null) {
+                                            return;
+                                        }
+                                        if (mUsernameTextInputLayout.getEditText() != null)
+                                            mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                                        if (mEmailTextInputLayout.getEditText() != null)
+                                            mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                                        if (mPhoneTextInputLayout.getEditText() != null)
+                                            mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                                        if (mAddressTextInputLayout != null)
+                                            mUser.setAddress(mCurrentAddress);
+                                        if (mShortBioTextInputLayout.getEditText() != null)
+                                            mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                                        docRef.set(mUser, SetOptions.merge());
+                                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                        intent.putExtra("ApplyChanges", true);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(intent);
                                     }
-                                    if (mUsernameTextInputLayout.getEditText() != null)
-                                        mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
-                                    if (mEmailTextInputLayout.getEditText() != null)
-                                        mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
-                                    if (mPhoneTextInputLayout.getEditText() != null)
-                                        mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                                    if (mAddressTextInputLayout != null)
-                                        mUser.setAddress(mCurrentAddress);
-                                    if (mShortBioTextInputLayout.getEditText() != null)
-                                        mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
-                                    mUser.setImage(mCurrentPhotoPath);
-                                    docRef.set(mUser, SetOptions.merge());
-                                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                    intent.putExtra("ApplyChanges", true);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(intent);
-                                }
-                            });
+                                });
+                    }
                 }
                 return true;
             }

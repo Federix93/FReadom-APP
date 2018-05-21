@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -241,7 +240,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     }
 
     private void setupNoConnectionButtonClickListener() {
-
         mNoConnectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -254,7 +252,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mSearchView.setOnMenuItemClickListener(new FloatingSearchView.OnMenuItemClickListener() {
             @Override
             public void onActionMenuItemSelected(MenuItem item) {
-
                 int itemID = item.getItemId();
                 if (itemID == R.id.action_filter) {
                     showDialog();
@@ -679,12 +676,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             outState.putInt("LAST_REQUESTED_PAGE", lastRequestedPage);
             outState.putInt("LAST_DISPLAYED_PAGE", lastDisplayedPage);
             outState.putBoolean("END_REACHED", endReached);
-
-
         }
-
         super.onSaveInstanceState(outState);
     }
-
-
 }

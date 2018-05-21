@@ -141,14 +141,17 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         mConfirmPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent();
-                if (mResultAddress != null) {
-                    i.putExtra(ADDRESS_KEY, mResultAddress.getAddress());
-                    i.putExtra(LAT_KEY, mResultAddress.getLat());
-                    i.putExtra(LON_KEY, mResultAddress.getLon());
+                if (mCurrentPositionTextView != null && mCurrentPositionTextView.getText() != null
+                        && mCurrentPositionTextView.getText().length() > 0) {
+                    Intent i = new Intent();
+                    if (mResultAddress != null) {
+                        i.putExtra(ADDRESS_KEY, mResultAddress.getAddress());
+                        i.putExtra(LAT_KEY, mResultAddress.getLat());
+                        i.putExtra(LON_KEY, mResultAddress.getLon());
+                    }
+                    setResult(RESULT_OK, i);
+                    finish();
                 }
-                setResult(RESULT_OK, i);
-                finish();
             }
         });
 

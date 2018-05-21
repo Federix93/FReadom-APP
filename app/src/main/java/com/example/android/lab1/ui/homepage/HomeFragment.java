@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.AppCompatButton;
@@ -13,6 +14,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,6 +26,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.algolia.search.saas.AbstractQuery;
+import com.algolia.search.saas.AlgoliaException;
+import com.algolia.search.saas.Client;
+import com.algolia.search.saas.CompletionHandler;
+import com.algolia.search.saas.Index;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.model.Address;
@@ -45,11 +52,27 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class HomeFragment extends Fragment {
+
+    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
+    private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
+    private final static String ALGOLIA_BOOKS_INDEX_NAME = "books";
+    private final static String ALGOLIA_USERS_INDEX_NAME = "users";
+
+    private static final String LAT = "LAT";
+    private static final String LON = "LAT";
+    private static final String SELECTED_GENRE = "SG";
+    private static final String CITY = "CITY";
+    private static final String GENRES = "GENRES";
+    private static final String GENRE_PLACE_HOLDER = "GENRE_PLACE_HOLDER";
 
     View mRootView;
     SwipeRefreshLayout mRefreshLayout;
@@ -60,6 +83,11 @@ public class HomeFragment extends Fragment {
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
     FirebaseFirestore mFirebaseFirestore;
+
+    private Index books;
+    private Index users;
+    private Bundle savedState = null;
+
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
     private boolean[] mRecyclerUpdating;
@@ -82,6 +110,11 @@ public class HomeFragment extends Fragment {
         for (int i = 0; i < mRecyclerUpdating.length; i++) {
             mRecyclerUpdating[i] = false;
         }
+
+        Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
+        books = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
+        users = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
+
         mToolbar.setTitle(getString(R.string.toolbar_title_home));
         mToolbar.getMenu().clear();
         mToolbar.inflateMenu(R.menu.fragment_home);
@@ -158,61 +191,9 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        getUserPosition();
         queryDatabase();
 
-        /*books.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                if (e != null) {
-                    return;
-                }
-                List<String> IDs = new ArrayList<>();
-                for (DocumentSnapshot d : queryDocumentSnapshots.getDocuments()) {
-                    IDs.add(d.getId());
-                }
-                List<Book> books = queryDocumentSnapshots.toObjects(Book.class);
-                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                    for (int i = 0; i < books.size(); i++) {
-                        if (books.get(i).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            books.remove(i);
-                            IDs.remove(i);
-                            i--;
-                        }
-                    }
-                }
-                mAdapter = new RecyclerBookAdapter(books, IDs);
-                mFirstRecyclerView.setAdapter(mAdapter);
-                // order by time stamp
-                List<Book> orderedByTime = new ArrayList<>(books);
-                List<String> orderedByTimeIds = new ArrayList<>(IDs);
-                Object temp[] = new Object[2];
-                Long first, second;
-                for (int i = 0; i < orderedByTime.size() - 1; i++) {
-                    for (int i1 = 0; i1 < orderedByTime.size(); i1++) {
-                        first = orderedByTime.get(i).getTimeInserted();
-                        second = orderedByTime.get(i1).getTimeInserted();
-                        if (first == null)
-                            first = 1 / System.currentTimeMillis();
-                        if (second == null)
-                            second = 1/ System.currentTimeMillis();
-
-                        if (first < second)
-                        {
-                            temp[0] = orderedByTime.get(i);
-                            temp[1] = orderedByTimeIds.get(i);
-
-                            orderedByTime.set(i, orderedByTime.get(i1));
-                            orderedByTimeIds.set(i, orderedByTimeIds.get(i1));
-
-                            orderedByTime.set(i1, (Book) temp[0]);
-                            orderedByTimeIds.set(i1, (String) temp[1]);
-                        }
-                    }
-                }
-
-                mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(orderedByTime, orderedByTimeIds));
-            }
-        });*/
         if (SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
             Resources res = getResources();
             SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
@@ -242,23 +223,16 @@ public class HomeFragment extends Fragment {
         return mRootView;
     }
 
+    private void getUserPosition() {
+        /* TODO query firebase to see if user has ever setup position otherwise do
+           TODO a location request asking permission first
+         */
+    }
+
     private void queryDatabase() {
-
-        CollectionReference books = mFirebaseFirestore.collection("books");
-
-
-        Query query1, query2;
-        query1 = query2 = null;
-
-        if (mCurrentPosition != null) {
-            GeoPoint[] geoPoints = buildBoundingBox(mCurrentPosition.getLatitude(),
-                    mCurrentPosition.getLongitude(),
-                    (double) getResources().getInteger(R.integer.position_radius_address) / 1000);
-            query1 = books.whereGreaterThan("geoPoint", geoPoints[0])
-                    .whereLessThan("geoPoint", geoPoints[1]);
-            query2 = books.whereGreaterThan("geoPoint", geoPoints[0])
-                    .whereLessThan("geoPoint", geoPoints[1]);
-        }
+        final com.algolia.search.saas.Query algoliaQuery1 = new com.algolia.search.saas.Query();
+        com.algolia.search.saas.Query algoliaQuery2 = new com.algolia.search.saas.Query();
+        final int homePageBooksNumber = getResources().getInteger(R.integer.homepage_book_number);
 
         String userId = null;
         if (FirebaseAuth.getInstance() != null
@@ -266,96 +240,177 @@ public class HomeFragment extends Fragment {
                 FirebaseAuth.getInstance().getCurrentUser().getUid() != null) {
             userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
-
-        final int homePageBooksNumber = getResources().getInteger(R.integer.homepage_book_number);
-
-        if (query1 == null)
-            query1 = books;
-
-        if (query2 == null) {
-            query2 = books;
-        }
-
         final String finalUserId = userId;
-        query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                mRecyclerUpdating[0] = true;
-                List<String> ids = new ArrayList<>();
-                List<Book> books = new ArrayList<>();
-                int size = 0;
-                Book currentBook;
-                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
-                    currentBook = documentSnapshot.toObject(Book.class);
-                    if ((finalUserId != null &&
-                            currentBook.getUid().equals(finalUserId)) ||
-                            (mSelectedGenre != null &&
-                                    !mSelectedGenre.equals(currentBook.getGenre())))
-                        continue;
-                    ids.add(documentSnapshot.getId());
-                    books.add(currentBook);
-                    size++;
-                    if (size > homePageBooksNumber)
-                        break;
-                }
+        if ((mCurrentPosition != null || mSelectedGenre != null)
+                && getResources() != null) {
+            if (mCurrentPosition != null) {
+                int radius = getResources()
+                        .getInteger(R.integer.position_radius_address);
+                AbstractQuery.LatLng latLng = new AbstractQuery.LatLng(mCurrentPosition.getLatitude(),
+                        mCurrentPosition.getLongitude());
 
-                if (mFirstRecyclerView != null)
-                    mFirstRecyclerView.setAdapter(new RecyclerBookAdapter(books, ids));
+                algoliaQuery1.setAroundLatLng(latLng);
+                algoliaQuery1.setAroundRadius(radius);
 
-                mRecyclerUpdating[0] = false;
-                if (!mRecyclerUpdating[1])
-                    mRefreshLayout.setRefreshing(false);
+                algoliaQuery2.setAroundLatLng(latLng);
+                algoliaQuery2.setAroundRadius(radius);
             }
-        });
+
+            String filters[] = new String[2];
+            filters[0] = mSelectedGenre != null ? "genre=" + Integer.toString(mSelectedGenre) : "";
+            filters[1] = finalUserId != null ? "NOT uid:\"" + finalUserId + "\"" : "";
+
+            if (!filters[0].equals("") && !filters[1].equals(""))
+                algoliaQuery1.setFilters(TextUtils.join(" AND ", filters));
+            else if (!filters[0].equals(""))
+                algoliaQuery1.setFilters(filters[0]);
+            else
+                algoliaQuery1.setFilters(filters[1]);
+
+            //algoliaQuery2.setFilters(TextUtils.join(" AND ", filters));
+
+            algoliaQuery1.setHitsPerPage(homePageBooksNumber);
+            algoliaQuery2.setHitsPerPage(homePageBooksNumber);
 
 
-        query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                mRecyclerUpdating[1] = true;
-                List<String> ids = new ArrayList<>();
-                List<Book> books = new ArrayList<>();
-                int size = 0;
-                Book currentBook;
-                // apply filter
-                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
-                    currentBook = documentSnapshot.toObject(Book.class);
-                    if ((finalUserId != null &&
-                            currentBook.getUid().equals(finalUserId)) ||
-                            (mSelectedGenre != null &&
-                                    !mSelectedGenre.equals(currentBook.getGenre())))
-                        continue;
-                    ids.add(documentSnapshot.getId());
-                    books.add(currentBook);
-                    size++;
-                }
-                Book temp;
-                String idTemp;
-                for (int i = 0; i < books.size() - 1; i++) {
-                    for (int i1 = i + 1; i1 < books.size(); i1++) {
-                        if (books.get(i).compareTo(books.get(i1)) < 0) {
-                            temp = books.get(i);
-                            idTemp = ids.get(i);
-
-                            books.set(i, books.get(i1));
-                            ids.set(i, ids.get(i1));
-
-                            books.set(i1, temp);
-                            ids.set(i1, idTemp);
-                        }
+            books.searchAsync(algoliaQuery1, new CompletionHandler() {
+                @Override
+                public void requestCompleted(JSONObject result, AlgoliaException error) {
+                    if (result != null && error == null) {
+                        processFilteredResultIntoRecyclerView(result, mFirstRecyclerView);
                     }
                 }
+            });
 
-                if (mSecondRecyclerView != null)
-                    mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(books.subList(0, Math.min(books.size(), homePageBooksNumber)), ids));
-
-                mRecyclerUpdating[1] = false;
-                if (!mRecyclerUpdating[0])
-                    mRefreshLayout.setRefreshing(false);
+            try {
+                books.setSettingsAsync(new JSONObject().put("customRanking", new JSONArray()
+                        .put("desc(timestamp)")), new CompletionHandler() {
+                    @Override
+                    public void requestCompleted(JSONObject jsonObject, AlgoliaException e) {
+                        if (jsonObject != null && e == null) {
+                            books.searchAsync(algoliaQuery1, new CompletionHandler() {
+                                @Override
+                                public void requestCompleted(JSONObject result, AlgoliaException error) {
+                                    if (result != null && error == null) {
+                                        processFilteredResultIntoRecyclerView(result, mSecondRecyclerView);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        });
 
 
+        }
+
+        if (mCurrentPosition == null && mSelectedGenre == null) {
+            // if no filters firebase can easily handle the queries
+            CollectionReference books = mFirebaseFirestore.collection("books");
+
+            Query query1, query2;
+            query1 = query2 = null;
+
+
+            if (query1 == null)
+                query1 = books;
+
+            if (query2 == null) {
+                query2 = books.orderBy("timeInserted", Query.Direction.DESCENDING);
+            }
+
+            query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    mRecyclerUpdating[0] = true;
+                    List<String> ids = new ArrayList<>();
+                    List<Book> books = new ArrayList<>();
+                    int size = 0;
+                    Book currentBook;
+                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
+                        currentBook = documentSnapshot.toObject(Book.class);
+                        if ((finalUserId != null &&
+                                currentBook.getUid().equals(finalUserId)))
+                            continue;
+                        ids.add(documentSnapshot.getId());
+                        books.add(currentBook);
+                        size++;
+                        if (size > homePageBooksNumber)
+                            break;
+                    }
+
+                    if (mFirstRecyclerView != null)
+                        mFirstRecyclerView.setAdapter(new RecyclerBookAdapter(books, ids));
+
+                    mRecyclerUpdating[0] = false;
+                    if (!mRecyclerUpdating[1])
+                        mRefreshLayout.setRefreshing(false);
+                }
+            });
+
+
+            query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    mRecyclerUpdating[1] = true;
+                    List<String> ids = new ArrayList<>();
+                    List<Book> books = new ArrayList<>();
+                    int size = 0;
+                    Book currentBook;
+                    // apply filter
+                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
+                        currentBook = documentSnapshot.toObject(Book.class);
+                        if ((finalUserId != null &&
+                                currentBook.getUid().equals(finalUserId)))
+                            continue;
+                        ids.add(documentSnapshot.getId());
+                        books.add(currentBook);
+                        size++;
+                        if (size > homePageBooksNumber)
+                            break;
+                    }
+
+                    if (mSecondRecyclerView != null)
+                        mSecondRecyclerView.setAdapter(new RecyclerBookAdapter(books.subList(0, Math.min(books.size(), homePageBooksNumber)), ids));
+
+                    mRecyclerUpdating[1] = false;
+                    if (!mRecyclerUpdating[0])
+                        mRefreshLayout.setRefreshing(false);
+                }
+            });
+        }
+
+    }
+
+    private void processFilteredResultIntoRecyclerView(JSONObject result, RecyclerView recyclerView) {
+        try {
+            JSONArray hits = result.getJSONArray("hits");
+            if (hits.length() > 0) {
+                final ArrayList<Book> booksDataSet = new ArrayList<>();
+                ArrayList<String> IDs = new ArrayList<>();
+
+                for (int i = 0; i < hits.length(); i++) {
+                    JSONObject jsonBook = hits.optJSONObject(i);
+                    String uid = jsonBook.optString("uid");
+
+                    Book book = new Book();
+                    book.setTitle(jsonBook.optString("title"));
+                    book.setAuthors(jsonBook.optString("author"));
+                    book.setCondition(jsonBook.optInt("conditions"));
+                    book.setWebThumbnail(jsonBook.optString("thumbnail"));
+                    book.setUid(uid);
+                    IDs.add(jsonBook.optString("objectID"));
+                    JSONObject geoLocation = jsonBook.optJSONObject("_geoloc");
+                    book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
+                    booksDataSet.add(book);
+                }
+
+                recyclerView.setAdapter(new RecyclerBookAdapter(booksDataSet, IDs));
+            }
+        } catch (JSONException ex) {
+        }
     }
 
     @Override
@@ -364,10 +419,14 @@ public class HomeFragment extends Fragment {
         switch (requestCode) {
             case Constants.POSITION_ACTIVITY_REQUEST:
                 if (resultCode == Activity.RESULT_OK) {
-                    Address address = Utilities.readResultOfPositionActivity(data);
-                    mCurrentPosition = new GeoPoint(address.getLat(), address.getLon());
-                    mPositionFilterButton.setText(address.getAddress());
-                    queryDatabase();
+                    if (data != null) {
+                        Address address = Utilities.readResultOfPositionActivity(data);
+                        if (address != null) {
+                            mCurrentPosition = new GeoPoint(address.getLat(), address.getLon());
+                            mPositionFilterButton.setText(address.getAddress());
+                            queryDatabase();
+                        }
+                    }
                 }
                 break;
             case Constants.PICK_GENRE:
@@ -376,38 +435,53 @@ public class HomeFragment extends Fragment {
                     mSelectedGenre = data.hasExtra(GenreBooksActivity.SELECTED_GENRE) &&
                             GenreBooksActivity.isValidGenre(data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1)) ?
                             data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1) : null;
-                    mGenreFilterButton.setText(mSelectedGenre != null ?
-                            getResources().getStringArray(R.array.genre)[mSelectedGenre] :
-                            getString(R.string.genre_filter_home_page));
-                    if (mSelectedGenre != oldSelectedGenre)
-                        queryDatabase();
+                    // since is an activity result we may have lost context so check it
+                    if (getActivity() != null && getActivity().getApplicationContext() != null)
+                        mGenreFilterButton.setText(mSelectedGenre != null ?
+                                getActivity().getApplicationContext()
+                                        .getResources()
+                                        .getStringArray(R.array.genre)[mSelectedGenre] :
+                                getActivity().getApplicationContext()
+                                        .getResources()
+                                        .getString(R.string.genre_filter_home_page));
+                    queryDatabase();
                 }
                 break;
         }
 
     }
 
-    private GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-        // ~1 mile of lat and lon in degrees
-        Double lat = 0.0144927536231884;
-        Double lon = 0.0181818181818182;
-
-        Double lowerLat = latitude - (lat * distanceInKm);
-        Double lowerLon = longitude - (lon * distanceInKm);
-
-        Double greaterLat = latitude + (lat * distanceInKm);
-        Double greaterLon = longitude + (lon * distanceInKm);
-
-        GeoPoint lesserGeoPoint = new GeoPoint(lowerLat, lowerLon);
-        GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
-
-        return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
+        if (mSelectedGenre != null) {
+            outState.putInt(SELECTED_GENRE, mSelectedGenre);
+        }
+        if (mCurrentPosition != null) {
+            outState.putString(CITY, mPositionFilterButton.getText().toString());
+            outState.putDouble(LAT, mCurrentPosition.getLatitude());
+            outState.putDouble(LON, mCurrentPosition.getLongitude());
+        }
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(SELECTED_GENRE)) {
+                mSelectedGenre = savedInstanceState.getInt(SELECTED_GENRE);
+                mGenreFilterButton.setText(getResources().getStringArray(R.array.genre)[mSelectedGenre]);
+            }
+            if (savedInstanceState.containsKey(LAT) &&
+                    savedInstanceState.containsKey(LON) &&
+                    savedInstanceState.containsKey(CITY)) {
+                mCurrentPosition = new GeoPoint(savedInstanceState.getDouble(LAT),
+                        savedInstanceState.getDouble(LON));
+                mPositionFilterButton.setText(savedInstanceState.getString(CITY));
+            }
+            queryDatabase();
+        }
     }
 
     @Override
