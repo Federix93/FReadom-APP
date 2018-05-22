@@ -842,7 +842,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         if (userBookPhotosStoragePath.size() > 0) {
             StorageReference storageRef = storageReference.child(generateStorageRef(userBookPhotosStoragePath.get(mUploadedImagesCount)));
             byte[] compressedImage = null;
-            compressedImage = Utilities.compressPhoto(userBookPhotosStoragePath.get(mUploadedImagesCount), getContentResolver());
+            compressedImage = Utilities.compressPhoto(userBookPhotosStoragePath.get(mUploadedImagesCount),
+                    getContentResolver(),
+                    getApplicationContext());
 
             if (compressedImage == null) {
                 Toast.makeText(getApplicationContext(),

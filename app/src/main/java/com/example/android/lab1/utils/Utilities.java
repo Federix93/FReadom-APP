@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -14,10 +15,12 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.CursorLoader;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -34,6 +37,7 @@ import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.android.SphericalUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -204,9 +208,22 @@ public abstract class Utilities {
         }
     }
 
-    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver) {
+    private static String getRealPathFromURI(Uri contentUri, Context context) {
+        String[] proj = {MediaStore.Images.Media.DATA};
+        CursorLoader loader = new CursorLoader(context, contentUri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(column_index);
+        cursor.close();
+        return result;
+    }
+
+    public static byte[] compressPhoto(String filePath, ContentResolver contentResolver, Context context) {
         int rotationAngle = 0;
         ExifInterface ei = null;
+        if (filePath.contains("content"))
+            filePath = Utilities.getRealPathFromURI(Uri.parse(filePath), context);
         try {
             ei = new ExifInterface(filePath);
             int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
@@ -282,6 +299,24 @@ public abstract class Utilities {
             dist = dist * 0.8684;
         }
         return (dist);
+    }
+
+    private GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
+
+        // ~1 mile of lat and lon in degrees
+        Double lat = 0.0144927536231884;
+        Double lon = 0.0181818181818182;
+
+        Double lowerLat = latitude - (lat * distanceInKm);
+        Double lowerLon = longitude - (lon * distanceInKm);
+
+        Double greaterLat = latitude + (lat * distanceInKm);
+        Double greaterLon = longitude + (lon * distanceInKm);
+
+        GeoPoint lesserGeoPoint = new GeoPoint(lowerLat, lowerLon);
+        GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
+
+        return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
     }
 
     private static double deg2rad(double deg) {

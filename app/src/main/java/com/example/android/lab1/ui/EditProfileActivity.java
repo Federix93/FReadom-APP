@@ -30,6 +30,7 @@ import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -40,6 +41,9 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +55,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class EditProfileActivity extends AppCompatActivity implements View.OnFocusChangeListener, EventListener<DocumentSnapshot> {
 
+    private static final String CHANGE_PICTURE = "CP";
     Toolbar mToolbar;
     ImageView mSaveProfileUpdatesImageView;
     ImageView mCameraImageView;
@@ -78,6 +83,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     ListenerRegistration mUserListenerRegistration;
     SharedPreferencesManager mSharedPreferencesManager;
     Bundle mSavedInstanceState;
+    private boolean mChangedPicture;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -120,38 +126,94 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             public boolean onMenuItemClick(MenuItem item) {
                 int clicked = item.getItemId();
                 if(clicked == R.id.confirm_updates) {
-                    FirebaseFirestore db = FirebaseFirestore.getInstance();
-                    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                            .setPersistenceEnabled(true)
-                            .build();
-                    db.setFirestoreSettings(settings);
-                    final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
-                    db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
-                            .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                @Override
-                                public void onEvent(@Nullable QuerySnapshot querySnapshot,
-                                                    @Nullable FirebaseFirestoreException e) {
-                                    if (e != null) {
-                                        return;
+                    // upload profile picture
+                    if (mChangedPicture && mCurrentPhotoPath != null) {
+                        FirebaseStorage storage = FirebaseStorage.getInstance();
+                        final StorageReference reference = storage.getReference(FirebaseAuth.getInstance()
+                                .getCurrentUser()
+                                .getUid() + "/" + "profile_pic.jpg");
+                        byte[] bytes = Utilities.compressPhoto(mCurrentPhotoPath,
+                                getContentResolver(),
+                                getApplicationContext());
+                        if (bytes != null)
+                            reference.putBytes(bytes)
+                                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                            reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+                                                    if (mUser != null) {
+                                                        mUser.setImage(uri.toString());
+                                                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                                        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                                                                .setPersistenceEnabled(true)
+                                                                .build();
+                                                        db.setFirestoreSettings(settings);
+                                                        final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+                                                        db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
+                                                                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                                                    @Override
+                                                                    public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                                                                        @Nullable FirebaseFirestoreException e) {
+                                                                        if (e != null) {
+                                                                            return;
+                                                                        }
+                                                                        if (mUsernameTextInputLayout.getEditText() != null)
+                                                                            mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                                                                        if (mEmailTextInputLayout.getEditText() != null)
+                                                                            mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                                                                        if (mPhoneTextInputLayout.getEditText() != null)
+                                                                            mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                                                                        if (mAddressTextInputLayout != null)
+                                                                            mUser.setAddress(mCurrentAddress);
+                                                                        if (mShortBioTextInputLayout.getEditText() != null)
+                                                                            mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                                                                        docRef.set(mUser, SetOptions.merge());
+                                                                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                                                        intent.putExtra("ApplyChanges", true);
+                                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                                        startActivity(intent);
+                                                                    }
+                                                                });
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                    } else {
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                                .setPersistenceEnabled(true)
+                                .build();
+                        db.setFirestoreSettings(settings);
+                        final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+                        db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
+                                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                                        @Nullable FirebaseFirestoreException e) {
+                                        if (e != null) {
+                                            return;
+                                        }
+                                        if (mUsernameTextInputLayout.getEditText() != null)
+                                            mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
+                                        if (mEmailTextInputLayout.getEditText() != null)
+                                            mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
+                                        if (mPhoneTextInputLayout.getEditText() != null)
+                                            mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
+                                        if (mAddressTextInputLayout != null)
+                                            mUser.setAddress(mCurrentAddress);
+                                        if (mShortBioTextInputLayout.getEditText() != null)
+                                            mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
+                                        docRef.set(mUser, SetOptions.merge());
+                                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                        intent.putExtra("ApplyChanges", true);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(intent);
                                     }
-                                    if (mUsernameTextInputLayout.getEditText() != null)
-                                        mUser.setUsername(mUsernameTextInputLayout.getEditText().getText().toString());
-                                    if (mEmailTextInputLayout.getEditText() != null)
-                                        mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
-                                    if (mPhoneTextInputLayout.getEditText() != null)
-                                        mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                                    if (mAddressTextInputLayout != null)
-                                        mUser.setAddress(mCurrentAddress);
-                                    if (mShortBioTextInputLayout.getEditText() != null)
-                                        mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
-                                    mUser.setImage(mCurrentPhotoPath);
-                                    docRef.set(mUser, SetOptions.merge());
-                                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                    intent.putExtra("ApplyChanges", true);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(intent);
-                                }
-                            });
+                                });
+                    }
                 }
                 return true;
             }
@@ -228,6 +290,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             }
         });
         mFocusedView = null;
+        mChangedPicture = false;
         resetFocus();
         clearFocusOnViews();
     }
@@ -275,6 +338,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             else
                 outState.putString("Focus", "FShortBio");
         }
+
+        outState.putBoolean(CHANGE_PICTURE, mChangedPicture);
         outState.putString("UriImage", mCurrentPhotoPath);
 
     }
@@ -313,7 +378,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             if (genericView != null)
                 genericView.requestFocus();
         }
-
+        mChangedPicture = savedInstanceState.getBoolean(CHANGE_PICTURE, false);
         mCurrentAddress = savedInstanceState.getString("Address");
         mAddressTextInputLayout.setText(mCurrentAddress);
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
@@ -366,6 +431,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                         mCurrentPhotoPath = data.getData().toString();
                         mSharedPreferencesManager.putImage(mCurrentPhotoPath);
                         Glide.with(getApplicationContext()).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                        mChangedPicture = true;
                     }
                 }
                 break;
@@ -374,6 +440,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     mCurrentPhotoPath = mPhotoFile.getAbsolutePath();
                     mSharedPreferencesManager.putImage(mCurrentPhotoPath);
                     Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
+                    mChangedPicture = true;
                 }
                 break;
             case Constants.POSITION_ACTIVITY_REQUEST:
