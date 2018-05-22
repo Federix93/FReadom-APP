@@ -50,7 +50,9 @@ public class HomePageActivity extends AppCompatActivity
 
     FragmentManager mFragmentManager;
     HomeFragment mHomeFragment;
-    DashboardFragment mDashboardFragment;
+    YourLibraryFragment mYourLibraryFragment;
+    LoanFragment mLoanFragment;
+    RequestsFragment mRequestFragment;
     AHBottomNavigation mBottomNavigation;
     ImageView mProfileImage;
     TextView mUsernameTextView;
@@ -58,8 +60,9 @@ public class HomePageActivity extends AppCompatActivity
     LinearLayout mSideNavLinearLayout;
 
     private static final int HOME_FRAGMENT = 0;
-    private static final int ADD_BOOK = 1;
-    private static final int DASH_FRAGMENT = 2;
+    private static final int YOUR_LIBRARY = 1;
+    private static final int LOANS_FRAGMENT = 2;
+    private static final int REQUESTS_FRAGMENT = 3;
     private int oldPosition;
     private int comeBackPosition;
 
@@ -112,22 +115,27 @@ public class HomePageActivity extends AppCompatActivity
         mFragmentManager = getSupportFragmentManager();
 
         mHomeFragment = new HomeFragment();
-        mDashboardFragment = new DashboardFragment();
+        mYourLibraryFragment = new YourLibraryFragment();
+        mLoanFragment = new LoanFragment();
+        mRequestFragment = new RequestsFragment();
         mBottomNavigation = findViewById(R.id.navigation);
 
         AHBottomNavigationItem homeItem = new AHBottomNavigationItem(getString(R.string.title_home), R.drawable.ic_home_black_24dp);
-        AHBottomNavigationItem addBook = new AHBottomNavigationItem(getString(R.string.add_book_fragment_title), R.drawable.ic_add_box_black_24dp);
-        AHBottomNavigationItem dashItem = new AHBottomNavigationItem(getString(R.string.title_dashboard), R.drawable.ic_dashboard_black_24dp);
+        AHBottomNavigationItem yourLibrary = new AHBottomNavigationItem(getString(R.string.your_library_fragment), R.drawable.ic_library_books_black_24dp);
+        AHBottomNavigationItem loansItem = new AHBottomNavigationItem(getString(R.string.title_loans), R.drawable.ic_compare_arrows_black_24dp);
+        AHBottomNavigationItem requestsItem = new AHBottomNavigationItem(getString(R.string.title_requests), R.drawable.ic_dashboard_black_24dp);
 
         ArrayList<AHBottomNavigationItem> items = new ArrayList<>();
 
         items.add(homeItem);
-        items.add(addBook);
-        items.add(dashItem);
+        items.add(yourLibrary);
+        items.add(loansItem);
+        items.add(requestsItem);
         oldPosition = 0;
         mBottomNavigation.addItems(items);
         mBottomNavigation.setBehaviorTranslationEnabled(false);
         mBottomNavigation.setAccentColor(getResources().getColor(R.color.colorSecondaryAccent));
+        mBottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
 
 
         mFragmentManager.beginTransaction()
@@ -141,34 +149,33 @@ public class HomePageActivity extends AppCompatActivity
                 } else {
                     switch (position) {
                         case HOME_FRAGMENT:
-                            if(oldPosition != ADD_BOOK) {
-                                mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mHomeFragment).commit();
-                            }
+                            mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mHomeFragment).commit();
 
                             oldPosition = position;
                             break;
 
-                        case ADD_BOOK:
+                        case YOUR_LIBRARY:
                             if(mFirebaseAuth.getCurrentUser() == null){
                                 Toast.makeText(getApplicationContext(), "Devi essere loggato", Toast.LENGTH_SHORT).show();
                                 break;
                             }
-                            comeBackPosition = oldPosition;
+                            mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mYourLibraryFragment).commit();
+
                             oldPosition = position;
-                            Intent intent = new Intent(getApplicationContext(), LoadBookActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            startActivityForResult(intent, ADD_BOOK_ACTIVITY);
                             break;
 
-                        case DASH_FRAGMENT:
-                            if(oldPosition != ADD_BOOK) {
-                                mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mDashboardFragment).commit();
-                            }
+                        case LOANS_FRAGMENT:
+                            mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mLoanFragment).commit();
+
+                            oldPosition = position;
+                            break;
+                        case REQUESTS_FRAGMENT:
+                            mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mRequestFragment).commit();
+
                             oldPosition = position;
                             break;
                     }
                 }
-
                 return true;
             }
         });

@@ -41,16 +41,19 @@
     <string name="connection_internet_dialog">Attesa della connessione internet</string>
     <string name="email_verification">Verificare l\'email per procedere con il login, altrimenti cambiare metodo di accesso.</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_loans">Prestiti</string>
+    <string name="title_requests">Richieste</string>
     <string name="title_profile">Profilo</string>
     <string name="search">Cerca</string>
     <string name="filter">Filtra</string>
     <string name="verification_email_confirm">OK</string>
     <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
     <string name="confirm">Conferma</string>
-    <string name="dashboard_library_item">I tuoi libri</string>
-    <string name="dashboard_borrowed_item">Libri richiesti</string>
-    <string name="dashboard_lended_item">Prestati</string>
+    <string name="loan_your_item">Libri in prestito</string>
+    <string name="loan_other_book_item">Libri ricevuti in prestito</string>
+    <string name="request_done_item">Effettuate</string>
+    <string name="request_received_item">Ricevute</string>
+
     <string name="load_book_upload">Upload del libro in corso</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
     <string name="load_book_tags">Aggiungi parole chiave per la ricerca del libro</string>
@@ -90,7 +93,7 @@
 
     <string name="search_books_hint">Titolo, autore, editore, tags...</string>
 
-    <string name="add_book_fragment_title">Aggiungi libro</string>
+    <string name="your_library_fragment">La tua libreria</string>
 
     <string name="position_filter_home_page">POSIZIONE</string>
     <string name="genre_filter_home_page">GENERI</string>

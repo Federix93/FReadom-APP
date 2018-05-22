@@ -17,12 +17,12 @@ import com.example.android.lab1.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashboardFragment extends Fragment {
+public class LoanFragment extends Fragment {
 
     FragmentManager mFt = null;
     android.support.v7.widget.Toolbar mToolbar;
 
-    public DashboardFragment (){
+    public LoanFragment(){
 
     }
 
@@ -34,13 +34,13 @@ public class DashboardFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_dashboard, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_loans_and_requests, container, false);
 
         mFt = getChildFragmentManager();
 
         mToolbar = getActivity().findViewById(R.id.toolbar_home_page_activity);
 
-        mToolbar.setTitle(R.string.app_name);
+        mToolbar.setTitle(R.string.title_loans);
         mToolbar.getMenu().clear();
 
         ViewPager viewPager = rootView.findViewById(R.id.viewpager);
@@ -58,8 +58,8 @@ public class DashboardFragment extends Fragment {
 
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(mFt);
-        adapter.addFragment(new DashboardFragmentLibraryItem(), getResources().getString(R.string.dashboard_library_item));
-        adapter.addFragment(new DashboardFragmentBorrowedItem(), getResources().getString(R.string.dashboard_borrowed_item));
+        adapter.addFragment(new DashboardFragmentLibraryItem(), getResources().getString(R.string.loan_your_item));
+        adapter.addFragment(new DashboardFragmentBorrowedItem(), getResources().getString(R.string.loan_other_book_item));
         viewPager.setAdapter(adapter);
     }
 

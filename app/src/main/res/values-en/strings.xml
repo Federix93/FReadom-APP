@@ -40,16 +40,16 @@
     <string name="connection_internet_dialog">Waiting for internet connection</string>
     <string name="email_verification">Verify email to login, otherwise change login method</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_loans">Loans</string>
+    <string name="title_requests">Requests</string>
     <string name="title_profile">Profile</string>
     <string name="search">Search</string>
     <string name="filter">Filter</string>
     <string name="verification_email_confirm">OK</string>
     <string name="load_book_fill_fields">Fill all the fields before confirming</string>
     <string name="confirm">Confirm</string>
-    <string name="dashboard_library_item">Your books</string>
-    <string name="dashboard_borrowed_item">Requested books</string>
-    <string name="dashboard_lended_item">Lended</string>
+    <string name="request_done_item">Requests done</string>
+    <string name="request_received_item">Requests received</string>
     <string name="load_book_upload">Uploading book</string>
     <string name="load_book_upload_error">Unable to upload book</string>
     <string name="condition_poor">Poor</string>
@@ -72,7 +72,7 @@
     <string name="button_right_recycler_view">MORE</string>
     <string name="filter_by">Filter by</string>
     <string name="min_selection">Choose at least one item</string>
-    <string name="add_book_fragment_title">Add book</string>
+    <string name="your_library_fragment">Your Library</string>
     <string name="preview">Preview</string>
     <string name="book_request">Request</string>
 
@@ -137,6 +137,7 @@
     <string name="error_message">Something went wrong</string>
 
     <string name="tags">Tags</string>
+
 
 
 </resources>

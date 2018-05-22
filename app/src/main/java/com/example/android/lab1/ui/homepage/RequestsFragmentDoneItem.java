@@ -29,7 +29,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public class DashboardFragmentBorrowedItem extends Fragment {
+public class RequestsFragmentDoneItem extends Fragment {
 
     private RecyclerView mRecyclerView;
     FirebaseFirestore mFirebaseFirestore;
@@ -41,7 +41,7 @@ public class DashboardFragmentBorrowedItem extends Fragment {
     DatabaseReference openedChatReference;
     RecyclerBorrowedBooksAdapter mAdapter;
 
-    public DashboardFragmentBorrowedItem() {
+    public void RequestsFragmentDoneItem() {
     }
 
     @Override
