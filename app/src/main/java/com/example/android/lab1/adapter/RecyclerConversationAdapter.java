@@ -115,9 +115,11 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         if(chat.getLastMessageUserID() != null && !chat.getLastMessageUserID().equals(FirebaseAuth.getInstance().getUid())){
                             if(chat.getCounter() == 0) {
                                 mMessageCounterTextView.setText("");
+                                mMessageCounterTextView.setBackground(null);
                             }
                             else {
                                 mMessageCounterTextView.setText(String.valueOf(chat.getCounter()));
+                                mMessageCounterTextView.setBackground(itemView.getResources().getDrawable(R.drawable.rounded_textview));
                             }
                         }
                     }
