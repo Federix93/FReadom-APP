@@ -21,7 +21,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.EditProfileActivity" />
+        <activity android:name=".ui.Profile.EditProfileActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -104,7 +104,7 @@
             android:theme="@style/ThemeDrawer" />
         <activity android:name=".ui.GenreBooksActivity" />
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
-        <activity android:name=".ui.ProfileActivity" />
+        <activity android:name=".ui.Profile.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
         <activity android:name=".ui.chat.ChatActivity"></activity>
 

@@ -137,7 +137,8 @@
     <string name="error_message">Something went wrong</string>
 
     <string name="tags">Tags</string>
-
+    <string name="profile_info_fragment">Info</string>
+    <string name="profile_reviews_fragment">Reviews</string>
 
 
 </resources>

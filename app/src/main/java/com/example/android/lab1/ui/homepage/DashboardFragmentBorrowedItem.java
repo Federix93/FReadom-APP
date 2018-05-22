@@ -49,7 +49,7 @@ public class DashboardFragmentBorrowedItem extends Fragment {
                              final Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.recycler_fragments_content, container, false);
 
-        mRecyclerView = view.findViewById(R.id.recycler_books);
+        mRecyclerView = view.findViewById(R.id.recycler_fragment_content);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         listBooks = new ArrayList<>();
         chatIDs = new ArrayList<>();

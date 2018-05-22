@@ -1,4 +1,4 @@
-package com.example.android.lab1.ui;
+package com.example.android.lab1.ui.Profile;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -26,6 +26,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.PositionActivity;
+import com.example.android.lab1.ui.SignInActivity;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.SharedPreferencesManager;

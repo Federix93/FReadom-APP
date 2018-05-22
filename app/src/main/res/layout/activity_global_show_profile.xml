@@ -42,7 +42,7 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:id="@+id/global_profile_image"
+                        android:id="@+id/profile_image"
                         android:layout_width="128dp"
                         android:layout_height="128dp"
                         android:layout_gravity="center_horizontal"
@@ -164,7 +164,7 @@
                 android:layout_gravity="center_horizontal">
 
                 <TextView
-                    android:id="@+id/global_profile_bio"
+                    android:id="@+id/bio_text_edit"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"

@@ -5,18 +5,13 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,9 +22,6 @@ import com.example.android.lab1.adapter.ProfileBookAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.Utilities;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,7 +30,6 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -79,11 +70,11 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
 
         Utilities.setupStatusBarColor(this);
 
-        mImageView = findViewById(R.id.global_profile_image);
+        mImageView = findViewById(R.id.profile_image);
         mUserName = findViewById(R.id.global_profile_name);
         mRating = findViewById(R.id.global_profile_rating);
         mOwnerName = findViewById(R.id.global_profile_books_owner);
-        mShortBio = findViewById(R.id.global_profile_bio);
+        mShortBio = findViewById(R.id.bio_text_edit);
         mBookNumber = findViewById(R.id.global_profile_books_published);
         mReviewDone = findViewById(R.id.global_profile_reviews_published);
 

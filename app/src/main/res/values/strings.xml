@@ -44,6 +44,8 @@
     <string name="title_loans">Prestiti</string>
     <string name="title_requests">Richieste</string>
     <string name="title_profile">Profilo</string>
+    <string name="profile_info_fragment">Info</string>
+    <string name="profile_reviews_fragment">Recensioni</string>
     <string name="search">Cerca</string>
     <string name="filter">Filtra</string>
     <string name="verification_email_confirm">OK</string>

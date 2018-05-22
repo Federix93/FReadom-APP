@@ -25,8 +25,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.ui.LoadBookActivity;
-import com.example.android.lab1.ui.ProfileActivity;
+import com.example.android.lab1.ui.Profile.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
@@ -58,6 +57,7 @@ public class HomePageActivity extends AppCompatActivity
     TextView mUsernameTextView;
     TextView mEmailTextView;
     LinearLayout mSideNavLinearLayout;
+    private User mUser;
 
     private static final int HOME_FRAGMENT = 0;
     private static final int YOUR_LIBRARY = 1;
@@ -106,8 +106,8 @@ public class HomePageActivity extends AppCompatActivity
             docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
                 @Override
                 public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
-                    User user = snapshot.toObject(User.class);
-                    updateNavigationDrawer(user);
+                    mUser = snapshot.toObject(User.class);
+                    updateNavigationDrawer();
                 }
             });
         }
@@ -202,6 +202,7 @@ public class HomePageActivity extends AppCompatActivity
         } else if (id == R.id.nav_profile) {
             Intent intent = new Intent(this, ProfileActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("user", mUser);
             startActivity(intent);
 
         } else if (id == R.id.nav_logout) {
@@ -221,12 +222,12 @@ public class HomePageActivity extends AppCompatActivity
         return true;
     }
 
-    private void updateNavigationDrawer(User user) {
+    private void updateNavigationDrawer() {
 
-        if (user != null) {
-            if (user.getImage() != null) {
+        if (mUser != null) {
+            if (mUser.getImage() != null) {
                 Glide.with(getApplicationContext())
-                        .load(user.getImage())
+                        .load(mUser.getImage())
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mProfileImage);
 
@@ -236,8 +237,8 @@ public class HomePageActivity extends AppCompatActivity
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mProfileImage);
             }
-            mUsernameTextView.setText(user.getUsername());
-            mEmailTextView.setText(user.getEmail());
+            mUsernameTextView.setText(mUser.getUsername());
+            mEmailTextView.setText(mUser.getEmail());
         } else {
             Glide.with(getApplicationContext())
                     .load(R.drawable.ic_account_circle_black_24dp)
