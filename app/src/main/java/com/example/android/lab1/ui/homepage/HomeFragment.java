@@ -46,6 +46,7 @@ import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -235,8 +236,7 @@ public class HomeFragment extends Fragment {
         final int homePageBooksNumber = getResources().getInteger(R.integer.homepage_book_number);
 
         String userId = null;
-        if (FirebaseAuth.getInstance() != null
-                && FirebaseAuth.getInstance().getCurrentUser() != null &&
+        if (FirebaseAuth.getInstance() != null && FirebaseAuth.getInstance().getCurrentUser() != null &&
                 FirebaseAuth.getInstance().getCurrentUser().getUid() != null) {
             userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
@@ -244,8 +244,7 @@ public class HomeFragment extends Fragment {
         if ((mCurrentPosition != null || mSelectedGenre != null)
                 && getResources() != null) {
             if (mCurrentPosition != null) {
-                int radius = getResources()
-                        .getInteger(R.integer.position_radius_address);
+                int radius = getResources().getInteger(R.integer.position_radius_address);
                 AbstractQuery.LatLng latLng = new AbstractQuery.LatLng(mCurrentPosition.getLatitude(),
                         mCurrentPosition.getLongitude());
 
@@ -256,10 +255,10 @@ public class HomeFragment extends Fragment {
                 algoliaQuery2.setAroundRadius(radius);
             }
 
-            String filters[] = new String[2];
+            String filters[] = new String[3];
             filters[0] = mSelectedGenre != null ? "genre=" + Integer.toString(mSelectedGenre) : "";
             filters[1] = finalUserId != null ? "NOT uid:\"" + finalUserId + "\"" : "";
-
+            //filters[2] = "loanStart=0";
             if (!filters[0].equals("") && !filters[1].equals(""))
                 algoliaQuery1.setFilters(TextUtils.join(" AND ", filters));
             else if (!filters[0].equals(""))
@@ -309,19 +308,9 @@ public class HomeFragment extends Fragment {
         if (mCurrentPosition == null && mSelectedGenre == null) {
             // if no filters firebase can easily handle the queries
             CollectionReference books = mFirebaseFirestore.collection("books");
+            Query query = books.whereEqualTo("loanStart", null);
 
-            Query query1, query2;
-            query1 = query2 = null;
-
-
-            if (query1 == null)
-                query1 = books;
-
-            if (query2 == null) {
-                query2 = books.orderBy("timeInserted", Query.Direction.DESCENDING);
-            }
-
-            query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            query.limit(20).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                     mRecyclerUpdating[0] = true;
@@ -331,9 +320,9 @@ public class HomeFragment extends Fragment {
                     Book currentBook;
                     for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
                         currentBook = documentSnapshot.toObject(Book.class);
-                        if ((finalUserId != null &&
-                                currentBook.getUid().equals(finalUserId)))
+                        if ((finalUserId != null && currentBook.getUid().equals(finalUserId))) {
                             continue;
+                        }
                         ids.add(documentSnapshot.getId());
                         books.add(currentBook);
                         size++;
@@ -351,7 +340,7 @@ public class HomeFragment extends Fragment {
             });
 
 
-            query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            books.orderBy("timeInserted", Query.Direction.DESCENDING).limit(20).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                     mRecyclerUpdating[1] = true;
@@ -362,8 +351,9 @@ public class HomeFragment extends Fragment {
                     // apply filter
                     for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
                         currentBook = documentSnapshot.toObject(Book.class);
-                        if ((finalUserId != null &&
-                                currentBook.getUid().equals(finalUserId)))
+                        if ((finalUserId != null && currentBook.getUid().equals(finalUserId)))
+                            continue;
+                        if(currentBook.getLoanStart() != null)
                             continue;
                         ids.add(documentSnapshot.getId());
                         books.add(currentBook);
