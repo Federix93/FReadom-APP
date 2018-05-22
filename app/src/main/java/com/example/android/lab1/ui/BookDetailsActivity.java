@@ -14,7 +14,6 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,14 +27,13 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
-import com.example.android.lab1.model.BooksBorrowed;
+import com.example.android.lab1.model.BorrowedBooks;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,12 +43,9 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -138,6 +133,43 @@ public class BookDetailsActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     mBook = task.getResult().toObject(Book.class);
                     updateUI(mBook);
+                }
+            }
+        });
+
+        mBookButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final DocumentReference docRef;
+                if (mFirebaseAuth.getUid() != null) {
+                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
+                    progressDialogHolder.showLoadingDialog(R.string.wait_for_chat_opening);
+                    docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
+                    docRef.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                BorrowedBooks booksBorrowed = documentSnapshot.toObject(BorrowedBooks.class);
+                                if (booksBorrowed != null) {
+                                    if (!booksBorrowed.getBooksID().contains(mBookId)) {
+                                        booksBorrowed.getBooksID().add(mBookId);
+                                        docRef.set(booksBorrowed);
+                                    }
+                                } else {
+                                    List<String> list = new ArrayList<>();
+                                    list.add(mBookId);
+                                    booksBorrowed = new BorrowedBooks(list);
+                                    docRef.set(booksBorrowed);
+                                }
+                                if (progressDialogHolder.isProgressDialogShowing())
+                                    progressDialogHolder.dismissDialog();
+                                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
+                            }
+                        }
+                    });
+                } else {
+                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
                 }
             }
         });
@@ -301,30 +333,6 @@ public class BookDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mBookButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final DocumentReference docRef;
-                if(mFirebaseAuth.getUid() != null) {
-                    docRef = mFirebaseFirestore.collection("borrowedBooks").document();
-                    BooksBorrowed booksBorrowed = new BooksBorrowed(mFirebaseAuth.getUid() ,mBookId, 0);
-                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
-                    progressDialogHolder.showLoadingDialog(R.string.wait_for_chat_opening);
-                    docRef.set(booksBorrowed).addOnSuccessListener(BookDetailsActivity.this, new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            if(progressDialogHolder.isProgressDialogShowing())
-                                progressDialogHolder.dismissDialog();
-                            new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
-                        }
-                    });
-                }
-                else{
-                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
-                }
             }
         });
 
