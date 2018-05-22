@@ -313,7 +313,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if(task.isSuccessful()){
                                 DocumentSnapshot documentSnapshot = task.getResult();
-                                BorrowedBooks booksBorrowed = documentSnapshot.toObject(BooksBorrowed.class);
+                                BorrowedBooks booksBorrowed = documentSnapshot.toObject(BorrowedBooks.class);
                                 if(booksBorrowed != null) {
                                     if(!booksBorrowed.getBooksID().contains(mBookId)) {
                                         booksBorrowed.getBooksID().add(mBookId);
