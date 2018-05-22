@@ -66,25 +66,27 @@ public class DashboardFragmentBorrowedItem extends Fragment {
                 .setPersistenceEnabled(true)
                 .build();
         mFirebaseFirestore.setFirestoreSettings(settings);
-        mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid())
-                .addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
+        mFirebaseFirestore.collection("borrowedBooks").addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
             @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
-                if (snapshot != null && snapshot.exists()) {
-                    BooksBorrowed booksBorrowed = snapshot.toObject(BooksBorrowed.class);
-                    List<String> booksID = booksBorrowed.getBooksID();
-                    for (String bookID : booksID) {
-                        mFirebaseFirestore.collection("books").document(bookID).addSnapshotListener(
-                                new EventListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
-                                        if (snapshot != null && snapshot.exists()) {
-                                            Book book = snapshot.toObject(Book.class);
-                                            listBooks.add(book);
-                                            mRecyclerView.setAdapter(new RecyclerBorrowedBooksAdapter(listBooks));
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if(e != null)
+                    return;
+                if(queryDocumentSnapshots != null) {
+                    List<BooksBorrowed> listBorrowedBooks = queryDocumentSnapshots.toObjects(BooksBorrowed.class);
+                    for(BooksBorrowed booksBorrowed : listBorrowedBooks){
+                        if(booksBorrowed.getBorrowerUserID().equals(mFirebaseAuth.getUid())) {
+                            mFirebaseFirestore.collection("books").document(booksBorrowed.getBookID()).addSnapshotListener(
+                                    new EventListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+                                            if (snapshot != null && snapshot.exists()) {
+                                                Book book = snapshot.toObject(Book.class);
+                                                listBooks.add(book);
+                                                mRecyclerView.setAdapter(new RecyclerBorrowedBooksAdapter(listBooks));
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                        }
                     }
                 }
             }

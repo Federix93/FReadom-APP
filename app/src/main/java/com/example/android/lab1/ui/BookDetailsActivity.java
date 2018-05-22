@@ -33,7 +33,10 @@ import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -306,27 +309,16 @@ public class BookDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final DocumentReference docRef;
                 if(mFirebaseAuth.getUid() != null) {
-                    docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
-                    docRef.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                    docRef = mFirebaseFirestore.collection("borrowedBooks").document();
+                    BooksBorrowed booksBorrowed = new BooksBorrowed(mFirebaseAuth.getUid() ,mBookId, 0);
+                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
+                    progressDialogHolder.showLoadingDialog(R.string.wait_for_chat_opening);
+                    docRef.set(booksBorrowed).addOnSuccessListener(BookDetailsActivity.this, new OnSuccessListener<Void>() {
                         @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if(task.isSuccessful()){
-                                DocumentSnapshot documentSnapshot = task.getResult();
-                                BooksBorrowed booksBorrowed = documentSnapshot.toObject(BooksBorrowed.class);
-                                if(booksBorrowed != null) {
-                                    if(!booksBorrowed.getBooksID().contains(mBookId)) {
-                                        booksBorrowed.getBooksID().add(mBookId);
-                                        docRef.set(booksBorrowed);
-                                    }
-                                }
-                                else{
-                                    List<String> list = new ArrayList<>();
-                                    list.add(mBookId);
-                                    booksBorrowed = new BooksBorrowed(list);
-                                    docRef.set(booksBorrowed);
-                                }
-                                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
-                            }
+                        public void onSuccess(Void aVoid) {
+                            if(progressDialogHolder.isProgressDialogShowing())
+                                progressDialogHolder.dismissDialog();
+                            new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
                         }
                     });
                 }

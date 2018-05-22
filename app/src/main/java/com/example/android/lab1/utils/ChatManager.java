@@ -22,6 +22,7 @@ public class ChatManager {
     private Context mContext;
     private String mChatID;
     private User mBookOwnerUserDatabase;
+    private boolean isChatAlreadyOpened = true;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase firebaseDatabase;
@@ -87,7 +88,9 @@ public class ChatManager {
     }
 
     private void createChat() {
-        Chat chat = new Chat(mBookID, "", System.currentTimeMillis() / 1000);
+        String defaultMessage = "HAI RICHIESTO IL LIBRO ALLO STRONZO";
+        isChatAlreadyOpened = false;
+        Chat chat = new Chat(mBookID, defaultMessage, System.currentTimeMillis() / 1000);
         DatabaseReference newChat = chatsReference.push();
         mChatID = newChat.getKey();
         newChat.setValue(chat);
