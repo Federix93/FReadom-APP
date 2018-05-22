@@ -16,6 +16,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +40,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -135,9 +141,15 @@ public class BookDetailsActivity extends AppCompatActivity {
         mListenerRegistration = docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                //Log.d("DEBUGPERSISTANCE", "onComplete: " + documentSnapshot.getMetadata()
-                //        .isFromCache());
                 mBook = documentSnapshot.toObject(Book.class);
+                if(mBook == null) {
+                    Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                if(mBook.isAlreadyLent()){
+                    mBookButton.setText(getResources().getString(R.string.book_not_available));
+                    mBookButton.setEnabled(false);
+                }
                 updateUI(mBook);
                 if (mListenerRegistration != null)
                     mListenerRegistration.remove();
@@ -182,18 +194,70 @@ public class BookDetailsActivity extends AppCompatActivity {
         });
     }
 
-
-                /*.addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+    @Override
+    protected void onStart() {
+        super.onStart();
+        final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
+        docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    Book book = task.getResult().toObject(Book.class);
+            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                mBook = documentSnapshot.toObject(Book.class);
+                if (mBook == null) {
+                    Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                if (mBook.isAlreadyLent()) {
+                    mBookButton.setText(getResources().getString(R.string.book_not_available));
+                    mBookButton.setEnabled(false);
+                } else {
+                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference()
+                            .child("openedChats")
+                            .child(mBookId)
+                            .child(mBook.getUid())
+                            .child(mFirebaseAuth.getUid());
+                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot != null && dataSnapshot.exists()) {
+                                mBookButton.setText("Vai alla chat");
+                            } else if (dataSnapshot != null) {
+                                mBookButton.setText(getResources().getString(R.string.book_request));
+                            }
+                        }
 
-                    updateUI(book);
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
             }
-        });*/
+        });
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("LULLO", "OnStop");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("LULLO", "OnPause");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("LULLO", "OnDestroy");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("LULLO", "OnResume");
+    }
 
     private void updateUI(final Book book) {
         if (book.getTitle() != null)
@@ -216,6 +280,7 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
             mBookDetailConditionColor.setColorFilter(Condition.getConditionColor(getApplicationContext(), book.getCondition()));
         }
+
         if (book.getWebThumbnail() != null)
             Glide.with(this).load(book.getWebThumbnail())
                     .apply(new RequestOptions().centerCrop())

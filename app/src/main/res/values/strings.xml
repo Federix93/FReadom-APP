@@ -178,4 +178,5 @@
     <string name="reset_filters_uppercase">RESETTA FILTRI</string>
     <string name="error_message">Qualcosa è andato storto</string>
     <string name="wait_for_chat_opening">Apertura della chat in corso</string>
+    <string name="book_not_available">Libro non più disponibile</string>
 </resources>
