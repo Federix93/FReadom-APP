@@ -135,6 +135,7 @@
     <string name="editor_not_available">Editor not available</string>
     <string name="date_not_available">Pubblication date not available</string>
     <string name="error_message">Something went wrong</string>
+    <string name="wait_for_chat_opening">Waiting for chat opening</string>
 
     <string name="tags">Tags</string>
 

@@ -160,7 +160,6 @@ public class SignInActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-                                Log.d("LULLO", "STO "+mFirebaseAuth+" "+mFirebaseAuth.getUid());
                                 DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
                                 if(mFirebaseAuth != null && mFirebaseAuth.getUid() != null) {
                                     setupAlgolia();

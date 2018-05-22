@@ -6,8 +6,8 @@
         <solid android:color="@color/colorSecondaryAccent" />
 
         <size
-            android:width="20dp"
-            android:height="20dp" />
+            android:width="16dp"
+            android:height="16dp" />
 
     </shape>
 </inset>

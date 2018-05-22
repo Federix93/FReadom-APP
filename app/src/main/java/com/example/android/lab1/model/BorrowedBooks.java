@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BooksBorrowed {
+public class BorrowedBooks {
+
+    public BorrowedBooks(){}
 
     private List<String> mBooksID;
 
-    public BooksBorrowed(){}
-
-    public BooksBorrowed(List<String> bookID){
+    public BorrowedBooks(List<String> bookID){
         mBooksID = bookID;
     }
     public List<String> getBooksID() {

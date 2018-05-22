@@ -8,6 +8,7 @@ public class Chat {
     private long mTimestamp;
     private String mBookID;
     private int mCounter;
+    private String mLastMessageUserID;
 
     public Chat(){}
 
@@ -15,6 +16,14 @@ public class Chat {
         mBookID = bookID;
         mLastMessage = lastMessage;
         mTimestamp = timestamp;
+    }
+
+    public String getLastMessageUserID() {
+        return mLastMessageUserID;
+    }
+
+    public void setLastMessageUserID(String lastMessageUserID) {
+        this.mLastMessageUserID = lastMessageUserID;
     }
 
     public String getBookID() {
