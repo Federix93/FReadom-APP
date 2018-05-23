@@ -10,23 +10,18 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.ui.chat.ChatActivity;
-import com.google.firebase.messaging.FirebaseMessagingService;
+import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.google.firebase.messaging.RemoteMessage;
 
-public class FCMService extends FirebaseMessagingService {
-
+public class FirebaseNotificationService extends com.google.firebase.messaging.FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        /* There are two types of messages data messages and notification messages.
-         Data messages are handled here in onMessageReceived whether the app is in the foreground or background.
-         Data messages are the type traditionally used with GCM.
-         Notification messages are only received here in onMessageReceived when the app is in the foreground.
-         When the app is in the background an automatically generated notification is displayed. */
+        Log.d("GNIPPO", "onMessageReceived: "+remoteMessage);
 
+        /* There are two types of messages data messages and notification messages. Data messages are handled here in onMessageReceived whether the app is in the foreground or background. Data messages are the type traditionally used with GCM. Notification messages are only received here in onMessageReceived when the app is in the foreground. When the app is in the background an automatically generated notification is displayed. */
         String notificationTitle = null, notificationBody = null;
         String dataTitle = null, dataMessage = null;
 
@@ -50,18 +45,17 @@ public class FCMService extends FirebaseMessagingService {
     }
 
     /**
-     * //     * Create and show a simple notification containing the received FCM message.
-     * //
-     */
+     //     * Create and show a simple notification containing the received FCM message.
+     //     */
     private void sendNotification(String notificationTitle, String notificationBody, String dataTitle, String dataMessage) {
-        Intent intent = new Intent(this, ChatActivity.class);
+        Intent intent = new Intent(this, SearchBookActivity.class);
         intent.putExtra("title", dataTitle);
         intent.putExtra("message", dataMessage);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(notificationTitle)

@@ -108,13 +108,24 @@
         <activity android:name=".ui.CalendarActivity" />
         <activity android:name=".ui.chat.ChatActivity"></activity>
 
-        <service android:name=".utils.FCMService">
+        <service android:name=".utils.FirebaseNotificationService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
         <activity android:name=".ui.chat.ConversationsActivity"></activity>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_star_full_24dp" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorSecondaryAccent" />
+
     </application>
+
+
 
 </manifest>
