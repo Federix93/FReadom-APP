@@ -178,4 +178,11 @@
     <string name="reset_filters_uppercase">RESETTA FILTRI</string>
     <string name="error_message">Qualcosa è andato storto</string>
     <string name="wait_for_chat_opening">Apertura della chat in corso</string>
+    <string name="new_message_channel_title">Messaggi chat</string>
+    <string name="new_message_channel_description">Notifiche per nuovi messaggi da altri utenti</string>
+    <string name="new_request_channel_title">Richieste libri</string>
+    <string name="new_request_channel_description">Ricevi una notifica quando un utente richiede un tuo libro</string>
+    <string name="new_message_notification_title">%1$s ti ha inviato un messaggio</string>
+    <string name="new_message_notification_title_photo">%1$s ti ha inviato una foto</string>
+
 </resources>

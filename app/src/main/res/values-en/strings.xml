@@ -138,6 +138,12 @@
     <string name="wait_for_chat_opening">Waiting for chat opening</string>
 
     <string name="tags">Tags</string>
+    <string name="new_message_channel_title">Chat messages</string>
+    <string name="new_message_channel_description">Notifications for new messages from other users</string>
+    <string name="new_request_channel_title">Book requests</string>
+    <string name="new_request_channel_description">Receive a notification when an user requests one of your books</string>
+    <string name="new_message_notification_title">%1$s sent you a message</string>
+    <string name="new_message_notification_title_photo">%1$s sent you a photo</string>
 
 
 </resources>

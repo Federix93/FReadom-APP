@@ -174,6 +174,7 @@ public class ChatActivity extends AppCompatActivity {
                             if (chat != null) {
                                 chat.setTimestamp(System.currentTimeMillis() / 1000);
                                 chat.setLastMessage(messageWritten);
+                                chat.setIsText("true");
                                 if(chat.getSenderUID() == null){
                                     chat.setSenderUID(mFirebaseAuth.getUid());
                                     chat.setCounter(chat.getCounter() + 1);
@@ -283,6 +284,7 @@ public class ChatActivity extends AppCompatActivity {
                                         chat.setTimestamp(System.currentTimeMillis() / 1000);
                                         chat.setLastMessage(downloadUrl.toString());
                                         chat.setSenderUID(mFirebaseAuth.getUid());
+                                        chat.setIsText("false");
                                     }
                                     mChatsReference.child(mChatID).setValue(chat);
                                 }

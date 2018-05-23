@@ -1,17 +1,22 @@
 package com.example.android.lab1.utils;
 
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
+import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
 
 public class FirebaseNotificationService extends com.google.firebase.messaging.FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
@@ -19,54 +24,84 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        Log.d("GNIPPO", "onMessageReceived: "+remoteMessage);
+        Log.d(TAG, "onMessageReceived: Parto");
+        switch (remoteMessage.getData().get("type")) {
+            case Utilities.NEW_MESSAGE_CHANNEL_ID:
+                sendNewMessageNotification(remoteMessage.getData());
+                break;
 
-        /* There are two types of messages data messages and notification messages. Data messages are handled here in onMessageReceived whether the app is in the foreground or background. Data messages are the type traditionally used with GCM. Notification messages are only received here in onMessageReceived when the app is in the foreground. When the app is in the background an automatically generated notification is displayed. */
-        String notificationTitle = null, notificationBody = null;
-        String dataTitle = null, dataMessage = null;
+            case Utilities.BOOK_REQUEST_CHANNEL_ID:
+                //sendNewBookRequestNotification(remoteMessage);
+                break;
 
-        // Check if message contains a data payload.
-        if (remoteMessage.getData().size() > 0) {
-            Log.d(TAG, "Message data payload: " + remoteMessage.getData().get("message"));
-            dataTitle = remoteMessage.getData().get("title");
-            dataMessage = remoteMessage.getData().get("message");
+            default:
+                Log.d(TAG, "onMessageReceived: Fottuto default");
+                break;
         }
 
-        // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            notificationTitle = remoteMessage.getNotification().getTitle();
-            notificationBody = remoteMessage.getNotification().getBody();
-        }
-
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
-        sendNotification(notificationTitle, notificationBody, dataTitle, dataMessage);
     }
 
-    /**
-     //     * Create and show a simple notification containing the received FCM message.
-     //     */
-    private void sendNotification(String notificationTitle, String notificationBody, String dataTitle, String dataMessage) {
-        Intent intent = new Intent(this, SearchBookActivity.class);
-        intent.putExtra("title", dataTitle);
-        intent.putExtra("message", dataMessage);
+    private void sendNewMessageNotification(Map<String, String> data) {
+        Log.d(TAG, "sendNewMessageNotification: ci entro?");
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra("ChatID", data.get("chat"));
+        intent.putExtra("Username", data.get("sender"));
+        intent.putExtra("ImageURL", data.get("senderPic"));
+        intent.putExtra("BookID", data.get("book"));
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(notificationTitle)
-                .setContentText(notificationBody)
+        Bitmap userImage = null;
+
+        try {
+            userImage = BitmapFactory.decodeStream(new URL(data.get("senderPic")).openConnection().getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        boolean isText = data.get("isText").equals("true");
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID)
+                .setSmallIcon(R.drawable.share_icon)
+                .setLargeIcon(userImage)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if(isText)
+        {
+            notificationBuilder
+                    .setContentTitle(String.format(getResources().getString(R.string.new_message_notification_title), data.get("sender")))
+                    .setContentText(data.get("body"))
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(data.get("body")));
+        }
+        else
+        {
+            Bitmap sentPhoto = null;
+
+            try {
+                sentPhoto = BitmapFactory.decodeStream(new URL(data.get("body")).openConnection().getInputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            notificationBuilder
+                    .setContentTitle(String.format(getResources().getString(R.string.new_message_notification_title_photo), data.get("sender")))
+                    .setStyle(new NotificationCompat.BigPictureStyle()
+                            .bigPicture(sentPhoto));
+        }
+
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
+
+
 }

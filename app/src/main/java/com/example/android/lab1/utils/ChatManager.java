@@ -88,7 +88,7 @@ public class ChatManager {
     private void createChat() {
         String defaultMessage = "HAI RICHIESTO IL LIBRO AL POCO SIMPATICO";
         isChatAlreadyOpened = false;
-        Chat chat = new Chat(mBookID, mBookOwnerUserID,  defaultMessage, System.currentTimeMillis() / 1000);
+        Chat chat = new Chat(mBookID, mBookOwnerUserID,  defaultMessage, System.currentTimeMillis() / 1000, "true");
         DatabaseReference newChat = chatsReference.push();
         mChatID = newChat.getKey();
         newChat.setValue(chat);
