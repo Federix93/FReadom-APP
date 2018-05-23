@@ -3,7 +3,6 @@ package com.example.android.lab1.adapter;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,13 +16,11 @@ import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -112,7 +109,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
                         mTimetampTextView.setText(dateFormat.format(cal1.getTime()));
                         mLastMessageTextView.setText(chat.getLastMessage());
-                        if(chat.getLastMessageUserID() != null && !chat.getLastMessageUserID().equals(FirebaseAuth.getInstance().getUid())){
+                        if(chat.getSenderUID() != null && !chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())){
                             if(chat.getCounter() == 0) {
                                 mMessageCounterTextView.setText("");
                                 mMessageCounterTextView.setBackground(null);

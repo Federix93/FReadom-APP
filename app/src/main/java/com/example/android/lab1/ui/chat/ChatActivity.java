@@ -27,7 +27,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
-import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.utils.Utilities;
@@ -175,21 +174,17 @@ public class ChatActivity extends AppCompatActivity {
                             if (chat != null) {
                                 chat.setTimestamp(System.currentTimeMillis() / 1000);
                                 chat.setLastMessage(messageWritten);
-                                if(chat.getLastMessageUserID() == null){
-                                    Log.d("LULLO", "IF 1:  MATTIA FA I FILTRI");
-                                    chat.setLastMessageUserID(mFirebaseAuth.getUid());
+                                if(chat.getSenderUID() == null){
+                                    chat.setSenderUID(mFirebaseAuth.getUid());
                                     chat.setCounter(chat.getCounter() + 1);
                                 }else{
-                                    Log.d("LULLO", "IF 1:  MATTIA SCORRE FACENDO FINTA");
-                                    if(chat.getLastMessageUserID().equals(mFirebaseAuth.getUid())) {
-                                        Log.d("LULLO", "IF 1:  MATTIA FA I FILTRI DA 3 MESI E NON CI RIESCE");
+                                    if(chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
                                         chat.setCounter(chat.getCounter() + 1);
                                     }
                                     else{
-                                        Log.d("LULLO", "IF 1:  NONOSTANTE CIO' MATTIA E' IL NUMERO 1");
                                         chat.setCounter(1);
                                     }
-                                    chat.setLastMessageUserID(mFirebaseAuth.getUid());
+                                    chat.setSenderUID(mFirebaseAuth.getUid());
                                 }
                             }
                             mChatsReference.child(mChatID).setValue(chat);
@@ -285,7 +280,7 @@ public class ChatActivity extends AppCompatActivity {
                                     if (chat != null) {
                                         chat.setTimestamp(System.currentTimeMillis() / 1000);
                                         chat.setLastMessage(downloadUrl.toString());
-                                        chat.setLastMessageUserID(mFirebaseAuth.getUid());
+                                        chat.setSenderUID(mFirebaseAuth.getUid());
                                     }
                                     mChatsReference.child(mChatID).setValue(chat);
                                 }

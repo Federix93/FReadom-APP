@@ -1,14 +1,13 @@
 package com.example.android.lab1.model.chatmodels;
 
-import java.util.Date;
-
 public class Chat {
 
     private String mLastMessage;
     private long mTimestamp;
     private String mBookID;
     private int mCounter;
-    private String mLastMessageUserID;
+    private String mSenderUID;
+    private String mReceiverUserID;
 
     public Chat(){}
 
@@ -18,12 +17,20 @@ public class Chat {
         mTimestamp = timestamp;
     }
 
-    public String getLastMessageUserID() {
-        return mLastMessageUserID;
+    public String getSenderUID() {
+        return mSenderUID;
     }
 
-    public void setLastMessageUserID(String lastMessageUserID) {
-        this.mLastMessageUserID = lastMessageUserID;
+    public void setSenderUID(String lastMessageUserID) {
+        this.mSenderUID = lastMessageUserID;
+    }
+
+    public String getReceiverUserID() {
+        return mReceiverUserID;
+    }
+
+    public void setReceiverUserID(String receiverUserID) {
+        this.mReceiverUserID = receiverUserID;
     }
 
     public String getBookID() {

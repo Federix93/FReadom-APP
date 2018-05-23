@@ -80,6 +80,7 @@ public class SignInActivity extends AppCompatActivity {
         mNetworkConnectionBroadcastReceiver = new NetworkConnectionReceiver(this);
         mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
 
         if(user != null){
             openHomePageActivity();
