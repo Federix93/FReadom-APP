@@ -25,7 +25,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.ui.Profile.ProfileActivity;
+import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;

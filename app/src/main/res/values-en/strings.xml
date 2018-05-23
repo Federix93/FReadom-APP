@@ -58,7 +58,7 @@
     <string name="condition_near_mint">Near mint</string>
     <string name="condition_mint">Mint</string>
     <string name="load_book_tags">Tags</string>
-    <string name="toolbar_title_home">Library</string>
+    <string name="toolbar_title_home">Freadom</string>
     <string name="button_signin">LOGIN</string>
     <string name="access_without_login">CONTINUE WITHOUT SIGNIN</string>
     <string name="activate_position">Please activate position</string>
@@ -139,6 +139,9 @@
     <string name="tags">Tags</string>
     <string name="profile_info_fragment">Info</string>
     <string name="profile_reviews_fragment">Reviews</string>
+    <string name="rating_global_profile">Rating: %.1f</string>
+    <string name="library">Library</string>
+    <string name="book_detail_gallery">Gallery</string>
 
 
 </resources>

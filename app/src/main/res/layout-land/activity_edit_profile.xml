@@ -24,7 +24,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:weightSum="5"
-        tools:context="com.example.android.lab1.ui.Profile.EditProfileActivity">
+        tools:context="com.example.android.lab1.ui.profile.EditProfileActivity">
 
         <RelativeLayout
             android:layout_width="0dp"

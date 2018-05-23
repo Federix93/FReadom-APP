@@ -1,4 +1,4 @@
-package com.example.android.lab1.ui.Profile;
+package com.example.android.lab1.ui.profile;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ProfileBookAdapter;
@@ -28,8 +27,6 @@ import java.util.List;
 public class GlobalProfileBooksFragment extends Fragment {
 
     User mUser;
-    TextView mBookNumber;
-    TextView mRatingNumber;
 
     private RecyclerView mRecyclerView;
 
@@ -74,7 +71,6 @@ public class GlobalProfileBooksFragment extends Fragment {
 
         ProfileBookAdapter adapter = new ProfileBookAdapter(mListBooksOfUser, bookIds);
         mRecyclerView.setAdapter(adapter);
-        GlobalShowProfileActivity.getBookNumber().setText(String.valueOf(numOfBooks));
     }
 
 

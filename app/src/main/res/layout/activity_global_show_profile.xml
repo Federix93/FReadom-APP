@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.Profile.GlobalShowProfileActivity">
+    tools:context=".ui.profile.GlobalShowProfileActivity">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -14,7 +14,7 @@
         <ImageView
             android:id="@+id/imageView2"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="250dp"
             android:alpha="0.95"
             android:background="@drawable/global_profile_background"
             app:layout_constraintEnd_toEndOf="parent"
@@ -56,15 +56,39 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="4dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textColor="@color/black"
-            android:textSize="21sp"
-            android:textStyle="bold"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@+id/rating_text_global_profile"
+            app:layout_constraintEnd_toStartOf="@+id/guideline15"
+            app:layout_constraintStart_toStartOf="@+id/guideline13" />
+
+        <TextView
+            android:id="@+id/rating_text_global_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Rating 4.5"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/black"
+            android:textSize="14sp"
             app:layout_constraintBottom_toTopOf="@+id/global_bio_text"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/guideline15"
+            app:layout_constraintStart_toStartOf="@+id/guideline13" />
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginBottom="19dp"
+            app:layout_constraintBottom_toTopOf="@+id/global_bio_text"
+            app:layout_constraintStart_toEndOf="@+id/rating_text_global_profile"
+            app:srcCompat="@drawable/ic_star_orange_24dp" />
+
 
         <TextView
             android:id="@+id/global_bio_text"
@@ -77,65 +101,14 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:ellipsize="end"
-            android:maxLines="3"
-            android:textStyle="italic"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="12sp"
+            android:textStyle="italic"
             app:layout_constraintBottom_toBottomOf="@+id/imageView2"
             app:layout_constraintEnd_toStartOf="@+id/guideline15"
             app:layout_constraintStart_toStartOf="@+id/guideline13" />
-
-        <TextView
-            android:id="@+id/book_number_text_global_profile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:text="@string/books"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toTopOf="@+id/tabs_global_show_profile"
-            app:layout_constraintEnd_toStartOf="@+id/guideline13"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/book_number_global_profile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:textColor="@color/colorSecondaryAccent"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toTopOf="@+id/book_number_text_global_profile"
-            app:layout_constraintEnd_toStartOf="@+id/guideline13"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/rating_number_global_profile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:textColor="@color/colorSecondaryAccent"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toTopOf="@+id/rating_text_global_profile"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/guideline15" />
-
-        <TextView
-            android:id="@+id/rating_text_global_profile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-
-            android:text="@string/rating"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toTopOf="@+id/tabs_global_show_profile"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/guideline15" />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs_global_show_profile"
@@ -153,21 +126,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_begin="268dp" />
+            app:layout_constraintGuide_begin="300dp" />
 
         <android.support.constraint.Guideline
             android:id="@+id/guideline13"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_begin="100dp" />
+            app:layout_constraintGuide_begin="70dp" />
 
         <android.support.constraint.Guideline
             android:id="@+id/guideline15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_end="100dp" />
+            app:layout_constraintGuide_end="70dp" />
 
     </android.support.constraint.ConstraintLayout>
 

@@ -1,4 +1,4 @@
-package com.example.android.lab1.ui.Profile;
+package com.example.android.lab1.ui.profile;
 
 import android.Manifest;
 import android.content.DialogInterface;

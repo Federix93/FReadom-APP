@@ -67,7 +67,7 @@
     <string name="condition_near_mint">Ottime</string>
     <string name="condition_mint">Perfette</string>
 
-    <string name="toolbar_title_home">Libreria</string>
+    <string name="toolbar_title_home">Freadom</string>
     <string name="activate_position">Attivare la posizione</string>
     <string name="activate">Attiva</string>
 
@@ -106,6 +106,8 @@
     <string name="reviews">Recensioni</string>
     <string name="books">Libri</string>
     <string name="rating">Rating</string>
+    <string name="rating_global_profile">Rating: %.1f</string>
+    <string name="library">Libreria</string>
 
     <string-array name="genre">
         <item>Arte</item>
@@ -182,5 +184,7 @@
     <string name="cancel_uppercase">ANNULLA</string>
     <string name="reset_filters_uppercase">RESETTA FILTRI</string>
     <string name="error_message">Qualcosa è andato storto</string>
+
+    <string name="book_detail_gallery">Galleria</string>
 
 </resources>

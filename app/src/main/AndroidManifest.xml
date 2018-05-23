@@ -21,7 +21,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.Profile.EditProfileActivity" />
+        <activity android:name=".ui.profile.EditProfileActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -71,7 +71,7 @@
         <activity
             android:name=".ui.PositionActivity"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.Profile.GlobalShowProfileActivity" />
+        <activity android:name=".ui.profile.GlobalShowProfileActivity" />
 
         <service
             android:name=".utils.FetchAddressIntentService"
@@ -104,7 +104,7 @@
             android:theme="@style/ThemeDrawer" />
         <activity android:name=".ui.GenreBooksActivity" />
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
-        <activity android:name=".ui.Profile.ProfileActivity" />
+        <activity android:name=".ui.profile.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
         <activity android:name=".ui.chat.ChatActivity"></activity>
 
@@ -115,6 +115,7 @@
         </service>
 
         <activity android:name=".ui.chat.ConversationsActivity"></activity>
+        <activity android:name=".ui.TextDetailActivity" />
     </application>
 
 </manifest>

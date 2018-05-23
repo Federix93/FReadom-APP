@@ -38,10 +38,12 @@
                     android:id="@+id/book_thumbnail"
                     android:layout_width="116dp"
                     android:layout_height="180dp"
+                    android:layout_marginBottom="8dp"
                     android:layout_marginStart="16dp"
                     android:contentDescription="@string/book_thumbnail_content_description"
                     android:scaleType="centerCrop"
                     android:src="@drawable/book_thumbnail_placeholder"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -56,7 +58,7 @@
                     android:gravity="start"
                     android:textColor="@color/black"
                     android:textSize="20sp"
-                    android:textStyle="bold"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
@@ -71,6 +73,7 @@
                     android:layout_marginTop="8dp"
                     android:textColor="@color/black"
                     android:textSize="16sp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toBottomOf="@+id/book_title_detail_activity" />
@@ -81,6 +84,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toBottomOf="@+id/author" />
@@ -157,24 +161,44 @@
                 android:id="@+id/activity_main"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp">
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="18dp">
+
+                <TextView
+                    android:id="@+id/gallery_book_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/book_detail_gallery"
+                    android:textSize="16sp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:textColor="@color/black"/>
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rv_images"
+                    android:layout_below="@+id/gallery_book_detail"
                     android:layout_width="match_parent"
-                    android:layout_height="121dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_height="120dp"
+                    android:layout_marginTop="8dp"
                     android:orientation="horizontal" />
             </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_gravity="end"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd ="16dp"
+                android:background="@android:color/darker_gray" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:baselineAligned="false"
                 android:orientation="horizontal"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="24dp">
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -184,8 +208,8 @@
 
                     <ImageView
                         android:id="@+id/add_to_favorite"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_gravity="center_horizontal"
                         app:srcCompat="@drawable/ic_bookmark_border_orange_32dp" />
 
@@ -209,8 +233,8 @@
 
                     <ImageView
                         android:id="@+id/share_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_gravity="center_horizontal"
                         app:srcCompat="@drawable/ic_share_orange_32dp" />
 
@@ -232,7 +256,35 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_gravity="end"
-                android:layout_marginTop="4dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd ="16dp"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:id="@+id/book_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
+                    android:ellipsize="end"
+                    android:maxLines="4"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:text="The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid."
+                    android:textStyle="italic"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_gravity="end"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd ="16dp"
                 android:background="@android:color/darker_gray" />
@@ -289,8 +341,8 @@
 
                 <ImageView
                     android:id="@+id/star_book_owner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="4dp"
                     app:layout_constraintBottom_toBottomOf="parent"

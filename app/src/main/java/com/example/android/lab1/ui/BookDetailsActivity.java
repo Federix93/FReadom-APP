@@ -32,7 +32,7 @@ import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.BooksBorrowed;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.ui.Profile.GlobalShowProfileActivity;
+import com.example.android.lab1.ui.profile.GlobalShowProfileActivity;
 import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -50,6 +50,7 @@ import java.util.List;
 
 import com.google.firebase.firestore.ListenerRegistration;
 
+import static android.view.View.GONE;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class BookDetailsActivity extends AppCompatActivity {
@@ -60,6 +61,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     TextView mAuthorTextView;
     TextView mEditorTextView;
     TextView mPublicationDateTextView;
+    TextView mGalleryTextView;
     ImageView mBookThumbnailImageView;
     TextView mUsernameTextView;
     TextView mRatingTextView;
@@ -70,6 +72,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     ImageView mShareImageView;
     ImageView mFavoritesImageView;
     TextView mBookDetailCondition;
+    TextView mBookDescription;
     ImageView mBookDetailConditionColor;
     FirebaseFirestore mFirebaseFirestore;
     FirebaseAuth mFirebaseAuth;
@@ -100,6 +103,8 @@ public class BookDetailsActivity extends AppCompatActivity {
         mFavoritesImageView = findViewById(R.id.add_to_favorite);
         mBookDetailCondition = findViewById(R.id.book_detail_conditions);
         mBookDetailConditionColor = findViewById(R.id.book_detail_conditions_color);
+        mGalleryTextView = findViewById(R.id.gallery_book_detail);
+        mBookDescription = findViewById(R.id.book_description);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -140,6 +145,17 @@ public class BookDetailsActivity extends AppCompatActivity {
                 updateUI(mBook);
                 if (mListenerRegistration != null)
                     mListenerRegistration.remove();
+            }
+        });
+
+        mBookDescription.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
+                intent.putExtra("Title", mBook.getTitle());
+                startActivity(intent);
             }
         });
 
@@ -197,7 +213,8 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
                 recyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
             } else {
-                recyclerView.setVisibility(View.GONE);
+                recyclerView.setVisibility(GONE);
+                mGalleryTextView.setVisibility(GONE);
             }
         }
         if (book.getUid() != null) {

@@ -1,4 +1,4 @@
-package com.example.android.lab1.ui.Profile;
+package com.example.android.lab1.ui.profile;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -8,9 +8,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -27,9 +25,6 @@ import com.example.android.lab1.adapter.ViewPagerAdapter;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
