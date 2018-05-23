@@ -22,19 +22,19 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashboardFragmentLibraryItem extends Fragment {
+public class LentFragmentItem extends Fragment {
 
     private RecyclerView mRecyclerView;
     List<Book> mBookIds;
 
 
-    public DashboardFragmentLibraryItem() {
+    public LentFragmentItem() {
 
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_your_library, container, false);
+        View view = inflater.inflate(R.layout.recycler_fragments_content, container, false);
 
         mRecyclerView = view.findViewById(R.id.recycler_fragment_content);
 

@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
+import com.example.android.lab1.adapter.ViewPagerAdapter;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
@@ -39,6 +40,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     TextView mUsernameText;
     ImageView mEditButton;
+    ImageView mBackArrow;
     ImageView mCircleImageView;
     //Toolbar mToolbar;
     FragmentManager mFt = null;
@@ -51,9 +53,10 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_profile);
-        mUsernameText = findViewById(R.id.username_text);
+        mUsernameText = findViewById(R.id.global_profile_name);
         mCircleImageView = findViewById(R.id.profile_image);
         mEditButton = findViewById(R.id.edit_profile_button);
+        mBackArrow = findViewById(R.id.back_arrow_profile);
 
         Utilities.setupStatusBarColor(this);
         mUser = getIntent().getExtras().getParcelable("user");
@@ -70,6 +73,13 @@ public class ProfileActivity extends AppCompatActivity {
                 }else{
                     Toast.makeText(getApplicationContext(), "Devi essere loggato", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        mBackArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 
@@ -169,39 +179,10 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        Adapter adapter = new Adapter(mFt);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(mFt);
         adapter.addFragment(new ProfileInfoFragment(), getResources().getString(R.string.profile_info_fragment));
         adapter.addFragment(new ProfileReviewFragment(), getResources().getString(R.string.profile_reviews_fragment));
         viewPager.setAdapter(adapter);
-    }
-
-    static class Adapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        public Adapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
     }
 
     private void updateUI() {

@@ -24,7 +24,7 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
-        android:id="@+id/profile_image"
+        android:id="@+id/global_profile_image"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:contentDescription="@string/nav_header_desc"

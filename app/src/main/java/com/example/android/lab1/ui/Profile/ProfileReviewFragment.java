@@ -6,4 +6,6 @@ public class ProfileReviewFragment extends Fragment {
 
     public void ProfileReviewFragment () {
     }
+
+    //usare recycler_fragment_content as layout file for displaying items
 }

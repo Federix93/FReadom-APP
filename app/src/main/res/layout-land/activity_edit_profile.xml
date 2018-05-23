@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@id/user_profile_edit_image"
                 android:layout_alignEnd="@id/user_profile_edit_image"
-                app:srcCompat="@drawable/ic_add_a_photo_black_24dp"
+                app:srcCompat="@drawable/ic_add_a_photo_white_24dp"
                 app:elevation="6dp"
                 app:layout_anchor="@id/user_profile_edit_image"
                 app:layout_anchorGravity="bottom|end" />
@@ -180,44 +180,6 @@
                                 android:maxLength="200" />
                         </android.support.design.widget.TextInputLayout>
                     </RelativeLayout>
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingBottom="16dp"
-                        android:paddingEnd="16dp"
-                        android:paddingStart="0dp">
-
-                        <ImageView
-                            android:id="@+id/position_image_view"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            app:srcCompat="@drawable/ic_location_on_white_24dp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="21dp"
-                                android:paddingBottom="8dp"
-                                android:text="@string/address_text" />
-
-                            <TextView
-                                android:id="@+id/position_text_edit"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="21dp"
-                                android:textColor="#000"
-                                android:textSize="16sp" />
-                        </LinearLayout>
-                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>

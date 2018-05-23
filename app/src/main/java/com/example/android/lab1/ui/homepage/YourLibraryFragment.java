@@ -33,6 +33,8 @@ import static com.example.android.lab1.ui.homepage.HomePageActivity.ADD_BOOK_ACT
 public class YourLibraryFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
+
+    android.support.v7.widget.Toolbar mToolbar;
     FloatingActionButton mFabLibrary;
     RecyclerYourLibraryAdapter mAdapter;
     List<Book> mBookIds;
@@ -47,6 +49,11 @@ public class YourLibraryFragment extends Fragment {
 
         mRecyclerView = view.findViewById(R.id.rv_fragment_books_library);
         mFabLibrary = view.findViewById(R.id.fab_your_library);
+
+        mToolbar = getActivity().findViewById(R.id.toolbar_home_page_activity);
+
+        mToolbar.setTitle(R.string.your_library_fragment);
+        mToolbar.getMenu().clear();
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();

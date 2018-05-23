@@ -20,16 +20,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.ui.PositionActivity;
 import com.example.android.lab1.ui.SignInActivity;
-import com.example.android.lab1.ui.homepage.HomePageActivity;
-import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,15 +50,12 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public class EditProfileActivity extends AppCompatActivity implements View.OnFocusChangeListener, EventListener<DocumentSnapshot> {
 
     Toolbar mToolbar;
-    ImageView mSaveProfileUpdatesImageView;
     ImageView mCameraImageView;
     ImageView mUserImageView;
     TextInputLayout mUsernameTextInputLayout;
     TextInputLayout mEmailTextInputLayout;
     TextInputLayout mPhoneTextInputLayout;
-    TextView mAddressTextInputLayout;
     TextInputLayout mShortBioTextInputLayout;
-    ImageView mPositionImageView;
 
     private User mUser;
 
@@ -71,7 +64,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
     private FirebaseAuth mFirebaseAuth;
     private String mCurrentPhotoPath;
-    private String mCurrentAddress;
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
     private View mFocusedView;
@@ -98,10 +90,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         mUserImageView = findViewById(R.id.user_profile_edit_image);
 
         mCameraImageView = findViewById(R.id.add_image_fab);
-
-        mPositionImageView = findViewById(R.id.position_image_view);
-
-        mAddressTextInputLayout = findViewById(R.id.position_text_edit);
 
         mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
 
@@ -142,14 +130,12 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                                         mUser.setEmail(mEmailTextInputLayout.getEditText().getText().toString());
                                     if (mPhoneTextInputLayout.getEditText() != null)
                                         mUser.setPhone(mPhoneTextInputLayout.getEditText().getText().toString());
-                                    if (mAddressTextInputLayout != null)
-                                        mUser.setAddress(mCurrentAddress);
                                     if (mShortBioTextInputLayout.getEditText() != null)
                                         mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                                     mUser.setImage(mCurrentPhotoPath);
                                     docRef.set(mUser, SetOptions.merge());
-                                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                    intent.putExtra("ApplyChanges", true);
+                                    Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                                    intent.putExtra("user", mUser);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(intent);
                                 }
@@ -175,7 +161,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         mUserRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
 
         mCurrentPhotoPath = mSharedPreferencesManager.getImage();
-        mCurrentAddress = mSharedPreferencesManager.getAddress();
 
         mCameraImageView.setOnClickListener(new View.OnClickListener() {
 
@@ -216,36 +201,23 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             }
         });
 
-        mPositionImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openPositionActivity(false);
-            }
-        });
-
-        mAddressTextInputLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openPositionActivity(false);
-            }
-        });
         mFocusedView = null;
         resetFocus();
         clearFocusOnViews();
     }
 
-    private void openPositionActivity(boolean skipCheck) {
-        if (skipCheck ||
-                Utilities.checkPermissionActivity(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            Intent positionActivityIntent = Utilities.getPositionActivityIntent(this, false);
-            startActivityForResult(positionActivityIntent, Constants.POSITION_ACTIVITY_REQUEST);
-        } else {
-            Utilities.askPermissionActivity(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Constants.POSITION_ACTIVITY_REQUEST);
-        }
-
-    }
+//    private void openPositionActivity(boolean skipCheck) {
+//        if (skipCheck ||
+//                Utilities.checkPermissionActivity(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+//            Intent positionActivityIntent = Utilities.getPositionActivityIntent(this, false);
+//            startActivityForResult(positionActivityIntent, Constants.POSITION_ACTIVITY_REQUEST);
+//        } else {
+//            Utilities.askPermissionActivity(this,
+//                    Manifest.permission.ACCESS_FINE_LOCATION,
+//                    Constants.POSITION_ACTIVITY_REQUEST);
+//        }
+//
+//    }
 
     @Override
     public void onBackPressed() {
@@ -261,8 +233,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
             outState.putString("Email", mEmailTextInputLayout.getEditText().getText().toString());
         if (mPhoneTextInputLayout.getEditText() != null)
             outState.putString("Phone", mPhoneTextInputLayout.getEditText().getText().toString());
-        if (mAddressTextInputLayout != null)
-            outState.putString("Address", mCurrentAddress);
         if (mShortBioTextInputLayout.getEditText() != null)
             outState.putString("ShortBio", mShortBioTextInputLayout.getEditText().getText().toString());
         if (mPhotoFile != null)
@@ -289,11 +259,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     takePicture();
                 }
-            case Constants.POSITION_ACTIVITY_REQUEST:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    openPositionActivity(true);
-                break;
-
         }
     }
 
@@ -316,8 +281,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                 genericView.requestFocus();
         }
 
-        mCurrentAddress = savedInstanceState.getString("Address");
-        mAddressTextInputLayout.setText(mCurrentAddress);
         mCurrentPhotoPath = savedInstanceState.getString("UriImage");
         if (mCurrentPhotoPath != null) {
             Glide.with(this).load(mCurrentPhotoPath)
@@ -378,14 +341,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     Glide.with(this).load(mCurrentPhotoPath).apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
                 }
                 break;
-            case Constants.POSITION_ACTIVITY_REQUEST:
-                if (resultCode == RESULT_OK) {
-                    if (data != null && data.hasExtra(PositionActivity.ADDRESS_KEY)) {
-                        mCurrentAddress = data.getStringExtra(PositionActivity.ADDRESS_KEY);
-                        mSharedPreferencesManager.putAddress(mCurrentAddress);
-                        mAddressTextInputLayout.setText(mCurrentAddress);
-                    }
-                }
         }
     }
 
@@ -445,14 +400,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                     } else {
                         Glide.with(this).load(getResources().getDrawable(R.drawable.ic_account_circle_black_24dp))
                                 .apply(bitmapTransform(new CircleCrop())).into(mUserImageView);
-                    }
-                }
-                if(mAddressTextInputLayout != null){
-                    if(mCurrentAddress.equals(getString(R.string.selection_position))
-                            && mSharedPreferencesManager.getAddress().equals(getString(R.string.selection_position))){
-                        mAddressTextInputLayout.setText(mUser.getAddress());
-                    }else{
-                        mAddressTextInputLayout.setText(mCurrentAddress);
                     }
                 }
             }

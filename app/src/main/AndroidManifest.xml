@@ -71,7 +71,7 @@
         <activity
             android:name=".ui.PositionActivity"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.GlobalShowProfileActivity" />
+        <activity android:name=".ui.Profile.GlobalShowProfileActivity" />
 
         <service
             android:name=".utils.FetchAddressIntentService"

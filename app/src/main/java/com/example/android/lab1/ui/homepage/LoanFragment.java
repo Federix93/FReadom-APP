@@ -6,16 +6,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.android.lab1.adapter.ViewPagerAdapter;
 
 public class LoanFragment extends Fragment {
 
@@ -57,39 +54,10 @@ public class LoanFragment extends Fragment {
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        Adapter adapter = new Adapter(mFt);
-        adapter.addFragment(new DashboardFragmentLibraryItem(), getResources().getString(R.string.loan_your_item));
-        adapter.addFragment(new DashboardFragmentBorrowedItem(), getResources().getString(R.string.loan_other_book_item));
+        ViewPagerAdapter adapter = new ViewPagerAdapter(mFt);
+        adapter.addFragment(new LentFragmentItem(), getResources().getString(R.string.loan_your_item));
+        adapter.addFragment(new BorrowedFragmentItem(), getResources().getString(R.string.loan_other_book_item));
         viewPager.setAdapter(adapter);
-    }
-
-    static class Adapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        public Adapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
     }
 
 

@@ -88,7 +88,7 @@ public class HomePageActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         View header = navigationView.getHeaderView(0);
-        mProfileImage = header.findViewById(R.id.profile_image);
+        mProfileImage = header.findViewById(R.id.global_profile_image);
         mUsernameTextView = header.findViewById(R.id.name_text_nav_drawer);
         mEmailTextView = header.findViewById(R.id.email_text_nav_drawer);
         mSideNavLinearLayout = header.findViewById(R.id.header_nav_drawer);
