@@ -219,7 +219,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot != null && dataSnapshot.exists()) {
-                                mBookButton.setText("Vai alla chat");
+                                mBookButton.setText(getResources().getString(R.string.open_chat));
                             } else if (dataSnapshot != null) {
                                 mBookButton.setText(getResources().getString(R.string.book_request));
                             }
