@@ -142,6 +142,7 @@
     <string name="rating_global_profile">Rating: %.1f</string>
     <string name="library">Library</string>
     <string name="book_detail_gallery">Gallery</string>
+    <string name="loan_other_book_item">Books Borrowed</string>
 
 
 </resources>

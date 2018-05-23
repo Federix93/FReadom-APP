@@ -52,7 +52,7 @@
     <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
     <string name="confirm">Conferma</string>
     <string name="loan_your_item">Libri in prestito</string>
-    <string name="loan_other_book_item">Libri ricevuti in prestito</string>
+    <string name="loan_other_book_item">Libri ricevuti</string>
     <string name="request_done_item">Effettuate</string>
     <string name="request_received_item">Ricevute</string>
 
