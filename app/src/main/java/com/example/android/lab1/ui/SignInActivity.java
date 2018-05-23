@@ -6,13 +6,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,9 +21,7 @@ import android.widget.Toast;
 
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
-import com.algolia.search.saas.Request;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
@@ -46,6 +44,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,6 +56,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 10;
     private FirebaseAuth mFirebaseAuth;
+    private FirebaseFirestore mFirebaseFirestore;
 
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
@@ -142,10 +142,9 @@ public class SignInActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
-                    FirebaseFirestore db = FirebaseFirestore.getInstance();
                     if (firebaseUser.getEmail() != null) {
-                        final DocumentReference documentReference = db.collection("users").document(firebaseUser.getUid());
-                         mUser = User.getInstance();
+                        final DocumentReference documentReference = mFirebaseFirestore.collection("users").document(firebaseUser.getUid());
+                        mUser = User.getInstance();
                         if (firebaseUser.getPhotoUrl() != null)
                             mUser.setImage(firebaseUser.getPhotoUrl().toString());
                         else
@@ -161,32 +160,22 @@ public class SignInActivity extends AppCompatActivity {
                             public void onSuccess(Void aVoid) {
                                 FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                                 DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
-                                if(mFirebaseAuth != null && mFirebaseAuth.getUid() != null) {
+                                if (mFirebaseAuth != null && mFirebaseAuth.getUid() != null) {
+                                    String userID = mFirebaseAuth.getUid();
                                     setupAlgolia();
-                                    try {
-
-                                        JSONObject algoliaUser = new JSONObject();
-
-                                        if(mUser.getImage() != null)
-                                            algoliaUser.put("image", mUser.getImage());
-                                        algoliaUser.put("rating", mUser.getRating());
-
-                                        algoliaIndex.addObjectAsync(algoliaUser, mFirebaseAuth.getUid(),
-                                                null);
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
+                                    loadUserOnAlgolia(userID);
                                     com.example.android.lab1.model.chatmodels.User user =
-                                            new com.example.android.lab1.model.chatmodels.User(mUser.getUsername(), mUser.getImage());
+                                            new com.example.android.lab1.model.chatmodels.User(mUser.getUsername(), mUser.getImage(), FirebaseInstanceId.getInstance().getToken());
                                     usersReference.child(mFirebaseAuth.getUid()).setValue(user, new DatabaseReference.CompletionListener() {
                                         @Override
                                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                            if(databaseError == null) {
+                                            if (databaseError == null) {
                                                 if (progressDialogHolder.isProgressDialogShowing())
                                                     progressDialogHolder.dismissDialog();
-                                                openHomePageActivity();
-                                            }else{
+
+                                                    openHomePageActivity();
+
+                                            } else {
                                                 if (progressDialogHolder.isProgressDialogShowing())
                                                     progressDialogHolder.dismissDialog();
                                                 Snackbar.make(mRootConstraintLayout, R.string.error_message, Snackbar.LENGTH_SHORT).show();
@@ -217,9 +206,26 @@ public class SignInActivity extends AppCompatActivity {
         return false;
     }
 
-    private static void setupAlgolia() {
+    private void setupAlgolia() {
         Client algoliaClient = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
         algoliaIndex = algoliaClient.getIndex(ALGOLIA_USER_INDEX);
+    }
+
+    private void loadUserOnAlgolia(String userID) {
+        try {
+
+            JSONObject algoliaUser = new JSONObject();
+
+            if (mUser.getImage() != null)
+                algoliaUser.put("image", mUser.getImage());
+            algoliaUser.put("rating", mUser.getRating());
+
+            algoliaIndex.addObjectAsync(algoliaUser, userID,
+                    null);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void openHomePageActivity() {
