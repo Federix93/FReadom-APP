@@ -7,14 +7,15 @@ public class Chat {
     private String mBookID;
     private int mCounter;
     private String mSenderUID;
-    private String mReceiverUserID;
+    private String mReceiverUID;
 
     public Chat(){}
 
-    public Chat(String bookID, String lastMessage, long timestamp){
+    public Chat(String bookID, String receiverUID, String lastMessage, long timestamp){
         mBookID = bookID;
         mLastMessage = lastMessage;
         mTimestamp = timestamp;
+        mReceiverUID = receiverUID;
     }
 
     public String getSenderUID() {
@@ -25,12 +26,12 @@ public class Chat {
         this.mSenderUID = lastMessageUserID;
     }
 
-    public String getReceiverUserID() {
-        return mReceiverUserID;
+    public String getReceiverUID() {
+        return mReceiverUID;
     }
 
-    public void setReceiverUserID(String receiverUserID) {
-        this.mReceiverUserID = receiverUserID;
+    public void setReceiverUID(String receiverUID) {
+        this.mReceiverUID = receiverUID;
     }
 
     public String getBookID() {

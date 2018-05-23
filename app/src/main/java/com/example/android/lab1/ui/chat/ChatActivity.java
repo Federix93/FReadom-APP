@@ -182,6 +182,8 @@ public class ChatActivity extends AppCompatActivity {
                                         chat.setCounter(chat.getCounter() + 1);
                                     }
                                     else{
+                                        chat.setReceiverUID(chat.getSenderUID());
+                                        chat.setSenderUID(mFirebaseAuth.getUid());
                                         chat.setCounter(1);
                                     }
                                     chat.setSenderUID(mFirebaseAuth.getUid());
