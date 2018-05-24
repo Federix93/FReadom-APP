@@ -959,7 +959,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
         if (mPublishYearSpinner != null && mPublishYearSpinner.getSelectedItemPosition() > 0 && mPublishYearSpinner.isEnabled())
             mResultBook.setPublishYear(Integer.parseInt(mPublishYearSpinner.getSelectedItem().toString()));
-
+        mResultBook.setIsAlreadyLent(false);
 
         mProgressBar.setVisibility(View.VISIBLE);
         if (mResultBook.getUserBookPhotosStoragePath() != null

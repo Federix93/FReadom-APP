@@ -60,8 +60,17 @@ public class Book implements Parcelable, Comparable<Book> {
     private int mGenre;
     private String mInfoLink;
     private Long mTimeInserted;
+    private boolean mIsAlreadyLent;
 
     public Book() {
+    }
+
+    public boolean isAlreadyLent() {
+        return mIsAlreadyLent;
+    }
+
+    public void setIsAlreadyLent(boolean isAlreadyLent) {
+        this.mIsAlreadyLent = isAlreadyLent;
     }
 
     public String getWebThumbnail() {
