@@ -37,10 +37,10 @@ public class LentBookAdapter extends RecyclerView.Adapter<LentBookAdapter.MyView
     private List<String> mUsersIds;
     private List<com.example.android.lab1.model.User> mUsersOwner;
 
-    User mBookOwner;
-    Context mContext;
-    DatabaseReference userReference;
-    FirebaseDatabase firebaseDatabase;
+    private User mBookOwner;
+    private Context mContext;
+    private DatabaseReference userReference;
+    private FirebaseDatabase firebaseDatabase;
 
     public LentBookAdapter(List<Book> listBooks, List<String> booksID, List<String> chatIDs, List<String> usersID) {
         mBookList = listBooks;
