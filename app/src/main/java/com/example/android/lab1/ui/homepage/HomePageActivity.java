@@ -96,6 +96,7 @@ public class HomePageActivity extends AppCompatActivity
         mUsernameTextView = header.findViewById(R.id.name_text_nav_drawer);
         mEmailTextView = header.findViewById(R.id.email_text_nav_drawer);
         mSideNavLinearLayout = header.findViewById(R.id.header_nav_drawer);
+        mBottomNavigation = findViewById(R.id.navigation);
 
         //header.setBackgroundResource(R.drawable.background);
 
@@ -122,7 +123,6 @@ public class HomePageActivity extends AppCompatActivity
         mYourLibraryFragment = new YourLibraryFragment();
         mLoanFragment = new LoanFragment();
         mRequestFragment = new RequestsFragment();
-        mBottomNavigation = findViewById(R.id.navigation);
 
         AHBottomNavigationItem homeItem = new AHBottomNavigationItem(getString(R.string.title_home), R.drawable.ic_home_black_24dp);
         AHBottomNavigationItem yourLibrary = new AHBottomNavigationItem(getString(R.string.your_library_fragment), R.drawable.ic_library_books_black_24dp);

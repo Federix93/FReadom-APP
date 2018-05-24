@@ -9,8 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
+import com.example.android.lab1.adapter.LentBookAdapter;
 import com.example.android.lab1.adapter.RecyclerBorrowedBooksAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.model.User;
 import com.example.android.lab1.model.BorrowedBooks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -38,8 +40,9 @@ public class RequestsFragmentDoneItem extends Fragment {
     List<String> booksID;
     List<String> chatIDs;
     List<String> usersID;
+    List<User> mUsersOwner;
     DatabaseReference openedChatReference;
-    RecyclerBorrowedBooksAdapter mAdapter;
+    LentBookAdapter mAdapter;
 
     public void RequestsFragmentDoneItem() {
     }
@@ -54,11 +57,14 @@ public class RequestsFragmentDoneItem extends Fragment {
         listBooks = new ArrayList<>();
         chatIDs = new ArrayList<>();
         usersID = new ArrayList<>();
+        mUsersOwner = new ArrayList<>();
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerBorrowedBooksAdapter(listBooks, booksID, chatIDs, usersID);
+        mAdapter = new LentBookAdapter(listBooks, booksID, chatIDs, usersID, mUsersOwner);
+
+        //mAdapter = new RecyclerBorrowedBooksAdapter(listBooks, booksID, chatIDs, usersID);
         mRecyclerView.setAdapter(mAdapter);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
@@ -79,7 +85,6 @@ public class RequestsFragmentDoneItem extends Fragment {
                             if (snapshot != null && snapshot.exists()) {
                                 BorrowedBooks booksBorrowed = snapshot.toObject(BorrowedBooks.class);
                                 final List<String> booksID = booksBorrowed.getBooksID();
-
                                 for (final String bookID : booksID) {
                                     mFirebaseFirestore.collection("books").document(bookID).addSnapshotListener(
                                             new EventListener<DocumentSnapshot>() {
@@ -92,14 +97,23 @@ public class RequestsFragmentDoneItem extends Fragment {
                                                                 .child(mFirebaseAuth.getUid())
                                                                 .addListenerForSingleValueEvent(new ValueEventListener() {
                                                                     @Override
-                                                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                                                        String chatID = (String) dataSnapshot.getValue();
-                                                                        chatIDs.add(chatID);
-                                                                        listBooks.add(book);
-                                                                        String userId = book.getUid();
-                                                                        usersID.add(userId);
-                                                                        mAdapter.setItems(listBooks, booksID, chatIDs, usersID);
-                                                                        mAdapter.notifyDataSetChanged();
+                                                                    public void onDataChange(final DataSnapshot dataSnapshot) {
+                                                                        mFirebaseFirestore.collection("users").document(book.getUid()).addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
+                                                                            @Override
+                                                                            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                                                                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                                                    User user = documentSnapshot.toObject(User.class);
+                                                                                    String chatID = (String) dataSnapshot.getValue();
+                                                                                    String userId = book.getUid();
+                                                                                    chatIDs.add(chatID);
+                                                                                    listBooks.add(book);
+                                                                                    usersID.add(userId);
+                                                                                    mUsersOwner.add(user);
+                                                                                    mAdapter.setItems(listBooks, booksID, chatIDs, usersID, mUsersOwner);
+                                                                                    mAdapter.notifyDataSetChanged();
+                                                                                }
+                                                                            }
+                                                                        });
                                                                     }
                                                                     @Override
                                                                     public void onCancelled(DatabaseError databaseError) {

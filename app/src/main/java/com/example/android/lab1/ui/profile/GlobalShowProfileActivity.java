@@ -30,6 +30,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
     ImageView mUserImage;
     TextView mUserName;
     ImageView mBackArrow;
+    ImageView mRatingStar;
     //Toolbar mToolbar;
     TextView mShortBio;
     TextView mRatingText;
@@ -66,6 +67,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         mBackArrow = findViewById(R.id.back_arrow_global_profile);
         mShortBio = findViewById(R.id.global_bio_text);
         mRatingText = findViewById(R.id.rating_text_global_profile);
+        mRatingStar = findViewById(R.id.global_rating_star);
 
         mFt = getSupportFragmentManager();
 
@@ -86,7 +88,15 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         if (mUser.getShortBio() != null) {
             mShortBio.setText(mUser.getShortBio());
         }
-        mRatingText.setText(String.format(getResources().getString(R.string.rating_global_profile), mUser.getRating()));
+        if (Float.compare(mUser.getRating(), 0) != 0) {
+            mRatingText.setText(String.format(getResources().getString(R.string.rating_global_profile), mUser.getRating()));
+            Glide.with(this).load(R.drawable.ic_star_orange_24dp).into(mRatingStar);
+
+        } else {
+            mRatingText.setText(getResources().getString(R.string.not_rated_yet));
+            Glide.with(this).load(R.drawable.ic_star_empty_24dp).into(mRatingStar);
+
+        }
 
         ViewPager viewPager = findViewById(R.id.viewpager_global_profile);
         setupViewPager(viewPager);

@@ -1,8 +1,5 @@
 package com.example.android.lab1.model.chatmodels;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class User {
 
     private String mPhotoURL;
