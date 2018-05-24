@@ -6,14 +6,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.RecyclerDashboardLibraryAdapter;
 import com.example.android.lab1.adapter.RecyclerYourLibraryAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.LoadBookActivity;
@@ -35,7 +34,7 @@ public class YourLibraryFragment extends Fragment {
     private RecyclerView mRecyclerView;
 
     android.support.v7.widget.Toolbar mToolbar;
-    FloatingActionButton mFabLibrary;
+    FloatingActionButton mFab;
     RecyclerYourLibraryAdapter mAdapter;
     List<Book> mBookIds;
 
@@ -48,7 +47,7 @@ public class YourLibraryFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_your_library, container, false);
 
         mRecyclerView = view.findViewById(R.id.rv_fragment_books_library);
-        mFabLibrary = view.findViewById(R.id.fab_your_library);
+        mFab = view.findViewById(R.id.fab_your_library);
 
         mToolbar = getActivity().findViewById(R.id.toolbar_home_page_activity);
 
@@ -76,7 +75,7 @@ public class YourLibraryFragment extends Fragment {
                     }
                 });
 
-        mFabLibrary.setOnClickListener(new View.OnClickListener() {
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(view.getContext(), LoadBookActivity.class);
@@ -88,11 +87,9 @@ public class YourLibraryFragment extends Fragment {
     }
 
     public void updateListOfBooks(List<Book> mListBooksOfUser, List<String> bookIds) {
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-
-        mRecyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setNestedScrollingEnabled(true);
+        mRecyclerView.setItemAnimator(null);
 
         mAdapter = new RecyclerYourLibraryAdapter(mListBooksOfUser, bookIds);
         mRecyclerView.setAdapter(mAdapter);
