@@ -16,6 +16,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -251,7 +252,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                             if (mUser.getUsername() != null) {
                                 mUsernameTextView.setText(mUser.getUsername());
                             }
-                            if (String.valueOf(mUser.getRating()) != null) {
+                            if (Float.compare(mUser.getRating(), 0) != 0) {
                                 mRatingTextView.setText(String.valueOf(mUser.getRating()));
                             } else {
                                 mRatingTextView.setText(getResources().getString(R.string.not_rated_yet));

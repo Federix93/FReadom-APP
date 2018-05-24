@@ -67,8 +67,8 @@ public class LentFragmentItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        LentBookAdapter adapter = new LentBookAdapter(mListBooksOfUser, bookIds);
-        mRecyclerView.setAdapter(adapter);
+        //LentBookAdapter adapter = new LentBookAdapter(mListBooksOfUser, bookIds);
+        //mRecyclerView.setAdapter(adapter);
     }
 
 }
