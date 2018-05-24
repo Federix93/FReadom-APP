@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBorrowedBooksAdapter;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.model.BooksBorrowed;
+import com.example.android.lab1.model.BorrowedBooks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -77,7 +77,7 @@ public class RequestsFragmentDoneItem extends Fragment {
                         @Override
                         public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                             if (snapshot != null && snapshot.exists()) {
-                                BooksBorrowed booksBorrowed = snapshot.toObject(BooksBorrowed.class);
+                                BorrowedBooks booksBorrowed = snapshot.toObject(BorrowedBooks.class);
                                 final List<String> booksID = booksBorrowed.getBooksID();
 
                                 for (final String bookID : booksID) {

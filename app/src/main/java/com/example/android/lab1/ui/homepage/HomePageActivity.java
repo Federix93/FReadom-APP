@@ -69,7 +69,6 @@ public class HomePageActivity extends AppCompatActivity
     private static final int YOUR_LIBRARY = 1;
     private static final int LOANS_FRAGMENT = 2;
     private static final int REQUESTS_FRAGMENT = 3;
-    private int oldPosition;
     private int comeBackPosition;
     private Fragment mCurrentFragment;
 
@@ -136,7 +135,7 @@ public class HomePageActivity extends AppCompatActivity
         items.add(yourLibrary);
         items.add(loansItem);
         items.add(requestsItem);
-        oldPosition = 0;
+
         mBottomNavigation.addItems(items);
         mBottomNavigation.setBehaviorTranslationEnabled(false);
         mBottomNavigation.setAccentColor(getResources().getColor(R.color.colorSecondaryAccent));
@@ -155,8 +154,6 @@ public class HomePageActivity extends AppCompatActivity
                     switch (position) {
                         case HOME_FRAGMENT:
                             mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mHomeFragment).commit();
-
-                            oldPosition = position;
                             break;
 
                         case YOUR_LIBRARY:
@@ -165,19 +162,13 @@ public class HomePageActivity extends AppCompatActivity
                                 break;
                             }
                             mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mYourLibraryFragment).commit();
-
-                            oldPosition = position;
                             break;
 
                         case LOANS_FRAGMENT:
                             mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mLoanFragment).commit();
-
-                            oldPosition = position;
                             break;
                         case REQUESTS_FRAGMENT:
                             mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mRequestFragment).commit();
-
-                            oldPosition = position;
                             break;
                     }
                 }
