@@ -48,6 +48,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         intent.putExtra("Username", data.get("sender"));
         intent.putExtra("ImageURL", data.get("senderPic"));
         intent.putExtra("BookID", data.get("book"));
+        intent.putExtra("SenderUID", data.get("senderUID"));
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);

@@ -36,6 +36,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mChatsReference;
     private String mBookID;
+    private String mSenderUID;
 
     public RecyclerConversationAdapter(List<User> listUsers, List<String> listChatID, String bookID){
         mListUsers = listUsers;
@@ -108,8 +109,12 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         cal1.setTimeInMillis(chat.getTimestamp() * 1000);
                         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
                         mTimetampTextView.setText(dateFormat.format(cal1.getTime()));
-                        mLastMessageTextView.setText(chat.getLastMessage());
+                        if(chat.getIsText().equals("true"))
+                            mLastMessageTextView.setText(chat.getLastMessage());
+                        else
+                            mLastMessageTextView.setText(R.string.photo_message_chat);
                         if(chat.getSenderUID() != null && !chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())){
+                            mSenderUID = chat.getSenderUID();
                             if(chat.getCounter() == 0) {
                                 mMessageCounterTextView.setText("");
                                 mMessageCounterTextView.setBackground(null);
@@ -135,11 +140,11 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ChatActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    mChatsReference.child(chatID).child("counter").setValue(0);
                     intent.putExtra("ChatID", chatID);
                     intent.putExtra("Username", user.getUsername());
                     intent.putExtra("ImageURL", user.getPhotoURL());
                     intent.putExtra("BookID", mBookID);
+                    intent.putExtra("SenderUID", mSenderUID);
                     v.getContext().startActivity(intent);
                 }
             });

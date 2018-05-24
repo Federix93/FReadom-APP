@@ -107,6 +107,10 @@ public class ChatActivity extends AppCompatActivity {
         mUsername = getIntent().getStringExtra("Username");
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
+        String senderUID = getIntent().getStringExtra("SenderUID");
+
+        if(senderUID != null && !senderUID.equals(mFirebaseAuth.getUid()))
+            mChatsReference.child(mChatID).child("counter").setValue(0);
 
         mToolbar = findViewById(R.id.toolbar_chat_activity);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
@@ -312,13 +316,22 @@ public class ChatActivity extends AppCompatActivity {
                                     Chat chat = dataSnapshot.getValue(Chat.class);
                                     if (chat != null) {
                                         chat.setTimestamp(System.currentTimeMillis() / 1000);
-                                        chat.setLastMessage(getResources().getString(R.string.photo_message_chat));
+                                        chat.setLastMessage(downloadUrl.toString());
                                         chat.setIsText("false");
-                                        if(!chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
-                                            chat.setReceiverUID(chat.getSenderUID());
+                                        if(chat.getSenderUID() == null){
+                                            chat.setSenderUID(mFirebaseAuth.getUid());
+                                            chat.setCounter(chat.getCounter() + 1);
+                                        }else{
+                                            if(chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
+                                                chat.setCounter(chat.getCounter() + 1);
+                                            }
+                                            else{
+                                                chat.setReceiverUID(chat.getSenderUID());
+                                                chat.setSenderUID(mFirebaseAuth.getUid());
+                                                chat.setCounter(1);
+                                            }
                                             chat.setSenderUID(mFirebaseAuth.getUid());
                                         }
-                                        chat.setSenderUID(mFirebaseAuth.getUid());
                                     }
                                     mChatsReference.child(mChatID).setValue(chat);
                                 }
