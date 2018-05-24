@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
+import com.example.android.lab1.adapter.LentBookAdapter;
 import com.example.android.lab1.adapter.RecyclerDashboardLibraryAdapter;
 import com.example.android.lab1.model.Book;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,9 +28,7 @@ public class LentFragmentItem extends Fragment {
     private RecyclerView mRecyclerView;
     List<Book> mBookIds;
 
-
     public LentFragmentItem() {
-
     }
 
     @Override
@@ -38,6 +37,7 @@ public class LentFragmentItem extends Fragment {
 
         mRecyclerView = view.findViewById(R.id.recycler_fragment_content);
 
+        /*
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
@@ -57,7 +57,7 @@ public class LentFragmentItem extends Fragment {
                         updateListOfBooks(mBookIds, IDs);
 
                     }
-                });
+                });*/
         return view;
     }
     public void updateListOfBooks(List<Book> mListBooksOfUser, List<String> bookIds) {
@@ -67,7 +67,7 @@ public class LentFragmentItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        RecyclerDashboardLibraryAdapter adapter = new RecyclerDashboardLibraryAdapter(mListBooksOfUser, bookIds);
+        LentBookAdapter adapter = new LentBookAdapter(mListBooksOfUser, bookIds);
         mRecyclerView.setAdapter(adapter);
     }
 

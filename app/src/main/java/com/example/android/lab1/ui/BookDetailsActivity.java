@@ -20,6 +20,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +58,8 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public class BookDetailsActivity extends AppCompatActivity {
 
     ConstraintLayout mProfileConstraintLayout;
+    LinearLayout mBookDescriptionLayout;
+    RelativeLayout mGalleryLayout;
     Toolbar mToolbar;
     TextView mBookTitleTextView;
     TextView mAuthorTextView;
@@ -105,6 +109,8 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookDetailConditionColor = findViewById(R.id.book_detail_conditions_color);
         mGalleryTextView = findViewById(R.id.gallery_book_detail);
         mBookDescription = findViewById(R.id.book_description);
+        mBookDescriptionLayout = findViewById(R.id.book_description_container);
+        mGalleryLayout = findViewById(R.id.relative_gallery_layout);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -148,16 +154,20 @@ public class BookDetailsActivity extends AppCompatActivity {
             }
         });
 
-        mBookDescription.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
-                intent.putExtra("Title", mBook.getTitle());
-                startActivity(intent);
-            }
-        });
+        //if (mBook.getDescription() != null) {
+            mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
+                    intent.putExtra("Title", mBook.getTitle());
+                    startActivity(intent);
+                }
+            });
+        /*} else {
+            mBookDescriptionLayout.setVisibility(GONE);
+        }*/
 
 
                 /*.addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -213,8 +223,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
                 recyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
             } else {
-                recyclerView.setVisibility(GONE);
-                mGalleryTextView.setVisibility(GONE);
+                mGalleryLayout.setVisibility(GONE);
             }
         }
         if (book.getUid() != null) {
@@ -244,6 +253,8 @@ public class BookDetailsActivity extends AppCompatActivity {
                             }
                             if (String.valueOf(mUser.getRating()) != null) {
                                 mRatingTextView.setText(String.valueOf(mUser.getRating()));
+                            } else {
+                                mRatingTextView.setText(getResources().getString(R.string.not_rated_yet));
                             }
                         }
                     }

@@ -30,9 +30,6 @@ public class RecyclerDashboardLibraryAdapter extends RecyclerView.Adapter<Recycl
         this.mBooks = books;
         this.mBookIds = mBookIds;
     }
-    public RecyclerDashboardLibraryAdapter(List<Book> books) {
-        this.mBooks = books;
-    }
 
     @NonNull
     @Override
@@ -67,10 +64,10 @@ public class RecyclerDashboardLibraryAdapter extends RecyclerView.Adapter<Recycl
 
         public MyViewHolder (View itemView) {
             super (itemView);
-            mBookTitle = itemView.findViewById(R.id.rv_book_dash_title);
-            mBookAuthor = itemView.findViewById(R.id.rv_book_dash_author);
-            mBookCity = itemView.findViewById(R.id.rv_book_dash_city);
-            mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_dash_library);
+            mBookTitle = itemView.findViewById(R.id.rv_book_lent_title);
+            mBookAuthor = itemView.findViewById(R.id.rv_book_lent_author);
+            mBookCity = itemView.findViewById(R.id.rv_book_lent_city);
+            mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_lent);
             mEditButton = itemView.findViewById(R.id.dash_edit_item);
             mDeleteButton = itemView.findViewById(R.id.dash_delete_item);
             mChatButton = itemView.findViewById(R.id.dash_chat_item);

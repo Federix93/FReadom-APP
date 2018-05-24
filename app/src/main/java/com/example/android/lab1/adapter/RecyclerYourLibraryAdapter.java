@@ -1,7 +1,6 @@
 package com.example.android.lab1.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,7 +13,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.ui.chat.ConversationsActivity;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -65,10 +63,10 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
 
         public MyViewHolder (View itemView) {
             super (itemView);
-            mBookTitle = itemView.findViewById(R.id.rv_book_dash_title);
-            mBookAuthor = itemView.findViewById(R.id.rv_book_dash_author);
-            mBookCity = itemView.findViewById(R.id.rv_book_dash_city);
-            mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_dash_library);
+            mBookTitle = itemView.findViewById(R.id.rv_book_lent_title);
+            mBookAuthor = itemView.findViewById(R.id.rv_book_lent_author);
+            mBookCity = itemView.findViewById(R.id.rv_book_lent_city);
+            mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_lent);
             mEditButton = itemView.findViewById(R.id.dash_edit_item);
             mDeleteButton = itemView.findViewById(R.id.dash_delete_item);
         }

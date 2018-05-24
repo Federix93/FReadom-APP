@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#607D8B</color>
-    <color name="colorPrimaryDark">#455A64</color>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#c8c8c8</color>
     <color name="colorAccent">#F63D2B</color>
     <color name="black">#000000</color>
-    <color name="white">#FFF</color>
+    <color name="white">#FFFFFF</color>
     <color name="background_app">#fafafa</color>
     <color name="colorSecondaryAccent">#F63D2B</color>
     <color name="poor">#ff0000</color>
@@ -13,4 +13,5 @@
     <color name="near_mint">#b4ff00</color>
     <color name="mint">#00ff00</color>
     <color name="grayed_button">#808080</color>
+    <color name="light_grey">#c8c8c8</color>
 </resources>
