@@ -15,6 +15,7 @@ import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -72,6 +73,8 @@ public class ChatActivity extends AppCompatActivity {
     ImageButton mPhotoPickerButton;
     ImageView mToolbarProfileImage;
     TextView mToolbarProfileUsername;
+    TextView mNoMessagesOwnerTextView;
+    TextView mNoMessagesReceiverTextView;
     LinearLayout mInputTextLinearLayout;
 
     ChildEventListener mChildEventListener;
@@ -88,12 +91,14 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         Utilities.setupStatusBarColor(this);
-
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         mMessagesRecyclerView = findViewById(R.id.chat_recyclerView);
         mMessageEditText = findViewById(R.id.edittext_chat_message);
         mSendButton = findViewById(R.id.sendButton);
         mPhotoPickerButton = findViewById(R.id.buttonUpload);
         mInputTextLinearLayout = findViewById(R.id.linearLayoutBottomInput);
+        mNoMessagesOwnerTextView = findViewById(R.id.chat_advice_owner_response_text_view);
+        mNoMessagesReceiverTextView = findViewById(R.id.chat_wait_owner_response_text_view);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -109,7 +114,7 @@ public class ChatActivity extends AppCompatActivity {
         mBookID = getIntent().getStringExtra("BookID");
         String senderUID = getIntent().getStringExtra("SenderUID");
 
-        if(senderUID != null && !senderUID.equals(mFirebaseAuth.getUid()))
+        if (senderUID != null && !senderUID.equals(mFirebaseAuth.getUid()))
             mChatsReference.child(mChatID).child("counter").setValue(0);
 
         mToolbar = findViewById(R.id.toolbar_chat_activity);
@@ -150,8 +155,12 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getChildrenCount() > 1) {
-                    if (mInputTextLinearLayout.getVisibility() == View.GONE)
+                    if (mInputTextLinearLayout.getVisibility() == View.GONE) {
                         mInputTextLinearLayout.setVisibility(View.VISIBLE);
+                        mNoMessagesReceiverTextView.setVisibility(View.GONE);
+                    } else {
+                        mNoMessagesOwnerTextView.setVisibility(View.GONE);
+                    }
                     setInputLinearLayout();
                     dbRef.removeEventListener(this);
 
@@ -161,9 +170,12 @@ public class ChatActivity extends AppCompatActivity {
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (mFirebaseAuth.getUid().equals(dataSnapshot.getValue())) {
                                 mInputTextLinearLayout.setVisibility(View.GONE);
-                            } else{
-                                if(mInputTextLinearLayout.getVisibility() == View.GONE)
+                                mNoMessagesReceiverTextView.setVisibility(View.VISIBLE);
+                            } else {
+                                if (mInputTextLinearLayout.getVisibility() == View.GONE) {
                                     mInputTextLinearLayout.setVisibility(View.VISIBLE);
+                                }
+                                mNoMessagesOwnerTextView.setVisibility(View.VISIBLE);
                                 setInputLinearLayout();
                             }
                         }
@@ -253,14 +265,13 @@ public class ChatActivity extends AppCompatActivity {
                                 chat.setTimestamp(System.currentTimeMillis() / 1000);
                                 chat.setLastMessage(messageWritten);
                                 chat.setIsText("true");
-                                if(chat.getSenderUID() == null){
+                                if (chat.getSenderUID() == null) {
                                     chat.setSenderUID(mFirebaseAuth.getUid());
                                     chat.setCounter(chat.getCounter() + 1);
-                                }else{
-                                    if(chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
+                                } else {
+                                    if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
                                         chat.setCounter(chat.getCounter() + 1);
-                                    }
-                                    else{
+                                    } else {
                                         chat.setReceiverUID(chat.getSenderUID());
                                         chat.setSenderUID(mFirebaseAuth.getUid());
                                         chat.setCounter(1);
@@ -318,14 +329,13 @@ public class ChatActivity extends AppCompatActivity {
                                         chat.setTimestamp(System.currentTimeMillis() / 1000);
                                         chat.setLastMessage(downloadUrl.toString());
                                         chat.setIsText("false");
-                                        if(chat.getSenderUID() == null){
+                                        if (chat.getSenderUID() == null) {
                                             chat.setSenderUID(mFirebaseAuth.getUid());
                                             chat.setCounter(chat.getCounter() + 1);
-                                        }else{
-                                            if(chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
+                                        } else {
+                                            if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
                                                 chat.setCounter(chat.getCounter() + 1);
-                                            }
-                                            else{
+                                            } else {
                                                 chat.setReceiverUID(chat.getSenderUID());
                                                 chat.setSenderUID(mFirebaseAuth.getUid());
                                                 chat.setCounter(1);

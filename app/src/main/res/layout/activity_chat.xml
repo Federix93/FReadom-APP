@@ -75,14 +75,40 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/chat_recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:paddingBottom="4dp"
             android:clipToPadding="false"
             android:scrollbars="vertical">
 
         </android.support.v7.widget.RecyclerView>
 
+        <TextView
+            android:id="@+id/chat_wait_owner_response_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chat_wait_owner_response"
+            android:layout_marginTop="128dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:layout_gravity="center"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:textAlignment="center"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-light"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/chat_advice_owner_response_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chat_advice_owner_response"
+            android:layout_marginTop="128dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:textSize="22sp"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:fontFamily="sans-serif-light"
+            android:visibility="gone"/>
     </LinearLayout>
 </RelativeLayout>
 </LinearLayout>
