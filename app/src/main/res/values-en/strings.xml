@@ -139,6 +139,7 @@
     <string name="book_not_available">Book not available</string>
     <string name="tags">Tags</string>
     <string name="open_chat">Open chat</string>
+    <string name="photo_message_chat">Photo</string>
 
 
 </resources>

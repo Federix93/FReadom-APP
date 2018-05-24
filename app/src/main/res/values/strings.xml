@@ -180,4 +180,5 @@
     <string name="wait_for_chat_opening">Apertura della chat in corso</string>
     <string name="book_not_available">Libro non più disponibile</string>
     <string name="open_chat">Vai alla chat</string>
+    <string name="photo_message_chat">Foto</string>
 </resources>

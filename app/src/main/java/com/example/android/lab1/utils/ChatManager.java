@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.example.android.lab1.model.chatmodels.Chat;
+import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,7 +21,6 @@ public class ChatManager {
     private Context mContext;
     private String mChatID;
     private User mBookOwnerUserDatabase;
-    private boolean isChatAlreadyOpened = true;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase firebaseDatabase;
@@ -28,6 +28,7 @@ public class ChatManager {
     private final DatabaseReference conversationsReference;
     private final DatabaseReference usersReference;
     private final DatabaseReference openedChatReference;
+    private final DatabaseReference messageReference;
 
     public ChatManager(String bookID, final String bookOwnerID, Context context) {
         mBookID = bookID;
@@ -40,12 +41,12 @@ public class ChatManager {
         conversationsReference = firebaseDatabase.getReference().child("conversations");
         usersReference = firebaseDatabase.getReference().child("users");
         openedChatReference = firebaseDatabase.getReference().child("openedChats");
+        messageReference = firebaseDatabase.getReference().child("messages");
         linkUsersToChat();
 }
 
     private void linkUsersToChat(){
         if (firebaseAuth != null && firebaseAuth.getUid() != null) {
-
             openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -87,13 +88,16 @@ public class ChatManager {
 
     private void createChat() {
         String defaultMessage = "HAI RICHIESTO IL LIBRO ALLO STRONZO";
-        isChatAlreadyOpened = false;
         Chat chat = new Chat(mBookID, defaultMessage, System.currentTimeMillis() / 1000);
+        chat.setCounter(1);
+        chat.setLastMessageUserID(firebaseAuth.getUid());
         DatabaseReference newChat = chatsReference.push();
         mChatID = newChat.getKey();
         newChat.setValue(chat);
+        Message message = new Message(firebaseAuth.getUid(), defaultMessage, System.currentTimeMillis() / 1000, null);
         conversationsReference.child(mBookID).child(mChatID).setValue(firebaseAuth.getUid());
         openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).setValue(mChatID);
+        messageReference.child(mChatID).push().setValue(message);
     }
 
     private void getUserOwner(){

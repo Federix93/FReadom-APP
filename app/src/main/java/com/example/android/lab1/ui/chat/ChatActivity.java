@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +28,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
-import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.utils.Utilities;
@@ -39,6 +39,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -49,11 +50,14 @@ import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
 
+    private static final String TAG = "LULLO";
+
     Toolbar mToolbar;
     FirebaseDatabase mFirebaseDatabase;
 
     DatabaseReference mChatsReference;
     DatabaseReference mMessagesReference;
+    DatabaseReference mConversationsReference;
 
     FirebaseAuth mFirebaseAuth;
     FirebaseStorage mFirebaseStorage;
@@ -70,6 +74,7 @@ public class ChatActivity extends AppCompatActivity {
     ImageButton mPhotoPickerButton;
     ImageView mToolbarProfileImage;
     TextView mToolbarProfileUsername;
+    LinearLayout mInputTextLinearLayout;
 
     ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
@@ -90,11 +95,13 @@ public class ChatActivity extends AppCompatActivity {
         mMessageEditText = findViewById(R.id.edittext_chat_message);
         mSendButton = findViewById(R.id.sendButton);
         mPhotoPickerButton = findViewById(R.id.buttonUpload);
+        mInputTextLinearLayout = findViewById(R.id.linearLayoutBottomInput);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mChatsReference = mFirebaseDatabase.getReference().child("chats");
         mMessagesReference = mFirebaseDatabase.getReference().child("messages");
+        mConversationsReference = mFirebaseDatabase.getReference().child("conversations");
         mFirebaseStorage = FirebaseStorage.getInstance();
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
 
@@ -116,7 +123,7 @@ public class ChatActivity extends AppCompatActivity {
         mToolbarProfileUsername = findViewById(R.id.chat_toolbar_profile_username);
 
         mToolbarProfileUsername.setText(mUsername);
-
+        ;
         Glide.with(this).load(mPhotoProfileURL).apply(RequestOptions
                 .bitmapTransform(new CircleCrop()))
                 .into(mToolbarProfileImage);
@@ -136,85 +143,43 @@ public class ChatActivity extends AppCompatActivity {
                 mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
             }
         });
-
-        // Enable Send button when there's text to send
-        mMessageEditText.addTextChangedListener(new TextWatcher() {
+        final DatabaseReference dbRef = mMessagesReference.child(mChatID);
+        ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() > 1) {
+                    if (mInputTextLinearLayout.getVisibility() == View.GONE)
+                        mInputTextLinearLayout.setVisibility(View.VISIBLE);
+                    setInputLinearLayout();
+                    dbRef.removeEventListener(this);
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.toString().trim().length() > 0) {
-                    mSendButton.setEnabled(true);
                 } else {
-                    mSendButton.setEnabled(false);
+                    mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (mFirebaseAuth.getUid().equals(dataSnapshot.getValue())) {
+                                mInputTextLinearLayout.setVisibility(View.GONE);
+                            } else{
+                                if(mInputTextLinearLayout.getVisibility() == View.GONE)
+                                    mInputTextLinearLayout.setVisibility(View.VISIBLE);
+                                setInputLinearLayout();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {
+            public void onCancelled(DatabaseError databaseError) {
+
             }
-        });
-        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
-
-        // Send button sends a message and clears the EditText
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Message chatMessage = new Message(mUsername, mFirebaseAuth.getUid(), mMessageEditText.getText().toString(), mPhotoProfileURL,
-                        System.currentTimeMillis() / 1000, null);
-                mMessagesReference.child(mChatID).push().setValue(chatMessage);
-                final String messageWritten = mMessageEditText.getText().toString();
-                mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            Chat chat = dataSnapshot.getValue(Chat.class);
-                            if (chat != null) {
-                                chat.setTimestamp(System.currentTimeMillis() / 1000);
-                                chat.setLastMessage(messageWritten);
-                                if(chat.getLastMessageUserID() == null){
-                                    Log.d("LULLO", "IF 1:  MATTIA FA I FILTRI");
-                                    chat.setLastMessageUserID(mFirebaseAuth.getUid());
-                                    chat.setCounter(chat.getCounter() + 1);
-                                }else{
-                                    Log.d("LULLO", "IF 1:  MATTIA SCORRE FACENDO FINTA");
-                                    if(chat.getLastMessageUserID().equals(mFirebaseAuth.getUid())) {
-                                        Log.d("LULLO", "IF 1:  MATTIA FA I FILTRI DA 3 MESI E NON CI RIESCE");
-                                        chat.setCounter(chat.getCounter() + 1);
-                                    }
-                                    else{
-                                        Log.d("LULLO", "IF 1:  NONOSTANTE CIO' MATTIA E' IL NUMERO 1");
-                                        chat.setCounter(1);
-                                    }
-                                    chat.setLastMessageUserID(mFirebaseAuth.getUid());
-                                }
-                            }
-                            mChatsReference.child(mChatID).setValue(chat);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-                // Clear input box
-                mMessageEditText.setText("");
-            }
-        });
-
-        mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/jpeg");
-                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-                startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
-            }
-        });
+        };
+        dbRef.addValueEventListener(valueEventListener);
 
         mChildEventListener = new ChildEventListener() {
             @Override
@@ -244,21 +209,82 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
         mMessagesReference.child(mChatID).addChildEventListener(mChildEventListener);
+    }
 
-        /*if (getIntent().getExtras() != null) {
-            for (String key : getIntent().getExtras().keySet()) {
-                if (key.equals("username")) {
-                    dataTitle = (String) getIntent().getExtras().get(key);
-                }
-                if (key.equals("textMessage")) {
-                    dataMessage = (String) getIntent().getExtras().get(key);
+    private void setInputLinearLayout() {
+        // Enable Send button when there's text to send
+        mMessageEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.toString().trim().length() > 0) {
+                    mSendButton.setEnabled(true);
+                } else {
+                    mSendButton.setEnabled(false);
                 }
             }
 
-            showAlertDialog();
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
 
-        }*/
+        // Send button sends a message and clears the EditText
+        mSendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
+                Message chatMessage = new Message(mFirebaseAuth.getUid(), mMessageEditText.getText().toString(),
+                        System.currentTimeMillis() / 1000, null);
+                mMessagesReference.child(mChatID).push().setValue(chatMessage);
+                final String messageWritten = mMessageEditText.getText().toString();
+                mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            Chat chat = dataSnapshot.getValue(Chat.class);
+                            if (chat != null) {
+                                chat.setTimestamp(System.currentTimeMillis() / 1000);
+                                chat.setLastMessage(messageWritten);
+                                if (chat.getLastMessageUserID() == null) {
+                                    chat.setLastMessageUserID(mFirebaseAuth.getUid());
+                                    chat.setCounter(chat.getCounter() + 1);
+                                } else {
+                                    if (chat.getLastMessageUserID().equals(mFirebaseAuth.getUid())) {
+                                        chat.setCounter(chat.getCounter() + 1);
+                                    } else {
+                                        chat.setCounter(1);
+                                    }
+                                    chat.setLastMessageUserID(mFirebaseAuth.getUid());
+                                }
+                            }
+                            mChatsReference.child(mChatID).setValue(chat);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                // Clear input box
+                mMessageEditText.setText("");
+            }
+        });
+
+        mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
+            }
+        });
     }
 
     @Override
@@ -273,7 +299,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         final Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        Message chatMessage = new Message(mUsername, mFirebaseAuth.getUid(), null, mPhotoProfileURL, System.currentTimeMillis() / 1000,
+                        Message chatMessage = new Message(mFirebaseAuth.getUid(), null, System.currentTimeMillis() / 1000,
                                 downloadUrl.toString());
 
                         mMessagesReference.child(mChatID).push().setValue(chatMessage);
@@ -284,7 +310,7 @@ public class ChatActivity extends AppCompatActivity {
                                     Chat chat = dataSnapshot.getValue(Chat.class);
                                     if (chat != null) {
                                         chat.setTimestamp(System.currentTimeMillis() / 1000);
-                                        chat.setLastMessage(downloadUrl.toString());
+                                        chat.setLastMessage(getResources().getString(R.string.photo_message_chat));
                                         chat.setLastMessageUserID(mFirebaseAuth.getUid());
                                     }
                                     mChatsReference.child(mChatID).setValue(chat);
