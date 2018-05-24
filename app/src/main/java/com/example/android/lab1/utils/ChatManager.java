@@ -51,8 +51,7 @@ public class ChatManager {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot != null && !dataSnapshot.exists()){
-                        createChat();
-                        getUserOwner();
+                        getUserOwnerForFirstTime();
                     }else{
 
                         openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).addValueEventListener(new ValueEventListener() {
@@ -88,7 +87,7 @@ public class ChatManager {
 
     private void createChat() {
         String defaultMessage = "HAI RICHIESTO IL LIBRO ALLO STRONZO";
-        Chat chat = new Chat(mBookID, defaultMessage, System.currentTimeMillis() / 1000);
+        Chat chat = new Chat(mBookID, mBookOwnerUserID, defaultMessage, System.currentTimeMillis() / 1000, "true");
         chat.setCounter(1);
         chat.setSenderUID(firebaseAuth.getUid());
         DatabaseReference newChat = chatsReference.push();
@@ -98,6 +97,7 @@ public class ChatManager {
         conversationsReference.child(mBookID).child(mChatID).setValue(firebaseAuth.getUid());
         openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).setValue(mChatID);
         messageReference.child(mChatID).push().setValue(message);
+        openChat();
     }
 
     private void getUserOwner(){
@@ -114,4 +114,20 @@ public class ChatManager {
             }
         });
     }
+
+    private void getUserOwnerForFirstTime(){
+        usersReference.child(mBookOwnerUserID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mBookOwnerUserDatabase = dataSnapshot.getValue(User.class);
+                if(mBookOwnerUserDatabase != null)
+                    createChat();
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 }

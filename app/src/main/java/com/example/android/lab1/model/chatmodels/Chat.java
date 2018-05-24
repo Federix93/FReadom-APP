@@ -8,14 +8,16 @@ public class Chat {
     private int mCounter;
     private String mSenderUID;
     private String mReceiverUID;
+    private String mIsText;
 
     public Chat(){}
 
-    public Chat(String bookID, String receiverUID, String lastMessage, long timestamp){
+    public Chat(String bookID, String receiverUID, String lastMessage, long timestamp, String isText){
         mBookID = bookID;
         mLastMessage = lastMessage;
         mTimestamp = timestamp;
         mReceiverUID = receiverUID;
+        mIsText = isText;
     }
 
     public String getSenderUID() {
