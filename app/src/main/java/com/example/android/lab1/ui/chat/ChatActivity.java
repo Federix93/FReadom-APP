@@ -313,8 +313,12 @@ public class ChatActivity extends AppCompatActivity {
                                     if (chat != null) {
                                         chat.setTimestamp(System.currentTimeMillis() / 1000);
                                         chat.setLastMessage(getResources().getString(R.string.photo_message_chat));
-                                        chat.setSenderUID(mFirebaseAuth.getUid());
                                         chat.setIsText("false");
+                                        if(!chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
+                                            chat.setReceiverUID(chat.getSenderUID());
+                                            chat.setSenderUID(mFirebaseAuth.getUid());
+                                        }
+                                        chat.setSenderUID(mFirebaseAuth.getUid());
                                     }
                                     mChatsReference.child(mChatID).setValue(chat);
                                 }
