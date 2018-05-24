@@ -156,6 +156,8 @@
     <string name="new_message_notification_title_photo">%1$s sent you a photo</string>
     <string name="chat_wait_owner_response">Before starting the conversation wait for the book owner to accept your request</string>
     <string name="chat_advice_owner_response">This user won\'t be able to send you other messages until your first response</string>
+    <string name="search_unknown_error_top">An unknown error occurred</string>
+    <string name="search_unknown_error_bottom">Please try again later</string>
 
 
 </resources>

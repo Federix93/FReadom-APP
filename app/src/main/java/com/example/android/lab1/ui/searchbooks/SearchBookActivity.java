@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -72,10 +73,11 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private final static int OFFLINE_VIEW = 1;
     private final static int NO_RESULTS_VIEW = 2;
     private final static int RESULTS_VIEW = 3;
+    private final static int UNKNOWN_ERROR_VIEW = 4;
 
     private final static int POSITION_FINE_PERMISSION = 10;
 
-    private boolean[] currentView = {true, false, false, false};
+    private boolean[] currentView = {true, false, false, false, false};
 
     boolean[] searchByFilters = {true, true, true, true};
     int[] seekBarsFilters = {0, FiltersValues.MAX_POSITION};
@@ -91,6 +93,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private TextView mNoResultsTextViewBottom;
     private TextView mNoConnectionTextViewTop;
     private TextView mNoConnectionTextViewBottom;
+    private TextView mUnknownErrorTextViewTop;
+    private TextView mUnknownErrorTextViewBottom;
     private AppCompatButton mNoConnectionButton;
 
     private RecyclerView mRecyclerView;
@@ -98,7 +102,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private RecyclerSearchAdapter mAdapter;
     private FusedLocationProviderClient mFusedLocationClient;
 
-    private Query query = new Query();
+    private Query booksQuery = new Query();
+    private Query usersQuery = new Query();
     private String mCurrentUserId;
 
     private JSONArray hits;
@@ -123,6 +128,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mNoConnectionTextViewTop = findViewById(R.id.search_book_no_connection_top);
         mNoConnectionTextViewBottom = findViewById(R.id.search_book_no_connection_bottom);
         mNoConnectionButton = findViewById(R.id.search_book_no_connection_try_again);
+        mUnknownErrorTextViewTop = findViewById(R.id.search_book_unknown_error_top);
+        mUnknownErrorTextViewBottom = findViewById(R.id.search_book_unknown_error_bottom);
         mRecyclerView = findViewById(R.id.results_recycler_view);
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -156,7 +163,9 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         booksIndex = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
         usersIndex = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
-        query.setHitsPerPage(HITS_PER_PAGE);
+        booksQuery.setHitsPerPage(HITS_PER_PAGE);
+        usersQuery.setHitsPerPage(HITS_PER_PAGE);
+        usersQuery.setQuery("");
 
         booksIndex.enableSearchCache();
         usersIndex.enableSearchCache();
@@ -172,9 +181,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         applyFilters();
         setRecyclerViewScrollListener();
 
-        if(savedInstanceState == null)
-        {
-                mSearchView.setSearchFocused(true);
+        if (savedInstanceState == null) {
+            mSearchView.setSearchFocused(true);
         }
 
     }
@@ -258,17 +266,17 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     }
 
     private void preSearch(String searchString) {
-        if (Utilities.isOnline(SearchBookActivity.this)) {
-            if (searchString.isEmpty() || searchString.length() < 2) {
-                if (!currentView[INTRO_VIEW])
-                    showIntroView();
-                return;
-            }
-            search(searchString);
-        } else {
-            if (!currentView[OFFLINE_VIEW])
-                showOfflineView();
+//        if (Utilities.isOnline(SearchBookActivity.this)) {
+        if (searchString.isEmpty() || searchString.length() < 2) {
+            if (!currentView[INTRO_VIEW])
+                showIntroView();
+            return;
         }
+        search(searchString);
+//        } else {
+//            if (!currentView[OFFLINE_VIEW])
+//                showOfflineView();
+//        }
     }
 
     private void search(final String searchString) {
@@ -278,10 +286,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         lastDisplayedPage = -1;
         endReached = false;
 
-        query.setQuery(searchString);
+        booksQuery.setQuery(searchString);
         mSearchView.showProgress();
 
-        booksIndex.searchAsync(query, new CompletionHandler() {
+        booksIndex.searchAsync(booksQuery, new CompletionHandler() {
             @Override
             public void requestCompleted(final JSONObject result, AlgoliaException error) {
                 if (result != null && error == null) {
@@ -290,19 +298,16 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         mSearchView.hideProgress();
                         return;
                     }
-
                     hits = result.optJSONArray("hits");
                     if (hits.length() == 0) {
                         endReached = true;
                         if (!currentView[NO_RESULTS_VIEW])
                             showNoResultsView();
-
-                        updateNoResultsTextView(query.getQuery());
+                        updateNoResultsTextView(booksQuery.getQuery());
 
                         mSearchView.hideProgress();
                         return;
                     }
-
                     final ArrayList<BookSearchItem> booksDataSet = new ArrayList<>();
                     Set<String> bookUIDs = new HashSet<>();
 
@@ -325,12 +330,25 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         }
                     }
 
-                    usersIndex.getObjectsAsync(bookUIDs, new CompletionHandler() {
+                    StringBuilder stringBuilder = new StringBuilder(400);
+                    for (String s : bookUIDs) {
+                        stringBuilder.append("objectID:");
+                        stringBuilder.append(s);
+                        stringBuilder.append(" OR ");
+                    }
+
+                    stringBuilder.trimToSize();
+                    stringBuilder.delete(stringBuilder.capacity() - 4, stringBuilder.capacity());
+                    stringBuilder.trimToSize();
+
+                    usersQuery.setFilters(stringBuilder.toString());
+
+                    usersIndex.searchAsync(usersQuery, new CompletionHandler() {
                         @Override
                         public void requestCompleted(JSONObject jsonObject, AlgoliaException e) {
-
                             if (jsonObject != null && e == null) {
-                                JSONArray usersResult = jsonObject.optJSONArray("results");
+
+                                JSONArray usersResult = jsonObject.optJSONArray("hits");
                                 HashMap<String, UserInfo> bookUsers = new HashMap<>();
                                 for (int i = 0; i < usersResult.length(); i++) {
                                     JSONObject jsonUser = usersResult.optJSONObject(i);
@@ -339,6 +357,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                                     userInfo.setRating(jsonUser.optDouble("rating"));
                                     bookUsers.put(jsonUser.optString("objectID"), userInfo);
                                 }
+
 
                                 for (int i = 0; i < booksDataSet.size(); i++) {
 
@@ -364,26 +383,29 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                                     endReached = true;
                                     if (!currentView[NO_RESULTS_VIEW])
                                         showNoResultsView();
-                                    updateNoResultsTextView(query.getQuery());
+                                    updateNoResultsTextView(booksQuery.getQuery());
                                 }
                                 mAdapter.notifyDataSetChanged();
                                 mRecyclerView.smoothScrollToPosition(0);
                                 mSearchView.hideProgress();
 
+                            } else if (e != null) {
+                                manageSearchError();
                             }
                         }
 
                     });
+                } else if (error != null) {
+                    manageSearchError();
                 }
 
 
             }
         });
-
     }
 
     private void loadMore() {
-        Query loadMoreQuery = new Query(query);
+        Query loadMoreQuery = new Query(booksQuery);
         loadMoreQuery.setPage(++lastRequestedPage);
         final int currentSearchSeqNo = lastSearchedSeqNo;
 
@@ -427,12 +449,25 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         }
                     }
 
-                    usersIndex.getObjectsAsync(bookUIDs, new CompletionHandler() {
+                    StringBuilder stringBuilder = new StringBuilder(400);
+                    for (String s : bookUIDs) {
+                        stringBuilder.append("objectID:");
+                        stringBuilder.append(s);
+                        stringBuilder.append(" OR ");
+                    }
+
+                    stringBuilder.trimToSize();
+                    stringBuilder.delete(stringBuilder.capacity() - 4, stringBuilder.capacity());
+                    stringBuilder.trimToSize();
+
+                    usersQuery.setFilters(stringBuilder.toString());
+
+                    usersIndex.searchAsync(usersQuery, new CompletionHandler() {
                         @Override
                         public void requestCompleted(JSONObject jsonObject, AlgoliaException e) {
 
                             if (jsonObject != null && e == null) {
-                                JSONArray usersResult = jsonObject.optJSONArray("results");
+                                JSONArray usersResult = jsonObject.optJSONArray("hits");
                                 HashMap<String, UserInfo> bookUsers = new HashMap<>();
                                 for (int i = 0; i < usersResult.length(); i++) {
                                     JSONObject jsonUser = usersResult.optJSONObject(i);
@@ -466,10 +501,14 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                                 mAdapter.notifyDataSetChanged();
                                 mSearchView.hideProgress();
 
+                            } else if (e != null) {
+                                manageSearchError();
                             }
                         }
 
                     });
+                } else if (error != null) {
+                    manageSearchError();
                 }
 
 
@@ -522,9 +561,21 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             searchFields.add("tags");
         }
 
-        query.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
+        booksQuery.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
         if (currentLat != 0 && currentLong != 0)
-            query.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
+            booksQuery.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
+    }
+
+    private void manageSearchError() {
+        mSearchView.hideProgress();
+
+        if (Utilities.isOnline(SearchBookActivity.this)) {
+            if (!currentView[UNKNOWN_ERROR_VIEW])
+                showUnknownErrorView();
+        } else {
+            if (!currentView[OFFLINE_VIEW])
+                showOfflineView();
+        }
     }
 
     private void showOfflineView() {
@@ -532,15 +583,31 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         currentView[NO_RESULTS_VIEW] = false;
         currentView[INTRO_VIEW] = false;
         currentView[RESULTS_VIEW] = false;
+        currentView[UNKNOWN_ERROR_VIEW] = false;
 
-        mRecyclerView.setVisibility(View.GONE);
-        mIntroTextViewTop.setVisibility(View.GONE);
-        mIntroTextViewBottom.setVisibility(View.GONE);
-        mNoResultsTextViewTop.setVisibility(View.GONE);
-        mNoResultsTextViewBottom.setVisibility(View.GONE);
+        if (mRecyclerView.getVisibility() != View.GONE)
+            mRecyclerView.setVisibility(View.GONE);
+        if (mIntroTextViewTop.getVisibility() != View.GONE) {
+            mIntroTextViewTop.setVisibility(View.GONE);
+            mIntroTextViewBottom.setVisibility(View.GONE);
+        }
+
+        if (mNoResultsTextViewTop.getVisibility() != View.GONE) {
+            mNoResultsTextViewTop.setVisibility(View.GONE);
+            mNoResultsTextViewBottom.setVisibility(View.GONE);
+        }
+
+        if (mUnknownErrorTextViewTop.getVisibility() != View.GONE) {
+            mUnknownErrorTextViewTop.setVisibility(View.GONE);
+            mUnknownErrorTextViewBottom.setVisibility(View.GONE);
+        }
+
+
         mNoConnectionTextViewTop.setVisibility(View.VISIBLE);
         mNoConnectionTextViewBottom.setVisibility(View.VISIBLE);
         mNoConnectionButton.setVisibility(View.VISIBLE);
+
+
     }
 
     private void showResultsView() {
@@ -548,15 +615,31 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         currentView[NO_RESULTS_VIEW] = false;
         currentView[INTRO_VIEW] = false;
         currentView[RESULTS_VIEW] = true;
+        currentView[UNKNOWN_ERROR_VIEW] = false;
 
-        mNoConnectionTextViewTop.setVisibility(View.GONE);
-        mNoConnectionTextViewBottom.setVisibility(View.GONE);
-        mNoConnectionButton.setVisibility(View.GONE);
-        mIntroTextViewTop.setVisibility(View.GONE);
-        mIntroTextViewBottom.setVisibility(View.GONE);
-        mNoResultsTextViewTop.setVisibility(View.GONE);
-        mNoResultsTextViewBottom.setVisibility(View.GONE);
+        if (mNoConnectionTextViewTop.getVisibility() != View.GONE) {
+            mNoConnectionTextViewTop.setVisibility(View.GONE);
+            mNoConnectionTextViewBottom.setVisibility(View.GONE);
+            mNoConnectionButton.setVisibility(View.GONE);
+        }
+
+        if (mIntroTextViewTop.getVisibility() != View.GONE) {
+            mIntroTextViewTop.setVisibility(View.GONE);
+            mIntroTextViewBottom.setVisibility(View.GONE);
+        }
+
+        if (mNoResultsTextViewTop.getVisibility() != View.GONE) {
+            mNoResultsTextViewTop.setVisibility(View.GONE);
+            mNoResultsTextViewBottom.setVisibility(View.GONE);
+        }
+
+        if (mUnknownErrorTextViewTop.getVisibility() != View.GONE) {
+            mUnknownErrorTextViewTop.setVisibility(View.GONE);
+            mUnknownErrorTextViewBottom.setVisibility(View.GONE);
+        }
+
         mRecyclerView.setVisibility(View.VISIBLE);
+
     }
 
     private void showNoResultsView() {
@@ -564,15 +647,30 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         currentView[NO_RESULTS_VIEW] = true;
         currentView[INTRO_VIEW] = false;
         currentView[RESULTS_VIEW] = false;
+        currentView[UNKNOWN_ERROR_VIEW] = false;
 
-        mRecyclerView.setVisibility(View.GONE);
-        mNoConnectionTextViewTop.setVisibility(View.GONE);
-        mNoConnectionTextViewBottom.setVisibility(View.GONE);
-        mNoConnectionButton.setVisibility(View.GONE);
-        mIntroTextViewTop.setVisibility(View.GONE);
-        mIntroTextViewBottom.setVisibility(View.GONE);
+        if (mNoConnectionTextViewTop.getVisibility() != View.GONE) {
+            mNoConnectionTextViewTop.setVisibility(View.GONE);
+            mNoConnectionTextViewBottom.setVisibility(View.GONE);
+            mNoConnectionButton.setVisibility(View.GONE);
+        }
+
+        if (mIntroTextViewTop.getVisibility() != View.GONE) {
+            mIntroTextViewTop.setVisibility(View.GONE);
+            mIntroTextViewBottom.setVisibility(View.GONE);
+        }
+
+        if (mUnknownErrorTextViewTop.getVisibility() != View.GONE) {
+            mUnknownErrorTextViewTop.setVisibility(View.GONE);
+            mUnknownErrorTextViewBottom.setVisibility(View.GONE);
+        }
+
+        if (mRecyclerView.getVisibility() != View.GONE)
+            mRecyclerView.setVisibility(View.GONE);
+
         mNoResultsTextViewTop.setVisibility(View.VISIBLE);
         mNoResultsTextViewBottom.setVisibility(View.VISIBLE);
+
     }
 
     private void updateNoResultsTextView(String text) {
@@ -584,15 +682,64 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         currentView[NO_RESULTS_VIEW] = false;
         currentView[INTRO_VIEW] = true;
         currentView[RESULTS_VIEW] = false;
+        currentView[UNKNOWN_ERROR_VIEW] = false;
 
-        mRecyclerView.setVisibility(View.GONE);
-        mNoConnectionTextViewTop.setVisibility(View.GONE);
-        mNoConnectionTextViewBottom.setVisibility(View.GONE);
-        mNoConnectionButton.setVisibility(View.GONE);
-        mNoResultsTextViewTop.setVisibility(View.GONE);
-        mNoResultsTextViewBottom.setVisibility(View.GONE);
+        if (mNoConnectionTextViewTop.getVisibility() != View.GONE) {
+            mNoConnectionTextViewTop.setVisibility(View.GONE);
+            mNoConnectionTextViewBottom.setVisibility(View.GONE);
+            mNoConnectionButton.setVisibility(View.GONE);
+        }
+
+        if (mUnknownErrorTextViewTop.getVisibility() != View.GONE) {
+            mUnknownErrorTextViewTop.setVisibility(View.GONE);
+            mUnknownErrorTextViewBottom.setVisibility(View.GONE);
+        }
+
+        if (mRecyclerView.getVisibility() != View.GONE)
+            mRecyclerView.setVisibility(View.GONE);
+
+        if (mNoResultsTextViewTop.getVisibility() != View.GONE) {
+            mNoResultsTextViewTop.setVisibility(View.GONE);
+            mNoResultsTextViewBottom.setVisibility(View.GONE);
+        }
+
         mIntroTextViewTop.setVisibility(View.VISIBLE);
         mIntroTextViewBottom.setVisibility(View.VISIBLE);
+
+
+    }
+
+    private void showUnknownErrorView() {
+        currentView[OFFLINE_VIEW] = false;
+        currentView[NO_RESULTS_VIEW] = false;
+        currentView[INTRO_VIEW] = false;
+        currentView[RESULTS_VIEW] = false;
+        currentView[UNKNOWN_ERROR_VIEW] = true;
+
+        if (mNoConnectionTextViewTop.getVisibility() != View.GONE) {
+            mNoConnectionTextViewTop.setVisibility(View.GONE);
+            mNoConnectionTextViewBottom.setVisibility(View.GONE);
+            mNoConnectionButton.setVisibility(View.GONE);
+        }
+
+        if (mIntroTextViewTop.getVisibility() != View.GONE) {
+            mIntroTextViewTop.setVisibility(View.GONE);
+            mIntroTextViewBottom.setVisibility(View.GONE);
+        }
+
+        if (mRecyclerView.getVisibility() != View.GONE)
+            mRecyclerView.setVisibility(View.GONE);
+
+        if (mNoResultsTextViewTop.getVisibility() != View.GONE) {
+            mNoResultsTextViewTop.setVisibility(View.GONE);
+            mNoResultsTextViewBottom.setVisibility(View.GONE);
+        }
+
+
+        mUnknownErrorTextViewTop.setVisibility(View.VISIBLE);
+        mUnknownErrorTextViewBottom.setVisibility(View.VISIBLE);
+
+
     }
 
     @SuppressLint("MissingPermission")
@@ -616,7 +763,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         if (location != null) {
                             currentLat = location.getLatitude();
                             currentLong = location.getLongitude();
-                            query.setAroundLatLng(new AbstractQuery.LatLng(currentLat, currentLong));
+                            booksQuery.setAroundLatLng(new AbstractQuery.LatLng(currentLat, currentLong));
                         } else {
                             currentLat = 0;
                             currentLong = 0;
@@ -661,31 +808,31 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-            int currentViewIndex = savedInstanceState.getInt("CURRENT_VIEW");
+        int currentViewIndex = savedInstanceState.getInt("CURRENT_VIEW");
 
-            Arrays.fill(currentView, false);
-            currentView[currentViewIndex] = true;
+        Arrays.fill(currentView, false);
+        currentView[currentViewIndex] = true;
 
-            currentLat = savedInstanceState.getDouble("CURRENT_LAT");
-            currentLong = savedInstanceState.getDouble("CURRENT_LONG");
+        currentLat = savedInstanceState.getDouble("CURRENT_LAT");
+        currentLong = savedInstanceState.getDouble("CURRENT_LONG");
 
-            if (currentView[OFFLINE_VIEW])
-                showOfflineView();
-            else if (currentView[NO_RESULTS_VIEW]) {
-                showNoResultsView();
-                updateNoResultsTextView(savedInstanceState.getString("NO_RESULT_SEARCH"));
-                query.setQuery(mSearchView.getQuery());
-            } else if (currentView[RESULTS_VIEW]) {
-                backupDataSet = (ArrayList<BookSearchItem>) savedInstanceState.getSerializable("DATA_SET");
-                mAdapter = new RecyclerSearchAdapter(backupDataSet, currentLat, currentLong);
-                mRecyclerView.setAdapter(mAdapter);
-                showResultsView();
-            }
-            lastSearchedSeqNo = savedInstanceState.getInt("LAST_SEARCHED_SEQ_NO");
-            lastDisplayedSeqNo = savedInstanceState.getInt("LAST_DISPLAYED_SEQ_NO");
-            lastRequestedPage = savedInstanceState.getInt("LAST_REQUESTED_PAGE");
-            lastDisplayedPage = savedInstanceState.getInt("LAST_DISPLAYED_PAGE");
-            endReached = savedInstanceState.getBoolean("END_REACHED");
+        if (currentView[OFFLINE_VIEW])
+            showOfflineView();
+        else if (currentView[NO_RESULTS_VIEW]) {
+            showNoResultsView();
+            updateNoResultsTextView(savedInstanceState.getString("NO_RESULT_SEARCH"));
+            booksQuery.setQuery(mSearchView.getQuery());
+        } else if (currentView[RESULTS_VIEW]) {
+            backupDataSet = (ArrayList<BookSearchItem>) savedInstanceState.getSerializable("DATA_SET");
+            mAdapter = new RecyclerSearchAdapter(backupDataSet, currentLat, currentLong);
+            mRecyclerView.setAdapter(mAdapter);
+            showResultsView();
+        }
+        lastSearchedSeqNo = savedInstanceState.getInt("LAST_SEARCHED_SEQ_NO");
+        lastDisplayedSeqNo = savedInstanceState.getInt("LAST_DISPLAYED_SEQ_NO");
+        lastRequestedPage = savedInstanceState.getInt("LAST_REQUESTED_PAGE");
+        lastDisplayedPage = savedInstanceState.getInt("LAST_DISPLAYED_PAGE");
+        endReached = savedInstanceState.getBoolean("END_REACHED");
 
     }
 }

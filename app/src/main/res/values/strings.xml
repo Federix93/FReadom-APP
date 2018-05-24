@@ -201,4 +201,6 @@
     <string name="new_message_notification_title_photo">%1$s ti ha inviato una foto</string>
     <string name="chat_wait_owner_response">Prima di iniziare la conversazione attendi che il proprietario del libro accetti la tua richiesta</string>
     <string name="chat_advice_owner_response">Questo utente non potrà inviarti altri messaggi fino alla tua prima risposta</string>
+    <string name="search_unknown_error_top">Si è verificato un errore sconosciuto</string>
+    <string name="search_unknown_error_bottom">Si prega di riprovare più tardi</string>
 </resources>
