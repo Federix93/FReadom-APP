@@ -26,8 +26,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.ui.LoadBookActivity;
-import com.example.android.lab1.ui.ProfileActivity;
+import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
@@ -52,17 +51,24 @@ public class HomePageActivity extends AppCompatActivity
     public static final int ADD_BOOK_ACTIVITY = 22847;
     private static final String CURRENT_FRAGMENT = "HFK";
     private static final String DASHBOARD_FRAGMENT = "DASHBOARD_FRAG";
-    private static final int HOME_FRAGMENT = 0;
     private static final int ADD_BOOK = 1;
     private static final int DASH_FRAGMENT = 2;
     FragmentManager mFragmentManager;
     HomeFragment mHomeFragment;
-    DashboardFragment mDashboardFragment;
+    YourLibraryFragment mYourLibraryFragment;
+    LoanFragment mLoanFragment;
+    RequestsFragment mRequestFragment;
     AHBottomNavigation mBottomNavigation;
     ImageView mProfileImage;
     TextView mUsernameTextView;
     TextView mEmailTextView;
     LinearLayout mSideNavLinearLayout;
+    private User mUser;
+
+    private static final int HOME_FRAGMENT = 0;
+    private static final int YOUR_LIBRARY = 1;
+    private static final int LOANS_FRAGMENT = 2;
+    private static final int REQUESTS_FRAGMENT = 3;
     private int oldPosition;
     private int comeBackPosition;
     private Fragment mCurrentFragment;
@@ -87,7 +93,7 @@ public class HomePageActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         View header = navigationView.getHeaderView(0);
-        mProfileImage = header.findViewById(R.id.profile_image);
+        mProfileImage = header.findViewById(R.id.global_profile_image);
         mUsernameTextView = header.findViewById(R.id.name_text_nav_drawer);
         mEmailTextView = header.findViewById(R.id.email_text_nav_drawer);
         mSideNavLinearLayout = header.findViewById(R.id.header_nav_drawer);
@@ -105,46 +111,41 @@ public class HomePageActivity extends AppCompatActivity
             docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
                 @Override
                 public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
-                    User user = snapshot.toObject(User.class);
-                    updateNavigationDrawer(user);
+                    mUser = snapshot.toObject(User.class);
+                    updateNavigationDrawer();
                 }
             });
         }
 
         mFragmentManager = getSupportFragmentManager();
 
-
+        mHomeFragment = new HomeFragment();
+        mYourLibraryFragment = new YourLibraryFragment();
+        mLoanFragment = new LoanFragment();
+        mRequestFragment = new RequestsFragment();
         mBottomNavigation = findViewById(R.id.navigation);
 
         AHBottomNavigationItem homeItem = new AHBottomNavigationItem(getString(R.string.title_home), R.drawable.ic_home_black_24dp);
-        AHBottomNavigationItem addBook = new AHBottomNavigationItem(getString(R.string.add_book_fragment_title), R.drawable.ic_add_box_black_24dp);
-        AHBottomNavigationItem dashItem = new AHBottomNavigationItem(getString(R.string.title_dashboard), R.drawable.ic_dashboard_black_24dp);
+        AHBottomNavigationItem yourLibrary = new AHBottomNavigationItem(getString(R.string.your_library_fragment), R.drawable.ic_library_books_black_24dp);
+        AHBottomNavigationItem loansItem = new AHBottomNavigationItem(getString(R.string.title_loans), R.drawable.ic_compare_arrows_black_24dp);
+        AHBottomNavigationItem requestsItem = new AHBottomNavigationItem(getString(R.string.title_requests), R.drawable.ic_dashboard_black_24dp);
 
         ArrayList<AHBottomNavigationItem> items = new ArrayList<>();
 
         items.add(homeItem);
-        items.add(addBook);
-        items.add(dashItem);
+        items.add(yourLibrary);
+        items.add(loansItem);
+        items.add(requestsItem);
         oldPosition = 0;
         mBottomNavigation.addItems(items);
         mBottomNavigation.setBehaviorTranslationEnabled(false);
         mBottomNavigation.setAccentColor(getResources().getColor(R.color.colorSecondaryAccent));
+        mBottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(CURRENT_FRAGMENT)) {
-            mCurrentFragment = mFragmentManager.getFragment(savedInstanceState,
-                    CURRENT_FRAGMENT);
-            mFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_frame, mCurrentFragment)
-                    .commit();
-        } else {
-            mHomeFragment = new HomeFragment();
-            mDashboardFragment = new DashboardFragment();
-            mCurrentFragment = mHomeFragment;
-            mFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_frame, mCurrentFragment)
-                    .commit();
-        }
 
+        mFragmentManager.beginTransaction()
+                .replace(R.id.fragment_frame, mHomeFragment)
+                .commit();
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
@@ -153,52 +154,36 @@ public class HomePageActivity extends AppCompatActivity
                 } else {
                     switch (position) {
                         case HOME_FRAGMENT:
-                            if (oldPosition != ADD_BOOK) {
-                                if (mHomeFragment == null) // may be null if dashboard was selected and user rotated device
-                                    mHomeFragment = new HomeFragment();
-                                mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mHomeFragment).commit();
-                                mCurrentFragment = mHomeFragment;
-                            }
+                            mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mHomeFragment).commit();
 
                             oldPosition = position;
                             break;
 
-                        case ADD_BOOK:
-                            if (mFirebaseAuth.getCurrentUser() == null) {
+                        case YOUR_LIBRARY:
+                            if(mFirebaseAuth.getCurrentUser() == null){
                                 Toast.makeText(getApplicationContext(), "Devi essere loggato", Toast.LENGTH_SHORT).show();
                                 break;
                             }
-                            comeBackPosition = oldPosition;
+                            mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mYourLibraryFragment).commit();
+
                             oldPosition = position;
-                            Intent intent = new Intent(getApplicationContext(), LoadBookActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            startActivityForResult(intent, ADD_BOOK_ACTIVITY);
                             break;
 
-                        case DASH_FRAGMENT:
-                            if (oldPosition != ADD_BOOK) {
-                                if (mDashboardFragment == null)
-                                    mDashboardFragment = new DashboardFragment();
-                                mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mDashboardFragment).commit();
-                                mCurrentFragment = mDashboardFragment;
-                            }
+                        case LOANS_FRAGMENT:
+                            mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mLoanFragment).commit();
+
+                            oldPosition = position;
+                            break;
+                        case REQUESTS_FRAGMENT:
+                            mFragmentManager.beginTransaction().replace(R.id.fragment_frame, mRequestFragment).commit();
+
                             oldPosition = position;
                             break;
                     }
                 }
-
                 return true;
             }
         });
-
-
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        getSupportFragmentManager().putFragment(outState, CURRENT_FRAGMENT, mCurrentFragment);
     }
 
     @Override
@@ -222,6 +207,7 @@ public class HomePageActivity extends AppCompatActivity
         } else if (id == R.id.nav_profile) {
             Intent intent = new Intent(this, ProfileActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("user", mUser);
             startActivity(intent);
 
         } else if (id == R.id.nav_logout) {
@@ -241,12 +227,12 @@ public class HomePageActivity extends AppCompatActivity
         return true;
     }
 
-    private void updateNavigationDrawer(User user) {
+    private void updateNavigationDrawer() {
 
-        if (user != null) {
-            if (user.getImage() != null) {
+        if (mUser != null) {
+            if (mUser.getImage() != null) {
                 Glide.with(getApplicationContext())
-                        .load(user.getImage())
+                        .load(mUser.getImage())
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mProfileImage);
 
@@ -256,8 +242,8 @@ public class HomePageActivity extends AppCompatActivity
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mProfileImage);
             }
-            mUsernameTextView.setText(user.getUsername());
-            mEmailTextView.setText(user.getEmail());
+            mUsernameTextView.setText(mUser.getUsername());
+            mEmailTextView.setText(mUser.getEmail());
         } else {
             Glide.with(getApplicationContext())
                     .load(R.drawable.ic_account_circle_black_24dp)
@@ -277,7 +263,7 @@ public class HomePageActivity extends AppCompatActivity
                 break;
             case Constants.POSITION_ACTIVITY_REQUEST:
             case Constants.PICK_GENRE:
-                mCurrentFragment.onActivityResult(requestCode, resultCode, data);
+                mHomeFragment.onActivityResult(requestCode, resultCode, data);
                 break;
         }
 

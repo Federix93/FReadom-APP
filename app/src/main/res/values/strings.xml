@@ -16,7 +16,7 @@
     <string name="invalid_lat_long_used">Errata Latitudine o Longitudine usata</string>
     <string name="no_address_found">Nessun indirizzo trovato</string>
     <string name="address_text">Indirizzo</string>
-    <string name="short_bio_text">Breve Descrizione</string>
+    <string name="short_bio_text" translatable="false">Breve Descrizione</string>
     <string name="selection_position">Seleziona la tua posizione</string>
     <string name="enable_internet">Connettersi ad una rete per selezionare una nuova posizione</string>
     <string name="no_internet_connection">Connessione ad internet assente</string>
@@ -41,16 +41,21 @@
     <string name="connection_internet_dialog">Attesa della connessione internet</string>
     <string name="email_verification">Verificare l\'email per procedere con il login, altrimenti cambiare metodo di accesso.</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_loans">Prestiti</string>
+    <string name="title_requests">Richieste</string>
     <string name="title_profile">Profilo</string>
+    <string name="profile_info_fragment">Info</string>
+    <string name="profile_reviews_fragment">Recensioni</string>
     <string name="search">Cerca</string>
     <string name="filter">Filtra</string>
     <string name="verification_email_confirm">OK</string>
     <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
     <string name="confirm">Conferma</string>
-    <string name="dashboard_library_item">I tuoi libri</string>
-    <string name="dashboard_borrowed_item">Libri richiesti</string>
-    <string name="dashboard_lended_item">Prestati</string>
+    <string name="loan_your_item">Libri in prestito</string>
+    <string name="loan_other_book_item">Libri ricevuti</string>
+    <string name="request_done_item">Effettuate</string>
+    <string name="request_received_item">Ricevute</string>
+
     <string name="load_book_upload">Upload del libro in corso</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
     <string name="load_book_tags">Aggiungi parole chiave per la ricerca del libro</string>
@@ -62,7 +67,7 @@
     <string name="condition_near_mint">Ottime</string>
     <string name="condition_mint">Perfette</string>
 
-    <string name="toolbar_title_home">Libreria</string>
+    <string name="toolbar_title_home">Freadom</string>
     <string name="activate_position">Attivare la posizione</string>
     <string name="activate">Attiva</string>
 
@@ -90,7 +95,7 @@
 
     <string name="search_books_hint">Titolo, autore, editore, tags...</string>
 
-    <string name="add_book_fragment_title">Aggiungi libro</string>
+    <string name="your_library_fragment">La tua libreria</string>
 
     <string name="position_filter_home_page">POSIZIONE</string>
     <string name="genre_filter_home_page">GENERI</string>
@@ -101,6 +106,8 @@
     <string name="reviews">Recensioni</string>
     <string name="books">Libri</string>
     <string name="rating">Rating</string>
+    <string name="rating_global_profile">Rating: %.1f</string>
+    <string name="library">Libreria</string>
 
     <string-array name="genre">
         <item>Arte</item>
@@ -177,6 +184,11 @@
     <string name="cancel_uppercase">ANNULLA</string>
     <string name="reset_filters_uppercase">RESETTA FILTRI</string>
     <string name="error_message">Qualcosa è andato storto</string>
+
+    <string name="book_detail_gallery">Galleria</string>
+    <string name="more_info">Altre Info</string>
+    <string name="not_rated_yet">Nessuna recensione</string>
+
     <string name="wait_for_chat_opening">Apertura della chat in corso</string>
     <string name="book_not_available">Libro non più disponibile</string>
     <string name="open_chat">Vai alla chat</string>

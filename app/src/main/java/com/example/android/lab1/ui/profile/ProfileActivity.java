@@ -1,4 +1,4 @@
-package com.example.android.lab1.ui;
+package com.example.android.lab1.ui.profile;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -7,31 +7,24 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.TextInputLayout;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
+import com.example.android.lab1.adapter.ViewPagerAdapter;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -40,39 +33,52 @@ public class ProfileActivity extends AppCompatActivity {
     public static final String ADDRESS_KEY = "ADDRESS";
     private static final int READ_EXTERNAL_STORAGE_PERMISSION = 10;
 
-    TextInputLayout mUsernameTextInputLayout;
-    TextInputLayout mEmailTextInputLayout;
-    TextInputLayout mPhoneTextInputLayout;
-    TextInputLayout mAddressTextInputLayout;
-    TextInputLayout mShortBioTextInputLayout;
+    TextView mUsernameText;
+    ImageView mEditButton;
+    ImageView mBackArrow;
     ImageView mCircleImageView;
-    Toolbar mToolbar;
+    //Toolbar mToolbar;
+    FragmentManager mFt = null;
 
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseFirestore mDb;
-    private User mUser;
-    private DocumentReference mUserDocumentReference;
+    public static User mUser;
     SharedPreferencesManager mSharedPreferencesManager;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-        mUsernameTextInputLayout = findViewById(R.id.username_text);
-
-        mPhoneTextInputLayout = findViewById(R.id.phone_text);
-
-        mEmailTextInputLayout = findViewById(R.id.email_text);
-
-        mAddressTextInputLayout = findViewById(R.id.address_text_view);
-
+        setContentView(R.layout.activity_show_profile);
+        mUsernameText = findViewById(R.id.global_profile_name);
         mCircleImageView = findViewById(R.id.profile_image);
-
-        mShortBioTextInputLayout = findViewById(R.id.bio_text_edit);
+        mEditButton = findViewById(R.id.edit_profile_button);
+        mBackArrow = findViewById(R.id.back_arrow_profile);
 
         Utilities.setupStatusBarColor(this);
+        mUser = getIntent().getExtras().getParcelable("user");
+        mFt = getSupportFragmentManager();
 
+        mEditButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mUser != null) {
+                    Intent intent = new Intent(getApplicationContext(), EditProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra(ADDRESS_KEY, mUser.getAddress());
+                    startActivity(intent);
+                }else{
+                    Toast.makeText(getApplicationContext(), "Devi essere loggato", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        mBackArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        /*
         mToolbar = findViewById(R.id.toolbar_profile_activity);
         mToolbar.setTitle(R.string.title_profile);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
@@ -106,21 +112,15 @@ public class ProfileActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-        mFirebaseAuth = FirebaseAuth.getInstance();
+        */
+        /*mFirebaseAuth = FirebaseAuth.getInstance();
         mDb = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build();
         mDb.setFirestoreSettings(settings);
         if (mFirebaseAuth.getCurrentUser() != null)
-            mUserDocumentReference = mDb.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
-        mSharedPreferencesManager = SharedPreferencesManager.getInstance(this);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
+            mUserDocumentReference = mDb.collection("users").document(mFirebaseAuth.getUid());
         if (mUserDocumentReference != null) {
             mUserDocumentReference.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
                 @Override
@@ -136,7 +136,23 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             });
 
+        }*/
+        mSharedPreferencesManager = SharedPreferencesManager.getInstance(this);
+
+        if(mUser != null) {
+            checkPermissionToLoadPicture();
+            updateUI();
         }
+
+        ViewPager viewPager = findViewById(R.id.viewpager_profile);
+        setupViewPager(viewPager);
+
+        // Give the TabLayout the ViewPager
+        TabLayout tabs = findViewById(R.id.tabs_show_profile);
+        tabs.addTab(tabs.newTab());
+        tabs.addTab(tabs.newTab());
+
+        tabs.setupWithViewPager(viewPager);
     }
 
     @Override
@@ -153,41 +169,24 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    private void updateUI() {
-        if (mUsernameTextInputLayout.getEditText() != null) {
-            if (mUser.getUsername() != null)
-                mUsernameTextInputLayout.getEditText().setText(mUser.getUsername());
-            mUsernameTextInputLayout.getEditText().setKeyListener(null);
-            mUsernameTextInputLayout.getEditText().setEnabled(false);
-        }
-        if (mEmailTextInputLayout.getEditText() != null) {
-            if (mUser.getEmail() != null)
-                mEmailTextInputLayout.getEditText().setText(mUser.getEmail());
-            mEmailTextInputLayout.getEditText().setKeyListener(null);
-            mEmailTextInputLayout.getEditText().setEnabled(false);
-        }
-        if (mPhoneTextInputLayout.getEditText() != null) {
-            if (mUser.getPhone() != null)
-                mPhoneTextInputLayout.getEditText().setText(mUser.getPhone());
-            mPhoneTextInputLayout.getEditText().setKeyListener(null);
-            mPhoneTextInputLayout.getEditText().setEnabled(false);
-        }
+    public static User getUser() {
+        return mUser;
+    }
 
-        if (mShortBioTextInputLayout.getEditText() != null) {
-            if (mUser.getShortBio() != null)
-                mShortBioTextInputLayout.getEditText().setText(mUser.getShortBio());
-            mShortBioTextInputLayout.getEditText().setKeyListener(null);
-            mShortBioTextInputLayout.getEditText().setEnabled(false);
+    private void setupViewPager(ViewPager viewPager) {
+        ViewPagerAdapter adapter = new ViewPagerAdapter(mFt);
+        adapter.addFragment(new ProfileInfoFragment(), getResources().getString(R.string.profile_info_fragment));
+        adapter.addFragment(new ProfileReviewFragment(), getResources().getString(R.string.profile_reviews_fragment));
+        viewPager.setAdapter(adapter);
+    }
+
+    private void updateUI() {
+        if (mUsernameText.getText() != null) {
+            if (mUser.getUsername() != null)
+                mUsernameText.setText(mUser.getUsername());
         }
         if (mUser.getImage() != null) {
             mSharedPreferencesManager.putImage(mUser.getImage());
-
-        }
-        if (mAddressTextInputLayout.getEditText() != null) {
-            if (mUser.getAddress() != null)
-                mAddressTextInputLayout.getEditText().setText(mUser.getAddress());
-            mAddressTextInputLayout.getEditText().setKeyListener(null);
-            mAddressTextInputLayout.getEditText().setEnabled(false);
         }
     }
 

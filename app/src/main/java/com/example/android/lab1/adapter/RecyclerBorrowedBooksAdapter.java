@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,10 +87,10 @@ public class RecyclerBorrowedBooksAdapter extends RecyclerView.Adapter<RecyclerB
 
         public BorrowedBooksViewHolder(View itemView) {
             super(itemView);
-            mBookTitle = itemView.findViewById(R.id.rv_book_dash_title);
-            mBookAuthor = itemView.findViewById(R.id.rv_book_dash_author);
-            mBookCity = itemView.findViewById(R.id.rv_book_dash_city);
-            mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_dash_library);
+            mBookTitle = itemView.findViewById(R.id.rv_book_lent_title);
+            mBookAuthor = itemView.findViewById(R.id.rv_book_lent_author);
+            mBookCity = itemView.findViewById(R.id.rv_book_lent_city);
+            mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_lent);
             mEditButton = itemView.findViewById(R.id.dash_edit_item);
             mDeleteButton = itemView.findViewById(R.id.dash_delete_item);
             mChatButton = itemView.findViewById(R.id.dash_chat_item);

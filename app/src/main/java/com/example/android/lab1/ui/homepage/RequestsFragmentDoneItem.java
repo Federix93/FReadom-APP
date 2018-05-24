@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,7 @@ import android.view.ViewGroup;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBorrowedBooksAdapter;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.model.BorrowedBooks;
+import com.example.android.lab1.model.BooksBorrowed;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,7 +29,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public class DashboardFragmentBorrowedItem extends Fragment {
+public class RequestsFragmentDoneItem extends Fragment {
 
     private RecyclerView mRecyclerView;
     FirebaseFirestore mFirebaseFirestore;
@@ -42,15 +41,15 @@ public class DashboardFragmentBorrowedItem extends Fragment {
     DatabaseReference openedChatReference;
     RecyclerBorrowedBooksAdapter mAdapter;
 
-    public DashboardFragmentBorrowedItem() {
+    public void RequestsFragmentDoneItem() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_dashboard_borrowed, container, false);
+        View view = inflater.inflate(R.layout.recycler_fragments_content, container, false);
 
-        mRecyclerView = view.findViewById(R.id.recycler_books);
+        mRecyclerView = view.findViewById(R.id.recycler_fragment_content);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         listBooks = new ArrayList<>();
         chatIDs = new ArrayList<>();
@@ -78,7 +77,7 @@ public class DashboardFragmentBorrowedItem extends Fragment {
                         @Override
                         public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                             if (snapshot != null && snapshot.exists()) {
-                                BorrowedBooks booksBorrowed = snapshot.toObject(BorrowedBooks.class);
+                                BooksBorrowed booksBorrowed = snapshot.toObject(BooksBorrowed.class);
                                 final List<String> booksID = booksBorrowed.getBooksID();
 
                                 for (final String bookID : booksID) {
@@ -104,7 +103,6 @@ public class DashboardFragmentBorrowedItem extends Fragment {
                                                                     }
                                                                     @Override
                                                                     public void onCancelled(DatabaseError databaseError) {
-
                                                                     }
                                                                 });
                                                     }

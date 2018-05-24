@@ -16,11 +16,12 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.BorrowedBooks;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.profile.GlobalShowProfileActivity;
 import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
@@ -54,19 +56,23 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
 import com.google.firebase.firestore.ListenerRegistration;
 
+import static android.view.View.GONE;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class BookDetailsActivity extends AppCompatActivity {
 
     ConstraintLayout mProfileConstraintLayout;
+    LinearLayout mBookDescriptionLayout;
+    RelativeLayout mGalleryLayout;
     Toolbar mToolbar;
     TextView mBookTitleTextView;
     TextView mAuthorTextView;
     TextView mEditorTextView;
     TextView mPublicationDateTextView;
+    TextView mGalleryTextView;
     ImageView mBookThumbnailImageView;
     TextView mUsernameTextView;
     TextView mRatingTextView;
@@ -77,6 +83,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     ImageView mShareImageView;
     ImageView mFavoritesImageView;
     TextView mBookDetailCondition;
+    TextView mBookDescription;
     ImageView mBookDetailConditionColor;
     FirebaseFirestore mFirebaseFirestore;
     FirebaseAuth mFirebaseAuth;
@@ -107,6 +114,10 @@ public class BookDetailsActivity extends AppCompatActivity {
         mFavoritesImageView = findViewById(R.id.add_to_favorite);
         mBookDetailCondition = findViewById(R.id.book_detail_conditions);
         mBookDetailConditionColor = findViewById(R.id.book_detail_conditions_color);
+        mGalleryTextView = findViewById(R.id.gallery_book_detail);
+        mBookDescription = findViewById(R.id.book_description);
+        mBookDescriptionLayout = findViewById(R.id.book_description_container);
+        mGalleryLayout = findViewById(R.id.relative_gallery_layout);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -155,6 +166,21 @@ public class BookDetailsActivity extends AppCompatActivity {
                     mListenerRegistration.remove();
             }
         });
+
+        //if (mBook.getDescription() != null) {
+            mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
+                    intent.putExtra("Title", mBook.getTitle());
+                    startActivity(intent);
+                }
+            });
+        /*} else {
+            mBookDescriptionLayout.setVisibility(GONE);
+        }*/
 
         mBookButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,31 +260,6 @@ public class BookDetailsActivity extends AppCompatActivity {
             }
         });
     }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("LULLO", "OnStop");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("LULLO", "OnPause");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("LULLO", "OnDestroy");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("LULLO", "OnResume");
-    }
-
     private void updateUI(final Book book) {
         if (book.getTitle() != null)
             mBookTitleTextView.setText(book.getTitle());
@@ -280,7 +281,6 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
             mBookDetailConditionColor.setColorFilter(Condition.getConditionColor(getApplicationContext(), book.getCondition()));
         }
-
         if (book.getWebThumbnail() != null)
             Glide.with(this).load(book.getWebThumbnail())
                     .apply(new RequestOptions().centerCrop())
@@ -301,7 +301,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
                 recyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
             } else {
-                recyclerView.setVisibility(View.GONE);
+                mGalleryLayout.setVisibility(GONE);
             }
         }
         if (book.getUid() != null) {
@@ -331,6 +331,8 @@ public class BookDetailsActivity extends AppCompatActivity {
                             }
                             if (String.valueOf(mUser.getRating()) != null) {
                                 mRatingTextView.setText(String.valueOf(mUser.getRating()));
+                            } else {
+                                mRatingTextView.setText(getResources().getString(R.string.not_rated_yet));
                             }
                         }
                     }

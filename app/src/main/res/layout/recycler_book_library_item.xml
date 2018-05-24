@@ -91,11 +91,11 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="32dp"
+                        android:ellipsize="end"
                         android:gravity="start"
+                        android:maxLines="1"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:maxLines="1"
-                        android:ellipsize="end"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/position_lent"
                         app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_author" />
@@ -110,38 +110,14 @@
                         app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_author"
                         app:srcCompat="@drawable/ic_location_on_orange_24dp" />
 
-
-                    <ImageView
-                        android:id="@+id/dash_chat_item"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_marginBottom="12dp"
-                        android:layout_marginEnd="24dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:srcCompat="@drawable/ic_chat_grey_32dp" />
-
-                    <TextView
-                        android:id="@+id/dash_chat_notifications"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        android:layout_marginEnd="16dp"
-                        android:background="@drawable/rounded_textview"
-                        android:gravity="center"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
-
                     <ImageView
                         android:id="@+id/dash_delete_item"
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:layout_marginBottom="12dp"
-                        android:layout_marginEnd="24dp"
+                        android:layout_marginEnd="8dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/dash_chat_item"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:srcCompat="@drawable/ic_delete_grey_24dp" />
 
                     <ImageView
