@@ -1,5 +1,7 @@
 package com.example.android.lab1.ui;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -81,6 +83,8 @@ public class SignInActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mFirebaseAuth.getCurrentUser();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
+
+        createNotificationChannel();
 
         if(user != null){
             openHomePageActivity();
@@ -269,6 +273,31 @@ public class SignInActivity extends AppCompatActivity {
                             .setAvailableProviders(providers)
                             .build(),
                     RC_SIGN_IN);
+        }
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence requestName = getString(R.string.new_request_channel_title);
+            String requestDescription = getString(R.string.new_request_channel_description);
+            int requestImportance = NotificationManager.IMPORTANCE_HIGH;
+
+            CharSequence messageName = getString(R.string.new_message_channel_title);
+            String messageDescription = getString(R.string.new_message_channel_description);
+            int messageImportance = NotificationManager.IMPORTANCE_DEFAULT;
+
+            NotificationChannel requestChannel = new NotificationChannel(Utilities.BOOK_REQUEST_CHANNEL_ID, requestName, requestImportance);
+            requestChannel.setDescription(requestDescription);
+
+            NotificationChannel messageChannel = new NotificationChannel(Utilities.NEW_MESSAGE_CHANNEL_ID, messageName, messageImportance);
+            messageChannel.setDescription(messageDescription);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(requestChannel);
+            notificationManager.createNotificationChannel(messageChannel);
         }
     }
 }

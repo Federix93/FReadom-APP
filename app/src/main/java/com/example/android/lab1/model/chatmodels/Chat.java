@@ -66,4 +66,11 @@ public class Chat {
 
     public int getCounter() { return mCounter; }
 
+    public String getIsText() {
+        return mIsText;
+    }
+
+    public void setIsText (String isText) {
+        this.mIsText = isText;
+    }
 }
