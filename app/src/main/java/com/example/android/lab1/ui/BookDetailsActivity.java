@@ -91,7 +91,6 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     private String mBookId;
     private User mUser;
-    private ListenerRegistration mListenerRegistration;
     private Book mBook;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -120,7 +119,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookDescriptionLayout = findViewById(R.id.book_description_container);
         mGalleryLayout = findViewById(R.id.relative_gallery_layout);
 
-        mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
+        mBook = getIntent().getParcelableExtra("BookSelected");
 
         Utilities.setupStatusBarColor(this);
         //setupOnClickListeners();
@@ -149,24 +148,17 @@ public class BookDetailsActivity extends AppCompatActivity {
                 .setPersistenceEnabled(true)
                 .build();
         mFirebaseFirestore.setFirestoreSettings(settings);
-        final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
-        mListenerRegistration = docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                mBook = documentSnapshot.toObject(Book.class);
-                if(mBook == null) {
-                    Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                if(mBook.isAlreadyLent()){
-                    mBookButton.setText(getResources().getString(R.string.book_not_available));
-                    mBookButton.setEnabled(false);
-                }
-                updateUI(mBook);
-                if (mListenerRegistration != null)
-                    mListenerRegistration.remove();
-            }
-        });
+
+        if(mBook == null) {
+            Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        if(mBook.isAlreadyLent()){
+            mBookButton.setText(getResources().getString(R.string.book_not_available));
+            mBookButton.setEnabled(false);
+        }
+        updateUI(mBook);
+
 
         //if (mBook.getDescription() != null) {
             mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
@@ -183,7 +175,7 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBookDescriptionLayout.setVisibility(GONE);
         }*/
 
-        mBookButton.setOnClickListener(new View.OnClickListener() {
+        /*mBookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final DocumentReference docRef;
@@ -218,13 +210,13 @@ public class BookDetailsActivity extends AppCompatActivity {
                     Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
                 }
             }
-        });
+        });*/
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
+        /*final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
         docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
@@ -259,7 +251,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                     });
                 }
             }
-        });
+        });*/
     }
     private void updateUI(final Book book) {
         if (book.getTitle() != null)
@@ -370,7 +362,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         } else
             mPreviewButton.setEnabled(false);
 
-        mBookButton.setOnClickListener(new View.OnClickListener() {
+        /*mBookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final DocumentReference docRef;
@@ -403,7 +395,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                     Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
                 }
             }
-        });
+        });*/
 
         mShareImageView.setOnClickListener(new View.OnClickListener() {
             @Override

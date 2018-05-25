@@ -1,10 +1,11 @@
 package com.example.android.lab1.ui.homepage;
 
-import android.app.Activity;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -16,12 +17,8 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
-import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -30,35 +27,28 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.algolia.search.saas.AbstractQuery;
-import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
-import com.algolia.search.saas.CompletionHandler;
 import com.algolia.search.saas.Index;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.adapter.RecyclerYourLibraryAdapter;
 import com.example.android.lab1.adapter.ViewPagerAdapter;
-import com.example.android.lab1.model.Address;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.GenreBooksActivity;
-import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.viewmodel.BooksViewModel;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
@@ -100,11 +90,12 @@ public class TabFragment extends Fragment {
     private boolean[] mRecyclerUpdating;
     private Integer mSelectedGenre;
     private GeoPoint mCurrentPosition;
-
     //YourLibraryFragment variables
     private RecyclerView mYourLibraryRecyclerView;
     RecyclerYourLibraryAdapter mAdapter;
+    RecyclerBookAdapter mRecyclerBookAdapter;
     List<Book> mBookIds;
+    List<Book> mBookListHomeFragment = new ArrayList<>();
 
     //LoanFragment variables
 
@@ -210,8 +201,6 @@ public class TabFragment extends Fragment {
                 Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
             }
         });
-
-
         mFirstRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         SnapHelper firstSnapHelperStart = new GravitySnapHelper(Gravity.START);
@@ -223,10 +212,23 @@ public class TabFragment extends Fragment {
         SnapHelper secondSnapHelperStart = new GravitySnapHelper(Gravity.START);
         mSecondRecyclerView.setNestedScrollingEnabled(true);
         secondSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
-
         mFirebaseFirestore = FirebaseFirestore.getInstance();
 
-        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        BooksViewModel bookViewModel = ViewModelProviders.of(getActivity()).get(BooksViewModel.class);
+        LiveData<List<Book>> liveData = bookViewModel.getSnapshotLiveData();
+
+        liveData.observe(getActivity(), new Observer<List<Book>>() {
+            @Override
+            public void onChanged(@Nullable List<Book> books) {
+                if(mRecyclerBookAdapter == null){
+                    mRecyclerBookAdapter = new RecyclerBookAdapter(books);
+                    mFirstRecyclerView.setAdapter(mRecyclerBookAdapter);
+                    mSecondRecyclerView.setAdapter(mRecyclerBookAdapter);
+                }
+            }
+        });
+
+        /*mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 new Handler().post(new Runnable() {
@@ -236,10 +238,10 @@ public class TabFragment extends Fragment {
                     }
                 });
             }
-        });
+        });*/
 
         getUserPosition();
-        queryDatabase();
+        //queryDatabase();
 
         if (SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
             Resources res = getResources();
@@ -275,7 +277,7 @@ public class TabFragment extends Fragment {
          */
     }
 
-    private void queryDatabase() {
+    /*private void queryDatabase() {
         final com.algolia.search.saas.Query algoliaQuery1 = new com.algolia.search.saas.Query();
         com.algolia.search.saas.Query algoliaQuery2 = new com.algolia.search.saas.Query();
         final int homePageBooksNumber = getResources().getInteger(R.integer.homepage_book_number);
@@ -417,7 +419,7 @@ public class TabFragment extends Fragment {
             });
         }
 
-    }
+    }*/
 
     private void processFilteredResultIntoRecyclerView(JSONObject result, RecyclerView recyclerView) {
         try {

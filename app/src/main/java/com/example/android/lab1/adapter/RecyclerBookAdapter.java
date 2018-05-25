@@ -32,6 +32,14 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         this.IDs = IDs;
     }
 
+    public RecyclerBookAdapter(List<Book> books){
+        this.books = books;
+    }
+
+    public void updateItems(List<Book> books){
+        this.books = books;
+    }
+
     @NonNull
     @Override
     public BookViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -107,7 +115,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
         }
 
-        void bind(Book book, final int position) {
+        void bind(final Book book, final int position) {
            /* mRootView.setVisibility(View.VISIBLE);
             if (mOldParams != null) mRootView.setLayoutParams(mOldParams); */
             mTitle.setText(book.getTitle());
@@ -125,7 +133,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("ID_BOOK_SELECTED", IDs.get(position));
+                    intent.putExtra("BookSelected", book);
                     v.getContext().startActivity(intent);
                 }
             });
