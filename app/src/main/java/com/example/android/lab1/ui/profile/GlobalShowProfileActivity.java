@@ -20,6 +20,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ViewPagerAdapter;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.ReviewListFragment;
 import com.example.android.lab1.ui.TextDetailActivity;
 import com.example.android.lab1.utils.Utilities;
 
@@ -133,7 +134,8 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(mFt);
         adapter.addFragment(new GlobalProfileBooksFragment(), getResources().getString(R.string.toolbar_title_home));
-        adapter.addFragment(new GlobalProfileReviewsFragment(), getResources().getString(R.string.profile_reviews_fragment));
+        ReviewListFragment reviewListFragment = ReviewListFragment.Companion.newInstance(getUserId());
+        adapter.addFragment(reviewListFragment, getResources().getString(R.string.profile_reviews_fragment));
         viewPager.setAdapter(adapter);
 
     }

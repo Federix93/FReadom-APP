@@ -184,6 +184,26 @@
     <string name="cancel_uppercase">ANNULLA</string>
     <string name="reset_filters_uppercase">RESETTA FILTRI</string>
     <string name="error_message">Qualcosa è andato storto</string>
+    <string name="review_leave_optional_comment_for_owner">Racconta come è andato il tuo scambio</string>
+    <string name="review_title">Valuta il tuo scambio</string>
+    <string name="leave_review">Pubblica recensione</string>
+    <string name="review_toolbar_title">Lascia una recensione</string>
+    <string name="express_rating">Nessun giudizio espresso</string>
+    <string name="no_rating_to_show">Nessuna recensione</string>
+    <string name="ratings">Recensioni</string>
+    <string name="less_than_a_minute">Meno di un minuto fa</string>
+    <string name="a_minute_ago">Un minuto fa</string>
+    <string name="minutes_ago">Minuti fa</string>
+    <string name="an_hour_ago">Un ora fa</string>
+    <string name="hours_ago">ore fa</string>
+    <string name="a_day_ago">Un giorno fa</string>
+    <string name="days_ago">Giorni fa</string>
+    <string name="a_week_ago">Una settimana fa</string>
+    <string name="weeks_ago">settimane fa</string>
+    <string name="a_month_ago">Un mese fa</string>
+    <string name="months_ago">Mesi fa</string>
+    <string name="a_year_ago">Un anno fa</string>
+    <string name="years_ago">Anni fa</string>
 
     <string name="book_detail_gallery">Galleria</string>
     <string name="more_info">Altre Info</string>

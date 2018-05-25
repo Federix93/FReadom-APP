@@ -23,10 +23,12 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ViewPagerAdapter;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.ReviewListFragment;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
+import static com.example.android.lab1.ui.profile.ProfileActivity.Constants.USER_ID;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -42,6 +44,12 @@ public class ProfileActivity extends AppCompatActivity {
 
     public static User mUser;
     SharedPreferencesManager mSharedPreferencesManager;
+    private String mUserID;
+
+    public enum Constants
+    {
+        USER_ID
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -55,6 +63,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         Utilities.setupStatusBarColor(this);
         mUser = getIntent().getExtras().getParcelable("user");
+        mUserID = getIntent().getStringExtra(USER_ID.toString());
+
         mFt = getSupportFragmentManager();
 
         mEditButton.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +186,13 @@ public class ProfileActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(mFt);
         adapter.addFragment(new ProfileInfoFragment(), getResources().getString(R.string.profile_info_fragment));
-        adapter.addFragment(new ProfileReviewFragment(), getResources().getString(R.string.profile_reviews_fragment));
+        // create reviews fragment
+        Bundle args = new Bundle();
+        args.putString(ReviewListFragment.Constants.REVIEWED_ID.toString(), mUserID);
+
+        ReviewListFragment reviewListFragment = ReviewListFragment.Companion.newInstance(mUserID);
+
+        adapter.addFragment(reviewListFragment, getResources().getString(R.string.profile_reviews_fragment));
         viewPager.setAdapter(adapter);
     }
 

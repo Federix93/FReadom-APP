@@ -28,6 +28,7 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
+import com.example.android.lab1.ui.listeners.RatingActivityOpener;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.AuthUI;
@@ -71,12 +72,18 @@ public class HomePageActivity extends AppCompatActivity
     private static final int REQUESTS_FRAGMENT = 3;
     private int comeBackPosition;
     private Fragment mCurrentFragment;
+    private String mUserId;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
+
+        new RatingActivityOpener(this,
+                "SMc8vP0GD8eBUK0Wty8zfTYEB7l1",
+                "SMc8vP0GD8eBUK0Wty8zfTYEB7l1",
+                "4OGgy0KCkBBg4q8yb5mW").onClick(new View(getApplicationContext()));
 
         Toolbar toolbar = findViewById(R.id.toolbar_home_page_activity);
 
@@ -112,6 +119,7 @@ public class HomePageActivity extends AppCompatActivity
                 @Override
                 public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
                     mUser = snapshot.toObject(User.class);
+                    mUserId = snapshot.getId();
                     updateNavigationDrawer();
                 }
             });
@@ -199,6 +207,7 @@ public class HomePageActivity extends AppCompatActivity
             Intent intent = new Intent(this, ProfileActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("user", mUser);
+            intent.putExtra(ProfileActivity.Constants.USER_ID.toString(), mUserId);
             startActivity(intent);
 
         } else if (id == R.id.nav_logout) {
