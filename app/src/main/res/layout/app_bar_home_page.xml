@@ -21,8 +21,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        android:layout_marginBottom="64dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="72dp"
+        android:layout_marginEnd="16dp"
         app:srcCompat="@drawable/ic_add_white_24dp"
         android:visibility="gone"
         app:useCompatPadding="true"/>
