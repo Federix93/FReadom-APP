@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.ui.chat.ChatActivity;
+import com.example.android.lab1.ui.chat.CurrentOpenChat;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.io.IOException;
@@ -24,25 +25,27 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        Log.d(TAG, "onMessageReceived: Parto");
         switch (remoteMessage.getData().get("type")) {
             case Utilities.NEW_MESSAGE_CHANNEL_ID:
-                sendNewMessageNotification(remoteMessage.getData());
+                String currentOpenChat = CurrentOpenChat.getOpenChatID();
+                if(!(currentOpenChat != null && currentOpenChat.equals(remoteMessage.getData().get("chat"))))
+                {
+                    sendNewMessageNotification(remoteMessage.getData());
+                }
                 break;
 
             case Utilities.BOOK_REQUEST_CHANNEL_ID:
-                //sendNewBookRequestNotification(remoteMessage);
+//                sendNewBookRequestNotification(remoteMessage);
                 break;
 
             default:
-                Log.d(TAG, "onMessageReceived: Fottuto default");
                 break;
         }
 
     }
 
     private void sendNewMessageNotification(Map<String, String> data) {
-        Log.d(TAG, "sendNewMessageNotification: ci entro?");
+
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("ChatID", data.get("chat"));
         intent.putExtra("Username", data.get("sender"));
@@ -50,7 +53,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         intent.putExtra("BookID", data.get("book"));
         intent.putExtra("SenderUID", data.get("senderUID"));
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
         Bitmap userImage = null;
@@ -72,7 +75,8 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .setGroup("wewe");
 
         if(isText)
         {
@@ -101,7 +105,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(data.get("sender"),Integer.valueOf(data.get("senderUID")), notificationBuilder.build());
     }
 
 

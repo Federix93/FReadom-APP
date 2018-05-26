@@ -370,4 +370,16 @@ public class ChatActivity extends AppCompatActivity {
         FirebaseMessaging.getInstance().subscribeToTopic("notifications");
         Toast.makeText(this, "Subscribed to Topic: Notifications", Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        CurrentOpenChat.setOpenChatID(mChatID);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        CurrentOpenChat.setOpenChatID(null);
+    }
 }
