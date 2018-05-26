@@ -322,10 +322,16 @@ public class BookDetailsActivity extends AppCompatActivity {
             Glide.with(this).load(R.drawable.book_thumbnail_placeholder)
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
+
+        String uri = "@drawable/ic_bookmark_border_orange_24dp";  // where myresource (without the extension) is the file
+        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+        Drawable res = getResources().getDrawable(imageResource);
+        mFavoritesImageView.setImageDrawable(res);
+
         setupOnClickListeners(book);
 
-        // storage photos
 
+        // storage photos
         if (mGalleryRecyclerView != null) {
             if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
                 BookPhoto[] bookPhotos = new BookPhoto[book.getUserBookPhotosStoragePath().size()];

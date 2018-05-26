@@ -161,6 +161,8 @@
     <string name="delete_book">Delete</string>
     <string name="go_favorite">Go favorite</string>
     <string name="book_added">Book added to favorite</string>
+    <string name="favorite_title">Your favorites</string>
+    <string name="book_removed">Book removed from favorites</string>
 
 
 </resources>

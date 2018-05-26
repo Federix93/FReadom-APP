@@ -64,7 +64,6 @@ public class RequestsFragmentDoneItem extends Fragment {
 
         mAdapter = new LentBookAdapter(listBooks, booksID, chatIDs, usersID, mUsersOwner);
 
-        //mAdapter = new RecyclerBorrowedBooksAdapter(listBooks, booksID, chatIDs, usersID);
         mRecyclerView.setAdapter(mAdapter);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();

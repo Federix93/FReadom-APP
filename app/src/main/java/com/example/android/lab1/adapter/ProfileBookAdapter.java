@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +14,6 @@ import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.BookDetailsActivity;
-import com.example.android.lab1.ui.chat.ConversationsActivity;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -41,7 +38,7 @@ public class ProfileBookAdapter extends RecyclerView.Adapter<ProfileBookAdapter.
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        View cardView = inflater.inflate(R.layout.recycler_book_item_profile, parent, false);
+        View cardView = inflater.inflate(R.layout.recycler_book_item_global_profile, parent, false);
 
         return new MyViewHolder(cardView);
     }
