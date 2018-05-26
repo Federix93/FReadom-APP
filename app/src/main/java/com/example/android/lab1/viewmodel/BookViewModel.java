@@ -7,42 +7,50 @@ import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.example.android.lab1.model.User;
-import com.example.android.lab1.utils.FirebaseDocumentSnapshotLiveDataFirestore;
-import com.google.firebase.auth.FirebaseAuth;
+import com.example.android.lab1.model.Book;
+import com.example.android.lab1.utils.firebaseutils.FirebaseDocumentSnapshotLiveDataFirestore;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class BookViewModel extends ViewModel {
 
-    /*private static final DocumentReference USER_REF = FirebaseFirestore.getInstance().collection("books").document(FirebaseAuth.getInstance().getUid());
+    private String mBookID;
 
-    private final FirebaseDocumentSnapshotLiveDataFirestore liveData = new FirebaseDocumentSnapshotLiveDataFirestore(USER_REF);
+    private static DocumentReference SPECIFIC_BOOK_REF;
 
-    private final MediatorLiveData<User> userLiveData = new MediatorLiveData<>();
+    private FirebaseDocumentSnapshotLiveDataFirestore liveData;
 
-    public UserViewModel(){
-        userLiveData.addSource(liveData, new Observer<DocumentSnapshot>() {
+    private final MediatorLiveData<Book> bookLiveData = new MediatorLiveData<>();
+
+    public BookViewModel(String bookID){
+        mBookID = bookID;
+        SPECIFIC_BOOK_REF = FirebaseFirestore.getInstance().collection("books").document(mBookID);
+        liveData = new FirebaseDocumentSnapshotLiveDataFirestore(SPECIFIC_BOOK_REF);
+        fetchData();
+    }
+
+    private void fetchData(){
+        bookLiveData.addSource(liveData, new Observer<DocumentSnapshot>() {
             @Override
             public void onChanged(@Nullable final DocumentSnapshot snapshot) {
                 if(snapshot != null){
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            userLiveData.postValue(snapshot.toObject(User.class));
+                            bookLiveData.postValue(snapshot.toObject(Book.class));
                         }
                     }).start();
                 }else{
-                    userLiveData.setValue(null);
+                    bookLiveData.setValue(null);
                 }
             }
         });
     }
 
     @NonNull
-    public LiveData<User> getSnapshotLiveData(){
-        return userLiveData;
-    }*/
+    public LiveData<Book> getSnapshotLiveData(){
+        return bookLiveData;
+    }
 
 }

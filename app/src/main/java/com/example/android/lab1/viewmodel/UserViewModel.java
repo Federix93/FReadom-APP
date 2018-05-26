@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.utils.FirebaseDocumentSnapshotLiveDataFirestore;
+import com.example.android.lab1.utils.firebaseutils.FirebaseDocumentSnapshotLiveDataFirestore;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -16,13 +16,30 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UserViewModel extends ViewModel {
 
-    private static final DocumentReference USER_REF = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getUid());
+    private static DocumentReference USER_REF;
 
-    private final FirebaseDocumentSnapshotLiveDataFirestore liveData = new FirebaseDocumentSnapshotLiveDataFirestore(USER_REF);
+    private FirebaseDocumentSnapshotLiveDataFirestore liveData;
 
     private final MediatorLiveData<User> userLiveData = new MediatorLiveData<>();
 
     public UserViewModel(){
+        USER_REF = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getUid());
+        liveData = new FirebaseDocumentSnapshotLiveDataFirestore(USER_REF);
+        fetchData();
+    }
+
+    public UserViewModel(String uid){
+        USER_REF = FirebaseFirestore.getInstance().collection("users").document(uid);
+        liveData = new FirebaseDocumentSnapshotLiveDataFirestore(USER_REF);
+        fetchData();
+    }
+
+    @NonNull
+    public LiveData<User> getSnapshotLiveData(){
+        return userLiveData;
+    }
+
+    private void fetchData(){
         userLiveData.addSource(liveData, new Observer<DocumentSnapshot>() {
             @Override
             public void onChanged(@Nullable final DocumentSnapshot snapshot) {
@@ -38,11 +55,6 @@ public class UserViewModel extends ViewModel {
                 }
             }
         });
-    }
-
-    @NonNull
-    public LiveData<User> getSnapshotLiveData(){
-        return userLiveData;
     }
 
 }

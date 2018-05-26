@@ -1,4 +1,4 @@
-package com.example.android.lab1.utils;
+package com.example.android.lab1.utils.firebaseutils;
 
 import android.arch.lifecycle.LiveData;
 import android.os.Handler;

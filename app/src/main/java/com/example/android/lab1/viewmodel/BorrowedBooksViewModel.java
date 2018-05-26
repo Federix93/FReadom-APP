@@ -7,19 +7,12 @@ import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BorrowedBooks;
-import com.example.android.lab1.model.User;
-import com.example.android.lab1.utils.FirebaseDocumentSnapshotLiveDataFirestore;
-import com.example.android.lab1.utils.FirebaseQueryLiveDataFirestore;
+import com.example.android.lab1.utils.firebaseutils.FirebaseDocumentSnapshotLiveDataFirestore;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.List;
 
 public class BorrowedBooksViewModel extends ViewModel {
     private static final DocumentReference BORROWED_BOOKS_REF = FirebaseFirestore.getInstance()
