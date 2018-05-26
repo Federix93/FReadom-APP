@@ -1,6 +1,7 @@
 package com.example.android.lab1.ui;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,7 +16,9 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -31,6 +34,7 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.BorrowedBooks;
 import com.example.android.lab1.model.Condition;
+import com.example.android.lab1.model.FavoriteBooks;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.profile.GlobalShowProfileActivity;
 import com.example.android.lab1.utils.ChatManager;
@@ -63,6 +67,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     ConstraintLayout mProfileConstraintLayout;
     LinearLayout mBookDescriptionLayout;
+    LinearLayout mFavoriteContainer;
     RelativeLayout mGalleryLayout;
     Toolbar mToolbar;
     TextView mBookTitleTextView;
@@ -116,6 +121,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookDescription = findViewById(R.id.book_description);
         mBookDescriptionLayout = findViewById(R.id.book_description_container);
         mGalleryLayout = findViewById(R.id.relative_gallery_layout);
+        mFavoriteContainer = findViewById(R.id.add_to_favorite_container);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -126,7 +132,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         mToolbar.setTitle(R.string.app_name);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar.setNavigationOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -166,7 +172,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         });
 
         //if (mBook.getDescription() != null) {
-            mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
+            mBookDescriptionLayout.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
@@ -180,7 +186,7 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBookDescriptionLayout.setVisibility(GONE);
         }*/
 
-        mBookButton.setOnClickListener(new View.OnClickListener() {
+        mBookButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 final DocumentReference docRef;
@@ -216,6 +222,8 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+
+
     }
 
     @Override
@@ -257,6 +265,33 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+        final DocumentReference documentReference;
+        if (mFirebaseAuth.getUid() != null) {
+            documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid());
+            documentReference.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()){
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
+                        if (favoriteBooks != null) {
+                            if (favoriteBooks.getBookIds().contains(mBookId)) {
+                                String uri = "@drawable/ic_bookmark_orange_24dp";  // where myresource (without the extension) is the file
+                                int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+                                Drawable res = getResources().getDrawable(imageResource);
+                                mFavoritesImageView.setImageDrawable(res);
+                            } else {
+                                String uri = "@drawable/ic_bookmark_border_orange_24dp";  // where myresource (without the extension) is the file
+                                int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+                                Drawable res = getResources().getDrawable(imageResource);
+                                mFavoritesImageView.setImageDrawable(res);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
     }
     private void updateUI(final Book book) {
         if (book.getTitle() != null)
@@ -337,7 +372,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             });
 
-            mProfileConstraintLayout.setOnClickListener(new View.OnClickListener() {
+            mProfileConstraintLayout.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
@@ -353,7 +388,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     private void setupOnClickListeners(final Book book) {
 
         if (book != null && book.getInfoLink() != null) {
-            mPreviewButton.setOnClickListener(new View.OnClickListener() {
+            mPreviewButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
@@ -367,7 +402,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         } else
             mPreviewButton.setEnabled(false);
 
-        mBookButton.setOnClickListener(new View.OnClickListener() {
+        mBookButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 final DocumentReference docRef;
@@ -402,17 +437,96 @@ public class BookDetailsActivity extends AppCompatActivity {
             }
         });
 
-        mShareImageView.setOnClickListener(new View.OnClickListener() {
+        mShareImageView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
             }
         });
 
-        mFavoritesImageView.setOnClickListener(new View.OnClickListener() {
+        mFavoriteContainer.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                final DocumentReference documentReference;
+                if (mFirebaseAuth.getUid() != null) {
+                    documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid());
+                    documentReference.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()){
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
+                                if (favoriteBooks != null) {
+                                    if (favoriteBooks.getBookIds().contains(mBookId)) {
+                                        favoriteBooks.getBookIds().remove(mBookId);
+                                        documentReference.set(favoriteBooks);
+
+                                        String uri = "@drawable/ic_bookmark_border_orange_24dp";  // where myresource (without the extension) is the file
+                                        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+                                        Drawable res = getResources().getDrawable(imageResource);
+                                        mFavoritesImageView.setImageDrawable(res);
+
+                                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
+                                                R.string.book_removed, Snackbar.LENGTH_LONG).setDuration(4000);
+                                        mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                Intent intent = new Intent(getApplicationContext(), FavoriteBooksActivity.class);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                                startActivity(intent);
+                                            }
+                                        });
+                                        mySnackbar.show();
+                                    } else {
+                                        favoriteBooks.getBookIds().add(mBookId);
+                                        documentReference.set(favoriteBooks);
+
+                                        String uri = "@drawable/ic_bookmark_orange_24dp";  // where myresource (without the extension) is the file
+                                        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+                                        Drawable res = getResources().getDrawable(imageResource);
+                                        mFavoritesImageView.setImageDrawable(res);
+
+                                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
+                                                R.string.book_added, Snackbar.LENGTH_LONG).setDuration(4000);
+                                        mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                Intent intent = new Intent(getApplicationContext(), FavoriteBooksActivity.class);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                                startActivity(intent);
+                                            }
+                                        });
+                                        mySnackbar.show();
+                                    }
+                                } else {
+                                    List<String> favorites = new ArrayList<>();
+                                    favorites.add(mBookId);
+                                    favoriteBooks = new FavoriteBooks(favorites);
+                                    documentReference.set(favoriteBooks);
+
+                                    String uri = "@drawable/ic_bookmark_orange_24dp";  // where myresource (without the extension) is the file
+                                    int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+                                    Drawable res = getResources().getDrawable(imageResource);
+                                    mFavoritesImageView.setImageDrawable(res);
+
+                                    Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
+                                            R.string.book_added, Snackbar.LENGTH_LONG).setDuration(4000);
+                                    mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent intent = new Intent(getApplicationContext(), FavoriteBooksActivity.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                            startActivity(intent);
+                                        }
+                                    });
+                                    mySnackbar.show();
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
+                }
             }
         });
     }

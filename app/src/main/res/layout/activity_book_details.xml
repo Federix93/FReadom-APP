@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.BookDetailsActivity">
+    tools:context=".ui.BookDetailsActivity"
+    android:id="@+id/book_detail_linear_layout_container">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBarLayoutBookDetails"
@@ -201,6 +202,7 @@
                 android:layout_marginBottom="20dp">
 
                 <LinearLayout
+                    android:id="@+id/add_to_favorite_container"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -210,8 +212,7 @@
                         android:id="@+id/add_to_favorite"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_gravity="center_horizontal"
-                        app:srcCompat="@drawable/ic_bookmark_border_orange_32dp" />
+                        android:layout_gravity="center_horizontal" />
 
                     <TextView
                         android:id="@+id/add_to_favorite_text"

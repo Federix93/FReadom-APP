@@ -192,6 +192,10 @@
     <string name="edit_book">Modifica</string>
     <string name="delete_book">Elimina</string>
 
+    <string name="book_added">Libro aggiunto ai preferiti</string>
+    <string name="book_removed">Libro rimosso dai preferiti</string>
+    <string name="go_favorite">Vai ai miei preferiti</string>
+
     <string name="wait_for_chat_opening">Apertura della chat in corso</string>
     <string name="book_not_available">Libro non più disponibile</string>
     <string name="open_chat">Vai alla chat</string>

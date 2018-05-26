@@ -159,6 +159,8 @@
     <string name="view_more">View more</string>
     <string name="edit_book">Edit</string>
     <string name="delete_book">Delete</string>
+    <string name="go_favorite">Go favorite</string>
+    <string name="book_added">Book added to favorite</string>
 
 
 </resources>
