@@ -119,7 +119,11 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookDescriptionLayout = findViewById(R.id.book_description_container);
         mGalleryLayout = findViewById(R.id.relative_gallery_layout);
 
-        mBook = getIntent().getParcelableExtra("BookSelected");
+        if(getIntent().getExtras() != null) {
+            mBook = getIntent().getExtras().getParcelable("BookSelected");
+        }else{
+            Toast.makeText(this, "Si è verificato un errore sconosciuto", Toast.LENGTH_SHORT).show();
+        }
 
         Utilities.setupStatusBarColor(this);
         //setupOnClickListeners();
