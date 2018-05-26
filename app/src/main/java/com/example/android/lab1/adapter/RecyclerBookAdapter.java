@@ -71,7 +71,6 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
             }
         }
     }
-
     public BookFilter getFilter()
     {
         return mFilter;
@@ -176,27 +175,22 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
     /*private class DownLoadImageTask extends AsyncTask<String, Void, Bitmap> {
         // TODO move this inner class somewhere else
         private ImageView mTarget;
-
         public DownLoadImageTask(ImageView target) {
             mTarget = target;
         }
-
         @Override
         protected Bitmap doInBackground(String... strings) {
             Bitmap logo = null;
             try {
                 InputStream is = new URL(strings[0]).openStream();
-
                     //decodeStream(InputStream is)
                       //  Decode an input stream into a bitmap.
-
                 logo = BitmapFactory.decodeStream(is);
             } catch (Exception e) { // Catch the download exception
                 e.printStackTrace();
             }
             return logo;
         }
-
         protected void onPostExecute(Bitmap result) {
             mTarget.setImageBitmap(result);
         }

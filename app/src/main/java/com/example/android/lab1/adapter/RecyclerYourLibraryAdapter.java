@@ -2,6 +2,7 @@ package com.example.android.lab1.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +23,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.ui.BookDetailsLibraryActivity;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -31,18 +33,19 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
 
     private List<Book> mBooks;
     private List<String> mBookIds;
+
     Context mContext;
 
-    public RecyclerYourLibraryAdapter(List<Book> books, List<String> mBookIds) {
+    public RecyclerYourLibraryAdapter(List<Book> books, List<String> bookIds, Context context) {
         this.mBooks = books;
-        this.mBookIds = mBookIds;
+        this.mBookIds = bookIds;
+        mContext = context;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
-        LayoutInflater inflater = LayoutInflater.from(mContext);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View cardView = inflater.inflate(R.layout.recycler_book_item_library, parent, false);
 
         return new MyViewHolder(cardView);
@@ -50,7 +53,7 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.bind(mBooks.get(position));
+        holder.bind(mBooks.get(position), position);
     }
 
     @Override
@@ -64,20 +67,19 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
         TextView mBookAuthor;
         ImageView mBookThumbnail;
 
-
-        public MyViewHolder (View itemView) {
+        public MyViewHolder (final View itemView) {
             super (itemView);
-            mBookTitle = itemView.findViewById(R.id.library_book_title);
-            mBookAuthor = itemView.findViewById(R.id.library_book_author);
-            mBookThumbnail = itemView.findViewById(R.id.library_book_thumbnail);
+            mBookTitle = itemView.findViewById(R.id.rv_library_book_title);
+            mBookAuthor = itemView.findViewById(R.id.rv_library_book_author);
+            mBookThumbnail = itemView.findViewById(R.id.rv_library_book_thumbnail);
         }
         @SuppressLint("CheckResult")
-        public void bind(Book book){
+        public void bind(final Book book, final int position){
             mBookTitle.setText(book.getTitle());
             mBookAuthor.setText(book.getAuthors());
 
             if (book.getWebThumbnail() != null) {
-                Glide.with(itemView.getContext()).asBitmap()
+                Glide.with(mContext).asBitmap()
                         .load(book.getWebThumbnail())
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL).dontAnimate())
                         .listener(new RequestListener<Bitmap>() {
@@ -98,9 +100,19 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
                         .into(mBookThumbnail);
             } else if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
                 StorageReference storage = FirebaseStorage.getInstance().getReferenceFromUrl(book.getUserBookPhotosStoragePath().get(0));
-                Glide.with(itemView.getContext()).load(storage).into(mBookThumbnail);
+                Glide.with(mContext).load(storage).into(mBookThumbnail);
             } else
-                Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mBookThumbnail);
+                Glide.with(mContext).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mBookThumbnail);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mContext, BookDetailsLibraryActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("bookId", mBookIds.get(position));
+                    mContext.startActivity(intent);
+                }
+            });
         }
 
     }

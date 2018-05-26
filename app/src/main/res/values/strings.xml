@@ -186,8 +186,11 @@
     <string name="error_message">Qualcosa è andato storto</string>
 
     <string name="book_detail_gallery">Galleria</string>
-    <string name="more_info">Altre Info</string>
     <string name="not_rated_yet">Nessuna recensione</string>
+    <string name="more_detail">Maggiori dettagli..</string>
+    <string name="view_more">Mostra dettagli</string>
+    <string name="edit_book">Modifica</string>
+    <string name="delete_book">Elimina</string>
 
     <string name="wait_for_chat_opening">Apertura della chat in corso</string>
     <string name="book_not_available">Libro non più disponibile</string>

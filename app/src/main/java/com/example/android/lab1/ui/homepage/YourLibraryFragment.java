@@ -36,7 +36,8 @@ public class YourLibraryFragment extends Fragment {
     android.support.v7.widget.Toolbar mToolbar;
     FloatingActionButton mFab;
     RecyclerYourLibraryAdapter mAdapter;
-    List<Book> mBookIds;
+    List<Book> mBooks;
+    List<String> mBookIds;
 
     public void YourLibraryFragment() {
     }
@@ -61,17 +62,24 @@ public class YourLibraryFragment extends Fragment {
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
 
+        mBookIds = new ArrayList<>();
+        mBooks = new ArrayList<>();
+
+        RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setItemAnimator(null);
+
+        mAdapter = new RecyclerYourLibraryAdapter(mBooks, mBookIds, getActivity());
+
         firebaseFirestore.collection("books").whereEqualTo("uid", mFirebaseAuth.getCurrentUser().getUid())
                 .addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                        mBookIds = queryDocumentSnapshots.toObjects(Book.class);
-                        List<String> IDs = new ArrayList<>();
+                        mBooks = queryDocumentSnapshots.toObjects(Book.class);
                         for(DocumentSnapshot d : queryDocumentSnapshots.getDocuments()){
-                            IDs.add(d.getId());
+                            mBookIds.add(d.getId());
                         }
-                        updateListOfBooks(mBookIds, IDs);
-
+                        updateListOfBooks(mBooks, mBookIds);
                     }
                 });
 
@@ -86,12 +94,8 @@ public class YourLibraryFragment extends Fragment {
         return view;
     }
 
-    public void updateListOfBooks(List<Book> mListBooksOfUser, List<String> bookIds) {
-        RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setItemAnimator(null);
-
-        mAdapter = new RecyclerYourLibraryAdapter(mListBooksOfUser, bookIds);
+    public void updateListOfBooks(List<Book> listBooksOfUser, List<String> bookIds) {
+        mAdapter = new RecyclerYourLibraryAdapter(listBooksOfUser, bookIds, getActivity());
         mRecyclerView.setAdapter(mAdapter);
     }
 

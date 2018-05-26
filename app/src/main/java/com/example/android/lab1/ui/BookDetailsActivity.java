@@ -1,6 +1,5 @@
 package com.example.android.lab1.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -16,10 +15,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -30,6 +26,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
+import com.example.android.lab1.adapter.ImageGalleryAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.BorrowedBooks;
@@ -40,7 +37,6 @@ import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -88,6 +84,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     ImageView mBookDetailConditionColor;
     FirebaseFirestore mFirebaseFirestore;
     FirebaseAuth mFirebaseAuth;
+    RecyclerView mGalleryRecyclerView;
 
     private String mBookId;
     private User mUser;
@@ -100,10 +97,10 @@ public class BookDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_details);
 
-        mBookTitleTextView = findViewById(R.id.book_title_detail_activity);
-        mAuthorTextView = findViewById(R.id.author);
-        mEditorTextView = findViewById(R.id.editor);
-        mPublicationDateTextView = findViewById(R.id.publication_date);
+        mBookTitleTextView = findViewById(R.id.book_title);
+        mAuthorTextView = findViewById(R.id.book_author);
+        mEditorTextView = findViewById(R.id.book_editor);
+        mPublicationDateTextView = findViewById(R.id.book_publication_date);
         mBookThumbnailImageView = findViewById(R.id.book_thumbnail);
         mUsernameTextView = findViewById(R.id.name_book_owner);
         mRatingTextView = findViewById(R.id.rating_book_owner);
@@ -139,9 +136,9 @@ public class BookDetailsActivity extends AppCompatActivity {
         mProfileConstraintLayout = findViewById(R.id.profile_detail);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        RecyclerView recyclerView = findViewById(R.id.rv_images);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(layoutManager);
+        mGalleryRecyclerView = findViewById(R.id.rv_images);
+        mGalleryRecyclerView.setHasFixedSize(true);
+        mGalleryRecyclerView.setLayoutManager(layoutManager);
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -293,14 +290,14 @@ public class BookDetailsActivity extends AppCompatActivity {
         setupOnClickListeners(book);
 
         // storage photos
-        RecyclerView recyclerView = findViewById(R.id.rv_images);
-        if (recyclerView != null) {
+
+        if (mGalleryRecyclerView != null) {
             if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
                 BookPhoto[] bookPhotos = new BookPhoto[book.getUserBookPhotosStoragePath().size()];
                 for (int i = 0; i < book.getUserBookPhotosStoragePath().size(); i++) {
                     bookPhotos[i] = new BookPhoto(book.getUserBookPhotosStoragePath().get(i), book.getTitle());
                 }
-                recyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
+                mGalleryRecyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
             } else {
                 mGalleryLayout.setVisibility(GONE);
             }
@@ -418,69 +415,5 @@ public class BookDetailsActivity extends AppCompatActivity {
                 Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapter.MyViewHolder> {
-
-        private BookPhoto[] mBookPhoto;
-        private Context mContext;
-
-        public ImageGalleryAdapter(BookPhoto[] mBookPhoto, Context mContext) {
-            this.mBookPhoto = mBookPhoto;
-            this.mContext = mContext;
-        }
-
-        @Override
-        public ImageGalleryAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-            Context context = parent.getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-            View photoView = inflater.inflate(R.layout.book_detail_gallery_item, parent, false);
-            int width = (parent.getMeasuredWidth() / 3) - 16;
-            int height = parent.getMeasuredHeight();
-            photoView.setLayoutParams(new RecyclerView.LayoutParams(width, height));
-
-            ImageGalleryAdapter.MyViewHolder viewHolder = new ImageGalleryAdapter.MyViewHolder(photoView);
-            return viewHolder;
-        }
-
-        @Override
-        public void onBindViewHolder(ImageGalleryAdapter.MyViewHolder holder, int position) {
-
-            BookPhoto bookPhoto = mBookPhoto[position];
-            ImageView imageView = holder.mPhotoImageView;
-
-            Glide.with(mContext)
-                    .load(bookPhoto.getUrl())
-                    .apply(new RequestOptions().override(400, 400).fitCenter()
-                            .placeholder(R.drawable.ic_no_book_photo))
-                    .into(imageView);
-        }
-
-        public int getItemCount() {
-            return (mBookPhoto.length);
-        }
-
-
-        public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-            public ImageView mPhotoImageView;
-
-            public MyViewHolder(View itemView) {
-                super(itemView);
-                mPhotoImageView = itemView.findViewById(R.id.iv_photo);
-                itemView.setOnClickListener(this);
-            }
-
-            public void onClick(View view) {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    BookPhoto bookPhoto = mBookPhoto[position];
-                    Intent intent = new Intent(mContext, BookPhotoDetailActivity.class);
-                    intent.putExtra(BookPhotoDetailActivity.BOOK_PHOTO, bookPhoto);
-                    startActivity(intent);
-                }
-            }
-        }
     }
 }

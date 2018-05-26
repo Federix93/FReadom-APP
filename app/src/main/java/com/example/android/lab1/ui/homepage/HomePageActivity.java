@@ -259,4 +259,12 @@ public class HomePageActivity extends AppCompatActivity
         }
 
     }
+/*
+    @Override
+    public void passBookObject(Book book) {
+        Intent intent = new Intent(this, BookDetailsLibraryActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("book", book);
+        startActivity(intent);
+    }*/
 }

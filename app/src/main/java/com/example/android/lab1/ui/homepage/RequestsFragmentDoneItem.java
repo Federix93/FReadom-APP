@@ -84,6 +84,7 @@ public class RequestsFragmentDoneItem extends Fragment {
                         public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                             if (snapshot != null && snapshot.exists()) {
                                 BorrowedBooks booksBorrowed = snapshot.toObject(BorrowedBooks.class);
+
                                 final List<String> booksID = booksBorrowed.getBooksID();
                                 for (final String bookID : booksID) {
                                     mFirebaseFirestore.collection("books").document(bookID).addSnapshotListener(
