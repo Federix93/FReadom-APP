@@ -50,6 +50,7 @@ public class Book implements Parcelable, Comparable<Book> {
     private String mInfoLink;
     private Long mTimeInserted;
     private boolean mIsAlreadyLent;
+    private String mBookID;
 
     public Book() {
     }
@@ -165,6 +166,14 @@ public class Book implements Parcelable, Comparable<Book> {
         this.mLoanEnd = loanEnd;
     }
 
+    public String getBookID() {
+        return mBookID;
+    }
+
+    public void setBookID(String bookID) {
+        this.mBookID = bookID;
+    }
+
     @SuppressWarnings("unchecked")
     protected Book(Parcel in) {
         mIsbn = in.readString();
@@ -200,6 +209,8 @@ public class Book implements Parcelable, Comparable<Book> {
         Log.d("LULLO", "CONDITION ON READ: " + mCondition);
         mGenre = in.readInt();
         Log.d("LULLO", "GENRE ON READ: " + mGenre);
+        mBookID = in.readString();
+        Log.d("LULLO", "BOOOKID ON READ: " + mBookID);
     }
 
     public int getGenre() {
@@ -312,6 +323,8 @@ public class Book implements Parcelable, Comparable<Book> {
         dest.writeInt(mCondition);
         Log.d("LULLO", "CONDITION ON WRITE: " + mCondition);
         dest.writeInt(mGenre);
+        dest.writeString(mBookID);
+
     }
 
 

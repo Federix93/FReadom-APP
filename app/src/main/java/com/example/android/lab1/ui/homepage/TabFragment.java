@@ -438,13 +438,13 @@ public class TabFragment extends Fragment {
                     book.setCondition(jsonBook.optInt("conditions"));
                     book.setWebThumbnail(jsonBook.optString("thumbnail"));
                     book.setUid(uid);
-                    IDs.add(jsonBook.optString("objectID"));
+                    //IDs.add(jsonBook.optString("objectID"));
                     JSONObject geoLocation = jsonBook.optJSONObject("_geoloc");
                     book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
                     booksDataSet.add(book);
                 }
 
-                recyclerView.setAdapter(new RecyclerBookAdapter(booksDataSet, IDs));
+                recyclerView.setAdapter(new RecyclerBookAdapter(booksDataSet));
             }
         } catch (JSONException ex) {
         }

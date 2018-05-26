@@ -900,6 +900,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // fix spinners variable
         mResultBook.setTimeInserted(System.currentTimeMillis());
+        DocumentReference documentReference = db.collection("books").document();
+        String bookID = documentReference.getId();
+        mResultBook.setBookID(bookID);
         db.collection("books").add(mResultBook).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
