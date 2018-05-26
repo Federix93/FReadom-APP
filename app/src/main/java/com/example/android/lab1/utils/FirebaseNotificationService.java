@@ -8,8 +8,10 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.example.android.lab1.FreadomApp;
 import com.example.android.lab1.R;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.example.android.lab1.ui.chat.CurrentOpenChat;
@@ -53,8 +55,19 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         intent.putExtra("BookID", data.get("book"));
         intent.putExtra("SenderUID", data.get("senderUID"));
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent;
+
+        if(!LifecycleHandler.isApplicationInForeground())
+        {
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            stackBuilder.addNextIntentWithParentStack(intent);
+            pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
+        }
+        else
+        {
+            pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                    PendingIntent.FLAG_ONE_SHOT);
+        }
 
         Bitmap userImage = null;
 
@@ -75,8 +88,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
-                .setGroup("wewe");
+                .setContentIntent(pendingIntent);
 
         if(isText)
         {
@@ -105,7 +117,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-        notificationManager.notify(data.get("sender"),Integer.valueOf(data.get("senderUID")), notificationBuilder.build());
+        notificationManager.notify(0, notificationBuilder.build());
     }
 
 
