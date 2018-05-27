@@ -1,9 +1,15 @@
 package com.example.android.lab1.adapter;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +23,9 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
+import com.example.android.lab1.viewmodel.OpenedChatViewModel;
+import com.example.android.lab1.viewmodel.ViewModelFactory;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,16 +42,17 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerFragmentBooksAdapter.MyViewHolder>{
 
     private List<Book> mBookList;
-    //private List<String> mChatIds;
     private List<User> mUsersOwner;
+    private FragmentActivity mFragmentActivity;
 
     private Context mContext;
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
 
-    public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users) {
+    public RecyclerFragmentBooksAdapter(FragmentActivity fragmentActivity, List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
         mUsersOwner = users;
+        mFragmentActivity = fragmentActivity;
     }
 
 
@@ -91,7 +101,7 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
             userReference = firebaseDatabase.getReference().child("users");
         }
 
-        public void bind (Book book, final int position) {
+        public void bind (final Book book, final int position) {
             mBookTitle.setText(book.getTitle());
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
             mBookAuthor.setText(book.getAuthors());
@@ -115,13 +125,29 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
             mChatLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                    /*Intent intent = new Intent(v.getContext(), ChatActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     //intent.putExtra("ChatID", mChatIds.get(position));
                     intent.putExtra("Username", mUsersOwner.get(position).getUsername());
                     intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
                     intent.putExtra("BookID", mBookList.get(position).getBookID());
-                    v.getContext().startActivity(intent);
+                    v.getContext().startActivity(intent);*/
+                    final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
+                            .child(book.getBookID())
+                            .child(book.getUid())
+                            .child(FirebaseAuth.getInstance().getUid());
+                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String chatID = (String) dataSnapshot.getValue();
+                            Log.d("LULLO", "CHATID: " + chatID);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
             });
 

@@ -23,23 +23,20 @@ public class OpenedChatViewModel extends ViewModel{
 
     private final MediatorLiveData<Boolean> openedChatsLiveData = new MediatorLiveData<>();
 
+    private final MediatorLiveData<String> chatIDLiveData = new MediatorLiveData<>();
+
     public OpenedChatViewModel(String bookID, String bookOwnerID){
         OPENED_CHATS = FirebaseDatabase.getInstance().getReference("openedChats")
                 .child(bookID)
                 .child(bookOwnerID)
                 .child(FirebaseAuth.getInstance().getUid());
         liveData = new FirebaseQueryLiveDataRealtimeDB(OPENED_CHATS);
-        fetchData();
     }
 
     public OpenedChatViewModel(){}
 
     @NonNull
     public LiveData<Boolean> getSnapshotLiveData(){
-        return openedChatsLiveData;
-    }
-
-    public void fetchData(){
         openedChatsLiveData.addSource(liveData, new Observer<DataSnapshot>() {
             @Override
             public void onChanged(@Nullable DataSnapshot dataSnapshot) {
@@ -50,5 +47,25 @@ public class OpenedChatViewModel extends ViewModel{
                 }
             }
         });
+        return openedChatsLiveData;
+    }
+
+    public LiveData<String> getChatID(){
+        chatIDLiveData.addSource(liveData, new Observer<DataSnapshot>() {
+            @Override
+            public void onChanged(@Nullable final DataSnapshot dataSnapshot) {
+                if(dataSnapshot != null){
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            chatIDLiveData.postValue((String)dataSnapshot.getValue());
+                        }
+                    }).start();
+                }else{
+                    chatIDLiveData.setValue(null);
+                }
+            }
+        });
+        return chatIDLiveData;
     }
 }
