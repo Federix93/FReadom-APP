@@ -282,7 +282,7 @@ public class SignInActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence requestName = getString(R.string.new_request_channel_title);
             String requestDescription = getString(R.string.new_request_channel_description);
-            int requestImportance = NotificationManager.IMPORTANCE_HIGH;
+            int requestImportance = NotificationManager.IMPORTANCE_DEFAULT;
 
             CharSequence messageName = getString(R.string.new_message_channel_title);
             String messageDescription = getString(R.string.new_message_channel_description);
