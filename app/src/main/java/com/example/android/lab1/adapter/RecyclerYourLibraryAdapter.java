@@ -21,13 +21,8 @@ import java.util.List;
 public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYourLibraryAdapter.MyViewHolder> {
 
     private List<Book> mBooks;
-    private List<String> mBookIds;
     Context mContext;
 
-    public RecyclerYourLibraryAdapter(List<Book> books, List<String> mBookIds) {
-        this.mBooks = books;
-        this.mBookIds = mBookIds;
-    }
     public RecyclerYourLibraryAdapter(List<Book> books) {
         this.mBooks = books;
     }
@@ -44,7 +39,7 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.bind(mBooks.get(position), position);
+        holder.bind(mBooks.get(position));
     }
 
     @Override
@@ -70,7 +65,7 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
             mEditButton = itemView.findViewById(R.id.dash_edit_item);
             mDeleteButton = itemView.findViewById(R.id.dash_delete_item);
         }
-        public void bind(Book book, final int position){
+        public void bind(Book book){
 
             mBookTitle.setText(book.getTitle());
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));

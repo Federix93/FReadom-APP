@@ -39,6 +39,7 @@ import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.BooksViewModel;
+import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
@@ -530,36 +531,25 @@ public class TabFragment extends Fragment {
         mYourLibraryRecyclerView = view.findViewById(R.id.rv_fragment_books_library);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(true)
-                .build();
-        firebaseFirestore.setFirestoreSettings(settings);
 
-        firebaseFirestore.collection("books").whereEqualTo("uid", mFirebaseAuth.getCurrentUser().getUid())
-                .addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                        mBookIds = queryDocumentSnapshots.toObjects(Book.class);
-                        List<String> IDs = new ArrayList<>();
-                        for (DocumentSnapshot d : queryDocumentSnapshots.getDocuments()) {
-                            IDs.add(d.getId());
-                        }
-                        updateListOfBooks(mBookIds, IDs);
-
-                    }
-                });
+        BooksViewModel booksViewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(BooksViewModel.class);
+        booksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
+            @Override
+            public void onChanged(@Nullable List<Book> books) {
+                updateListOfBooks(books);
+            }
+        });
 
     }
 
-    private void updateListOfBooks(List<Book> mListBooksOfUser, List<String> bookIds) {
+    private void updateListOfBooks(List<Book> mListBooksOfUser) {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
 
         mYourLibraryRecyclerView.setHasFixedSize(true);
         mYourLibraryRecyclerView.setLayoutManager(layoutManager);
         mYourLibraryRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerYourLibraryAdapter(mListBooksOfUser, bookIds);
+        mAdapter = new RecyclerYourLibraryAdapter(mListBooksOfUser);
         mYourLibraryRecyclerView.setAdapter(mAdapter);
     }
 

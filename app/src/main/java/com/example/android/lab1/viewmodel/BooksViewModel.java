@@ -17,13 +17,30 @@ import java.util.List;
 
 public class BooksViewModel extends ViewModel {
 
-    private static final Query BOOK_REF = FirebaseFirestore.getInstance().collection("books");
+    private static Query BOOK_REF;
 
-    private final FirebaseQueryLiveDataFirestore liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF);
+    private FirebaseQueryLiveDataFirestore liveData;
 
     private final MediatorLiveData<List<Book>> bookLiveData = new MediatorLiveData<>();
 
+    public BooksViewModel(String uid){
+        BOOK_REF = FirebaseFirestore.getInstance().collection("books").whereEqualTo("uid", uid);
+        liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF);
+        fetchData();
+    }
+
     public BooksViewModel(){
+        BOOK_REF = FirebaseFirestore.getInstance().collection("books");
+        liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF);
+        fetchData();
+    }
+
+    @NonNull
+    public LiveData<List<Book>> getSnapshotLiveData(){
+        return bookLiveData;
+    }
+
+    public void fetchData(){
         bookLiveData.addSource(liveData, new Observer<QuerySnapshot>() {
             @Override
             public void onChanged(@Nullable final QuerySnapshot queryDocumentSnapshots) {
@@ -39,10 +56,5 @@ public class BooksViewModel extends ViewModel {
                 }
             }
         });
-    }
-
-    @NonNull
-    public LiveData<List<Book>> getSnapshotLiveData(){
-        return bookLiveData;
     }
 }
