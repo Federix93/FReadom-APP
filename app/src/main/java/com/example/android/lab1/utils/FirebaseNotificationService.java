@@ -37,7 +37,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 break;
 
             case Utilities.BOOK_REQUEST_CHANNEL_ID:
-//                sendNewBookRequestNotification(remoteMessage);
+                sendNewBookRequestNotification(remoteMessage.getData());
                 break;
 
             default:
@@ -117,7 +117,63 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-        notificationManager.notify(0, notificationBuilder.build());
+        notificationManager.notify(data.get("senderUID").hashCode(), notificationBuilder.build());
+    }
+
+    private void sendNewBookRequestNotification(Map<String, String> data) {
+
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra("ChatID", data.get("chat"));
+        intent.putExtra("Username", data.get("sender"));
+        intent.putExtra("ImageURL", data.get("senderPic"));
+        intent.putExtra("BookID", data.get("book"));
+        intent.putExtra("SenderUID", data.get("senderUID"));
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent;
+
+        if(!LifecycleHandler.isApplicationInForeground())
+        {
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            stackBuilder.addNextIntentWithParentStack(intent);
+            pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
+        }
+        else
+        {
+            pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                    PendingIntent.FLAG_ONE_SHOT);
+        }
+
+        Bitmap bookThumbnail = null;
+
+        try {
+            bookThumbnail = BitmapFactory.decodeStream(new URL(data.get("bookThumbnail")).openConnection().getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID)
+                .setSmallIcon(R.drawable.share_icon)
+                .setLargeIcon(bookThumbnail)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        String contentText = String.format(getResources().getString(R.string.new_request_notification_content), data.get("sender"), data.get("bookTitle"));
+
+            notificationBuilder
+                    .setContentTitle(getResources().getString(R.string.new_request_notification_title))
+                    .setContentText(contentText)
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(contentText));
+
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        notificationManager.notify((data.get("senderUID")+data.get("book")).hashCode(), notificationBuilder.build());
     }
 
 

@@ -158,6 +158,8 @@
     <string name="chat_advice_owner_response">This user won\'t be able to send you other messages until your first response</string>
     <string name="search_unknown_error_top">An unknown error occurred</string>
     <string name="search_unknown_error_bottom">Please try again later</string>
+    <string name="new_request_notification_title">You received a new request</string>
+    <string name="new_request_notification_content">%1$s requested %2$s</string>
 
 
 </resources>
