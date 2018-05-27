@@ -1,5 +1,7 @@
 package com.example.android.lab1.ui.chat;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -17,6 +19,10 @@ import com.example.android.lab1.adapter.RecyclerConversationAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.viewmodel.ConversationsViewModel;
+import com.example.android.lab1.viewmodel.UserRealtimeDBViewModel;
+import com.example.android.lab1.viewmodel.UserViewModel;
+import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -79,39 +85,53 @@ public class ConversationsActivity extends AppCompatActivity {
 
         final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(true)
-                .build();
-        firebaseFirestore.setFirestoreSettings(settings);
+
         if (firebaseAuth != null) {
-            firebaseDatabase.getReference().child("conversations").child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for (final DataSnapshot d : dataSnapshot.getChildren()) {
-                        String userID = (String) d.getValue();
-                        firebaseDatabase.getReference().child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                mListChatID.add(d.getKey());
-                                mUserList.add(dataSnapshot.getValue(User.class));
-                                mAdapter.setItems(mUserList, mListChatID);
-                                mAdapter.notifyDataSetChanged();
+
+            ConversationsViewModel conversationsViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBookID)).get(ConversationsViewModel.class);
+            conversationsViewModel.getSnapshotLiveData().observe(this, new Observer<DataSnapshot>() {
+                        @Override
+                        public void onChanged(@android.support.annotation.Nullable DataSnapshot dataSnapshot) {
+                            for (final DataSnapshot d : dataSnapshot.getChildren()) {
+                                UserRealtimeDBViewModel userViewModel = ViewModelProviders.of(ConversationsActivity.this, new ViewModelFactory((String)d.getValue())).get(UserRealtimeDBViewModel.class);
+                                userViewModel.getSnapshotLiveData().observe(ConversationsActivity.this, new Observer<User>() {
+                                    @Override
+                                    public void onChanged(@android.support.annotation.Nullable User user) {
+                                        mUserList.add(user);
+                                        mListChatID.add(d.getKey());
+                                        mAdapter.setItems(mUserList, mListChatID);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+                                });
                             }
+                        }
+                    });
+                    /*firebaseDatabase.getReference().child("conversations").child(mBookID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (final DataSnapshot d : dataSnapshot.getChildren()) {
+                                String userID = (String) d.getValue();
+                                firebaseDatabase.getReference().child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        mListChatID.add(d.getKey());
+                                        mUserList.add(dataSnapshot.getValue(User.class));
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                                    }
 
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
                             }
-                        });
-                    }
-                }
+                        }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
-                }
-            });
+                        }
+                    });*/
         }
     }
 }

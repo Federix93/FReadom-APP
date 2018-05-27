@@ -33,7 +33,12 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
                 return (T) new UserViewModel(params[0]);
             else
                 return (T) new UserViewModel();
-        }else{
+        }else if(modelClass == ConversationsViewModel.class){
+            return (T) new ConversationsViewModel(params[0]);
+        }else if(modelClass == UserRealtimeDBViewModel.class){
+            return (T) new UserRealtimeDBViewModel(params[0]);
+        }
+        else{
             return super.create(modelClass);
         }
     }

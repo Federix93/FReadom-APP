@@ -1,5 +1,7 @@
 package com.example.android.lab1.ui.homepage;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,8 +14,10 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.LentBookAdapter;
 import com.example.android.lab1.adapter.RecyclerBorrowedBooksAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.model.RequestedDoneBooks;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.model.BorrowedBooks;
+import com.example.android.lab1.viewmodel.RequestedDoneBooksViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -76,7 +80,14 @@ public class RequestsFragmentDoneItem extends Fragment {
         firebaseDatabase = FirebaseDatabase.getInstance();
         openedChatReference = firebaseDatabase.getReference().child("openedChats");
 
-        if (mFirebaseAuth.getUid() != null) {
+        /*if (mFirebaseAuth.getUid() != null) {
+            RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
+            requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<RequestedDoneBooks>() {
+                @Override
+                public void onChanged(@android.support.annotation.Nullable RequestedDoneBooks requestedDoneBooks) {
+
+                }
+            });
             /*mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid())
                     .addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
                         @Override
@@ -124,8 +135,8 @@ public class RequestsFragmentDoneItem extends Fragment {
                                 }
                             }
                         }
-                    });*/
-        }
+                    });
+        }*/
         return view;
     }
 }
