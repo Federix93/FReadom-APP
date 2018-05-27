@@ -47,7 +47,7 @@ public class FirebaseQueryLiveDataFirestore extends LiveData<QuerySnapshot>{
     @Override
     protected void onInactive() {
         super.onInactive();
-        handler.postDelayed(removeListener, 3000);
+        handler.postDelayed(removeListener, 2000);
         listenerRemovePending = true;
     }
 
