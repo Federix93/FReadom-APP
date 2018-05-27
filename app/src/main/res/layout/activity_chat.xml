@@ -70,7 +70,8 @@
         android:layout_above="@id/linearLayoutBottomInput"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_marginTop="4dp">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/chat_recyclerView"

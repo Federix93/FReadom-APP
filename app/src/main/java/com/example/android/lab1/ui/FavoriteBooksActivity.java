@@ -81,7 +81,7 @@ public class FavoriteBooksActivity extends AppCompatActivity {
         final DocumentReference documentReference;
         if (mFirebaseAuth.getUid() != null) {
             documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid());
-            documentReference.get().addOnCompleteListener(FavoriteBooksActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+            documentReference.get().addOnCompleteListener(this, new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()){
@@ -89,7 +89,7 @@ public class FavoriteBooksActivity extends AppCompatActivity {
                         FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
                         if (favoriteBooks != null && !favoriteBooks.getBookIds().isEmpty()) {
                             for (final String s : favoriteBooks.getBookIds()) {
-                                mFirebaseFirestore.collection("books").document(s).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                                mFirebaseFirestore.collection("books").document(s).addSnapshotListener(FavoriteBooksActivity.this, new EventListener<DocumentSnapshot>() {
                                     @Override
                                     public void onEvent(@javax.annotation.Nullable DocumentSnapshot documentSnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                         if (documentSnapshot != null && documentSnapshot.exists()) {

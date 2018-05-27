@@ -1,9 +1,16 @@
 package com.example.android.lab1.ui.chat;
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,6 +38,7 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
+import com.example.android.lab1.ui.profile.EditProfileActivity;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,8 +54,15 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static com.example.android.lab1.utils.Constants.CAPTURE_IMAGE;
+import static com.example.android.lab1.utils.Constants.RESULT_LOAD_IMAGE;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -82,7 +97,13 @@ public class ChatActivity extends AppCompatActivity {
 
     String dataTitle, dataMessage;
     private final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
-    private static final int RC_PHOTO_PICKER = 2;
+
+    private final int RESULT_LOAD_IMAGE = 1;
+    private final int CAPTURE_IMAGE = 0;
+
+    private AlertDialog.Builder mAlertDialogBuilder = null;
+    private File mPhotoFile = null;
+    String mPhotoPath;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -251,10 +272,10 @@ public class ChatActivity extends AppCompatActivity {
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Message chatMessage = new Message(mFirebaseAuth.getUid(), mMessageEditText.getText().toString(),
                         System.currentTimeMillis() / 1000, null);
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);
+
                 final String messageWritten = mMessageEditText.getText().toString();
                 mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -296,65 +317,151 @@ public class ChatActivity extends AppCompatActivity {
         mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/jpeg");
-                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-                startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
+                final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
+                mAlertDialogBuilder = new AlertDialog.Builder(view.getContext());
+                mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+                mAlertDialogBuilder.setTitle(R.string.upload_photo).setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case CAPTURE_IMAGE:
+                                if (!Utilities.checkPermissionActivity(ChatActivity.this,
+                                        Manifest.permission.CAMERA)) {
+                                    Utilities.askPermissionActivity(ChatActivity.this,
+                                            Manifest.permission.CAMERA, CAPTURE_IMAGE);
+                                } else {
+                                    takePicture();
+                                }
+                                break;
+                            case RESULT_LOAD_IMAGE:
+                                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                galleryIntent.setType("image/*");
+                                startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
+                                break;
+                            default:
+                                dialogInterface.cancel();
+                        }
+                    }
+                }).show();
             }
         });
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case CAPTURE_IMAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    takePicture();
+                }
+        }
+    }
+
+    public File saveThumbnail() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        return File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+    }
+
+    private void takePicture() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            try {
+                mPhotoFile = saveThumbnail();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (mPhotoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                        "com.example.android.fileprovider",
+                        mPhotoFile);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            }
+            startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
-            Uri selectedImageUri = data.getData();
-            if (selectedImageUri != null) {
-                StorageReference photoRef = mChatPhotosStorageReference.child(selectedImageUri.getLastPathSegment());
-                //Upload file to  Firebase Storage
-                photoRef.putFile(selectedImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        final Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        Message chatMessage = new Message(mFirebaseAuth.getUid(), null, System.currentTimeMillis() / 1000,
-                                downloadUrl.toString());
+        Uri photoUri = null;
+        switch (requestCode) {
+            case RESULT_LOAD_IMAGE:
+                if (resultCode == RESULT_OK && data != null) {
+                    mPhotoPath = data.getData().toString();
+                    photoUri = data.getData();
+                }
+                break;
+            case CAPTURE_IMAGE:
+                if (resultCode == RESULT_OK && mPhotoFile != null) {
+                    mPhotoPath = mPhotoFile.getAbsolutePath();
+                    photoUri = Uri.fromFile(mPhotoFile.getAbsoluteFile());
+                }
+                break;
+        }
 
-                        mMessagesReference.child(mChatID).push().setValue(chatMessage);
-                        mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.exists()) {
-                                    Chat chat = dataSnapshot.getValue(Chat.class);
-                                    if (chat != null) {
-                                        chat.setTimestamp(System.currentTimeMillis() / 1000);
-                                        chat.setLastMessage(downloadUrl.toString());
-                                        chat.setIsText("false");
-                                        if (chat.getSenderUID() == null) {
-                                            chat.setSenderUID(mFirebaseAuth.getUid());
+        if (photoUri != null) {
+            StorageReference photoRef = mChatPhotosStorageReference.child(photoUri.getLastPathSegment());
+            //Upload file to  Firebase Storage
+            byte[] compressedImage = null;
+            compressedImage = Utilities.compressPhoto(mPhotoPath,
+                    getContentResolver(),
+                    getApplicationContext());
+
+            photoRef.putBytes(compressedImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    final Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                    Message chatMessage = new Message(mFirebaseAuth.getUid(), null, System.currentTimeMillis() / 1000,
+                            downloadUrl.toString());
+
+                    mMessagesReference.child(mChatID).push().setValue(chatMessage);
+                    mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                Chat chat = dataSnapshot.getValue(Chat.class);
+                                if (chat != null) {
+                                    chat.setTimestamp(System.currentTimeMillis() / 1000);
+                                    chat.setLastMessage(downloadUrl.toString());
+                                    chat.setIsText("false");
+                                    if (chat.getSenderUID() == null) {
+                                        chat.setSenderUID(mFirebaseAuth.getUid());
+                                        chat.setCounter(chat.getCounter() + 1);
+                                    } else {
+                                        if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
                                             chat.setCounter(chat.getCounter() + 1);
                                         } else {
-                                            if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
-                                                chat.setCounter(chat.getCounter() + 1);
-                                            } else {
-                                                chat.setReceiverUID(chat.getSenderUID());
-                                                chat.setSenderUID(mFirebaseAuth.getUid());
-                                                chat.setCounter(1);
-                                            }
+                                            chat.setReceiverUID(chat.getSenderUID());
                                             chat.setSenderUID(mFirebaseAuth.getUid());
+                                            chat.setCounter(1);
                                         }
+                                        chat.setSenderUID(mFirebaseAuth.getUid());
                                     }
-                                    mChatsReference.child(mChatID).setValue(chat);
                                 }
+                                mChatsReference.child(mChatID).setValue(chat);
                             }
+                        }
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
-                            }
-                        });
-                    }
-                });
-            }
+                        }
+                    });
+                }
+            });
         }
     }
 

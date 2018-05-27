@@ -30,15 +30,13 @@
         android:layout_marginTop="32dp"
         android:ellipsize="end"
         android:gravity="center"
-        android:hint="Short bio"
+        android:hint="Short description"
         android:maxLines="8"
-        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eu ullamcorper est, tincidunt aliquam massa. Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed tincidunt fermentum consequat. Cras at ultricies diam. Integer quis nibh ut orci suscipit venenatis vitae at augue. Fusce iaculis ex nisi, ornare tincidunt mauris finibus et."
         android:textColor="@color/black"
         android:textStyle="italic"
         app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/guideline3"
-        app:layout_constraintTop_toTopOf="@+id/guideline12" />
+        app:layout_constraintStart_toStartOf="@+id/guideline3" />
 
     <TextView
         android:id="@+id/email_text"
@@ -66,7 +64,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
         android:gravity="center"
-        android:text="+39 3922160005"
+        android:hint="Phone number"
         android:textColor="@color/black"
         app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintStart_toStartOf="@+id/guideline3"

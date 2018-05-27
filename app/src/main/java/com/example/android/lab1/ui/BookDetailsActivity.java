@@ -231,6 +231,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
         final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
         docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
             @Override
