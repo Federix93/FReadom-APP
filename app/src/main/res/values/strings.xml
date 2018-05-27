@@ -205,4 +205,6 @@
     <string name="search_unknown_error_bottom">Si prega di riprovare più tardi</string>
     <string name="new_request_notification_title">Hai ricevuto una nuova richiesta</string>
     <string name="new_request_notification_content">%1$s ha richiesto %2$s</string>
+    <string name="reply">Rispondi</string>
+    <string name="answer_to">Rispondi a %1$s</string>
 </resources>

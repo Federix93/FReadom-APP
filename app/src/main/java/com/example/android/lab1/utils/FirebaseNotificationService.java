@@ -8,10 +8,9 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.RemoteInput;
 import android.support.v4.app.TaskStackBuilder;
-import android.util.Log;
 
-import com.example.android.lab1.FreadomApp;
 import com.example.android.lab1.R;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.example.android.lab1.ui.chat.CurrentOpenChat;
@@ -23,6 +22,7 @@ import java.util.Map;
 
 public class FirebaseNotificationService extends com.google.firebase.messaging.FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
+    public static final String MESSAGE_REPLY_KEY = "message_reply_key";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -30,8 +30,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         switch (remoteMessage.getData().get("type")) {
             case Utilities.NEW_MESSAGE_CHANNEL_ID:
                 String currentOpenChat = CurrentOpenChat.getOpenChatID();
-                if(!(currentOpenChat != null && currentOpenChat.equals(remoteMessage.getData().get("chat"))))
-                {
+                if (!(currentOpenChat != null && currentOpenChat.equals(remoteMessage.getData().get("chat")))) {
                     sendNewMessageNotification(remoteMessage.getData());
                 }
                 break;
@@ -57,17 +56,32 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent;
 
-        if(!LifecycleHandler.isApplicationInForeground())
-        {
+        if (!LifecycleHandler.isApplicationInForeground()) {
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
             stackBuilder.addNextIntentWithParentStack(intent);
             pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
-        }
-        else
-        {
+        } else {
             pendingIntent = PendingIntent.getActivity(this, 0, intent,
                     PendingIntent.FLAG_ONE_SHOT);
         }
+
+        PendingIntent replyPendingIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                0,
+                new Intent(getApplicationContext(), DirectReplyReceiver.class)
+                        .putExtra("ChatID", data.get("chat")),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        RemoteInput remoteInput = new RemoteInput.Builder(MESSAGE_REPLY_KEY)
+                .setLabel(String.format(getResources().getString(R.string.answer_to), data.get("sender")))
+                .build();
+
+        NotificationCompat.Action action =
+                new NotificationCompat.Action.Builder(R.drawable.ic_world_24dp,
+                        getResources().getString(R.string.reply), replyPendingIntent)
+                        .addRemoteInput(remoteInput)
+                        .build();
 
         Bitmap userImage = null;
 
@@ -88,18 +102,17 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .setChannelId(Utilities.NEW_MESSAGE_CHANNEL_ID)
+                .addAction(action);
 
-        if(isText)
-        {
+        if (isText) {
             notificationBuilder
                     .setContentTitle(String.format(getResources().getString(R.string.new_message_notification_title), data.get("sender")))
                     .setContentText(data.get("body"))
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(data.get("body")));
-        }
-        else
-        {
+        } else {
             Bitmap sentPhoto = null;
 
             try {
@@ -117,7 +130,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-        notificationManager.notify(data.get("senderUID").hashCode(), notificationBuilder.build());
+        notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
     }
 
     private void sendNewBookRequestNotification(Map<String, String> data) {
@@ -131,14 +144,11 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent;
 
-        if(!LifecycleHandler.isApplicationInForeground())
-        {
+        if (!LifecycleHandler.isApplicationInForeground()) {
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
             stackBuilder.addNextIntentWithParentStack(intent);
             pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
-        }
-        else
-        {
+        } else {
             pendingIntent = PendingIntent.getActivity(this, 0, intent,
                     PendingIntent.FLAG_ONE_SHOT);
         }
@@ -160,20 +170,21 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .setChannelId(Utilities.BOOK_REQUEST_CHANNEL_ID);
 
         String contentText = String.format(getResources().getString(R.string.new_request_notification_content), data.get("sender"), data.get("bookTitle"));
 
-            notificationBuilder
-                    .setContentTitle(getResources().getString(R.string.new_request_notification_title))
-                    .setContentText(contentText)
-                    .setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText(contentText));
+        notificationBuilder
+                .setContentTitle(getResources().getString(R.string.new_request_notification_title))
+                .setContentText(contentText)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(contentText));
 
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-        notificationManager.notify((data.get("senderUID")+data.get("book")).hashCode(), notificationBuilder.build());
+        notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
     }
 
 
