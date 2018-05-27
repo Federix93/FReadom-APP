@@ -26,4 +26,13 @@
     <dimen name="user_photos_max_height">200dp</dimen>
     <dimen name="user_photos_margin">5dp</dimen>
     <dimen name="photo_gallery_item_height">110dp</dimen>
+
+    <dimen name="max_width">400dp</dimen>
+    <dimen name="material_component_cards_left_and_right_padding">16dp</dimen>
+    <dimen name="material_component_cards_top_and_bottom_padding">16dp</dimen>
+    <dimen name="material_component_cards_padding_from_edge_of_screen_to_card">4dp</dimen>
+    <dimen name="material_component_cards_space_between_cards">4dp</dimen>
+    <dimen name="app_bar_elevation">4dp</dimen>
+    <dimen name="floating_action_button_elevation">4dp</dimen>
+    <integer name="grid_column_count">2</integer>
 </resources>

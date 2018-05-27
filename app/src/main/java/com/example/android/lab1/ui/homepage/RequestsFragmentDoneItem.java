@@ -64,7 +64,6 @@ public class RequestsFragmentDoneItem extends Fragment {
 
         mAdapter = new LentBookAdapter(listBooks, booksID, chatIDs, usersID, mUsersOwner);
 
-        //mAdapter = new RecyclerBorrowedBooksAdapter(listBooks, booksID, chatIDs, usersID);
         mRecyclerView.setAdapter(mAdapter);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
@@ -84,6 +83,7 @@ public class RequestsFragmentDoneItem extends Fragment {
                         public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                             if (snapshot != null && snapshot.exists()) {
                                 BorrowedBooks booksBorrowed = snapshot.toObject(BorrowedBooks.class);
+
                                 final List<String> booksID = booksBorrowed.getBooksID();
                                 for (final String bookID : booksID) {
                                     mFirebaseFirestore.collection("books").document(bookID).addSnapshotListener(

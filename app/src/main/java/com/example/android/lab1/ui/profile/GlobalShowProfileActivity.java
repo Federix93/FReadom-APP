@@ -11,7 +11,10 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Layout;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,6 +26,7 @@ import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.TextDetailActivity;
 import com.example.android.lab1.utils.Utilities;
 
+import static android.view.View.GONE;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class GlobalShowProfileActivity extends AppCompatActivity{
@@ -31,9 +35,9 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
     TextView mUserName;
     ImageView mBackArrow;
     ImageView mRatingStar;
-    //Toolbar mToolbar;
     TextView mShortBio;
     TextView mRatingText;
+    TextView mViewMoreText;
 
     FragmentManager mFt = null;
 
@@ -68,6 +72,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         mShortBio = findViewById(R.id.global_bio_text);
         mRatingText = findViewById(R.id.rating_text_global_profile);
         mRatingStar = findViewById(R.id.global_rating_star);
+        mViewMoreText = findViewById(R.id.global_view_more);
 
         mFt = getSupportFragmentManager();
 
@@ -95,7 +100,6 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         } else {
             mRatingText.setText(getResources().getString(R.string.not_rated_yet));
             Glide.with(this).load(R.drawable.ic_star_empty_24dp).into(mRatingStar);
-
         }
 
         ViewPager viewPager = findViewById(R.id.viewpager_global_profile);
@@ -114,16 +118,45 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
             }
         });
 
-        mShortBio.setOnClickListener(new View.OnClickListener() {
+
+        ViewTreeObserver vto = mShortBio.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra("Title", mUser.getUsername());
-                intent.putExtra("ShortBio", mUser.getShortBio());
-                startActivity(intent);
+            public void onGlobalLayout() {
+                Layout l = mShortBio.getLayout();
+                if ( l != null){
+                    int lines = l.getLineCount();
+                    if ( lines > 0)
+                        if ( l.getEllipsisCount(lines-1) > 0) {
+                            mViewMoreText.setVisibility(View.VISIBLE);
+                            mViewMoreText.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                    intent.putExtra("Title", mUser.getUsername());
+                                    intent.putExtra("ShortBio", mUser.getShortBio());
+                                    startActivity(intent);
+                                }
+                            });
+                            mShortBio.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                    intent.putExtra("Title", mUser.getUsername());
+                                    intent.putExtra("ShortBio", mUser.getShortBio());
+                                    startActivity(intent);
+                                }
+                            });
+                        } else {
+                            mViewMoreText.setVisibility(GONE);
+                        }
+                }
             }
         });
+
+
     }
 
     public static User getUser() { return mUser; }
@@ -132,7 +165,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(mFt);
-        adapter.addFragment(new GlobalProfileBooksFragment(), getResources().getString(R.string.toolbar_title_home));
+        adapter.addFragment(new GlobalProfileBooksFragment(), getResources().getString(R.string.books));
         adapter.addFragment(new GlobalProfileReviewsFragment(), getResources().getString(R.string.profile_reviews_fragment));
         viewPager.setAdapter(adapter);
 

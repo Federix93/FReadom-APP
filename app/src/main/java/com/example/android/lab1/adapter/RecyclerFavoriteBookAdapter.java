@@ -1,5 +1,4 @@
 package com.example.android.lab1.adapter;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -23,20 +22,21 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.BookDetailsLibraryActivity;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
-public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYourLibraryAdapter.MyViewHolder> {
+public class RecyclerFavoriteBookAdapter extends RecyclerView.Adapter<RecyclerFavoriteBookAdapter.MyViewHolder> {
 
     private List<Book> mBooks;
     private List<String> mBookIds;
 
     Context mContext;
 
-    public RecyclerYourLibraryAdapter(List<Book> books, List<String> bookIds, Context context) {
+    public RecyclerFavoriteBookAdapter(List<Book> books, List<String> bookIds, Context context) {
         this.mBooks = books;
         this.mBookIds = bookIds;
         mContext = context;
@@ -113,9 +113,9 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mContext, BookDetailsLibraryActivity.class);
+                    Intent intent = new Intent(mContext, BookDetailsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("bookId", mBookIds.get(position));
+                    intent.putExtra("ID_BOOK_SELECTED", mBookIds.get(position));
                     mContext.startActivity(intent);
                 }
             });

@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <ImageView
-        android:layout_height="136dp"
-        android:layout_width="136dp"
+        android:layout_height="150dp"
+        android:layout_width="150dp"
         android:id="@+id/iv_photo"
         app:srcCompat="@drawable/book_thumbnail_placeholder"
         android:adjustViewBounds="true"
