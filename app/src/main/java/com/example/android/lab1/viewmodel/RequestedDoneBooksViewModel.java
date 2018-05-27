@@ -8,41 +8,44 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.example.android.lab1.model.BorrowedBooks;
+import com.example.android.lab1.model.RequestedDoneBooks;
 import com.example.android.lab1.utils.firebaseutils.FirebaseDocumentSnapshotLiveDataFirestore;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class BorrowedBooksViewModel extends ViewModel {
-    private static final DocumentReference BORROWED_BOOKS_REF = FirebaseFirestore.getInstance()
-            .collection("borrowedBooks")
+public class RequestedDoneBooksViewModel extends ViewModel {
+
+    private static final DocumentReference REQ_DONE_BOOKS_REF = FirebaseFirestore.getInstance()
+            .collection("requestedDone")
             .document(FirebaseAuth.getInstance().getUid());
 
-    private final FirebaseDocumentSnapshotLiveDataFirestore liveData = new FirebaseDocumentSnapshotLiveDataFirestore(BORROWED_BOOKS_REF);
+    private final FirebaseDocumentSnapshotLiveDataFirestore liveData = new FirebaseDocumentSnapshotLiveDataFirestore(REQ_DONE_BOOKS_REF);
 
-    private final MediatorLiveData<BorrowedBooks> borrowedBooksLiveData = new MediatorLiveData<>();
+    private final MediatorLiveData<RequestedDoneBooks> reqDoneBooksLiveData = new MediatorLiveData<>();
 
-    public BorrowedBooksViewModel(){
-        borrowedBooksLiveData.addSource(liveData, new Observer<DocumentSnapshot>() {
+    public RequestedDoneBooksViewModel(){
+        reqDoneBooksLiveData.addSource(liveData, new Observer<DocumentSnapshot>() {
             @Override
             public void onChanged(@Nullable final DocumentSnapshot snapshot) {
                 if(snapshot != null){
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            borrowedBooksLiveData.postValue(snapshot.toObject(BorrowedBooks.class));
+                            reqDoneBooksLiveData.postValue(snapshot.toObject(RequestedDoneBooks.class));
                         }
                     }).start();
                 }else{
-                    borrowedBooksLiveData.setValue(null);
+                    reqDoneBooksLiveData.setValue(null);
                 }
             }
         });
     }
 
     @NonNull
-    public LiveData<BorrowedBooks> getSnapshotLiveData(){
-        return borrowedBooksLiveData;
+    public LiveData<RequestedDoneBooks> getSnapshotLiveData(){
+        return reqDoneBooksLiveData;
     }
 }
+

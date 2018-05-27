@@ -37,7 +37,6 @@ public class RequestsFragmentDoneItem extends Fragment {
     FirebaseFirestore mFirebaseFirestore;
     FirebaseDatabase firebaseDatabase;
     List<Book> listBooks;
-    List<String> booksID;
     List<String> chatIDs;
     List<String> usersID;
     List<User> mUsersOwner;
@@ -62,7 +61,7 @@ public class RequestsFragmentDoneItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new LentBookAdapter(listBooks, booksID, chatIDs, usersID, mUsersOwner);
+        mAdapter = new LentBookAdapter(listBooks, chatIDs, usersID, mUsersOwner);
 
         //mAdapter = new RecyclerBorrowedBooksAdapter(listBooks, booksID, chatIDs, usersID);
         mRecyclerView.setAdapter(mAdapter);
@@ -78,7 +77,7 @@ public class RequestsFragmentDoneItem extends Fragment {
         openedChatReference = firebaseDatabase.getReference().child("openedChats");
 
         if (mFirebaseAuth.getUid() != null) {
-            mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid())
+            /*mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid())
                     .addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
                         @Override
                         public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
@@ -125,7 +124,7 @@ public class RequestsFragmentDoneItem extends Fragment {
                                 }
                             }
                         }
-                    });
+                    });*/
         }
         return view;
     }

@@ -64,9 +64,12 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.view.View.GONE;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -183,41 +186,6 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         });
-
-        /*mBookButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mFirebaseAuth.getUid() != null) {
-                    final DocumentReference docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
-                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
-                    progressDialogHolder.showLoadingDialog(R.string.wait_for_chat_opening);
-                    BorrowedBooksViewModel borrowedBooksViewModel = ViewModelProviders.of(BookDetailsActivity.this).get(BorrowedBooksViewModel.class);
-                    final LiveData<BorrowedBooks> liveData = borrowedBooksViewModel.getSnapshotLiveData();
-                    liveData.observe(BookDetailsActivity.this, new Observer<BorrowedBooks>() {
-                        @Override
-                        public void onChanged(@Nullable BorrowedBooks borrowedBooks) {
-                            liveData.removeObserver(this);
-                            if (borrowedBooks != null) {
-                                if (!borrowedBooks.getBooksID().contains(mBook.getBookID())) {
-                                    borrowedBooks.getBooksID().add(mBook.getBookID());
-                                    docRef.set(borrowedBooks);
-                                }
-                            } else {
-                                List<String> list = new ArrayList<>();
-                                list.add(mBook.getBookID());
-                                borrowedBooks = new BorrowedBooks(list);
-                                docRef.set(borrowedBooks);
-                            }
-                            if (progressDialogHolder.isProgressDialogShowing())
-                                progressDialogHolder.dismissDialog();
-                            new ChatManager(mBook.getBookID(), mBook.getUid(), getApplicationContext());
-                        }
-                    });
-                } else {
-                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
-                }
-            }
-        });*/
     }
 
     private void updateUI() {
@@ -330,40 +298,47 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBookDescriptionLayout.setVisibility(GONE);
         }*/
 
-        /*mBookButton.setOnClickListener(new View.OnClickListener() {
+        mBookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final DocumentReference docRef;
-                if(mFirebaseAuth.getUid() != null) {
-                    docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
-                    docRef.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                if (mFirebaseAuth.getUid() != null) {
+
+                    final DocumentReference reqDocRef = mFirebaseFirestore.collection("requestedDone").document(mFirebaseAuth.getUid());
+                    Map<String, Book> map = new HashMap<>();
+                    map.put(mBook.getBookID(), mBook);
+                    reqDocRef.set(map, SetOptions.merge());
+                    new ChatManager(mBook.getBookID(), mBook.getUid(), getApplicationContext());
+
+                    /*final DocumentReference docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
+                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
+                    progressDialogHolder.showLoadingDialog(R.string.wait_for_chat_opening);
+                    BorrowedBooksViewModel borrowedBooksViewModel = ViewModelProviders.of(BookDetailsActivity.this).get(BorrowedBooksViewModel.class);
+                    final LiveData<BorrowedBooks> liveData = borrowedBooksViewModel.getSnapshotLiveData();
+                    liveData.observe(BookDetailsActivity.this, new Observer<BorrowedBooks>() {
                         @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if(task.isSuccessful()){
-                                DocumentSnapshot documentSnapshot = task.getResult();
-                                BorrowedBooks booksBorrowed = documentSnapshot.toObject(BorrowedBooks.class);
-                                if(booksBorrowed != null) {
-                                    if(!booksBorrowed.getBooksID().contains(mBookId)) {
-                                        booksBorrowed.getBooksID().add(mBookId);
-                                        docRef.set(booksBorrowed);
-                                    }
+                        public void onChanged(@Nullable BorrowedBooks borrowedBooks) {
+                            liveData.removeObserver(this);
+                            if (borrowedBooks != null) {
+                                if (!borrowedBooks.getBooksID().contains(mBook.getBookID())) {
+                                    borrowedBooks.getBooksID().add(mBook.getBookID());
+                                    docRef.set(borrowedBooks);
                                 }
-                                else{
-                                    List<String> list = new ArrayList<>();
-                                    list.add(mBookId);
-                                    booksBorrowed = new BorrowedBooks(list);
-                                    docRef.set(booksBorrowed);
-                                }
-                                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
+                            } else {
+                                List<String> list = new ArrayList<>();
+                                list.add(mBook.getBookID());
+                                borrowedBooks = new BorrowedBooks(list);
+                                docRef.set(borrowedBooks);
                             }
+                            if (progressDialogHolder.isProgressDialogShowing())
+                                progressDialogHolder.dismissDialog();
+                            new ChatManager(mBook.getBookID(), mBook.getUid(), getApplicationContext());
                         }
-                    });
-                }
-                else{
+                    });*/
+                } else {
                     Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
                 }
             }
-        });*/
+        });
 
         mShareImageView.setOnClickListener(new View.OnClickListener() {
             @Override

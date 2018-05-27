@@ -32,7 +32,6 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public class LentBookAdapter extends RecyclerView.Adapter<LentBookAdapter.MyViewHolder>{
 
     private List<Book> mBookList;
-    private List<String> mBookIds;
     private List<String> mChatIds;
     private List<String> mUsersIds;
     private List<com.example.android.lab1.model.User> mUsersOwner;
@@ -42,16 +41,14 @@ public class LentBookAdapter extends RecyclerView.Adapter<LentBookAdapter.MyView
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
 
-    public LentBookAdapter(List<Book> listBooks, List<String> booksID, List<String> chatIDs, List<String> usersID) {
+    public LentBookAdapter(List<Book> listBooks, List<String> chatIDs, List<String> usersID) {
         mBookList = listBooks;
-        mBookIds = booksID;
         mChatIds = chatIDs;
         mUsersIds = usersID;
     }
 
-    public LentBookAdapter(List<Book> listBooks, List<String> booksID, List<String> chatIDs, List<String> usersID, List<com.example.android.lab1.model.User> usersOwner) {
+    public LentBookAdapter(List<Book> listBooks, List<String> chatIDs, List<String> usersID, List<com.example.android.lab1.model.User> usersOwner) {
         mBookList = listBooks;
-        mBookIds = booksID;
         mChatIds = chatIDs;
         mUsersIds = usersID;
         mUsersOwner = usersOwner;
@@ -77,9 +74,8 @@ public class LentBookAdapter extends RecyclerView.Adapter<LentBookAdapter.MyView
         return mBookList.size();
     }
 
-    public void setItems(List<Book> listBooks, List<String> booksID, List<String> chatIDs, List<String> usersIds, List<com.example.android.lab1.model.User> usersOwner) {
+    public void setItems(List<Book> listBooks, List<String> chatIDs, List<String> usersIds, List<com.example.android.lab1.model.User> usersOwner) {
         mBookList = listBooks;
-        mBookIds = booksID;
         mChatIds = chatIDs;
         mUsersIds = usersIds;
         mUsersOwner = usersOwner;
@@ -140,7 +136,7 @@ public class LentBookAdapter extends RecyclerView.Adapter<LentBookAdapter.MyView
                             intent.putExtra("ChatID", mChatIds.get(position));
                             intent.putExtra("Username", mBookOwner.getUsername());
                             intent.putExtra("ImageURL", mBookOwner.getPhotoURL());
-                            intent.putExtra("BookID", mBookIds.get(position));
+                            intent.putExtra("BookID", mBookList.get(position).getBookID());
                             v.getContext().startActivity(intent);
                         }
 
