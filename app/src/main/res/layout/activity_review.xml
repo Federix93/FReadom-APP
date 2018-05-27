@@ -83,6 +83,7 @@
         android:hint="@string/review_leave_optional_comment_for_owner"
         android:maxLength="280"
         android:maxLines="5"
+        android:inputType="textCapSentences"
         app:layout_constraintTop_toBottomOf="@+id/review_rating" />
 
     <android.support.v7.widget.AppCompatButton

@@ -75,15 +75,17 @@ class ReviewActivity : AppCompatActivity() {
 
     private fun setupConfirm() {
         mConfirmButton.setOnClickListener {
-            if (mRatingBar.rating > 0 && ! Utilities.isOnline(applicationContext)) {
+            val failureFunction = {
+                mUploading = false
+                Toast.makeText(applicationContext,
+                        "Errore durante il caricamento, riprovare assicurandosi di avere una connessione ad internet attiva",
+                        Toast.LENGTH_SHORT).show()
+            }
+
+            if (mRatingBar.rating > 0 && Utilities.isOnline(applicationContext)) {
                 mUploading = true
 
-                val failureFunction = {
-                    mUploading = false
-                    Toast.makeText(applicationContext,
-                            "Errore durante il caricamento, riprovare assicurandosi di avere una connessione ad internet attiva",
-                            Toast.LENGTH_SHORT).show()
-                }
+
 
                 val failureListener = OnFailureListener { failureFunction() }
 
@@ -96,7 +98,7 @@ class ReviewActivity : AppCompatActivity() {
                                     task.result.exists() &&
                                     task.result.toObject(Book::class.java) != null) {
                                 val readBook = task.result.toObject(Book::class.java)!!
-                                firebaseFirestore.collection("user-rating")
+                                firebaseFirestore.collection("users")
                                         .document(mReviewedId)
                                         .collection("ratings").add(Review(reviewerId = mReviewerId,
                                                 bookId = mBookId,

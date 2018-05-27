@@ -18,7 +18,6 @@ import com.example.android.lab1.R
 import com.example.android.lab1.model.Review
 import com.example.android.lab1.model.User
 import com.example.android.lab1.utils.dateToWhenAgo
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import io.techery.properratingbar.ProperRatingBar
@@ -29,8 +28,7 @@ class ReviewListFragment : Fragment() {
 
     private lateinit var mReviewsRecyclerView: RecyclerView
     private lateinit var mNoReviewsTextView: TextView
-    private lateinit var mLoadMoreProgressBar: ProgressBar
-    var mReviewedId: String? = null
+    private var mReviewedId: String? = null
     private var mReviewsPerPage: Int = 10
     private var mDownloading: Boolean = false
 
@@ -64,9 +62,6 @@ class ReviewListFragment : Fragment() {
             mReviewsRecyclerView.visibility = View.GONE
             mNoReviewsTextView.visibility = View.VISIBLE
         }
-
-
-
         return rootView
     }
 
@@ -84,11 +79,10 @@ class ReviewListFragment : Fragment() {
                 val itemCount = rvRecyclerManager.itemCount
                 val lastVisiblePosition = rvRecyclerManager.findLastVisibleItemPosition()
 
-                if (!mDownloading && itemCount <= (lastVisiblePosition
-                                + mReviewsPerPage)) {
-                    getData(reviewsAdapter.lastId)
-                    mDownloading = true
-                    mLoadMoreProgressBar.visibility = View.VISIBLE
+                if (!mDownloading &&
+                        itemCount <= (lastVisiblePosition + mReviewsPerPage) &&
+                        dy > 0) {
+                    getData(reviewsAdapter.lastTimestamp)
                 }
 
             }
@@ -104,85 +98,93 @@ class ReviewListFragment : Fragment() {
         {
             mReviewsRecyclerView = findViewById(R.id.reviews_rv)
             mNoReviewsTextView = findViewById(R.id.reviews_no_reviews)
-            mLoadMoreProgressBar = findViewById(R.id.reviews_load_new_content)
         }
     }
 
-    fun getData(nodeId: String?) {
-
+    fun getData(nodeId: Date?) {
         val query = if (nodeId == null) // first query get firsts reviews
             FirebaseFirestore.getInstance()
-                    .collection("user-rating")
+                    .collection("users")
                     .document(mReviewedId!!)
                     .collection("ratings")
                     .orderBy("timestamp", Query.Direction.DESCENDING)
                     .limit(mReviewsPerPage.toLong())
         else {
             val documentReference = FirebaseFirestore.getInstance()
-                    .collection("user-rating")
+                    .collection("users")
                     .document(mReviewedId!!)
-                    .collection("rating")
+                    .collection("ratings")
             documentReference.orderBy("timestamp", Query.Direction.DESCENDING)
                     .startAfter(nodeId)
                     .limit(mReviewsPerPage.toLong())
         }
-
+        mDownloading = true
         query.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
             if (querySnapshot != null && firebaseFirestoreException == null) {
                 if (!querySnapshot.isEmpty) {
-                    val reviews = mutableListOf<Review>()
-                    val reviewsIDs = mutableListOf<String>()
-                    val usersMap = mutableMapOf<String, User?>()
                     val reviewsAdapter = mReviewsRecyclerView.adapter as ReviewsAdapter
-                    val currentUsers = reviewsAdapter.mUsers.keys
+                    val reviewsIDs = reviewsAdapter.mReviewsIds
+                    val reviews = reviewsAdapter.mReviews
+                    val usersMap = reviewsAdapter.mUsers
+                    val idsToDownload = mutableSetOf<String>()
+                    val initialIndex = reviews.size - 1
 
                     for (document in querySnapshot.documents) {
-                        reviewsIDs.add(document.id)
-                        val currentReview = document.toObject(Review::class.java)
-                        if (currentReview != null) {
-                            reviews.add(currentReview)
-                            if (!currentUsers.contains(currentReview.reviewerId)) {
-                                usersMap[currentReview.reviewerId] = null
+                        if (! reviewsIDs.contains(document.id)) {
+                            val currentReview = document.toObject(Review::class.java)
+                            if (currentReview != null) {
+                                reviewsIDs.add(document.id)
+                                reviews.add(currentReview)
+                                if (!usersMap.contains(currentReview.reviewerId)) {
+                                    idsToDownload.add(currentReview.reviewerId)
+                                }
                             }
                         }
-
                     }
 
                     var successfulTasks = 0
-                    val numTask = usersMap.keys.size
-                    for (userID in usersMap.keys) {
-                        FirebaseFirestore.getInstance()
-                                .collection("users")
-                                .document(userID)
-                                .get()
-                                .addOnCompleteListener {
-                                    usersMap[userID] = it.result.toObject(User::class.java)
-                                    successfulTasks++
-                                    if (successfulTasks >= numTask) {
-                                        // last user downloaded
-                                        mDownloading = false
-                                        mLoadMoreProgressBar.visibility = View.GONE
-                                        reviewsAdapter.addAll(reviews,
-                                                reviewsIDs,
-                                                usersMap)
-                                    }
-                                }
+                    val numTask = idsToDownload.size
+                    if (numTask <= 0)
+                    {
+                        mDownloading = false
+                        mReviewsRecyclerView.adapter.notifyItemRangeChanged(initialIndex,
+                                reviews.size)
                     }
-
-
+                    else
+                        for (userID in idsToDownload) {
+                            FirebaseFirestore.getInstance()
+                                    .collection("users")
+                                    .document(userID)
+                                    .get()
+                                    .addOnCompleteListener {
+                                        usersMap[userID] = it.result.toObject(User::class.java)!!
+                                        successfulTasks++
+                                        if (successfulTasks >= numTask) {
+                                            // last user downloaded
+                                            mDownloading = false
+                                            mReviewsRecyclerView.adapter.notifyItemRangeChanged(initialIndex,
+                                                    reviews.size)
+                                            /*reviewsAdapter.addAll(reviews,
+                                                    reviewsIDs,
+                                                    usersMap)*/
+                                        }
+                                    }
+                        }
                 } else if (nodeId == null) {
                     // if first query didn't return anything
                     mDownloading = false
-                    mLoadMoreProgressBar.visibility = View.GONE
                     mNoReviewsTextView.visibility = View.VISIBLE
                     mReviewsRecyclerView.visibility = View.GONE
+                }
+                else
+                {
+                    mDownloading = false
                 }
             } else {
                 mDownloading = false
                 if (nodeId == null) {
                     mNoReviewsTextView.visibility = View.VISIBLE
                     mReviewsRecyclerView.visibility = View.GONE
-                    mLoadMoreProgressBar.visibility = View.GONE
                     mNoReviewsTextView.text = firebaseFirestoreException.toString()
                 }
             }
@@ -192,13 +194,13 @@ class ReviewListFragment : Fragment() {
 
     class ReviewsAdapter(private val mContext: Context) : RecyclerView.Adapter<ReviewViewHolder>() {
 
-        private val mReviews: MutableList<Review> = mutableListOf()
-        private val mReviewsIds: MutableList<String> = mutableListOf()
+        val mReviews: MutableList<Review> = mutableListOf()
+        val mReviewsIds: MutableList<String> = mutableListOf()
         val mUsers: MutableMap<String, User> = mutableMapOf()
 
-        val lastId: String?
+        val lastTimestamp: Date?
             get() {
-                return if (mReviewsIds.isEmpty()) null else mReviewsIds[mReviewsIds.size - 1]
+                return if (mReviews.isEmpty()) null else mReviews[mReviews.size - 1].timestamp
             }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
@@ -216,13 +218,12 @@ class ReviewListFragment : Fragment() {
             holder.bind(mReviews[position], mUsers[mReviews[position].reviewerId])
         }
 
-        fun addAll(reviews: List<Review>, reviewsID: List<String>, users: MutableMap<String, User?>) {
+        fun addAll(reviews: List<Review>, reviewsID: List<String>, users: MutableMap<String, User>) {
             val initialSize = reviews.size
             mReviews.addAll(reviews)
             mReviewsIds.addAll(reviewsID)
             for ((key, value) in users)
-                if (value != null)
-                    mUsers[key] = value
+                mUsers[key] = value
             notifyItemRangeInserted(initialSize, initialSize + reviews.size)
         }
     }
