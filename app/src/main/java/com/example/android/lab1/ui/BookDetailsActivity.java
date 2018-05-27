@@ -84,6 +84,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     AppCompatButton mBookButton;
     ImageView mShareImageView;
     ImageView mFavoritesImageView;
+    TextView mFavoriteText;
     TextView mBookDetailCondition;
     TextView mBookDescription;
     ImageView mBookDetailConditionColor;
@@ -122,6 +123,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mBookDescriptionLayout = findViewById(R.id.book_description_container);
         mGalleryLayout = findViewById(R.id.relative_gallery_layout);
         mFavoriteContainer = findViewById(R.id.add_to_favorite_container);
+        mFavoriteText = findViewById(R.id.add_to_favorite_text);
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -276,12 +278,14 @@ public class BookDetailsActivity extends AppCompatActivity {
                         FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
                         if (favoriteBooks != null) {
                             if (favoriteBooks.getBookIds().contains(mBookId)) {
-                                String uri = "@drawable/ic_bookmark_orange_24dp";  // where myresource (without the extension) is the file
+                                mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
+                                String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
                                 int imageResource = getResources().getIdentifier(uri, null, getPackageName());
                                 Drawable res = getResources().getDrawable(imageResource);
                                 mFavoritesImageView.setImageDrawable(res);
                             } else {
-                                String uri = "@drawable/ic_bookmark_border_orange_24dp";  // where myresource (without the extension) is the file
+                                mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
+                                String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
                                 int imageResource = getResources().getIdentifier(uri, null, getPackageName());
                                 Drawable res = getResources().getDrawable(imageResource);
                                 mFavoritesImageView.setImageDrawable(res);
@@ -323,7 +327,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
 
-        String uri = "@drawable/ic_bookmark_border_orange_24dp";  // where myresource (without the extension) is the file
+        String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
         int imageResource = getResources().getIdentifier(uri, null, getPackageName());
         Drawable res = getResources().getDrawable(imageResource);
         mFavoritesImageView.setImageDrawable(res);
@@ -466,8 +470,8 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     if (favoriteBooks.getBookIds().contains(mBookId)) {
                                         favoriteBooks.getBookIds().remove(mBookId);
                                         documentReference.set(favoriteBooks);
-
-                                        String uri = "@drawable/ic_bookmark_border_orange_24dp";  // where myresource (without the extension) is the file
+                                        mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
+                                        String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
                                         int imageResource = getResources().getIdentifier(uri, null, getPackageName());
                                         Drawable res = getResources().getDrawable(imageResource);
                                         mFavoritesImageView.setImageDrawable(res);
@@ -487,7 +491,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                                         favoriteBooks.getBookIds().add(mBookId);
                                         documentReference.set(favoriteBooks);
 
-                                        String uri = "@drawable/ic_bookmark_orange_24dp";  // where myresource (without the extension) is the file
+                                        mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
+
+                                        String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
                                         int imageResource = getResources().getIdentifier(uri, null, getPackageName());
                                         Drawable res = getResources().getDrawable(imageResource);
                                         mFavoritesImageView.setImageDrawable(res);
@@ -510,7 +516,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     favoriteBooks = new FavoriteBooks(favorites);
                                     documentReference.set(favoriteBooks);
 
-                                    String uri = "@drawable/ic_bookmark_orange_24dp";  // where myresource (without the extension) is the file
+                                    mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
+
+                                    String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
                                     int imageResource = getResources().getIdentifier(uri, null, getPackageName());
                                     Drawable res = getResources().getDrawable(imageResource);
                                     mFavoritesImageView.setImageDrawable(res);

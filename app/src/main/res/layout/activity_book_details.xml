@@ -220,7 +220,6 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="2dp"
-                        android:text="@string/add_to_favorite"
                         android:textColor="@color/black"
                         android:textSize="12sp" />
 
@@ -241,7 +240,7 @@
 
 
                     <TextView
-                        android:id="@+id/add_to_favorite_text2"
+                        android:id="@+id/share_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"

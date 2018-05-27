@@ -195,6 +195,7 @@
     <string name="book_added">Libro aggiunto ai preferiti</string>
     <string name="book_removed">Libro rimosso dai preferiti</string>
     <string name="go_favorite">Vai ai miei preferiti</string>
+    <string name="remove_from_favorites">Rimuovi dai preferiti</string>
     <string name="favorite_title">I tuoi preferiti</string>
     <string name="favorite_advice">Al momento non hai libri preferiti. Quando aggiungerai un libro ai tuoi preferiti lo troverai qui, per tenerlo sempre a portata di mano!</string>
 

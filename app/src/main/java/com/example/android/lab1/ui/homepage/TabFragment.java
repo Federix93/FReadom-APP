@@ -16,6 +16,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -551,13 +552,13 @@ public class TabFragment extends Fragment {
     }
 
     private void updateListOfBooks(List<Book> mListBooksOfUser, List<String> bookIds) {
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
 
         mYourLibraryRecyclerView.setHasFixedSize(true);
         mYourLibraryRecyclerView.setLayoutManager(layoutManager);
         mYourLibraryRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerYourLibraryAdapter(mListBooksOfUser, bookIds);
+        mAdapter = new RecyclerYourLibraryAdapter(mListBooksOfUser, bookIds, getContext());
         mYourLibraryRecyclerView.setAdapter(mAdapter);
     }
 
