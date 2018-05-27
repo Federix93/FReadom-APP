@@ -25,47 +25,38 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.security.acl.Owner;
 import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class LentBookAdapter extends RecyclerView.Adapter<LentBookAdapter.MyViewHolder>{
+public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerFragmentBooksAdapter.MyViewHolder>{
 
     private List<Book> mBookList;
-    private List<String> mChatIds;
-    private List<String> mUsersIds;
-    private List<com.example.android.lab1.model.User> mUsersOwner;
+    //private List<String> mChatIds;
+    private List<User> mUsersOwner;
 
-    private User mBookOwner;
     private Context mContext;
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
 
-    public LentBookAdapter(List<Book> listBooks, List<String> chatIDs, List<String> usersID) {
+    public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
-        mChatIds = chatIDs;
-        mUsersIds = usersID;
+        mUsersOwner = users;
     }
 
-    public LentBookAdapter(List<Book> listBooks, List<String> chatIDs, List<String> usersID, List<com.example.android.lab1.model.User> usersOwner) {
-        mBookList = listBooks;
-        mChatIds = chatIDs;
-        mUsersIds = usersID;
-        mUsersOwner = usersOwner;
-    }
 
     @NonNull
     @Override
-    public LentBookAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerFragmentBooksAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View cardView = inflater.inflate(R.layout.recycler_book_item_lent, parent, false);
         return new MyViewHolder(cardView);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull LentBookAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerFragmentBooksAdapter.MyViewHolder holder, int position) {
         holder.bind(mBookList.get(position), position);
     }
 
@@ -74,10 +65,8 @@ public class LentBookAdapter extends RecyclerView.Adapter<LentBookAdapter.MyView
         return mBookList.size();
     }
 
-    public void setItems(List<Book> listBooks, List<String> chatIDs, List<String> usersIds, List<com.example.android.lab1.model.User> usersOwner) {
+    public void setItems(List<Book> listBooks, List<User> usersOwner) {
         mBookList = listBooks;
-        mChatIds = chatIDs;
-        mUsersIds = usersIds;
         mUsersOwner = usersOwner;
     }
 
@@ -118,33 +107,21 @@ public class LentBookAdapter extends RecyclerView.Adapter<LentBookAdapter.MyView
                 Glide.with(itemView.getContext()).load(storage).into(mBookThumbnail);
             } else
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(mBookThumbnail);
-            if (mUsersOwner.get(position).getImage() != null) {
-                Glide.with(mContext).load(mUsersOwner.get(position).getImage())
+            if (mUsersOwner.get(position).getPhotoURL() != null) {
+                Glide.with(mContext).load(mUsersOwner.get(position).getPhotoURL())
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserPhoto);
             }
             mChatLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    userReference.child(mUsersIds.get(position)).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            mBookOwner = dataSnapshot.getValue(User.class);
-
-                            Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            intent.putExtra("ChatID", mChatIds.get(position));
-                            intent.putExtra("Username", mBookOwner.getUsername());
-                            intent.putExtra("ImageURL", mBookOwner.getPhotoURL());
-                            intent.putExtra("BookID", mBookList.get(position).getBookID());
-                            v.getContext().startActivity(intent);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
+                    Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    //intent.putExtra("ChatID", mChatIds.get(position));
+                    intent.putExtra("Username", mUsersOwner.get(position).getUsername());
+                    intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
+                    intent.putExtra("BookID", mBookList.get(position).getBookID());
+                    v.getContext().startActivity(intent);
                 }
             });
 

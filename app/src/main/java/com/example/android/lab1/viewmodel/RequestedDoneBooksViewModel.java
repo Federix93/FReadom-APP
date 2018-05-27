@@ -7,44 +7,47 @@ import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.example.android.lab1.model.BorrowedBooks;
-import com.example.android.lab1.model.RequestedDoneBooks;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.utils.firebaseutils.FirebaseDocumentSnapshotLiveDataFirestore;
+import com.example.android.lab1.utils.firebaseutils.FirebaseQueryLiveDataFirestore;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.List;
 
 public class RequestedDoneBooksViewModel extends ViewModel {
 
-    private static final DocumentReference REQ_DONE_BOOKS_REF = FirebaseFirestore.getInstance()
-            .collection("requestedDone")
-            .document(FirebaseAuth.getInstance().getUid());
+    private static final CollectionReference REQ_DONE_BOOKS_REF = FirebaseFirestore.getInstance()
+            .collection("requestsDone").document(FirebaseAuth.getInstance().getUid()).collection("books");
 
-    private final FirebaseDocumentSnapshotLiveDataFirestore liveData = new FirebaseDocumentSnapshotLiveDataFirestore(REQ_DONE_BOOKS_REF);
+    private final FirebaseQueryLiveDataFirestore liveData = new FirebaseQueryLiveDataFirestore(REQ_DONE_BOOKS_REF);
 
-    private final MediatorLiveData<RequestedDoneBooks> reqDoneBooksLiveData = new MediatorLiveData<>();
+    private final MediatorLiveData<List<Book>> reqDoneBooksLiveData = new MediatorLiveData<>();
 
-    public RequestedDoneBooksViewModel(){
-        reqDoneBooksLiveData.addSource(liveData, new Observer<DocumentSnapshot>() {
+    public RequestedDoneBooksViewModel() {
+        reqDoneBooksLiveData.addSource(liveData, new Observer<QuerySnapshot>() {
             @Override
-            public void onChanged(@Nullable final DocumentSnapshot snapshot) {
-                if(snapshot != null){
+            public void onChanged(@Nullable final QuerySnapshot queryDocumentSnapshots) {
+                if(queryDocumentSnapshots != null){
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            reqDoneBooksLiveData.postValue(snapshot.toObject(RequestedDoneBooks.class));
+                            reqDoneBooksLiveData.postValue(queryDocumentSnapshots.toObjects(Book.class));
                         }
                     }).start();
-                }else{
-                    reqDoneBooksLiveData.setValue(null);
                 }
+                else
+                    reqDoneBooksLiveData.setValue(null);
             }
         });
     }
 
     @NonNull
-    public LiveData<RequestedDoneBooks> getSnapshotLiveData(){
+    public LiveData<List<Book>> getSnapshotLiveData() {
         return reqDoneBooksLiveData;
     }
 }

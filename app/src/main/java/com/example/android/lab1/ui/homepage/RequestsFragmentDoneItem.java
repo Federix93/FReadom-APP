@@ -3,37 +3,30 @@ package com.example.android.lab1.ui.homepage;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.LentBookAdapter;
-import com.example.android.lab1.adapter.RecyclerBorrowedBooksAdapter;
+import com.example.android.lab1.adapter.RecyclerFragmentBooksAdapter;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.model.RequestedDoneBooks;
-import com.example.android.lab1.model.User;
-import com.example.android.lab1.model.BorrowedBooks;
+import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.viewmodel.RequestedDoneBooksViewModel;
+import com.example.android.lab1.viewmodel.UserRealtimeDBViewModel;
+import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public class RequestsFragmentDoneItem extends Fragment {
 
@@ -42,10 +35,9 @@ public class RequestsFragmentDoneItem extends Fragment {
     FirebaseDatabase firebaseDatabase;
     List<Book> listBooks;
     List<String> chatIDs;
-    List<String> usersID;
     List<User> mUsersOwner;
     DatabaseReference openedChatReference;
-    LentBookAdapter mAdapter;
+    RecyclerFragmentBooksAdapter mAdapter;
 
     public void RequestsFragmentDoneItem() {
     }
@@ -59,18 +51,17 @@ public class RequestsFragmentDoneItem extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         listBooks = new ArrayList<>();
         chatIDs = new ArrayList<>();
-        usersID = new ArrayList<>();
         mUsersOwner = new ArrayList<>();
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new LentBookAdapter(listBooks, chatIDs, usersID, mUsersOwner);
+        mAdapter = new RecyclerFragmentBooksAdapter(listBooks,  mUsersOwner);
 
         //mAdapter = new RecyclerBorrowedBooksAdapter(listBooks, booksID, chatIDs, usersID);
         mRecyclerView.setAdapter(mAdapter);
 
-        final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+        /*final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
@@ -79,7 +70,30 @@ public class RequestsFragmentDoneItem extends Fragment {
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         openedChatReference = firebaseDatabase.getReference().child("openedChats");
-
+*/
+        RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
+        requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
+            @Override
+            public void onChanged(@Nullable List<Book> books) {
+                if(books != null) {
+                    listBooks = books;
+                    for (Book b : books) {
+                        UserRealtimeDBViewModel userRealtimeDBViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(b.getUid())).get(UserRealtimeDBViewModel.class);
+                        userRealtimeDBViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<User>() {
+                            @Override
+                            public void onChanged(@Nullable User user) {
+                                if (user != null) {
+                                    Log.d("LULLO", "USER: " + user.getUsername());
+                                    mUsersOwner.add(user);
+                                    mAdapter.setItems(listBooks, mUsersOwner);
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        });
         /*if (mFirebaseAuth.getUid() != null) {
             RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
             requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<RequestedDoneBooks>() {

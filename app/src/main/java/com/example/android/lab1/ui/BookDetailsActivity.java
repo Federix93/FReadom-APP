@@ -303,10 +303,8 @@ public class BookDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (mFirebaseAuth.getUid() != null) {
 
-                    final DocumentReference reqDocRef = mFirebaseFirestore.collection("requestedDone").document(mFirebaseAuth.getUid());
-                    Map<String, Book> map = new HashMap<>();
-                    map.put(mBook.getBookID(), mBook);
-                    reqDocRef.set(map, SetOptions.merge());
+                    final DocumentReference reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getUid());
+                    reqDocRef.set(mBook);
                     new ChatManager(mBook.getBookID(), mBook.getUid(), getApplicationContext());
 
                     /*final DocumentReference docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
