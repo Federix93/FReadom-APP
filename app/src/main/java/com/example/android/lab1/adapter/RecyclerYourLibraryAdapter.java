@@ -36,35 +36,28 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
 
     Context mContext;
 
-    public RecyclerYourLibraryAdapter(List<Book> books, List<String> bookIds, Context context) {
+    public RecyclerYourLibraryAdapter(List<Book> books) {
         this.mBooks = books;
-        this.mBookIds = bookIds;
-        mContext = context;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View cardView = inflater.inflate(R.layout.recycler_book_item_library, parent, false);
+        mContext = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        View cardView = inflater.inflate(R.layout.recycler_book_library_item, parent, false);
 
         return new MyViewHolder(cardView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.bind(mBooks.get(position), position);
+        holder.bind(mBooks.get(position));
     }
 
     @Override
     public int getItemCount() {
         return mBooks.size();
-    }
-
-    public void setItems(List<Book> books, List<String> bookIds, Context context) {
-        this.mBooks = books;
-        this.mBookIds = bookIds;
-        this.mContext = context;
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -80,7 +73,7 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
             mBookThumbnail = itemView.findViewById(R.id.rv_library_book_thumbnail);
         }
         @SuppressLint("CheckResult")
-        public void bind(final Book book, final int position){
+        public void bind(final Book book){
             mBookTitle.setText(book.getTitle());
             mBookAuthor.setText(book.getAuthors());
 
@@ -115,7 +108,7 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
                 public void onClick(View v) {
                     Intent intent = new Intent(mContext, BookDetailsLibraryActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("bookId", mBookIds.get(position));
+                    intent.putExtra("BookSelected", book);
                     mContext.startActivity(intent);
                 }
             });

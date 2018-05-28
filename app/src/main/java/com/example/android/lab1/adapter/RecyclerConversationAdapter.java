@@ -24,31 +24,30 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerConversationAdapter.ConversationViewHolder> {
 
-    private List<User> mListUsers;
-    private List<String> mListChatID;
+    private Map<String, User> mMap;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mChatsReference;
     private String mBookID;
     private String mSenderUID;
 
-    public RecyclerConversationAdapter(List<User> listUsers, List<String> listChatID, String bookID){
-        mListUsers = listUsers;
-        mListChatID = listChatID;
+    public RecyclerConversationAdapter(String bookID){
+        mMap = new HashMap<>();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mChatsReference = mFirebaseDatabase.getReference().child("chats");
         mBookID = bookID;
     }
 
-    public void setItems(List<User> listUsers, List<String> listChatID){
-        mListUsers = listUsers;
-        mListChatID = listChatID;
+    public void setItems(String chatID, User user){
+        mMap.put(chatID, user);
     }
 
 
@@ -62,12 +61,13 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
-        holder.bind(mListUsers.get(position), mListChatID.get(position));
+        Object[] keys = mMap.keySet().toArray();
+        holder.bind(mMap.get(keys[position]), (String) keys[position]);
     }
 
     @Override
     public int getItemCount() {
-        return mListUsers.size();
+        return mMap.size();
     }
 
     class ConversationViewHolder extends RecyclerView.ViewHolder{

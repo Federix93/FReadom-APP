@@ -16,20 +16,32 @@ import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.BookDetailsActivity;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapter.BookViewHolder> {
 
     private List<Book> books;
-    private List<String> IDs;
     private Integer mAnimationDuration;
 
-    public RecyclerBookAdapter(List<Book> books, List<String> IDs) {
+    public RecyclerBookAdapter(List<Book> books) {
+        if (this.books == null) {
+            this.books = new ArrayList<>();
+        }
+        for (Book b : books) {
+            if (!b.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                this.books.add(b);
+            }
+        }
+
+    }
+
+    public void updateItems(List<Book> books) {
         this.books = books;
-        this.IDs = IDs;
     }
 
     @NonNull
@@ -45,8 +57,9 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         /*if (mFilteredIds != null && mFilteredIds.contains(IDs.get(position)))
             holder.layoutHide();
         else */
-        holder.bind(books.get(position), position);
+        holder.bind(books.get(position));
         setFadeAnimation(holder.mRootView);
+
     }
 
     private void setFadeAnimation(View view) {
@@ -56,26 +69,6 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         anim.setDuration(mAnimationDuration);
         view.startAnimation(anim);
     }
-
- /*   public void setFilter(BookFilter bookFilter)
-    {
-        mFilter = bookFilter;
-        if (mFilter != null) {
-            mFilteredIds = bookFilter.getFilteredIds(IDs, books);
-            // reupdate
-            for (int i = 0; i < IDs.size(); i++) {
-                if (mFilteredIds.contains(IDs.get(i)))
-                    notifyItemRemoved(i);
-                else
-                    notifyItemChanged(i);
-            }
-        }
-    }
-    public BookFilter getFilter()
-    {
-        return mFilter;
-    }
-*/
 
     /**
      * Showing popup menu when tapping on 3 dots
@@ -106,7 +99,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
 
         }
 
-        void bind(Book book, final int position) {
+        void bind(final Book book) {
            /* mRootView.setVisibility(View.VISIBLE);
             if (mOldParams != null) mRootView.setLayoutParams(mOldParams); */
             mTitle.setText(book.getTitle());
@@ -124,7 +117,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("ID_BOOK_SELECTED", IDs.get(position));
+                    intent.putExtra("BookSelected", book);
                     v.getContext().startActivity(intent);
                 }
             });
@@ -175,6 +168,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
     /*private class DownLoadImageTask extends AsyncTask<String, Void, Bitmap> {
         // TODO move this inner class somewhere else
         private ImageView mTarget;
+
         public DownLoadImageTask(ImageView target) {
             mTarget = target;
         }

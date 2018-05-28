@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.ui.chat.ChatActivity;
+import com.example.android.lab1.utils.Utilities;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.io.IOException;

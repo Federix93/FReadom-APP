@@ -4,10 +4,12 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -24,24 +26,11 @@ public class Book implements Parcelable, Comparable<Book> {
             return new Book[size];
         }
     };
-    private static final String ISBN = "ISBN";
-    private static final String TITLE = "TITLE";
-    private static final String PHOTOS_PATH = "PHOTOS_PATH";
-    private static final String WEB_THUMBNAIL = "WEB_THUMBNAIL";
-    private static final String UUID = "UUID";
-    private static final String ADDRESS = "ADDRESS";
-    private static final String PUBLISHER = "PUBLISHER";
-    private static final String AUTHORS = "AUTHORS";
-    private static final String LAT = "LAT";
-    private static final String LON = "LON";
-    private static final String PUBLISH_YEAR = "PY";
-    private static final String LOAN_START = "LS";
-    private static final String LOAN_END = "LE";
-    private static final String INFO_LINK = "IL";
-    private static final String CONDITIONS = "CONDITIONS";
-    private static final String GENRE = "GENRE";
-    private static final String TIMESTAMP = "TIMESTAMP";
-    private static final String TAGS = "TAGS";
+
+    private final String DEFAULT_VALUE_STRING = null;
+    private final int DEFAULT_VALUE_INT = -1;
+    private final List DEFAULT_VALUE_LIST = new ArrayList();
+
 
     private String mIsbn;
     private String mTitle;
@@ -61,6 +50,7 @@ public class Book implements Parcelable, Comparable<Book> {
     private String mInfoLink;
     private Long mTimeInserted;
     private boolean mIsAlreadyLent;
+    private String mBookID;
 
     public Book() {
     }
@@ -138,7 +128,7 @@ public class Book implements Parcelable, Comparable<Book> {
     }
 
     public List<String> getUserBookPhotosStoragePath() {
-        return mBookPhotosPaths;
+        return null;
     }
 
     public void setUserBookPhotosStoragePath(ArrayList<String> mUserBookPhotosWebStoragePath) {
@@ -156,8 +146,7 @@ public class Book implements Parcelable, Comparable<Book> {
         return mAuthors;
     }
 
-    public void setAuthors(String authors)
-    {
+    public void setAuthors(String authors) {
         this.mAuthors = authors;
     }
 
@@ -177,30 +166,51 @@ public class Book implements Parcelable, Comparable<Book> {
         this.mLoanEnd = loanEnd;
     }
 
-    protected Book(Parcel in) {
-        Bundle bundle = in.readBundle(getClass().getClassLoader());
-        mIsbn = bundle.containsKey(ISBN) ? bundle.getString(ISBN) : null;
-        mTitle = bundle.containsKey(TITLE) ? bundle.getString(TITLE) : null;
-        mBookPhotosPaths = bundle.containsKey(PHOTOS_PATH) ? bundle.getStringArrayList(PHOTOS_PATH) : null;
-        mWebThumbnail = bundle.containsKey(WEB_THUMBNAIL) ? bundle.getString(WEB_THUMBNAIL) : null;
-        mUid = bundle.containsKey(UUID) ? bundle.getString(UUID) : null;
-        mAddress = bundle.containsKey(ADDRESS) ? bundle.getString(ADDRESS) : null;
-        mPublisher = bundle.containsKey(PUBLISHER) ? bundle.getString(PUBLISHER) : null;
-        mAuthors = bundle.containsKey(AUTHORS) ? bundle.getString(AUTHORS) : null;
-        mPublishYear = bundle.containsKey(PUBLISH_YEAR) ? bundle.getInt(PUBLISH_YEAR) : null;
-        mLoanStart = bundle.containsKey(LOAN_START) ? bundle.getLong(LOAN_START) : null;
-        mLoanEnd = bundle.containsKey(LOAN_END) ? bundle.getLong(LOAN_END) : null;
-        mInfoLink = bundle.containsKey(INFO_LINK) ? bundle.getString(INFO_LINK) : null;
-        mTimeInserted = bundle.containsKey(TIMESTAMP) ? bundle.getLong(TIMESTAMP) : null;
-        mSearchTags = bundle.containsKey(TAGS) ? bundle.getString(TAGS) : null;
-        if (bundle.containsKey(CONDITIONS))
-            mCondition = bundle.getInt(CONDITIONS);
-        if (bundle.containsKey(GENRE))
-            mGenre = bundle.getInt(GENRE);
-        if (bundle.containsKey(LAT) && bundle.containsKey(LON))
-            mGeoPoint = new GeoPoint(bundle.getDouble(LAT),
-                    bundle.getDouble(LON));
+    public String getBookID() {
+        return mBookID;
+    }
 
+    public void setBookID(String bookID) {
+        this.mBookID = bookID;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Book(Parcel in) {
+        mIsbn = in.readString();
+        Log.d("LULLO", "ISBN ON READ: " + mIsbn);
+        mTitle = in.readString();
+        Log.d("LULLO", "Title ON READ: " + mTitle);
+        mBookPhotosPaths = in.readArrayList(String.class.getClassLoader());
+        Log.d("LULLO", "LIST ON READ: " + mBookPhotosPaths.size());
+        mWebThumbnail = in.readString();
+        Log.d("LULLO", "WTHUMB ON READ: " + mWebThumbnail);
+        mUid = in.readString();
+        Log.d("LULLO", "UID ON READ: " + mUid);
+        mAddress = in.readString();
+        Log.d("LULLO", "ADDRESS ON READ: " + mAddress);
+        mPublisher = in.readString();
+        Log.d("LULLO", "PUBLISHER ON READ: " + mPublisher);
+        mAuthors = in.readString();
+        Log.d("LULLO", "AUTHORS ON READ: " + mAuthors);
+        mGeoPoint = new GeoPoint(in.readDouble(), in.readDouble());
+        mPublishYear = in.readInt();
+        Log.d("LULLO", "PUBLISHYEAR ON READ: " + mPublishYear);
+        mLoanStart = in.readLong();
+        Log.d("LULLO", "LOAN START ON READ: " + mLoanStart);
+        mLoanEnd = in.readLong();
+        Log.d("LULLO", "LOAN END ON READ: " + mLoanEnd);
+        mInfoLink = in.readString();
+        Log.d("LULLO", "INFO LINK ON READ: " + mInfoLink);
+        mTimeInserted = in.readLong();
+        Log.d("LULLO", "TimeINS ON READ: " + mTimeInserted);
+        mSearchTags = in.readString();
+        Log.d("LULLO", "TAGS ON READ: " + mSearchTags);
+        mCondition = in.readInt();
+        Log.d("LULLO", "CONDITION ON READ: " + mCondition);
+        mGenre = in.readInt();
+        Log.d("LULLO", "GENRE ON READ: " + mGenre);
+        mBookID = in.readString();
+        Log.d("LULLO", "BOOOKID ON READ: " + mBookID);
     }
 
     public int getGenre() {
@@ -247,41 +257,74 @@ public class Book implements Parcelable, Comparable<Book> {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        Bundle bundle = new Bundle();
         if (mIsbn != null)
-            bundle.putString(ISBN, mIsbn);
+            dest.writeString(mIsbn);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mTitle != null)
-            bundle.putString(TITLE, mTitle);
+            dest.writeString(mTitle);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mBookPhotosPaths != null && !mBookPhotosPaths.isEmpty())
-            bundle.putStringArrayList(PHOTOS_PATH, mBookPhotosPaths);
+            dest.writeList(mBookPhotosPaths);
+        else
+            dest.writeList(DEFAULT_VALUE_LIST);
         if (mWebThumbnail != null)
-            bundle.putString(WEB_THUMBNAIL, mWebThumbnail);
+            dest.writeString(mWebThumbnail);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mUid != null)
-            bundle.putString(UUID, mUid);
+            dest.writeString(mUid);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mAddress != null)
-            bundle.putString(ADDRESS, mAddress);
+            dest.writeString(mAddress);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mPublisher != null)
-            bundle.putString(PUBLISHER, mPublisher);
+            dest.writeString(mPublisher);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mAuthors != null)
-            bundle.putString(AUTHORS, mAuthors);
+            dest.writeString(mAuthors);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mGeoPoint != null) {
-            bundle.putDouble(LAT, mGeoPoint.getLatitude());
-            bundle.putDouble(LON, mGeoPoint.getLongitude());
+            dest.writeDouble(mGeoPoint.getLatitude());
+            dest.writeDouble(mGeoPoint.getLongitude());
+        }else{
+            dest.writeDouble(DEFAULT_VALUE_INT);
+            dest.writeDouble(DEFAULT_VALUE_INT);
         }
         if (mPublishYear != null)
-            bundle.putInt(PUBLISH_YEAR, mPublishYear);
+            dest.writeInt(mPublishYear);
+        else
+            dest.writeInt(DEFAULT_VALUE_INT);
         if (mLoanStart != null)
-            bundle.putLong(LOAN_START, mLoanStart);
+            dest.writeLong(mLoanStart);
+        else
+            dest.writeLong(DEFAULT_VALUE_INT);
         if (mLoanEnd != null)
-            bundle.putLong(LOAN_END, mLoanEnd);
+            dest.writeLong(mLoanEnd);
+        else
+            dest.writeLong(DEFAULT_VALUE_INT);
         if (mInfoLink != null)
-            bundle.putString(INFO_LINK, mInfoLink);
+            dest.writeString(mInfoLink);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mTimeInserted != null)
-            bundle.putLong(TIMESTAMP, mTimeInserted);
+            dest.writeLong(mTimeInserted);
+        else
+            dest.writeLong(DEFAULT_VALUE_INT);
         if (mSearchTags != null)
-            bundle.putString(TAGS, mSearchTags);
-        bundle.putInt(CONDITIONS, mCondition);
-        bundle.putInt(GENRE, mGenre);
+            dest.writeString(mSearchTags);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
+        dest.writeInt(mCondition);
+        Log.d("LULLO", "CONDITION ON WRITE: " + mCondition);
+        dest.writeInt(mGenre);
+        dest.writeString(mBookID);
+
     }
 
 

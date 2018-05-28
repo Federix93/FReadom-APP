@@ -1,10 +1,14 @@
 package com.example.android.lab1.ui.homepage;
 
 import android.animation.Animator;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -39,10 +43,12 @@ import com.example.android.lab1.ui.SignInActivity;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.viewmodel.UserViewModel;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -102,8 +108,6 @@ public class HomePageActivity extends AppCompatActivity
         mBottomNavigationViewPager = findViewById(R.id.fragment_frame);
         mFAB = findViewById(R.id.floating_action_button_library);
 
-        //header.setBackgroundResource(R.drawable.background);
-
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
@@ -111,14 +115,26 @@ public class HomePageActivity extends AppCompatActivity
                 .build();
         firebaseFirestore.setFirestoreSettings(settings);
         if (mFirebaseAuth.getCurrentUser() != null) {
-            final DocumentReference docRef = firebaseFirestore.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+            UserViewModel userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
+            final LiveData<User> liveData = userViewModel.getSnapshotLiveData();
+
+            liveData.observe(this, new Observer<User>() {
+                @Override
+                public void onChanged(@Nullable User user) {
+                    Log.d("LULLO", "UpdateNavigationDrawer");
+                    mUser = user;
+                    updateNavigationDrawer();
+                }
+            });
+            /*final DocumentReference docRef = firebaseFirestore.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
             docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
                 @Override
                 public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
                     mUser = snapshot.toObject(User.class);
+                    Log.d("LULLO", "UpdateNavigationDrawer");
                     updateNavigationDrawer();
                 }
-            });
+            });*/
         }
 
         mToolbar.setTitle(getString(R.string.toolbar_title_home));

@@ -9,18 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.LentBookAdapter;
-import com.example.android.lab1.adapter.RecyclerDashboardLibraryAdapter;
 import com.example.android.lab1.model.Book;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LentFragmentItem extends Fragment {

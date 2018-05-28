@@ -14,4 +14,5 @@
     <color name="mint">#00ff00</color>
     <color name="grayed_button">#808080</color>
     <color name="light_grey">#c8c8c8</color>
+    <color name="background_shimmer">#dddddd</color>
 </resources>

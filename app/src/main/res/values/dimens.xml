@@ -35,4 +35,9 @@
     <dimen name="app_bar_elevation">4dp</dimen>
     <dimen name="floating_action_button_elevation">4dp</dimen>
     <integer name="grid_column_count">2</integer>
+
+    <dimen name="activityPadding">16dp</dimen>
+    <dimen name="placeholderImage">60dp</dimen>
+    <dimen name="placeholderTextHeight">8dp</dimen>
+    <dimen name="padding_10">10dp</dimen>
 </resources>

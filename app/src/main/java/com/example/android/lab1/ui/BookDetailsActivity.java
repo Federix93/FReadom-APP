@@ -1,5 +1,11 @@
 package com.example.android.lab1.ui;
 
+import android.app.Activity;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -39,6 +45,11 @@ import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.profile.GlobalShowProfileActivity;
 import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.viewmodel.BookViewModel;
+import com.example.android.lab1.viewmodel.BorrowedBooksViewModel;
+import com.example.android.lab1.viewmodel.OpenedChatViewModel;
+import com.example.android.lab1.viewmodel.UserViewModel;
+import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -54,11 +65,12 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import com.google.firebase.firestore.ListenerRegistration;
+import java.util.Map;
 
 import static android.view.View.GONE;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -92,9 +104,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     FirebaseAuth mFirebaseAuth;
     RecyclerView mGalleryRecyclerView;
 
-    private String mBookId;
     private User mUser;
-    private ListenerRegistration mListenerRegistration;
     private Book mBook;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -125,16 +135,20 @@ public class BookDetailsActivity extends AppCompatActivity {
         mFavoriteContainer = findViewById(R.id.add_to_favorite_container);
         mFavoriteText = findViewById(R.id.add_to_favorite_text);
 
-        mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
+        if(getIntent().getExtras() != null) {
+            mBook = getIntent().getExtras().getParcelable("BookSelected");
+        }else{
+            Toast.makeText(this, "Si è verificato un errore sconosciuto", Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         Utilities.setupStatusBarColor(this);
-        //setupOnClickListeners();
 
         mToolbar = findViewById(R.id.toolbar_book_detail);
 
         mToolbar.setTitle(R.string.app_name);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-        mToolbar.setNavigationOnClickListener(new OnClickListener() {
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -154,173 +168,54 @@ public class BookDetailsActivity extends AppCompatActivity {
                 .setPersistenceEnabled(true)
                 .build();
         mFirebaseFirestore.setFirestoreSettings(settings);
-        final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
-        mListenerRegistration = docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                mBook = documentSnapshot.toObject(Book.class);
-                if(mBook == null) {
-                    Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                if(mBook.isAlreadyLent()){
-                    mBookButton.setText(getResources().getString(R.string.book_not_available));
-                    mBookButton.setEnabled(false);
-                }
-                updateUI(mBook);
-                if (mListenerRegistration != null)
-                    mListenerRegistration.remove();
-            }
-        });
 
-        //if (mBook.getDescription() != null) {
-            mBookDescriptionLayout.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
-                    intent.putExtra("Title", mBook.getTitle());
-                    startActivity(intent);
-                }
-            });
-        /*} else {
-            mBookDescriptionLayout.setVisibility(GONE);
-        }*/
-
-        mBookButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final DocumentReference docRef;
-                if (mFirebaseAuth.getUid() != null) {
-                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
-                    progressDialogHolder.showLoadingDialog(R.string.wait_for_chat_opening);
-                    docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
-                    docRef.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot documentSnapshot = task.getResult();
-                                BorrowedBooks booksBorrowed = documentSnapshot.toObject(BorrowedBooks.class);
-                                if (booksBorrowed != null) {
-                                    if (!booksBorrowed.getBooksID().contains(mBookId)) {
-                                        booksBorrowed.getBooksID().add(mBookId);
-                                        docRef.set(booksBorrowed);
-                                    }
-                                } else {
-                                    List<String> list = new ArrayList<>();
-                                    list.add(mBookId);
-                                    booksBorrowed = new BorrowedBooks(list);
-                                    docRef.set(booksBorrowed);
-                                }
-                                if (progressDialogHolder.isProgressDialogShowing())
-                                    progressDialogHolder.dismissDialog();
-                                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
-                            }
-                        }
-                    });
-                } else {
-                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        final DocumentReference docRef = mFirebaseFirestore.collection("books").document(mBookId);
-        docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                mBook = documentSnapshot.toObject(Book.class);
-                if (mBook == null) {
-                    Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                if (mBook.isAlreadyLent()) {
-                    mBookButton.setText(getResources().getString(R.string.book_not_available));
-                    mBookButton.setEnabled(false);
-                } else {
-                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference()
-                            .child("openedChats")
-                            .child(mBookId)
-                            .child(mBook.getUid())
-                            .child(mFirebaseAuth.getUid());
-                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot != null && dataSnapshot.exists()) {
-                                mBookButton.setText(getResources().getString(R.string.open_chat));
-                            } else if (dataSnapshot != null) {
-                                mBookButton.setText(getResources().getString(R.string.book_request));
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-            }
-        });
-        final DocumentReference documentReference;
-        if (mFirebaseAuth.getUid() != null) {
-            documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid());
-            documentReference.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()){
-                        DocumentSnapshot documentSnapshot = task.getResult();
-                        FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
-                        if (favoriteBooks != null) {
-                            if (favoriteBooks.getBookIds().contains(mBookId)) {
-                                mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
-                                String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
-                                int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-                                Drawable res = getResources().getDrawable(imageResource);
-                                mFavoritesImageView.setImageDrawable(res);
-                            } else {
-                                mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
-                                String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
-                                int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-                                Drawable res = getResources().getDrawable(imageResource);
-                                mFavoritesImageView.setImageDrawable(res);
-                            }
-                        }
-                    }
-                }
-            });
+        if(mBook == null) {
+            Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
+            finish();
         }
-
+        if(mBook.isAlreadyLent()){
+            mBookButton.setText(getResources().getString(R.string.book_not_available));
+            mBookButton.setEnabled(false);
+        }
+        //Verifico se la chat è aperta
+        OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
+        openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean) {
+                if(!aBoolean) {
+                    mBookButton.setText(getResources().getString(R.string.book_request));
+                }
+                else {
+                    mBookButton.setText(getResources().getString(R.string.open_chat));
+                }
+            }
+        });
+        updateUI();
     }
-    private void updateUI(final Book book) {
-        if (book.getTitle() != null)
-            mBookTitleTextView.setText(book.getTitle());
+
+    private void updateUI() {
+        if (mBook.getTitle() != null)
+            mBookTitleTextView.setText(mBook.getTitle());
         else
             mBookTitleTextView.setText(getResources().getString(R.string.title_not_available));
-        if (book.getAuthors() != null)
-            mAuthorTextView.setText(book.getAuthors());
+        if (mBook.getAuthors() != null)
+            mAuthorTextView.setText(mBook.getAuthors());
         else
             mAuthorTextView.setText(getResources().getString(R.string.author_not_available));
-        if (book.getPublisher() != null)
-            mEditorTextView.setText(book.getPublisher());
+        if (mBook.getPublisher() != null)
+            mEditorTextView.setText(mBook.getPublisher());
         else
             mEditorTextView.setText(getResources().getString(R.string.editor_not_available));
-        if (!String.valueOf(book.getPublishYear()).isEmpty())
-            mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
+        if (!String.valueOf(mBook.getPublishYear()).isEmpty())
+            mPublicationDateTextView.setText(String.valueOf(mBook.getPublishYear()));
         else
             mPublicationDateTextView.setText(getResources().getString(R.string.date_not_available));
-        if (!String.valueOf(book.getCondition()).isEmpty()) {
-            mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), book.getCondition())));
-            mBookDetailConditionColor.setColorFilter(Condition.getConditionColor(getApplicationContext(), book.getCondition()));
+        if (!String.valueOf(mBook.getCondition()).isEmpty()) {
+            mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), mBook.getCondition())));
+            mBookDetailConditionColor.setColorFilter(Condition.getConditionColor(getApplicationContext(), mBook.getCondition()));
         }
-        if (book.getWebThumbnail() != null)
-            Glide.with(this).load(book.getWebThumbnail())
+        if (mBook.getWebThumbnail() != null)
+            Glide.with(this).load(mBook.getWebThumbnail())
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
         else
@@ -333,73 +228,57 @@ public class BookDetailsActivity extends AppCompatActivity {
         Drawable res = getResources().getDrawable(imageResource);
         mFavoritesImageView.setImageDrawable(res);
 
-        setupOnClickListeners(book);
-
-
         // storage photos
         if (mGalleryRecyclerView != null) {
-            if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
-                BookPhoto[] bookPhotos = new BookPhoto[book.getUserBookPhotosStoragePath().size()];
-                for (int i = 0; i < book.getUserBookPhotosStoragePath().size(); i++) {
-                    bookPhotos[i] = new BookPhoto(book.getUserBookPhotosStoragePath().get(i), book.getTitle());
+            if (mBook.getUserBookPhotosStoragePath() != null && mBook.getUserBookPhotosStoragePath().size() > 0) {
+                BookPhoto[] bookPhotos = new BookPhoto[mBook.getUserBookPhotosStoragePath().size()];
+                for (int i = 0; i < mBook.getUserBookPhotosStoragePath().size(); i++) {
+                    bookPhotos[i] = new BookPhoto(mBook.getUserBookPhotosStoragePath().get(i), mBook.getTitle());
                 }
                 mGalleryRecyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
             } else {
                 mGalleryLayout.setVisibility(GONE);
             }
         }
-        if (book.getUid() != null) {
-            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-            FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                    .setPersistenceEnabled(true)
-                    .build();
-            firebaseFirestore.setFirestoreSettings(settings);
-            final DocumentReference docRef = firebaseFirestore.collection("users").document(book.getUid());
-            docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+        if (mBook.getUid() != null) {
+            UserViewModel userViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBook.getUid())).get(UserViewModel.class);
+            userViewModel.getSnapshotLiveData().observe(this, new Observer<User>() {
                 @Override
-                public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
-                    if (snapshot.exists()) {
-                        mUser = snapshot.toObject(User.class);
-                        if (mUser != null) {
-                            if (mUser.getImage() == null) {
-                                Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
-                                        .apply(bitmapTransform(new CircleCrop()))
-                                        .into(mUserImageView);
-                            } else {
-                                Glide.with(getApplicationContext()).load(mUser.getImage())
-                                        .apply(bitmapTransform(new CircleCrop()))
-                                        .into(mUserImageView);
-                            }
-                            if (mUser.getUsername() != null) {
-                                mUsernameTextView.setText(mUser.getUsername());
-                            }
-                            if (Float.compare(mUser.getRating(), 0) != 0) {
-                                mRatingTextView.setText(String.valueOf(mUser.getRating()));
-                            } else {
-                                mRatingTextView.setText(getResources().getString(R.string.not_rated_yet));
-                            }
+                public void onChanged(@Nullable User user) {
+                    mUser = user;
+                    if (mUser != null) {
+                        if (mUser.getImage() == null) {
+                            Glide.with(getApplicationContext()).load(R.mipmap.profile_picture)
+                                    .apply(bitmapTransform(new CircleCrop()))
+                                    .into(mUserImageView);
+                        } else {
+                            Glide.with(getApplicationContext()).load(mUser.getImage())
+                                    .apply(bitmapTransform(new CircleCrop()))
+                                    .into(mUserImageView);
                         }
+                        if (mUser.getUsername() != null) {
+                            mUsernameTextView.setText(mUser.getUsername());
+                        }
+                        if (Float.compare(mUser.getRating(), 0) != 0) {
+                            mRatingTextView.setText(String.valueOf(mUser.getRating()));
+                        } else {
+                            mRatingTextView.setText(getResources().getString(R.string.not_rated_yet));
+                        }
+                        setupOnClickListeners();
                     }
-                }
-            });
-
-            mProfileConstraintLayout.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("UserObject", mUser);
-                    intent.putExtra("UserID", book.getUid());
-                    startActivity(intent);
+                    else{
+                        Toast.makeText(getApplicationContext(), "Si è verificato un errore sconosciuto", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
                 }
             });
         }
     }
 
-    private void setupOnClickListeners(final Book book) {
+    private void setupOnClickListeners() {
 
-        if (book != null && book.getInfoLink() != null) {
-            mPreviewButton.setOnClickListener(new OnClickListener() {
+        if (mBook != null && mBook.getInfoLink() != null) {
+            mPreviewButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
@@ -407,42 +286,39 @@ public class BookDetailsActivity extends AppCompatActivity {
                     builder.setToolbarColor(v.getContext()
                             .getResources()
                             .getColor(R.color.colorPrimary));
-                    customTabsIntent.launchUrl(v.getContext(), Uri.parse(book.getInfoLink()));
+                    customTabsIntent.launchUrl(v.getContext(), Uri.parse(mBook.getInfoLink()));
                 }
             });
-        } else
+        } else {
             mPreviewButton.setEnabled(false);
+        }
+
+        //if (mBook.getDescription() != null) {
+        mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
+                intent.putExtra("Title", mBook.getTitle());
+                startActivity(intent);
+            }
+        });
+        /*} else {
+            mBookDescriptionLayout.setVisibility(GONE);
+        }*/
 
         mBookButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                final DocumentReference docRef;
-                if(mFirebaseAuth.getUid() != null) {
-                    docRef = mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid());
-                    docRef.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if(task.isSuccessful()){
-                                DocumentSnapshot documentSnapshot = task.getResult();
-                                BorrowedBooks booksBorrowed = documentSnapshot.toObject(BorrowedBooks.class);
-                                if(booksBorrowed != null) {
-                                    if(!booksBorrowed.getBooksID().contains(mBookId)) {
-                                        booksBorrowed.getBooksID().add(mBookId);
-                                        docRef.set(booksBorrowed);
-                                    }
-                                }
-                                else{
-                                    List<String> list = new ArrayList<>();
-                                    list.add(mBookId);
-                                    booksBorrowed = new BorrowedBooks(list);
-                                    docRef.set(booksBorrowed);
-                                }
-                                new ChatManager(mBookId, mBook.getUid(), getApplicationContext());
-                            }
-                        }
-                    });
-                }
-                else{
+                if (mFirebaseAuth.getUid() != null) {
+                    final DocumentReference reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+                    reqDocRef.set(mBook, SetOptions.merge());
+                    final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
+                    reqReceivedDocRef.set(mBook, SetOptions.merge());
+                    new ChatManager(mBook.getBookID(), mBook.getUid(), getApplicationContext());
+
+                } else {
                     Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
                 }
             }
@@ -468,8 +344,8 @@ public class BookDetailsActivity extends AppCompatActivity {
                                 DocumentSnapshot documentSnapshot = task.getResult();
                                 FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
                                 if (favoriteBooks != null) {
-                                    if (favoriteBooks.getBookIds().contains(mBookId)) {
-                                        favoriteBooks.getBookIds().remove(mBookId);
+                                    if (favoriteBooks.getBookIds().contains(mBook.getBookID())) {
+                                        favoriteBooks.getBookIds().remove(mBook.getBookID());
                                         documentReference.set(favoriteBooks);
                                         mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
                                         String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
@@ -489,7 +365,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                                         });
                                         mySnackbar.show();
                                     } else {
-                                        favoriteBooks.getBookIds().add(mBookId);
+                                        favoriteBooks.getBookIds().add(mBook.getBookID());
                                         documentReference.set(favoriteBooks);
 
                                         mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
@@ -513,7 +389,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     }
                                 } else {
                                     List<String> favorites = new ArrayList<>();
-                                    favorites.add(mBookId);
+                                    favorites.add(mBook.getBookID());
                                     favoriteBooks = new FavoriteBooks(favorites);
                                     documentReference.set(favoriteBooks);
 
