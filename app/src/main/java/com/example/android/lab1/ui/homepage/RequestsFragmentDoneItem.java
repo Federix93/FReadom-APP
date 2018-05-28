@@ -61,19 +61,8 @@ public class RequestsFragmentDoneItem extends Fragment {
 
         mAdapter = new RecyclerFragmentBooksAdapter(getActivity(), listBooks,  mUsersOwner);
 
-        //mAdapter = new RecyclerBorrowedBooksAdapter(listBooks, booksID, chatIDs, usersID);
         mRecyclerView.setAdapter(mAdapter);
 
-        /*final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseFirestore = FirebaseFirestore.getInstance();
-        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(true)
-                .build();
-        mFirebaseFirestore.setFirestoreSettings(settings);
-
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        openedChatReference = firebaseDatabase.getReference().child("openedChats");
-*/
         RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
         requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
             @Override
@@ -94,79 +83,10 @@ public class RequestsFragmentDoneItem extends Fragment {
 
                             }
                         });
-
-                        /*UserRealtimeDBViewModel userRealtimeDBViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(b.getUid())).get(UserRealtimeDBViewModel.class);
-                        userRealtimeDBViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<User>() {
-                            @Override
-                            public void onChanged(@Nullable User user) {
-                                if (user != null) {
-                                    mUsersOwner.add(user);
-                                    mAdapter.setItems(listBooks, mUsersOwner);
-                                    mAdapter.notifyDataSetChanged();
-                                }
-                            }
-                        });*/
                     }
                 }
             }
         });
-        /*if (mFirebaseAuth.getUid() != null) {
-            RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
-            requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<RequestedDoneBooks>() {
-                @Override
-                public void onChanged(@android.support.annotation.Nullable RequestedDoneBooks requestedDoneBooks) {
-
-                }
-            });
-            /*mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid())
-                    .addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
-                        @Override
-                        public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
-                            if (snapshot != null && snapshot.exists()) {
-                                BorrowedBooks booksBorrowed = snapshot.toObject(BorrowedBooks.class);
-                                final List<String> booksID = booksBorrowed.getBooksID();
-                                for (final String bookID : booksID) {
-                                    mFirebaseFirestore.collection("books").document(bookID).addSnapshotListener(
-                                            new EventListener<DocumentSnapshot>() {
-                                                @Override
-                                                public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
-                                                    if (snapshot != null && snapshot.exists()) {
-                                                        final Book book = snapshot.toObject(Book.class);
-                                                        openedChatReference.child(bookID)
-                                                                .child(book.getUid())
-                                                                .child(mFirebaseAuth.getUid())
-                                                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                    @Override
-                                                                    public void onDataChange(final DataSnapshot dataSnapshot) {
-                                                                        mFirebaseFirestore.collection("users").document(book.getUid()).addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
-                                                                            @Override
-                                                                            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                                                                                if (documentSnapshot != null && documentSnapshot.exists()) {
-                                                                                    User user = documentSnapshot.toObject(User.class);
-                                                                                    String chatID = (String) dataSnapshot.getValue();
-                                                                                    String userId = book.getUid();
-                                                                                    chatIDs.add(chatID);
-                                                                                    listBooks.add(book);
-                                                                                    usersID.add(userId);
-                                                                                    mUsersOwner.add(user);
-                                                                                    mAdapter.setItems(listBooks, booksID, chatIDs, usersID, mUsersOwner);
-                                                                                    mAdapter.notifyDataSetChanged();
-                                                                                }
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                    @Override
-                                                                    public void onCancelled(DatabaseError databaseError) {
-                                                                    }
-                                                                });
-                                                    }
-                                                }
-                                            });
-                                }
-                            }
-                        }
-                    });
-        }*/
         return view;
     }
 }
