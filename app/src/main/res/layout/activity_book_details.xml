@@ -101,6 +101,27 @@
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
                     app:layout_constraintTop_toBottomOf="@+id/book_editor" />
 
+                <ImageView
+                    android:id="@+id/book_position_image"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@+id/book_publication_date"
+                    app:srcCompat="@drawable/ic_location_on_orange_24dp" />
+
+                <TextView
+                    android:id="@+id/book_position"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="16dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/book_position_image"
+                    app:layout_constraintTop_toBottomOf="@+id/book_publication_date" />
+
                 <TextView
                     android:id="@+id/book_detail_conditions"
                     android:layout_width="0dp"
@@ -108,7 +129,7 @@
                     android:layout_marginStart="16dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     app:layout_constraintStart_toEndOf="@+id/book_thumbnail"
-                    app:layout_constraintTop_toBottomOf="@+id/book_publication_date" />
+                    app:layout_constraintTop_toBottomOf="@+id/book_position" />
 
                 <ImageView
                     android:id="@+id/book_detail_conditions_color"
@@ -117,7 +138,7 @@
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="4dp"
                     app:layout_constraintStart_toEndOf="@+id/book_detail_conditions"
-                    app:layout_constraintTop_toBottomOf="@+id/book_publication_date"
+                    app:layout_constraintTop_toBottomOf="@+id/book_position"
                     app:srcCompat="@drawable/circular_dot_12dp" />
             </android.support.constraint.ConstraintLayout>
 

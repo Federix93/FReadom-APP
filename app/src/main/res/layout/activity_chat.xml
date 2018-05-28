@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<LinearLayout
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,103 +16,147 @@
             layout="@layout/toolbar_chat"/>
     </android.support.design.widget.AppBarLayout>
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_open_chat_root"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior" >
-
-    <LinearLayout
-        android:id="@+id/linearLayoutBottomInput"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="4dp"
-        android:minHeight="44dp"
-        android:orientation="horizontal"
-        android:elevation="3dp">
+        android:background="@color/grey"
+        android:alpha="0.8"
+        android:elevation="4dp">
 
-        <ImageButton
-            android:id="@+id/buttonUpload"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="bottom"
-            android:background="?attr/selectableItemBackground"
-            android:contentDescription="Upload file"
-            app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
-
-        <EditText
-            android:id="@+id/edittext_chat_message"
-            android:layout_width="0dp"
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/start_loan_button"
+            style="@style/AppTheme.RoundedCornerMaterialButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:hint="@string/enter_message"
-            android:maxLines="4"
-            android:textSize="16sp" />
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:text="@string/start_loan"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/info_button_layout"
+            app:layout_constraintTop_toTopOf="parent"
+            android:alpha="1.0"/>
 
-        <Button
-            android:id="@+id/sendButton"
-            android:layout_width="64dp"
-            android:layout_height="48dp"
-            android:layout_gravity="bottom"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:gravity="center_vertical"
-            android:text="@string/send"
-            android:textColor="@color/colorSecondaryAccent"
-            android:textSize="16sp" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_above="@id/linearLayoutBottomInput"
+        <LinearLayout
+            android:id="@+id/info_button_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="4dp"
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_info_black_24dp" />
+        </LinearLayout>
+
+
+    </android.support.constraint.ConstraintLayout>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/layout_open_chat_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginTop="4dp">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/chat_recyclerView"
+        <LinearLayout
+            android:id="@+id/linearLayoutBottomInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="4dp"
-            android:clipToPadding="false"
-            android:scrollbars="vertical">
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="4dp"
+            android:minHeight="44dp"
+            android:orientation="horizontal"
+            android:elevation="3dp">
 
-        </android.support.v7.widget.RecyclerView>
+            <ImageButton
+                android:id="@+id/buttonUpload"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="Upload file"
+                app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
 
-        <TextView
-            android:id="@+id/chat_wait_owner_response_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chat_wait_owner_response"
-            android:layout_marginTop="128dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:layout_gravity="center"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
-            android:textAlignment="center"
-            android:textSize="22sp"
-            android:fontFamily="sans-serif-light"
-            android:visibility="gone"/>
-        <TextView
-            android:id="@+id/chat_advice_owner_response_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chat_advice_owner_response"
-            android:layout_marginTop="128dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
-            android:textSize="22sp"
-            android:layout_gravity="center"
-            android:textAlignment="center"
-            android:fontFamily="sans-serif-light"
-            android:visibility="gone"/>
-    </LinearLayout>
-</RelativeLayout>
+            <EditText
+                android:id="@+id/edittext_chat_message"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="@string/enter_message"
+                android:maxLines="4"
+                android:textSize="16sp"
+                android:inputType="textCapSentences"/>
+
+            <Button
+                android:id="@+id/sendButton"
+                android:layout_width="64dp"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:gravity="center_vertical"
+                android:text="@string/send"
+                android:textColor="@color/colorSecondaryAccent"
+                android:textSize="16sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_above="@id/linearLayoutBottomInput"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/chat_recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="4dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical">
+
+            </android.support.v7.widget.RecyclerView>
+
+            <TextView
+                android:id="@+id/chat_wait_owner_response_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/chat_wait_owner_response"
+                android:layout_marginTop="128dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:layout_gravity="center"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:textAlignment="center"
+                android:textSize="22sp"
+                android:fontFamily="sans-serif-light"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/chat_advice_owner_response_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/chat_advice_owner_response"
+                android:layout_marginTop="128dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:textSize="22sp"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:fontFamily="sans-serif-light"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>
 

@@ -76,7 +76,7 @@ public class RequestsFragmentDoneItem extends Fragment {
         firebaseDatabase = FirebaseDatabase.getInstance();
         openedChatReference = firebaseDatabase.getReference().child("openedChats");
 
-        if (mFirebaseAuth.getUid() != null) {
+        /*if (mFirebaseAuth.getUid() != null) {
             mFirebaseFirestore.collection("borrowedBooks").document(mFirebaseAuth.getUid())
                     .addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
                         @Override
@@ -126,7 +126,7 @@ public class RequestsFragmentDoneItem extends Fragment {
                             }
                         }
                     });
-        }
+        }*/
         return view;
     }
 }

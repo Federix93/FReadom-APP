@@ -1,8 +1,12 @@
 package com.example.android.lab1.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,6 +20,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +35,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ImageGalleryAdapter;
+import com.example.android.lab1.model.Address;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.BorrowedBooks;
@@ -40,6 +46,7 @@ import com.example.android.lab1.ui.profile.GlobalShowProfileActivity;
 import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -55,9 +62,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import static android.view.View.GONE;
@@ -91,11 +101,18 @@ public class BookDetailsActivity extends AppCompatActivity {
     FirebaseFirestore mFirebaseFirestore;
     FirebaseAuth mFirebaseAuth;
     RecyclerView mGalleryRecyclerView;
+    TextView mBookPosition;
 
     private String mBookId;
     private User mUser;
     private ListenerRegistration mListenerRegistration;
     private Book mBook;
+
+    private GeoCodingTask mCurrentlyExecuting;
+    private Location mCurrentlyResolving;
+    private Location mResolveLater;
+
+    private Activity mSelf;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -124,6 +141,8 @@ public class BookDetailsActivity extends AppCompatActivity {
         mGalleryLayout = findViewById(R.id.relative_gallery_layout);
         mFavoriteContainer = findViewById(R.id.add_to_favorite_container);
         mFavoriteText = findViewById(R.id.add_to_favorite_text);
+        mBookPosition = findViewById(R.id.book_position);
+        mSelf = this;
 
         mBookId = getIntent().getStringExtra("ID_BOOK_SELECTED");
 
@@ -167,7 +186,11 @@ public class BookDetailsActivity extends AppCompatActivity {
                     mBookButton.setText(getResources().getString(R.string.book_not_available));
                     mBookButton.setEnabled(false);
                 }
-                updateUI(mBook);
+                try {
+                    updateUI(mBook);
+                } catch (IOException e1) {
+                    Toast.makeText(mSelf, "Impossibile recuperare la posizione del libro", Toast.LENGTH_SHORT).show();
+                }
                 if (mListenerRegistration != null)
                     mListenerRegistration.remove();
             }
@@ -298,7 +321,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         }
 
     }
-    private void updateUI(final Book book) {
+    private void updateUI(final Book book) throws IOException {
         if (book.getTitle() != null)
             mBookTitleTextView.setText(book.getTitle());
         else
@@ -311,6 +334,15 @@ public class BookDetailsActivity extends AppCompatActivity {
             mEditorTextView.setText(book.getPublisher());
         else
             mEditorTextView.setText(getResources().getString(R.string.editor_not_available));
+        if (book.getGeoPoint() != null) {
+            Location location = new Location("location");
+            location.setLongitude(book.getGeoPoint().getLongitude());
+            location.setLatitude(book.getGeoPoint().getLatitude());
+
+            resolveCityLocation(location);
+        }
+        else
+            mBookPosition.setText(getResources().getString(R.string.position_not_available));
         if (!String.valueOf(book.getPublishYear()).isEmpty())
             mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
         else
@@ -547,5 +579,62 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void resolveCityLocation(Location location) {
+        // This method will change address mResultAddress var
+        mCurrentlyResolving = location;
+        mCurrentlyExecuting = new GeoCodingTask(mBookPosition);
+        mCurrentlyExecuting.execute(new LatLng(location.getLatitude(),
+                location.getLongitude()));
+    }
+
+    private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
+
+        private TextView mTarget;
+
+        public GeoCodingTask(TextView target) {
+            this.mTarget = target;
+        }
+
+        @Override
+        protected String doInBackground(LatLng... latLngs) {
+            if (latLngs.length > 0) {
+                Geocoder geocoder = new Geocoder(mSelf, Locale.getDefault());
+                List<android.location.Address> fromLocation = null;
+                try {
+                    if (!isCancelled())
+                        fromLocation = geocoder.getFromLocation(latLngs[0].latitude,
+                                latLngs[0].longitude,
+                                1);
+                    else
+                        return null;
+
+                } catch (IOException e) {
+                    return null;
+                }
+                if (fromLocation == null || fromLocation.size() == 0)
+                    return null;
+                else {
+                    return fromLocation.get(0).getLocality();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String city) {
+            if (mTarget != null && !this.isCancelled()) {
+                if (city == null) {
+                    mTarget.setText(R.string.no_address_found);
+                } else {
+                    mTarget.setText(city);
+                    mCurrentlyExecuting = null;
+                    mCurrentlyResolving = null;
+                    mResolveLater = null;
+                }
+            }
+
+        }
     }
 }

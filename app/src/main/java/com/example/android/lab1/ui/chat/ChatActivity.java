@@ -14,6 +14,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -92,6 +93,9 @@ public class ChatActivity extends AppCompatActivity {
     TextView mNoMessagesReceiverTextView;
     LinearLayout mInputTextLinearLayout;
 
+    AppCompatButton mStartLoan;
+    LinearLayout mInfoLayout;
+
     ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
 
@@ -128,6 +132,8 @@ public class ChatActivity extends AppCompatActivity {
         mConversationsReference = mFirebaseDatabase.getReference().child("conversations");
         mFirebaseStorage = FirebaseStorage.getInstance();
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
+        mStartLoan = findViewById(R.id.start_loan_button);
+        mInfoLayout = findViewById(R.id.info_button_layout);
 
         mChatID = getIntent().getStringExtra("ChatID");
         mUsername = getIntent().getStringExtra("Username");
