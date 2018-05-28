@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,12 +57,14 @@ public class RecyclerReqReceivedAdapter extends RecyclerView.Adapter<RecyclerReq
         ImageView thumbnailImageView;
         TextView titleTextView;
         TextView openChatsTextView;
+        RelativeLayout openChatsRelativeView;
 
         private ReqViewHolder(View itemView) {
             super(itemView);
             thumbnailImageView = itemView.findViewById(R.id.thumbnail);
             titleTextView = itemView.findViewById(R.id.title_book_text);
             openChatsTextView = itemView.findViewById(R.id.open_chats);
+            openChatsRelativeView = itemView.findViewById(R.id.open_chats_container);
         }
 
         private void bind(final Book book){
@@ -74,7 +77,7 @@ public class RecyclerReqReceivedAdapter extends RecyclerView.Adapter<RecyclerReq
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_no_book_photo)).into(thumbnailImageView);
 
             titleTextView.setText(book.getTitle());
-            openChatsTextView.setOnClickListener(new View.OnClickListener() {
+            openChatsRelativeView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ConversationsActivity.class);
