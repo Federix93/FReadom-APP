@@ -47,6 +47,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -107,7 +108,7 @@ public class HomePageActivity extends AppCompatActivity
         mFAB = findViewById(R.id.floating_action_button_library);
 
         //header.setBackgroundResource(R.drawable.background);
-
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()

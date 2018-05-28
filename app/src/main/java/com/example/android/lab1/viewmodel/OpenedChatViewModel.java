@@ -30,23 +30,42 @@ public class OpenedChatViewModel extends ViewModel{
                 .child(bookID)
                 .child(bookOwnerID)
                 .child(FirebaseAuth.getInstance().getUid());
+        OPENED_CHATS.keepSynced(true);
         liveData = new FirebaseQueryLiveDataRealtimeDB(OPENED_CHATS);
+        fetchData();
     }
 
     public OpenedChatViewModel(){}
 
-    @NonNull
-    public LiveData<Boolean> getSnapshotLiveData(){
+    private void fetchData(){
         openedChatsLiveData.addSource(liveData, new Observer<DataSnapshot>() {
             @Override
             public void onChanged(@Nullable DataSnapshot dataSnapshot) {
-                if(dataSnapshot == null || !dataSnapshot.exists()){
-                    openedChatsLiveData.setValue(false);
-                }else{
-                    openedChatsLiveData.setValue(true);
+                if(dataSnapshot != null) {
+                    if (!dataSnapshot.exists()) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                openedChatsLiveData.postValue(false);
+                            }
+                        }).start();
+                    } else {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                openedChatsLiveData.postValue(true);
+                            }
+                        }).start();
+                    }
                 }
+                else
+                    openedChatsLiveData.setValue(null);
             }
         });
+    }
+
+    @NonNull
+    public LiveData<Boolean> getSnapshotLiveData(){
         return openedChatsLiveData;
     }
 

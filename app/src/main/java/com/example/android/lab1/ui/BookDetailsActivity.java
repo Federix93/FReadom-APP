@@ -171,8 +171,6 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBookButton.setText(getResources().getString(R.string.book_not_available));
             mBookButton.setEnabled(false);
         }
-        updateUI();
-
         //Verifico se la chat è aperta
         OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
         openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
@@ -186,6 +184,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+        updateUI();
     }
 
     private void updateUI() {
