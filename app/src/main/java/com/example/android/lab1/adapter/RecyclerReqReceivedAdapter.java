@@ -1,5 +1,6 @@
 package com.example.android.lab1.adapter;
 
+import android.content.Intent;
 import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.ui.chat.ConversationsActivity;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -62,7 +64,7 @@ public class RecyclerReqReceivedAdapter extends RecyclerView.Adapter<RecyclerReq
             openChatsTextView = itemView.findViewById(R.id.open_chats);
         }
 
-        private void bind(Book book){
+        private void bind(final Book book){
             if (book.getWebThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(thumbnailImageView);
             } else if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
@@ -75,7 +77,10 @@ public class RecyclerReqReceivedAdapter extends RecyclerView.Adapter<RecyclerReq
             openChatsTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(v.getContext(), "You Pressed OpenChats", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(v.getContext(), ConversationsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("ID_BOOK_SELECTED", book.getBookID());
+                    v.getContext().startActivity(intent);
                 }
             });
             itemView.setOnClickListener(new View.OnClickListener() {

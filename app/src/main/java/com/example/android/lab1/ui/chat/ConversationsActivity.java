@@ -47,8 +47,6 @@ public class ConversationsActivity extends AppCompatActivity {
     Toolbar mToolbar;
     String mBookID;
     RecyclerView mRecyclerView;
-    private List<User> mUserList;
-    private List<String> mListChatID;
     private RecyclerConversationAdapter mAdapter;
 
     ChildEventListener childEventListener;
@@ -58,9 +56,6 @@ public class ConversationsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversations);
-
-        mUserList = new ArrayList<>();
-        mListChatID = new ArrayList<>();
 
         mBookID = getIntent().getStringExtra("ID_BOOK_SELECTED");
         Utilities.setupStatusBarColor(this);
@@ -80,7 +75,7 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
-        mAdapter = new RecyclerConversationAdapter(mUserList, mListChatID, mBookID);
+        mAdapter = new RecyclerConversationAdapter(mBookID);
         mRecyclerView.setAdapter(mAdapter);
 
         final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -97,9 +92,7 @@ public class ConversationsActivity extends AppCompatActivity {
                                 userViewModel.getSnapshotLiveData().observe(ConversationsActivity.this, new Observer<User>() {
                                     @Override
                                     public void onChanged(@android.support.annotation.Nullable User user) {
-                                        mUserList.add(user);
-                                        mListChatID.add(d.getKey());
-                                        mAdapter.setItems(mUserList, mListChatID);
+                                        mAdapter.setItems(d.getKey(), user);
                                         mAdapter.notifyDataSetChanged();
                                     }
                                 });
