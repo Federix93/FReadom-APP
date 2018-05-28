@@ -32,28 +32,25 @@ import java.util.List;
 public class RecyclerFavoriteBookAdapter extends RecyclerView.Adapter<RecyclerFavoriteBookAdapter.MyViewHolder> {
 
     private List<Book> mBooks;
-    private List<String> mBookIds;
 
     Context mContext;
 
-    public RecyclerFavoriteBookAdapter(List<Book> books, List<String> bookIds, Context context) {
+    public RecyclerFavoriteBookAdapter(List<Book> books) {
         this.mBooks = books;
-        this.mBookIds = bookIds;
-        mContext = context;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        mContext = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View cardView = inflater.inflate(R.layout.recycler_book_item_library, parent, false);
-
         return new MyViewHolder(cardView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.bind(mBooks.get(position), position);
+        holder.bind(mBooks.get(position));
     }
 
     @Override
@@ -61,10 +58,8 @@ public class RecyclerFavoriteBookAdapter extends RecyclerView.Adapter<RecyclerFa
         return mBooks.size();
     }
 
-    public void setItems(List<Book> books, List<String> bookIds, Context context) {
+    public void setItems(List<Book> books) {
         this.mBooks = books;
-        this.mBookIds = bookIds;
-        this.mContext = context;
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -79,8 +74,8 @@ public class RecyclerFavoriteBookAdapter extends RecyclerView.Adapter<RecyclerFa
             mBookAuthor = itemView.findViewById(R.id.rv_library_book_author);
             mBookThumbnail = itemView.findViewById(R.id.rv_library_book_thumbnail);
         }
-        @SuppressLint("CheckResult")
-        public void bind(final Book book, final int position){
+
+        public void bind(final Book book){
             mBookTitle.setText(book.getTitle());
             mBookAuthor.setText(book.getAuthors());
 
@@ -115,7 +110,7 @@ public class RecyclerFavoriteBookAdapter extends RecyclerView.Adapter<RecyclerFa
                 public void onClick(View v) {
                     Intent intent = new Intent(mContext, BookDetailsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("ID_BOOK_SELECTED", mBookIds.get(position));
+                    intent.putExtra("BookSelected", book);
                     mContext.startActivity(intent);
                 }
             });

@@ -1,11 +1,7 @@
 package com.example.android.lab1.ui;
 
-import android.app.Activity;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -38,39 +34,27 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ImageGalleryAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
-import com.example.android.lab1.model.BorrowedBooks;
 import com.example.android.lab1.model.Condition;
-import com.example.android.lab1.model.FavoriteBooks;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.ui.profile.GlobalShowProfileActivity;
 import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
-import com.example.android.lab1.viewmodel.BookViewModel;
-import com.example.android.lab1.viewmodel.BorrowedBooksViewModel;
 import com.example.android.lab1.viewmodel.OpenedChatViewModel;
 import com.example.android.lab1.viewmodel.UserViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
-import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static android.view.View.GONE;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -334,74 +318,22 @@ public class BookDetailsActivity extends AppCompatActivity {
         mFavoriteContainer.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                final DocumentReference documentReference;
                 if (mFirebaseAuth.getUid() != null) {
-                    documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid());
-                    documentReference.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                    DocumentReference documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+                    documentReference.get().addOnSuccessListener(BookDetailsActivity.this, new OnSuccessListener<DocumentSnapshot>() {
                         @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()){
-                                DocumentSnapshot documentSnapshot = task.getResult();
-                                FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
-                                if (favoriteBooks != null) {
-                                    if (favoriteBooks.getBookIds().contains(mBook.getBookID())) {
-                                        favoriteBooks.getBookIds().remove(mBook.getBookID());
-                                        documentReference.set(favoriteBooks);
-                                        mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
-                                        String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
-                                        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-                                        Drawable res = getResources().getDrawable(imageResource);
-                                        mFavoritesImageView.setImageDrawable(res);
-
-                                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
-                                                R.string.book_removed, Snackbar.LENGTH_LONG).setDuration(4000);
-                                        mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                Intent intent = new Intent(getApplicationContext(), FavoriteBooksActivity.class);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                                startActivity(intent);
-                                            }
-                                        });
-                                        mySnackbar.show();
-                                    } else {
-                                        favoriteBooks.getBookIds().add(mBook.getBookID());
-                                        documentReference.set(favoriteBooks);
-
-                                        mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
-
-                                        String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
-                                        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-                                        Drawable res = getResources().getDrawable(imageResource);
-                                        mFavoritesImageView.setImageDrawable(res);
-
-                                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
-                                                R.string.book_added, Snackbar.LENGTH_LONG).setDuration(4000);
-                                        mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                Intent intent = new Intent(getApplicationContext(), FavoriteBooksActivity.class);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                                startActivity(intent);
-                                            }
-                                        });
-                                        mySnackbar.show();
-                                    }
-                                } else {
-                                    List<String> favorites = new ArrayList<>();
-                                    favorites.add(mBook.getBookID());
-                                    favoriteBooks = new FavoriteBooks(favorites);
-                                    documentReference.set(favoriteBooks);
-
-                                    mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
-
-                                    String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
+                        public void onSuccess(DocumentSnapshot snapshot) {
+                            if(snapshot != null) {
+                                Log.d("LULLO", "SNAPSHOT != null");
+                                if (snapshot.exists()) {
+                                    Log.d("LULLO", "SNAPSHOT EXISTS");
+                                    String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
                                     int imageResource = getResources().getIdentifier(uri, null, getPackageName());
                                     Drawable res = getResources().getDrawable(imageResource);
                                     mFavoritesImageView.setImageDrawable(res);
 
                                     Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
-                                            R.string.book_added, Snackbar.LENGTH_LONG).setDuration(4000);
+                                            R.string.book_removed, Snackbar.LENGTH_LONG).setDuration(4000);
                                     mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
@@ -411,7 +343,13 @@ public class BookDetailsActivity extends AppCompatActivity {
                                         }
                                     });
                                     mySnackbar.show();
+                                } else {
+                                    Log.d("LULLO", "SNAPSHOT !EXISTS");
+                                    addBookToFavorite();
                                 }
+                            } else{
+                                Log.d("LULLO", "SNAPSHOT == null");
+                                addBookToFavorite();
                             }
                         }
                     });
@@ -420,5 +358,27 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void addBookToFavorite(){
+        final DocumentReference reqDocRef = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+        reqDocRef.set(mBook, SetOptions.merge());
+        mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
+        String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
+        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+        Drawable res = getResources().getDrawable(imageResource);
+        mFavoritesImageView.setImageDrawable(res);
+
+        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
+                R.string.book_added, Snackbar.LENGTH_LONG).setDuration(4000);
+        mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), FavoriteBooksActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
+        });
+        mySnackbar.show();
     }
 }

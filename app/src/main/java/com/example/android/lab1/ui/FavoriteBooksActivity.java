@@ -1,5 +1,8 @@
 package com.example.android.lab1.ui;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,8 +19,8 @@ import android.widget.Toast;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerFavoriteBookAdapter;
 import com.example.android.lab1.model.Book;
-import com.example.android.lab1.model.FavoriteBooks;
 import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.viewmodel.FavoriteBooksViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,8 +41,6 @@ public class FavoriteBooksActivity extends AppCompatActivity {
     LinearLayout mTextAdviceLayout;
 
     List<Book> mBooks;
-    List<String> mBookIds;
-
     FirebaseAuth mFirebaseAuth;
     FirebaseFirestore mFirebaseFirestore;
 
@@ -65,48 +66,25 @@ public class FavoriteBooksActivity extends AppCompatActivity {
 
         Utilities.setupStatusBarColor(this);
 
-        mBookIds = new ArrayList<>();
         mBooks = new ArrayList<>();
 
         RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setItemAnimator(null);
 
-        mAdapter = new RecyclerFavoriteBookAdapter(mBooks, mBookIds, getApplicationContext());
+        mAdapter = new RecyclerFavoriteBookAdapter(mBooks);
         mRecyclerView.setAdapter(mAdapter);
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-        final DocumentReference documentReference;
         if (mFirebaseAuth.getUid() != null) {
-            documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid());
-            documentReference.get().addOnCompleteListener(this, new OnCompleteListener<DocumentSnapshot>() {
+            FavoriteBooksViewModel favoriteBooksViewModel = ViewModelProviders.of(this).get(FavoriteBooksViewModel.class);
+            favoriteBooksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()){
-                        DocumentSnapshot documentSnapshot = task.getResult();
-                        FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
-                        if (favoriteBooks != null && !favoriteBooks.getBookIds().isEmpty()) {
-                            for (final String s : favoriteBooks.getBookIds()) {
-                                mFirebaseFirestore.collection("books").document(s).addSnapshotListener(FavoriteBooksActivity.this, new EventListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onEvent(@javax.annotation.Nullable DocumentSnapshot documentSnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
-                                        if (documentSnapshot != null && documentSnapshot.exists()) {
-                                            Book book = documentSnapshot.toObject(Book.class);
-                                            mBooks.add(book);
-                                            mBookIds.add(s);
-                                            mAdapter.setItems(mBooks, mBookIds, getApplicationContext());
-                                            mAdapter.notifyDataSetChanged();
-                                        }
-                                    }
-                                });
-                            }
-
-                        } else {
-                            mTextAdviceLayout.setVisibility(View.VISIBLE);
-                        }
-                    }
+                public void onChanged(@Nullable List<Book> bookList) {
+                    mAdapter.setItems(bookList);
+                    mAdapter.notifyDataSetChanged();
                 }
             });
         } else {

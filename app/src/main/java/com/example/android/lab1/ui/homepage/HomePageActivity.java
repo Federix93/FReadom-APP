@@ -121,20 +121,10 @@ public class HomePageActivity extends AppCompatActivity
             liveData.observe(this, new Observer<User>() {
                 @Override
                 public void onChanged(@Nullable User user) {
-                    Log.d("LULLO", "UpdateNavigationDrawer");
                     mUser = user;
                     updateNavigationDrawer();
                 }
             });
-            /*final DocumentReference docRef = firebaseFirestore.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
-            docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                @Override
-                public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
-                    mUser = snapshot.toObject(User.class);
-                    Log.d("LULLO", "UpdateNavigationDrawer");
-                    updateNavigationDrawer();
-                }
-            });*/
         }
 
         mToolbar.setTitle(getString(R.string.toolbar_title_home));

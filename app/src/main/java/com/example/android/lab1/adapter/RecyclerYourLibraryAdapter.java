@@ -32,7 +32,6 @@ import java.util.List;
 public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYourLibraryAdapter.MyViewHolder> {
 
     private List<Book> mBooks;
-    private List<String> mBookIds;
 
     Context mContext;
 
@@ -45,8 +44,7 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        View cardView = inflater.inflate(R.layout.recycler_book_library_item, parent, false);
-
+        View cardView = inflater.inflate(R.layout.recycler_book_item_library, parent, false);
         return new MyViewHolder(cardView);
     }
 
@@ -72,7 +70,7 @@ public class RecyclerYourLibraryAdapter extends RecyclerView.Adapter<RecyclerYou
             mBookAuthor = itemView.findViewById(R.id.rv_library_book_author);
             mBookThumbnail = itemView.findViewById(R.id.rv_library_book_thumbnail);
         }
-        @SuppressLint("CheckResult")
+
         public void bind(final Book book){
             mBookTitle.setText(book.getTitle());
             mBookAuthor.setText(book.getAuthors());

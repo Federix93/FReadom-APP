@@ -526,20 +526,23 @@ public class TabFragment extends Fragment {
         booksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
-                updateListOfBooks(books);
+                if (books != null) {
+                    Log.d("LULLO", "SIZEEEEEEEEEEEEgdsE: " + books.size());
+                    updateListOfBooks(books);
+                }
             }
         });
 
     }
 
-    private void updateListOfBooks(List<Book> mListBooksOfUser, List<String> bookIds) {
+    private void updateListOfBooks(List<Book> books) {
         RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
 
         mYourLibraryRecyclerView.setHasFixedSize(true);
         mYourLibraryRecyclerView.setLayoutManager(layoutManager);
         mYourLibraryRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerYourLibraryAdapter(mListBooksOfUser, bookIds, getContext());
+        mAdapter = new RecyclerYourLibraryAdapter(books);
         mYourLibraryRecyclerView.setAdapter(mAdapter);
     }
 

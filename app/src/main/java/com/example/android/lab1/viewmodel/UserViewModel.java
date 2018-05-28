@@ -18,6 +18,8 @@ public class UserViewModel extends ViewModel {
 
     private static DocumentReference USER_REF;
 
+    private String userID = null;
+
     private FirebaseDocumentSnapshotLiveDataFirestore liveData;
 
     private final MediatorLiveData<User> userLiveData = new MediatorLiveData<>();
