@@ -140,7 +140,13 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             String chatID = (String) dataSnapshot.getValue();
-                            Log.d("LULLO", "CHATID: " + chatID);
+                            Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            intent.putExtra("ChatID", chatID);
+                            intent.putExtra("Username", mUsersOwner.get(position).getUsername());
+                            intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
+                            intent.putExtra("BookID", mBookList.get(position).getBookID());
+                            v.getContext().startActivity(intent);
                         }
 
                         @Override
