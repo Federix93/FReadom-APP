@@ -16,9 +16,11 @@ import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.BookDetailsActivity;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapter.BookViewHolder> {
@@ -26,11 +28,19 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
     private List<Book> books;
     private Integer mAnimationDuration;
 
-    public RecyclerBookAdapter(List<Book> books){
-        this.books = books;
+    public RecyclerBookAdapter(List<Book> books) {
+        if (this.books == null) {
+            this.books = new ArrayList<>();
+        }
+        for (Book b : books) {
+            if (!b.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                this.books.add(b);
+            }
+        }
+
     }
 
-    public void updateItems(List<Book> books){
+    public void updateItems(List<Book> books) {
         this.books = books;
     }
 
@@ -49,6 +59,7 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         else */
         holder.bind(books.get(position));
         setFadeAnimation(holder.mRootView);
+
     }
 
     private void setFadeAnimation(View view) {

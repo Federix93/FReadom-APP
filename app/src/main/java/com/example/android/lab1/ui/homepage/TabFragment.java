@@ -17,6 +17,8 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +38,7 @@ import com.example.android.lab1.adapter.ViewPagerAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.GenreBooksActivity;
 import com.example.android.lab1.utils.Constants;
+import com.example.android.lab1.utils.CustomSwipeRefresh;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.BooksViewModel;
@@ -74,7 +77,7 @@ public class TabFragment extends Fragment {
     private static final String GENRES = "GENRES";
     private static final String GENRE_PLACE_HOLDER = "GENRE_PLACE_HOLDER";
 
-    SwipeRefreshLayout mRefreshLayout;
+    CustomSwipeRefresh mRefreshLayout;
     AppCompatButton mGenreFilterButton;
     AppCompatButton mPositionFilterButton;
     TextView mFirstOtherTextView;
@@ -216,15 +219,17 @@ public class TabFragment extends Fragment {
         mFirebaseFirestore = FirebaseFirestore.getInstance();
 
         BooksViewModel bookViewModel = ViewModelProviders.of(getActivity()).get(BooksViewModel.class);
-        LiveData<List<Book>> liveData = bookViewModel.getSnapshotLiveData();
+        final LiveData<List<Book>> liveData = bookViewModel.getSnapshotLiveData();
 
         liveData.observe(getActivity(), new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
-                if(mRecyclerBookAdapter == null){
-                    mRecyclerBookAdapter = new RecyclerBookAdapter(books);
-                    mFirstRecyclerView.setAdapter(mRecyclerBookAdapter);
-                    mSecondRecyclerView.setAdapter(mRecyclerBookAdapter);
+                if(mRecyclerBookAdapter == null) {
+                    if (books != null) {
+                        mRecyclerBookAdapter = new RecyclerBookAdapter(books);
+                        mFirstRecyclerView.setAdapter(mRecyclerBookAdapter);
+                        mSecondRecyclerView.setAdapter(mRecyclerBookAdapter);
+                    }
                 }
             }
         });

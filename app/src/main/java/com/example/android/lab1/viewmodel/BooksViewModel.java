@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.utils.firebaseutils.FirebaseQueryLiveDataFirestore;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -20,7 +21,6 @@ public class BooksViewModel extends ViewModel {
     private static Query BOOK_REF;
 
     private FirebaseQueryLiveDataFirestore liveData;
-
     private final MediatorLiveData<List<Book>> bookLiveData = new MediatorLiveData<>();
 
     public BooksViewModel(String uid){
@@ -30,9 +30,28 @@ public class BooksViewModel extends ViewModel {
     }
 
     public BooksViewModel(){
-        BOOK_REF = FirebaseFirestore.getInstance().collection("books");
+        BOOK_REF = FirebaseFirestore.getInstance().collection("books").whereEqualTo("loanStart", null)
+                .limit(30);
         liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF);
-        fetchData();
+        fetchBooks();
+    }
+
+    private void fetchBooks() {
+        bookLiveData.addSource(liveData, new Observer<QuerySnapshot>() {
+            @Override
+            public void onChanged(@Nullable final QuerySnapshot queryDocumentSnapshots) {
+                if(queryDocumentSnapshots != null){
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            bookLiveData.postValue(queryDocumentSnapshots.toObjects(Book.class));
+                        }
+                    }).start();
+                }else{
+                    bookLiveData.setValue(null);
+                }
+            }
+        });
     }
 
     @NonNull
