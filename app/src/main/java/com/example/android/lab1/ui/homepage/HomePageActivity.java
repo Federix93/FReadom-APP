@@ -107,8 +107,6 @@ public class HomePageActivity extends AppCompatActivity
         mBottomNavigationViewPager = findViewById(R.id.fragment_frame);
         mFAB = findViewById(R.id.floating_action_button_library);
 
-        //header.setBackgroundResource(R.drawable.background);
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()

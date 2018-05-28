@@ -87,13 +87,22 @@ public class ConversationsActivity extends AppCompatActivity {
             conversationsViewModel.getSnapshotLiveData().observe(this, new Observer<DataSnapshot>() {
                         @Override
                         public void onChanged(@android.support.annotation.Nullable DataSnapshot dataSnapshot) {
+                            final List<User> userList = new ArrayList<>();
+                            final List<DataSnapshot> snapshotList = new ArrayList<>();
                             for (final DataSnapshot d : dataSnapshot.getChildren()) {
-                                UserRealtimeDBViewModel userViewModel = ViewModelProviders.of(ConversationsActivity.this, new ViewModelFactory((String)d.getValue())).get(UserRealtimeDBViewModel.class);
-                                userViewModel.getSnapshotLiveData().observe(ConversationsActivity.this, new Observer<User>() {
+                                snapshotList.add(d);
+                                FirebaseDatabase.getInstance().getReference("users").child((String)d.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
-                                    public void onChanged(@android.support.annotation.Nullable User user) {
-                                        mAdapter.setItems(d.getKey(), user);
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        User user = dataSnapshot.getValue(User.class);
+                                        userList.add(user);
+                                        mAdapter.setItems(snapshotList.get(userList.size() - 1).getKey(), user);
                                         mAdapter.notifyDataSetChanged();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
                                     }
                                 });
                             }
