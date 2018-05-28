@@ -8,15 +8,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
@@ -34,10 +31,9 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.FavoriteBooksActivity;
 import com.example.android.lab1.ui.LoadBookActivity;
-import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
+import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
-import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -73,6 +69,7 @@ public class HomePageActivity extends AppCompatActivity
     private AHBottomNavigationViewPager mBottomNavigationViewPager;
     private FloatingActionButton mFAB;
     private Toolbar mToolbar;
+    private String mUserId;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -115,6 +112,7 @@ public class HomePageActivity extends AppCompatActivity
             docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
                 @Override
                 public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
+                    mUserId = snapshot.getId();
                     mUser = snapshot.toObject(User.class);
                     updateNavigationDrawer();
                 }
@@ -335,6 +333,7 @@ public class HomePageActivity extends AppCompatActivity
             Intent intent = new Intent(this, ProfileActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("user", mUser);
+            intent.putExtra(ProfileActivity.Constants.USER_ID.toString(), mUserId);
             startActivity(intent);
 
         } else if (id == R.id.nav_logout) {

@@ -90,7 +90,7 @@
         </activity>
         <activity
             android:name=".ui.LoadBookActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden" />
+            android:windowSoftInputMode="adjustResize" />
 
         <receiver android:name=".utils.NetworkConnectionReceiver">
             <intent-filter>

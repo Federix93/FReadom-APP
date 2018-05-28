@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 
 import com.example.android.lab1.R;
@@ -62,14 +63,13 @@ public abstract class Utilities {
     public final static String BOOK_REQUEST_CHANNEL_ID = "requestChannel";
     public final static String NEW_MESSAGE_CHANNEL_ID = "messageChannel";
 
-    public static boolean checkPermissionActivity(Activity activity, String permission){
+    public static boolean checkPermissionActivity(Activity activity, String permission) {
 
         return ContextCompat.checkSelfPermission(activity.getApplicationContext(), permission) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public static void askPermissionActivity(Activity activity, String permission, final int callbackRequest)
-    {
-        ActivityCompat.requestPermissions(activity, new String[] {permission}, callbackRequest);
+    public static void askPermissionActivity(Activity activity, String permission, final int callbackRequest) {
+        ActivityCompat.requestPermissions(activity, new String[]{permission}, callbackRequest);
     }
 
     public static Intent getSearchBarIntent(Activity activity, LatLng center, Double radius, int selectedFilter) throws GooglePlayServicesNotAvailableException, GooglePlayServicesRepairableException {
@@ -98,8 +98,7 @@ public abstract class Utilities {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public static  void setupStatusBarColor(Activity activity)
-    {
+    public static void setupStatusBarColor(Activity activity) {
         Window window = activity.getWindow();
 
 // clear FLAG_TRANSLUCENT_STATUS flag:
@@ -118,7 +117,7 @@ public abstract class Utilities {
     }
 
     public static boolean isOnline(Context context) {
-        ConnectivityManager cm =(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
@@ -240,6 +239,27 @@ public abstract class Utilities {
         return i;
     }
 
+    public static void showSoftKeyboard(Context context, View view) {
+        if (view.requestFocus()) {
+            InputMethodManager imm = (InputMethodManager)
+                    context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null)
+                imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    public static void hideKeyboard(Context context, Activity activity) {
+        InputMethodManager inputManager =
+                (InputMethodManager) context.
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (activity.getCurrentFocus() != null &&
+                activity.getCurrentFocus().getWindowToken() != null &&
+                inputManager != null)
+            inputManager.hideSoftInputFromWindow(
+                    activity.getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
     public static byte[] compressPhoto(String filePath, ContentResolver contentResolver, Context context) {
         int rotationAngle = 0;
         ExifInterface ei = null;
@@ -262,7 +282,7 @@ public abstract class Utilities {
                     break;
 
                 case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotationAngle = 270;
+                    //rotationAngle = 270;
                     break;
 
                 case ExifInterface.ORIENTATION_NORMAL:
@@ -272,7 +292,6 @@ public abstract class Utilities {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
 
         Uri filePathUri = Uri.parse(filePath);
@@ -322,6 +341,20 @@ public abstract class Utilities {
         return (dist);
     }
 
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private static double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
+    }
+
+    @Nullable
+    public static Intent getUserReviewsIntent(@NotNull Activity currentActivity,
+                                              @NotNull String reviewedId) {
+        return null;
+    }
+
     private GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
 
         // ~1 mile of lat and lon in degrees
@@ -338,20 +371,6 @@ public abstract class Utilities {
         GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
 
         return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
-    }
-
-    private static double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-
-    private static double rad2deg(double rad) {
-        return (rad * 180.0 / Math.PI);
-    }
-
-    @Nullable
-    public static Intent getUserReviewsIntent(@NotNull Activity currentActivity,
-                                              @NotNull String reviewedId) {
-        return null;
     }
 }
 

@@ -42,6 +42,7 @@ public class Book implements Parcelable, Comparable<Book> {
     private static final String GENRE = "GENRE";
     private static final String TIMESTAMP = "TIMESTAMP";
     private static final String TAGS = "TAGS";
+    private static final String DESCRIPTION = "DESCRIPTION";
 
     private String mIsbn;
     private String mTitle;
@@ -61,6 +62,7 @@ public class Book implements Parcelable, Comparable<Book> {
     private String mInfoLink;
     private Long mTimeInserted;
     private boolean mIsAlreadyLent;
+    private String mDescription;
 
     public Book() {
     }
@@ -193,6 +195,7 @@ public class Book implements Parcelable, Comparable<Book> {
         mInfoLink = bundle.containsKey(INFO_LINK) ? bundle.getString(INFO_LINK) : null;
         mTimeInserted = bundle.containsKey(TIMESTAMP) ? bundle.getLong(TIMESTAMP) : null;
         mSearchTags = bundle.containsKey(TAGS) ? bundle.getString(TAGS) : null;
+        mDescription = bundle.containsKey(DESCRIPTION) ? bundle.getString(DESCRIPTION) : null;
         if (bundle.containsKey(CONDITIONS))
             mCondition = bundle.getInt(CONDITIONS);
         if (bundle.containsKey(GENRE))
@@ -280,6 +283,8 @@ public class Book implements Parcelable, Comparable<Book> {
             bundle.putLong(TIMESTAMP, mTimeInserted);
         if (mSearchTags != null)
             bundle.putString(TAGS, mSearchTags);
+        if (mDescription != null)
+            bundle.putString(DESCRIPTION, mDescription);
         bundle.putInt(CONDITIONS, mCondition);
         bundle.putInt(GENRE, mGenre);
     }
@@ -314,5 +319,13 @@ public class Book implements Parcelable, Comparable<Book> {
 
     public void setTags(String searchTags) {
         this.mSearchTags = searchTags;
+    }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public void setDescription(String description) {
+        this.mDescription = description;
     }
 }
