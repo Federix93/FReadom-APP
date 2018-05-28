@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Bookique</string>
+    <string name="app_name">Freadom</string>
     <string name="username">Nome</string>
     <string name="email">Email</string>
     <string name="phoneNumber">Numero di telefono</string>
@@ -186,6 +186,7 @@
     <string name="error_message">Qualcosa è andato storto</string>
 
     <string name="book_detail_gallery">Galleria</string>
+    <string name="book_detail_title">Dettagli libro</string>
     <string name="not_rated_yet">Nessuna recensione</string>
     <string name="more_detail">Maggiori dettagli..</string>
     <string name="view_more">Mostra dettagli</string>

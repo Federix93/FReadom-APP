@@ -1,5 +1,6 @@
 package com.example.android.lab1.ui;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -81,7 +82,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
 
         mToolbar = findViewById(R.id.toolbar_library_book_detail);
 
-        mToolbar.setTitle(R.string.app_name);
+        mToolbar.setTitle(R.string.book_detail_title);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,7 +99,6 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
         Utilities.setupStatusBarColor(this);
 
         if (mBookId != null) {
-
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
             firebaseFirestore.collection("books").document(mBookId).addSnapshotListener(new EventListener<DocumentSnapshot>() {
                 @Override
@@ -157,6 +157,17 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
                 mGalleryLayout.setVisibility(GONE);
             }
         }
+
+        mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
+                intent.putExtra("Title", mBook.getTitle());
+                startActivity(intent);
+            }
+        });
 
     }
 }

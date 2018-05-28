@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -26,9 +27,12 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FavoriteBooksActivity extends AppCompatActivity {
 
@@ -36,6 +40,8 @@ public class FavoriteBooksActivity extends AppCompatActivity {
     RecyclerFavoriteBookAdapter mAdapter;
     Toolbar mToolbar;
     LinearLayout mTextAdviceLayout;
+
+    ListenerRegistration mListenerRegistration;
 
     List<Book> mBooks;
     List<String> mBookIds;
@@ -63,10 +69,10 @@ public class FavoriteBooksActivity extends AppCompatActivity {
             }
         });
 
-        Utilities.setupStatusBarColor(this);
-
         mBookIds = new ArrayList<>();
         mBooks = new ArrayList<>();
+
+        Utilities.setupStatusBarColor(this);
 
         RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -78,14 +84,29 @@ public class FavoriteBooksActivity extends AppCompatActivity {
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mFirebaseAuth = FirebaseAuth.getInstance();
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mListenerRegistration != null)
+            mListenerRegistration.remove();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mBookIds = new ArrayList<>();
+        mBooks = new ArrayList<>();
+
         final DocumentReference documentReference;
         if (mFirebaseAuth.getUid() != null) {
             documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid());
-            documentReference.get().addOnCompleteListener(this, new OnCompleteListener<DocumentSnapshot>() {
+            mListenerRegistration = documentReference.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()){
-                        DocumentSnapshot documentSnapshot = task.getResult();
+                public void onEvent(@javax.annotation.Nullable DocumentSnapshot documentSnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
                         FavoriteBooks favoriteBooks = documentSnapshot.toObject(FavoriteBooks.class);
                         if (favoriteBooks != null && !favoriteBooks.getBookIds().isEmpty()) {
                             for (final String s : favoriteBooks.getBookIds()) {
@@ -102,8 +123,11 @@ public class FavoriteBooksActivity extends AppCompatActivity {
                                     }
                                 });
                             }
-
                         } else {
+                            mBooks.clear();
+                            mBookIds.clear();
+                            mAdapter.setItems(mBooks, mBookIds, getApplicationContext());
+                            mAdapter.notifyDataSetChanged();
                             mTextAdviceLayout.setVisibility(View.VISIBLE);
                         }
                     }

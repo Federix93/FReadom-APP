@@ -132,7 +132,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         mToolbar = findViewById(R.id.toolbar_book_detail);
 
-        mToolbar.setTitle(R.string.app_name);
+        mToolbar.setTitle(R.string.book_detail_title);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new OnClickListener() {
             @Override
@@ -388,6 +388,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
                     intent.putExtra("UserObject", mUser);
                     intent.putExtra("UserID", book.getUid());
                     startActivity(intent);

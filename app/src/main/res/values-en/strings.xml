@@ -167,6 +167,7 @@
     <string name="search_unknown_error_bottom">Please try again later</string>
     <string name="remove_from_favorites">Remove from favorites</string>
     <string name="upload_photo">Upload photo</string>
+    <string name="book_detail_title">Book details</string>
 
 
 </resources>

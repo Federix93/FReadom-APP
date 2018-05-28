@@ -5,11 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <ImageView
-        android:layout_height="150dp"
-        android:layout_width="150dp"
+        android:layout_height="128dp"
+        android:layout_width="0dp"
         android:id="@+id/iv_photo"
         app:srcCompat="@drawable/book_thumbnail_placeholder"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
+        android:layout_weight="1"
         android:layout_marginEnd="4dp"/>
 </LinearLayout>
