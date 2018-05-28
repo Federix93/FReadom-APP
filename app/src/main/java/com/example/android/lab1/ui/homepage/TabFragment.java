@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -17,7 +18,6 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -47,13 +47,8 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -97,7 +92,8 @@ public class TabFragment extends Fragment {
     //YourLibraryFragment variables
     private RecyclerView mYourLibraryRecyclerView;
     RecyclerYourLibraryAdapter mAdapter;
-    RecyclerBookAdapter mRecyclerBookAdapter;
+    RecyclerBookAdapter mFirstRecyclerBookAdapter;
+    RecyclerBookAdapter mSecondRecyclerBookAdapter;
     List<Book> mBookIds;
     List<Book> mBookListHomeFragment = new ArrayList<>();
 
@@ -218,33 +214,19 @@ public class TabFragment extends Fragment {
         secondSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
         mFirebaseFirestore = FirebaseFirestore.getInstance();
 
-        BooksViewModel bookViewModel = ViewModelProviders.of(getActivity()).get(BooksViewModel.class);
-        final LiveData<List<Book>> liveData = bookViewModel.getSnapshotLiveData();
+        queryDatabaseWithViewModel();
 
-        liveData.observe(getActivity(), new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@Nullable List<Book> books) {
-                if(mRecyclerBookAdapter == null) {
-                    if (books != null) {
-                        mRecyclerBookAdapter = new RecyclerBookAdapter(books);
-                        mFirstRecyclerView.setAdapter(mRecyclerBookAdapter);
-                        mSecondRecyclerView.setAdapter(mRecyclerBookAdapter);
-                    }
-                }
-            }
-        });
-
-        /*mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 new Handler().post(new Runnable() {
                     @Override
                     public void run() {
-                        queryDatabase();
+                        queryDatabaseWithViewModel();
                     }
                 });
             }
-        });*/
+        });
 
         getUserPosition();
         //queryDatabase();
@@ -635,6 +617,39 @@ public class TabFragment extends Fragment {
         return mFragmentType;
     }
 
+    private void queryDatabaseWithViewModel(){
+        BooksViewModel bookViewModel = ViewModelProviders.of(getActivity()).get(BooksViewModel.class);
+        final LiveData<List<Book>> firstLiveData = bookViewModel.getBooksFirstRecycler();
+
+        firstLiveData.observe(getActivity(), new Observer<List<Book>>() {
+            @Override
+            public void onChanged(@Nullable List<Book> books) {
+                if(mFirstRecyclerBookAdapter == null) {
+                    if (books != null) {
+                        mFirstRecyclerBookAdapter = new RecyclerBookAdapter(books);
+                        mFirstRecyclerView.setAdapter(mFirstRecyclerBookAdapter);
+                    }
+                    firstLiveData.removeObserver(this);
+                }
+            }
+        });
+
+        final LiveData<List<Book>> secondLiveData = bookViewModel.getBooksSecondRecycler();
+
+        secondLiveData.observe(getActivity(), new Observer<List<Book>>() {
+            @Override
+            public void onChanged(@Nullable List<Book> books) {
+                if(mSecondRecyclerBookAdapter == null) {
+                    if (books != null) {
+                        mSecondRecyclerBookAdapter = new RecyclerBookAdapter(books);
+                        mSecondRecyclerView.setAdapter(mSecondRecyclerBookAdapter);
+                    }
+                    secondLiveData.removeObserver(this);
+                }
+            }
+        });
+
+    }
 
 }
 
