@@ -21,8 +21,11 @@ import java.net.URL;
 import java.util.Map;
 
 public class FirebaseNotificationService extends com.google.firebase.messaging.FirebaseMessagingService {
+
     private static final String TAG = "MyFirebaseMsgService";
     public static final String MESSAGE_REPLY_KEY = "message_reply_key";
+    public static final String FREADOM_GROUP = "freadom_app_group";
+    public static final int SUMMARY_KEY = 478514;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -103,8 +106,9 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
-                .setChannelId(Utilities.NEW_MESSAGE_CHANNEL_ID)
-                .addAction(action);
+                .addAction(action)
+                .setGroup(FREADOM_GROUP);
+
 
         if (isText) {
             notificationBuilder
@@ -129,8 +133,9 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
         notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
+        notificationSummary();
+
     }
 
     private void sendNewBookRequestNotification(Map<String, String> data) {
@@ -171,7 +176,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
-                .setChannelId(Utilities.BOOK_REQUEST_CHANNEL_ID);
+                .setGroup(FREADOM_GROUP);
 
         String contentText = String.format(getResources().getString(R.string.new_request_notification_content), data.get("sender"), data.get("bookTitle"));
 
@@ -183,9 +188,29 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
         notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
+        notificationSummary();
     }
 
+    private void notificationSummary()
+    {
+        NotificationCompat.Builder summary = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID);
+
+        summary.setContentTitle("SUMMARY")
+                //content text to support devices running API level < 24 (DA TESTARE)
+                .setContentText("Two new messages")
+                .setSmallIcon(R.drawable.ic_world_24dp)
+//                .setStyle(new NotificationCompat.InboxStyle()
+//                        .addLine(data.get("sender")+" "+data.get("body"))
+//                        .setBigContentTitle("Nuovi messaggi")
+//                        .setSummaryText("Nuove notifiche"))
+                .setGroup(FREADOM_GROUP)
+                .setGroupSummary(true);
+
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(SUMMARY_KEY, summary.build());
+
+    }
 
 }
