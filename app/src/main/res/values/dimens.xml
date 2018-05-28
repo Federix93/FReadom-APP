@@ -26,4 +26,9 @@
     <dimen name="user_photos_max_height">200dp</dimen>
     <dimen name="user_photos_margin">5dp</dimen>
     <dimen name="photo_gallery_item_height">110dp</dimen>
+
+    <dimen name="activityPadding">16dp</dimen>
+    <dimen name="placeholderImage">60dp</dimen>
+    <dimen name="placeholderTextHeight">8dp</dimen>
+    <dimen name="padding_10">10dp</dimen>
 </resources>

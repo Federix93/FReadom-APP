@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
@@ -23,6 +24,7 @@ import com.example.android.lab1.viewmodel.ConversationsViewModel;
 import com.example.android.lab1.viewmodel.UserRealtimeDBViewModel;
 import com.example.android.lab1.viewmodel.UserViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -48,7 +50,7 @@ public class ConversationsActivity extends AppCompatActivity {
     String mBookID;
     RecyclerView mRecyclerView;
     private RecyclerConversationAdapter mAdapter;
-
+    private ShimmerFrameLayout mShimmerViewContainer;
     ChildEventListener childEventListener;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -62,12 +64,14 @@ public class ConversationsActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.toolbar_conversations_activity);
         mToolbar.setTitle(R.string.conversations_title);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
+        mShimmerViewContainer = findViewById(R.id.shimmer_view_container);
 
         mRecyclerView = findViewById(R.id.conversation_recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -98,6 +102,10 @@ public class ConversationsActivity extends AppCompatActivity {
                                         userList.add(user);
                                         mAdapter.setItems(snapshotList.get(userList.size() - 1).getKey(), user);
                                         mAdapter.notifyDataSetChanged();
+                                        if(mShimmerViewContainer.isAnimationStarted()) {
+                                            mShimmerViewContainer.stopShimmerAnimation();
+                                            mShimmerViewContainer.setVisibility(View.GONE);
+                                        }
                                     }
 
                                     @Override
@@ -135,5 +143,17 @@ public class ConversationsActivity extends AppCompatActivity {
                         }
                     });*/
         }
+    }
+
+    @Override
+    protected void onPause() {
+        mShimmerViewContainer.stopShimmerAnimation();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mShimmerViewContainer.startShimmerAnimation();
     }
 }
