@@ -72,7 +72,15 @@
     <style name="IsbnButton">
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:background">@color/colorAccent</item>
+    </style>
 
+    <style name="MyAppRatingBar">
+        <item name="android:textSize">22sp</item>
+        <item name="prb_totalTicks">5</item>
+        <item name="prb_defaultRating">0</item>
+        <item name="prb_tickNormalDrawable">@drawable/ic_star_grey_32dp</item>
+        <item name="prb_tickSelectedDrawable">@drawable/ic_star_selected_32dp</item>
+        <item name="prb_tickSpacing">10dp</item>
     </style>
 
     <style name="ActionTextView">

@@ -10,4 +10,6 @@ public class Constants {
     public static final int RESULT_LOAD_IMAGE = 7;
     public static final int CALENDAR_REQUEST = 8;
     public static final int PICK_GENRE = 9;
+    public static final int RATING_REQUEST = 10;
+    public static final int SHOW_REVIEWS_ACTIVITY = 11;
 }

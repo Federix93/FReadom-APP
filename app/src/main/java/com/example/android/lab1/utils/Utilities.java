@@ -30,6 +30,7 @@ import android.widget.ArrayAdapter;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Address;
 import com.example.android.lab1.ui.PositionActivity;
+import com.example.android.lab1.ui.ReviewActivity;
 import com.example.android.lab1.ui.ScanBarCodeActivity;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -39,6 +40,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.android.SphericalUtil;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -222,6 +226,20 @@ public abstract class Utilities {
         return result;
     }
 
+    public static Intent getRatingIntent(Activity currentActivity,
+                                         String reviewerId,
+                                         String reviewedId,
+                                         String bookId) {
+        if (currentActivity == null || reviewedId == null || reviewerId == null)
+            return null;
+        Intent i = new Intent(currentActivity, ReviewActivity.class);
+        i.putExtra(ReviewActivity.ConstantKeys.REVIEWER_ID.toString(), reviewerId);
+        i.putExtra(ReviewActivity.ConstantKeys.REVIEWED_ID.toString(), reviewedId);
+        i.putExtra(ReviewActivity.ConstantKeys.BOOK_ID.toString(), bookId);
+        i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return i;
+    }
+
     public static byte[] compressPhoto(String filePath, ContentResolver contentResolver, Context context) {
         int rotationAngle = 0;
         ExifInterface ei = null;
@@ -328,6 +346,12 @@ public abstract class Utilities {
 
     private static double rad2deg(double rad) {
         return (rad * 180.0 / Math.PI);
+    }
+
+    @Nullable
+    public static Intent getUserReviewsIntent(@NotNull Activity currentActivity,
+                                              @NotNull String reviewedId) {
+        return null;
     }
 }
 

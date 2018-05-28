@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/review_toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@+id/review_toolbar"
+            layout="@layout/toolbar" />
+    </android.support.design.widget.AppBarLayout>
+
+    <!--<TextView
+        android:id="@+id/review_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/load_book_field_margin"
+        android:paddingEnd="@dimen/activity_load_book_content_padding"
+        android:paddingStart="@dimen/activity_load_book_content_padding"
+        android:text="@string/review_title"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/review_toolbar_layout" /> -->
+
+    <ImageView
+        android:id="@+id/user_photo"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginStart="@dimen/activity_load_book_content_padding"
+        android:layout_marginTop="@dimen/load_book_field_margin"
+        android:src="@mipmap/profile_picture"
+        app:layout_constraintTop_toBottomOf="@id/review_toolbar_layout"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/user_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:layout_marginStart="12dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:hint="Username"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/user_photo"
+        app:layout_constraintTop_toTopOf="@id/user_photo"
+        app:layout_constraintBottom_toBottomOf="@id/user_photo"
+        />
+
+    <!--<RatingBar
+        android:id="@+id/review_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/user_photo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        /> -->
+
+    <io.techery.properratingbar.ProperRatingBar
+        android:id="@+id/review_rating"
+        style="@style/MyAppRatingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/user_photo"
+        app:prb_clickable="true" />
+
+    <EditText
+        android:id="@+id/review_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
+        android:layout_marginStart="@dimen/activity_load_book_content_padding"
+        android:layout_marginTop="@dimen/load_book_field_margin"
+        android:hint="@string/review_leave_optional_comment_for_owner"
+        android:maxLength="280"
+        android:maxLines="5"
+        android:inputType="textCapSentences"
+        app:layout_constraintTop_toBottomOf="@+id/review_rating" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/review_confirm"
+        style="@style/IsbnButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/load_book_field_margin"
+        android:layout_marginEnd="@dimen/activity_load_book_content_padding"
+        android:layout_marginStart="@dimen/activity_load_book_content_padding"
+        android:layout_marginTop="@dimen/load_book_field_margin"
+        android:text="@string/leave_review"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</android.support.constraint.ConstraintLayout>
