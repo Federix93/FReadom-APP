@@ -27,8 +27,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:src="@drawable/isbn10digit"
-            android:visibility="visible" />
+            android:src="@drawable/isbn"
+            android:visibility="gone" />
 
             <android.support.v7.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
@@ -40,7 +40,7 @@
                 android:paddingEnd="@dimen/activity_load_book_content_padding"
                 android:paddingTop="@dimen/activity_load_book_content_padding"
                 android:paddingBottom="@dimen/activity_load_book_content_padding"
-                android:visibility="visible">
+                android:visibility="gone">
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/load_book_isbn"
@@ -59,6 +59,7 @@
                         android:layout_marginBottom="8dp"
                         android:hint="@string/isbn_hint"
                         android:inputType="number"
+                        android:imeOptions="actionDone"
                         android:maxLength="13"/>
                 </android.support.design.widget.TextInputLayout>
 
@@ -127,7 +128,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:padding="@dimen/icon_padding"
-                    app:layout_constraintBottom_toBottomOf="@id/load_book_title"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/thumbnail"
                     app:srcCompat="@drawable/ic_title_24dp" />
@@ -137,13 +137,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     style="@style/TextAppearance.AppCompat.Medium"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp"
                     android:hint="@string/title"
-                    android:layout_marginBottom="@dimen/load_book_field_margin"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:maxLines="2"
                     app:layout_constraintStart_toEndOf="@id/load_book_title_icon"
-                    android:padding="@dimen/icon_padding"
-                    app:layout_constraintTop_toBottomOf="@id/thumbnail" />
+                    app:layout_constraintBottom_toBottomOf="@id/load_book_title_icon"
+                    app:layout_constraintTop_toTopOf="@id/load_book_title_icon" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/load_book_author_list"
@@ -151,7 +152,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/load_book_title" />
+                    app:layout_constraintTop_toBottomOf="@id/load_book_title_icon" />
 
                 <ImageView
                     android:id="@+id/load_book_publisher_icon"
@@ -288,14 +289,17 @@
 
                 <TextView
                     style="@style/ActionTextView"
+                    android:id="@+id/add_photos_text_view"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/load_book_field_margin"
                     android:hint="@string/add_your_photos"
-                    app:layout_constraintBottom_toTopOf="@id/load_book_loaded_photos"
-                    app:layout_constraintEnd_toStartOf="@id/load_book_add_photos"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="16dp"
+                    app:layout_constraintBottom_toBottomOf="@id/load_book_add_photos_icon"
                     app:layout_constraintStart_toEndOf="@id/load_book_add_photos_icon"
-                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_rv" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/load_book_add_photos_icon" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/load_book_loaded_photos"
@@ -303,19 +307,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/load_book_field_margin"
                     android:maxHeight="@dimen/user_photos_max_height"
-                    app:layout_constraintStart_toEndOf="@drawable/ic_add_a_photo_black_24dp"
+                    app:layout_constraintStart_toEndOf="@id/load_book_add_photos_icon"
                     app:layout_constraintTop_toBottomOf="@id/load_book_add_photos_icon" />
-
-
-                <ImageButton
-                    android:id="@+id/load_book_add_photos"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/icon_padding"
-                    android:layout_marginTop="@dimen/load_book_field_margin"
-                    app:layout_constraintTop_toBottomOf="@id/load_book_tags_rv"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
 
                 <ImageView
                     android:id="@+id/load_book_tags_icon"
@@ -327,16 +320,24 @@
                     app:layout_constraintTop_toBottomOf="@id/load_book_location"
                     app:srcCompat="@drawable/ic_tags_red_24dp" />
 
-                <TextView
-                    android:id="@+id/load_book_tags_text_view"
-                    style="@style/ActionTextView"
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/load_book_tags_edit_view"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:hint="@string/load_book_tags"
-                    android:padding="16dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/load_book_tags_icon"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/load_book_tags_icon"
-                    app:layout_constraintTop_toTopOf="@id/load_book_tags_icon" />
+                    app:layout_constraintTop_toTopOf="@id/load_book_tags_icon">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionDone"
+                        android:inputType="textCapWords|textImeMultiLine" />
+
+                </android.support.design.widget.TextInputLayout>
+
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/load_book_tags_rv"
@@ -355,6 +356,7 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:textColor="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/load_book_loaded_photos" />
             </android.support.constraint.ConstraintLayout>
         </android.support.v4.widget.NestedScrollView>

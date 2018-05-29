@@ -2,13 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_marginEnd="@dimen/user_photos_margin"
     >
 
     <ImageView
         android:id="@+id/load_book_user_photo"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/photo_gallery_item_height"
         android:layout_height="@dimen/photo_gallery_item_height"
         android:scaleType="centerCrop"
         />
@@ -17,8 +17,7 @@
         android:id="@+id/load_book_remove_user_photo"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
+        android:layout_alignEnd="@id/load_book_user_photo"
         app:srcCompat="@drawable/ic_remove_black_24dp" />
 
 </RelativeLayout>

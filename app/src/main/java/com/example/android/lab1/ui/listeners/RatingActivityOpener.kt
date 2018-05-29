@@ -20,19 +20,4 @@ class RatingActivityOpener(private val mCurrentActivity: Activity,
                 mCurrentActivity.startActivityForResult(intent, Constants.RATING_REQUEST)
         }
     }
-
-    fun openActivity() {
-        // TODO REMOVE ALL FUNCTION
-        // aside function for testing reaso
-        mReviewedId = "SMc8vP0GD8eBUK0Wty8zfTYEB7l1" //TODO remove
-        mReviewerId = "SMc8vP0GD8eBUK0Wty8zfTYEB7l1" // TODO REMOVE
-        val bookId = "4OGgy0KCkBBg4q8yb5mW"
-        val intent = Utilities.getRatingIntent(mCurrentActivity,
-                mReviewerId,
-                mReviewedId,
-                bookId)
-        if (intent != null)
-            mCurrentActivity.startActivityForResult(intent, Constants.RATING_REQUEST)
-    }
-
 }

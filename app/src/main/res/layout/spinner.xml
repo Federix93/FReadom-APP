@@ -6,7 +6,7 @@
     app:ms_enableFloatingLabel="true"
     app:ms_enableErrorLabel="false"
     app:ms_errorColor="@color/error_color"
-    app:ms_hintColor="@color/colorPrimary"
+    app:ms_hintColor="@color/black"
     app:ms_arrowSize="16dp"
     app:ms_alignLabels="false"
     app:ms_floatingLabelColor="@color/colorPrimaryDark"

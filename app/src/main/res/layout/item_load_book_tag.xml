@@ -7,7 +7,7 @@
     android:background="@color/light_gray"
     android:orientation="horizontal">
 
-    <EditText
+    <TextView
         android:id="@+id/tag_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:srcCompat="@drawable/ic_baseline_clear_24px" />
 
 </LinearLayout>

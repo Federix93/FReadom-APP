@@ -19,12 +19,16 @@
         android:id="@+id/author_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/author_icon">
+        android:layout_toEndOf="@id/author_icon"
+        android:focusable="false"
+        android:focusableInTouchMode="false">
 
         <android.support.design.widget.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:hint="@string/author" />
     </android.support.design.widget.TextInputLayout>
 

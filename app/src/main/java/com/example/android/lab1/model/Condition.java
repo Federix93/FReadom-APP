@@ -1,6 +1,7 @@
 package com.example.android.lab1.model;
 
 import android.content.Context;
+
 import com.example.android.lab1.R;
 
 import java.util.ArrayList;
@@ -23,15 +24,15 @@ public abstract class Condition {
     }
     public static String getCondition (Context pContext, int cond) {
         switch (cond) {
-            case 1:
+            case 0:
                 return pContext.getResources().getString(R.string.condition_poor);
-            case 2:
+            case 1:
                 return pContext.getResources().getString(R.string.condition_fair);
-            case 3:
+            case 2:
                 return pContext.getResources().getString(R.string.condition_good);
-            case 4:
+            case 3:
                 return pContext.getResources().getString(R.string.condition_near_mint);
-            case 5:
+            case 4:
                 return pContext.getResources().getString(R.string.condition_mint);
             default:
                 break;
@@ -41,15 +42,15 @@ public abstract class Condition {
 
     public static int getConditionColor (Context pContext, int cond) {
         switch (cond) {
-            case 1:
+            case 0:
                 return pContext.getResources().getColor(R.color.poor);
-            case 2:
+            case 1:
                 return pContext.getResources().getColor(R.color.fair);
-            case 3:
+            case 2:
                 return pContext.getResources().getColor(R.color.good);
-            case 4:
+            case 3:
                 return pContext.getResources().getColor(R.color.near_mint);
-            case 5:
+            case 4:
                 return pContext.getResources().getColor(R.color.mint);
             default:
                 break;
