@@ -171,6 +171,9 @@
     <string name="answer_to">Answer to %1$s</string>
     <string name="remove_from_favorites">Remove from favorites</string>
     <string name="upload_photo">Upload photo</string>
+    <string name="book_detail_title">Book details</string>
+    <string name="start_loan">Start loan</string>
+    <string name="confirm_date">Confirm date</string>
 
 
 </resources>

@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -23,6 +25,7 @@ public class BookPhotoDetailActivity extends AppCompatActivity{
 
     public static final String BOOK_PHOTO = "BOOK_PHOTO_DETAIL";
     private ImageView mImageView;
+    Toolbar mToolbar;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -31,7 +34,18 @@ public class BookPhotoDetailActivity extends AppCompatActivity{
         setContentView(R.layout.activity_photo_full_detail);
 
         Utilities.setupStatusBarColor(this);
+
         mImageView = findViewById(R.id.image);
+        mToolbar = findViewById(R.id.toolbar_library_book_detail);
+        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+
         BookPhoto photo = getIntent().getParcelableExtra(BOOK_PHOTO);
 
         Glide.with(this)
@@ -46,7 +60,6 @@ public class BookPhotoDetailActivity extends AppCompatActivity{
                     @Override
                     public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                         mImageView.setImageBitmap(resource);
-
                         return false;
                     }
                 })

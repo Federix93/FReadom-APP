@@ -1,5 +1,11 @@
 package com.example.android.lab1.ui;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,6 +31,17 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.utils.Utilities;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.storage.FirebaseStorage;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import static android.view.View.GONE;
 
@@ -44,12 +61,19 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
     TextView mBookDescription;
     ImageView mBookDetailConditionColor;
     TextView mBookDetailCondition;
+    TextView mBookPosition;
 
     AppCompatButton mEditButton;
     AppCompatButton mDeleteButton;
     android.support.v7.widget.Toolbar mToolbar;
 
     RecyclerView mGalleryRecyclerView;
+
+    private GeoCodingTask mCurrentlyExecuting;
+    private Location mCurrentlyResolving;
+    private Location mResolveLater;
+
+    private Activity mSelf;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -77,10 +101,12 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
         mBookDescription = findViewById(R.id.library_book_description);
         mBookDescriptionLayout = findViewById(R.id.library_book_description_container);
         mGalleryLayout = findViewById(R.id.relative_library_gallery_layout);
+        mBookPosition = findViewById(R.id.library_book_position);
+        mSelf = this;
 
         mToolbar = findViewById(R.id.toolbar_library_book_detail);
 
-        mToolbar.setTitle(R.string.app_name);
+        mToolbar.setTitle(R.string.book_detail_title);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,6 +144,15 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
             mPublicationDateTextView.setText(String.valueOf(mBook.getPublishYear()));
         else
             mPublicationDateTextView.setText(getResources().getString(R.string.date_not_available));
+        if (mBook.getGeoPoint() != null) {
+            Location location = new Location("location");
+            location.setLongitude(mBook.getGeoPoint().getLongitude());
+            location.setLatitude(mBook.getGeoPoint().getLatitude());
+
+            resolveCityLocation(location);
+        }
+        else
+            mBookPosition.setText(getResources().getString(R.string.position_not_available));
         if (!String.valueOf(mBook.getCondition()).isEmpty()) {
             mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), mBook.getCondition())));
             mBookDetailConditionColor.setColorFilter(Condition.getConditionColor(getApplicationContext(), mBook.getCondition()));
@@ -144,5 +179,71 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
             }
         }
 
+        mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
+                intent.putExtra("Title", mBook.getTitle());
+                startActivity(intent);
+            }
+        });
+
+    }
+
+    private void resolveCityLocation(Location location) {
+        // This method will change address mResultAddress var
+        mCurrentlyResolving = location;
+        mCurrentlyExecuting = new GeoCodingTask(mBookPosition);
+        mCurrentlyExecuting.execute(new LatLng(location.getLatitude(),
+                location.getLongitude()));
+    }
+    private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
+
+        private TextView mTarget;
+
+        public GeoCodingTask(TextView target) {
+            this.mTarget = target;
+        }
+
+        @Override
+        protected String doInBackground(LatLng... latLngs) {
+            if (latLngs.length > 0) {
+                Geocoder geocoder = new Geocoder(mSelf, Locale.getDefault());
+                List<Address> fromLocation = null;
+                try {
+                    if (!isCancelled())
+                        fromLocation = geocoder.getFromLocation(latLngs[0].latitude,
+                                latLngs[0].longitude,
+                                1);
+                    else
+                        return null;
+
+                } catch (IOException e) {
+                    return null;
+                }
+                if (fromLocation == null || fromLocation.size() == 0)
+                    return null;
+                else {
+                    return fromLocation.get(0).getLocality();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String city) {
+            if (mTarget != null && !this.isCancelled()) {
+                if (city == null) {
+                    mTarget.setText(R.string.no_address_found);
+                } else {
+                    mTarget.setText(city);
+                    mCurrentlyExecuting = null;
+                    mCurrentlyResolving = null;
+                    mResolveLater = null;
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Bookique</string>
+    <string name="app_name">Freadom</string>
     <string name="username">Nome</string>
     <string name="email">Email</string>
     <string name="phoneNumber">Numero di telefono</string>
@@ -148,9 +148,10 @@
     <string name="insert_isbn_code">Inserisci il codice ISBN del libro</string>
     <string name="search_by_address_or_current_position">Scegliere il metodo di condivisione della posizione</string>
     <string name="yes">Si</string>
-    <string name="choose_initial_date">Seleziona la data iniziale</string>
-    <string name="ok">Ok</string>
-    <string name="choose_end_date">Seleziona la data finale</string>
+    <string name="choose_initial_date">Seleziona data inizio prestito</string>
+    <string name="ok">OK</string>
+    <string name="choose_end_date">Seleziona data fine prestito</string>
+    <string name="confirm_date">Conferma data</string>
 
     <string name="click_position_button">Aggiungi posizione</string>
     <string name="select_genres">Selezionare i generi che si vogliono visualizzare</string>
@@ -206,6 +207,7 @@
     <string name="years_ago">Anni fa</string>
 
     <string name="book_detail_gallery">Galleria</string>
+    <string name="book_detail_title">Dettagli libro</string>
     <string name="not_rated_yet">Nessuna recensione</string>
     <string name="more_detail">Maggiori dettagli..</string>
     <string name="view_more">Mostra dettagli</string>
@@ -220,6 +222,7 @@
     <string name="favorite_advice">Al momento non hai libri preferiti. Quando aggiungerai un libro ai tuoi preferiti lo troverai qui, per tenerlo sempre a portata di mano!</string>
 
     <string name="upload_photo">Carica foto</string>
+    <string name="start_loan">Inizia prestito</string>
     <string name="wait_for_chat_opening">Apertura della chat in corso</string>
     <string name="book_not_available">Libro non più disponibile</string>
     <string name="open_chat">Vai alla chat</string>

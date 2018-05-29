@@ -22,8 +22,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ViewPagerAdapter;
+import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.ReviewListFragment;
+import com.example.android.lab1.ui.BookPhotoDetailActivity;
 import com.example.android.lab1.ui.TextDetailActivity;
 import com.example.android.lab1.utils.Utilities;
 
@@ -155,6 +157,19 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
                 }
             }
         });
+
+        mUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BookPhoto bookPhoto = new BookPhoto(mUser.getImage(), "Profile image");
+                Intent intent = new Intent(getApplicationContext(), BookPhotoDetailActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra(BookPhotoDetailActivity.BOOK_PHOTO, bookPhoto);
+                startActivity(intent);
+            }
+        });
+
+
     }
 
     public static User getUser() { return mUser; }

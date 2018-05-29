@@ -14,6 +14,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -38,6 +39,7 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
+import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.profile.EditProfileActivity;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -92,6 +94,9 @@ public class ChatActivity extends AppCompatActivity {
     TextView mNoMessagesReceiverTextView;
     LinearLayout mInputTextLinearLayout;
 
+    AppCompatButton mStartLoan;
+    LinearLayout mInfoLayout;
+
     ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
 
@@ -128,6 +133,8 @@ public class ChatActivity extends AppCompatActivity {
         mConversationsReference = mFirebaseDatabase.getReference().child("conversations");
         mFirebaseStorage = FirebaseStorage.getInstance();
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
+        mStartLoan = findViewById(R.id.start_loan_button);
+        mInfoLayout = findViewById(R.id.info_button_layout);
 
         mChatID = getIntent().getStringExtra("ChatID");
         mUsername = getIntent().getStringExtra("Username");
@@ -244,6 +251,16 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
         mMessagesReference.child(mChatID).addChildEventListener(mChildEventListener);
+        mStartLoan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                Boolean startLoan = true;
+                intent.putExtra("start_loan", startLoan);
+                startActivity(intent);
+            }
+        });
     }
 
     private void setInputLinearLayout() {
