@@ -195,6 +195,29 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+
+        if (mFirebaseAuth.getUid() != null) {
+            DocumentReference doc = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+            doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if (documentSnapshot != null)
+                        if (documentSnapshot.exists()) {
+                            mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
+                            String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
+                            int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+                            Drawable res = getResources().getDrawable(imageResource);
+                            mFavoritesImageView.setImageDrawable(res);
+                        } else {
+                            String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
+                            int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+                            Drawable res = getResources().getDrawable(imageResource);
+                            mFavoritesImageView.setImageDrawable(res);
+                            mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
+                        }
+                }
+            });
+        }
         updateUI();
     }
 
