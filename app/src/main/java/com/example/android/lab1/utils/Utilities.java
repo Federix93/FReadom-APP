@@ -282,7 +282,7 @@ public abstract class Utilities {
                     break;
 
                 case ExifInterface.ORIENTATION_ROTATE_270:
-                    //rotationAngle = 270;
+                    rotationAngle = 270;
                     break;
 
                 case ExifInterface.ORIENTATION_NORMAL:

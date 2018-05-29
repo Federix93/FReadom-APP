@@ -90,7 +90,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             mBookId = book.getBookID();
 
             if (book.getWebThumbnail().isEmpty())
-                Glide.with(itemView.getContext()).load(R.drawable.book_placeholder_thumbnail).into(mThumbnail);
+                Glide.with(itemView.getContext()).load(R.drawable.book_thumbnail_placeholder).into(mThumbnail);
             else
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mThumbnail);
 

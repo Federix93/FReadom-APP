@@ -130,7 +130,7 @@ public class Book implements Parcelable, Comparable<Book> {
     }
 
     public List<String> getUserBookPhotosStoragePath() {
-        return null;
+        return mBookPhotosPaths;
     }
 
     public void setUserBookPhotosStoragePath(ArrayList<String> mUserBookPhotosWebStoragePath) {

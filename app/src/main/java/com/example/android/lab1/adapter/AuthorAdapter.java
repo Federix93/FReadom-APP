@@ -1,5 +1,6 @@
 package com.example.android.lab1.adapter;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.RecyclerView;
@@ -20,9 +21,10 @@ public class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.AuthorView
     private ArrayList<String> mAuthors;
     private LayoutInflater mLayoutInflater;
     private boolean mEditable;
+    private int mMaxAuthors;
 
-    public AuthorAdapter(LayoutInflater layoutInflater, ArrayList<String> authors) {
-        this.mLayoutInflater = layoutInflater;
+    public AuthorAdapter(Context context, ArrayList<String> authors) {
+        mMaxAuthors = context.getResources().getInteger(R.integer.max_authors);
         this.mAuthors = authors;
         this.mEditable = false;
     }
@@ -30,8 +32,10 @@ public class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.AuthorView
     @NonNull
     @Override
     public AuthorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View inflate = mLayoutInflater.inflate(R.layout.item_author, parent, false);
-        return new AuthorViewHolder(inflate);
+        LayoutInflater inflater = (LayoutInflater) parent.getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View rootView = inflater.inflate(R.layout.item_author, parent, false);
+        return new AuthorViewHolder(rootView);
     }
 
     @Override
@@ -45,7 +49,7 @@ public class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.AuthorView
 
     public void setEditable(boolean editable) {
         this.mEditable = editable;
-        if (mEditable)
+        if (mEditable && getItemCount() == 0)
             addAuthor(null);
     }
 
@@ -57,8 +61,10 @@ public class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.AuthorView
     private void addAuthor(String o) {
         if (mAuthors == null)
             mAuthors = new ArrayList<>();
-        mAuthors.add(o);
-        notifyDataSetChanged();
+        if (mMaxAuthors > mAuthors.size()) {
+            mAuthors.add(o);
+            notifyDataSetChanged();
+        }
     }
 
     private void removeAuthor(int adapterPosition) {
@@ -106,6 +112,7 @@ public class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.AuthorView
 
         public void setAuthor(String author) {
             mAuthorEditText.setText(author);
+            mAuthorEditText.setEnabled(mEditable);
             if (mEditable) {
                 if (getAdapterPosition() > 0) {
                     mRemoveAuthorButton.setImageResource(R.drawable.ic_remove_black_24dp);
@@ -120,7 +127,7 @@ public class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.AuthorView
                     mRemoveAuthorButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (getItemCount() < 3)
+                            if (getItemCount() < mMaxAuthors)
                                 addAuthor(null);
                         }
                     });
