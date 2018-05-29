@@ -1,15 +1,15 @@
 package com.example.android.lab1.model;
 
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 
@@ -48,7 +48,9 @@ public class Book implements Parcelable, Comparable<Book> {
     private Long mLoanEnd;
     private int mGenre;
     private String mInfoLink;
-    private Long mTimeInserted;
+    private @ServerTimestamp
+    Date mTimeInserted;
+    private String mDescription;
     private boolean mIsAlreadyLent;
     private String mBookID;
 
@@ -176,6 +178,7 @@ public class Book implements Parcelable, Comparable<Book> {
 
     @SuppressWarnings("unchecked")
     protected Book(Parcel in) {
+        mDescription = in.readString();
         mIsbn = in.readString();
         Log.d("LULLO", "ISBN ON READ: " + mIsbn);
         mTitle = in.readString();
@@ -201,7 +204,13 @@ public class Book implements Parcelable, Comparable<Book> {
         Log.d("LULLO", "LOAN END ON READ: " + mLoanEnd);
         mInfoLink = in.readString();
         Log.d("LULLO", "INFO LINK ON READ: " + mInfoLink);
-        mTimeInserted = in.readLong();
+        Long time = in.readLong();
+        if (time != DEFAULT_VALUE_INT) {
+            Date d = new Date();
+            d.setTime(time);
+            mTimeInserted = d;
+        } else
+            mTimeInserted = null;
         Log.d("LULLO", "TimeINS ON READ: " + mTimeInserted);
         mSearchTags = in.readString();
         Log.d("LULLO", "TAGS ON READ: " + mSearchTags);
@@ -257,6 +266,10 @@ public class Book implements Parcelable, Comparable<Book> {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (mDescription != null)
+            dest.writeString(mDescription);
+        else
+            dest.writeString(DEFAULT_VALUE_STRING);
         if (mIsbn != null)
             dest.writeString(mIsbn);
         else
@@ -313,7 +326,7 @@ public class Book implements Parcelable, Comparable<Book> {
         else
             dest.writeString(DEFAULT_VALUE_STRING);
         if (mTimeInserted != null)
-            dest.writeLong(mTimeInserted);
+            dest.writeLong(mTimeInserted.getTime());
         else
             dest.writeLong(DEFAULT_VALUE_INT);
         if (mSearchTags != null)
@@ -327,12 +340,12 @@ public class Book implements Parcelable, Comparable<Book> {
 
     }
 
-
-    public Long getTimeInserted() {
+    @ServerTimestamp
+    public Date getTimeInserted() {
         return mTimeInserted;
     }
 
-    public void setTimeInserted(Long mTimeInserted) {
+    public void setTimeInserted(Date mTimeInserted) {
         this.mTimeInserted = mTimeInserted;
     }
 
@@ -342,7 +355,7 @@ public class Book implements Parcelable, Comparable<Book> {
             return -1;
         if (o.getTimeInserted() == null)
             return 1;
-        long diff = getTimeInserted() - o.getTimeInserted();
+        long diff = getTimeInserted().getTime() - o.getTimeInserted().getTime();
         if (diff == 0)
             return 0;
         if (diff > 0)
@@ -357,5 +370,13 @@ public class Book implements Parcelable, Comparable<Book> {
 
     public void setTags(String searchTags) {
         this.mSearchTags = searchTags;
+    }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public void setDescription(String description) {
+        this.mDescription = description;
     }
 }

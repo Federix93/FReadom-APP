@@ -167,6 +167,143 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private int mProgressRate;
     private int mUploadedImagesCount;
 
+
+    private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint) {
+        mInsertManuallyButton.setOnClickListener(null);
+        if (mActivityState == State.ISBN_MANUALLY)
+            Utilities.hideKeyboard(getApplicationContext(), LoadBookActivity.this);
+        final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
+        mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setIndeterminate(true);
+
+        String url;
+        String readIsbn = isbn.replace("-", "");
+        if (readIsbn.length() == 10) {
+            readIsbn = Utilities.Isbn10ToIsbn13(readIsbn);
+        }
+        if (!alternativeEndPoint)
+            url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + readIsbn;
+        else
+            url = "https://www.googleapis.com/books/v1/volumes?q=ISBN:" + readIsbn;
+
+        final String finalReadIsbn = readIsbn;
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(
+                Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if (response.getInt("totalItems") > 0) {
+                        mResultBook = new Book();
+                        JSONObject book = response.getJSONArray("items")
+                                .getJSONObject(0).getJSONObject("volumeInfo");
+
+                        // read isbn from api
+                        if (book.has("industryIdentifiers")) {
+                            JSONArray industryIdentifiers = book.getJSONArray("industryIdentifiers");
+                            for (int i = 0; i < industryIdentifiers.length(); i++) {
+                                if (industryIdentifiers.getJSONObject(i)
+                                        .getString("type")
+                                        .equals("ISBN_13"))
+                                    mResultBook.setIsbn(industryIdentifiers.getJSONObject(i)
+                                            .getString("identifier"));
+                            }
+                        } else
+                            mResultBook.setIsbn(finalReadIsbn);
+
+                        mCurrentTitle = book.optString("title");
+                        mResultBook.setTitle(mCurrentTitle);
+                        mTitleTextView.setText(mCurrentTitle);
+
+                        //mResultBook.setDescription(book.optString("description"));
+                        mResultBook.setPublisher(book.optString("publisher"));
+                        if (mPublisherTextInputLayout != null && mPublisherTextInputLayout.getEditText() != null) {
+                            mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
+                            mPublisherTextInputLayout.getEditText().setEnabled(false);
+                        }
+
+                        if (book.has("authors") &&
+                                book.getJSONArray("authors").length() > 0) {
+                            JSONArray authors = book.getJSONArray("authors");
+                            ArrayList<String> authorsList = new ArrayList<>();
+                            for (int i = 0; i < authors.length(); i++) {
+                                mResultBook.addAuthor(authors.getString(i));
+                                authorsList.add(mResultBook.getAuthor(i));
+                            }
+
+                            AuthorAdapter authorAdapter = new AuthorAdapter(getLayoutInflater(),
+                                    authorsList);
+                            authorAdapter.setEditable(false);
+                            mAuthorsListView.setAdapter(authorAdapter);
+                            mAuthorsListView.getAdapter().notifyDataSetChanged();
+
+                        } else {
+                            AuthorAdapter authorAdapter = new AuthorAdapter(getLayoutInflater(), null);
+                            authorAdapter.setEditable(true);
+                            mAuthorsListView.setAdapter(authorAdapter);
+                        }
+
+                        if (book.has("publishedDate")) {
+                            String publishedDate = book.getString("publishedDate");
+                            if (publishedDate != null) {
+                                if (publishedDate.contains("-"))
+                                    mResultBook.setPublishYear(Integer.parseInt(book.getString("publishedDate").split("-")[0]));
+                                else
+                                    mResultBook.setPublishYear(book.getInt("publishedDate"));
+
+                                int currentYear, publishYear;
+                                currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                                publishYear = mResultBook.getPublishYear();
+                                mPublishYearSpinner.setSelection(currentYear - publishYear);
+                                mPublishYearSpinner.setEnabled(false);
+                            }
+                        }
+
+
+                        if (book.has("imageLinks")) {
+                            JSONObject imageLinks = book.getJSONObject("imageLinks");
+                            if (imageLinks.length() > 0 &&
+                                    imageLinks.has("thumbnail")) {
+                                mResultBook.setWebThumbnail(imageLinks.getString("thumbnail"));
+                                Glide.with(getApplicationContext())
+                                        .load(mResultBook.getWebThumbnail())
+                                        .into(mBookWebThumbnailImageView);
+                            }
+                        }
+
+                        if (book.has("infoLink"))
+                            mResultBook.setInfoLink(book.getString("infoLink"));
+                        else if (book.has("canonicalVolumeLink"))
+                            mResultBook.setInfoLink(book.getString("canonicalVolumeLink"));
+
+                        mActivityState = State.ISBN_ACQUIRED;
+                        updateActivityState();
+                    } else {
+                        // second request
+                        if (alternativeEndPoint) {
+                            showSnackBar(R.string.load_book_book_not_found);
+                            updateActivityState();
+                        } else
+                            makeRequestBookApi(finalReadIsbn, true);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                updateActivityState();
+                mProgressBar.setVisibility(View.GONE);
+                showSnackBar(R.string.load_book_autofill_request_error);
+            }
+        });
+        jsonRequest.setTag(Constants.ISBN_REQUEST_TAG);
+        if (mRequestQueue == null)
+            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        mRequestQueue.add(jsonRequest);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -598,140 +735,35 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         });
     }
 
-    private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint) {
-        mInsertManuallyButton.setOnClickListener(null);
-        if (mActivityState == State.ISBN_MANUALLY)
-            Utilities.hideKeyboard(getApplicationContext(), LoadBookActivity.this);
-        final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
-        mProgressBar.setVisibility(View.VISIBLE);
-        mProgressBar.setIndeterminate(true);
-
-        String url;
-        String readIsbn = isbn.replace("-", "");
-        if (readIsbn.length() == 10) {
-            readIsbn = Utilities.Isbn10ToIsbn13(readIsbn);
-        }
-        if (!alternativeEndPoint)
-            url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + readIsbn;
-        else
-            url = "https://www.googleapis.com/books/v1/volumes?q=ISBN:" + readIsbn;
-
-        final String finalReadIsbn = readIsbn;
-        JsonObjectRequest jsonRequest = new JsonObjectRequest(
-                Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
+    private void uploadBookInfo() {
+        mResultBook.setUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        mResultBook.setTimeInserted(null);
+        mResultBook.setBookID(db.collection("books").document().getId());
+        db.collection("books").add(mResultBook).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    if (response.getInt("totalItems") > 0) {
-                        mResultBook = new Book();
-                        JSONObject book = response.getJSONArray("items")
-                                .getJSONObject(0).getJSONObject("volumeInfo");
-
-                        // read isbn from api
-                        if (book.has("industryIdentifiers")) {
-                            JSONArray industryIdentifiers = book.getJSONArray("industryIdentifiers");
-                            for (int i = 0; i < industryIdentifiers.length(); i++) {
-                                if (industryIdentifiers.getJSONObject(i)
-                                        .getString("type")
-                                        .equals("ISBN_13"))
-                                    mResultBook.setIsbn(industryIdentifiers.getJSONObject(i)
-                                            .getString("identifier"));
-                            }
-                        } else
-                            mResultBook.setIsbn(finalReadIsbn);
-
-                        mCurrentTitle = book.optString("title");
-                        mResultBook.setTitle(mCurrentTitle);
-                        mTitleTextView.setText(mCurrentTitle);
-
-                        mResultBook.setDescription(book.optString("description"));
-                        mResultBook.setPublisher(book.optString("publisher"));
-                        if (mPublisherTextInputLayout != null && mPublisherTextInputLayout.getEditText() != null) {
-                            mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
-                            mPublisherTextInputLayout.getEditText().setEnabled(false);
-                        }
-
-                        if (book.has("authors") &&
-                                book.getJSONArray("authors").length() > 0) {
-                            JSONArray authors = book.getJSONArray("authors");
-                            ArrayList<String> authorsList = new ArrayList<>();
-                            for (int i = 0; i < authors.length(); i++) {
-                                mResultBook.addAuthor(authors.getString(i));
-                                authorsList.add(mResultBook.getAuthor(i));
-                            }
-
-                            AuthorAdapter authorAdapter = new AuthorAdapter(getLayoutInflater(),
-                                    authorsList);
-                            authorAdapter.setEditable(false);
-                            mAuthorsListView.setAdapter(authorAdapter);
-                            mAuthorsListView.getAdapter().notifyDataSetChanged();
-
-                        } else {
-                            AuthorAdapter authorAdapter = new AuthorAdapter(getLayoutInflater(), null);
-                            authorAdapter.setEditable(true);
-                            mAuthorsListView.setAdapter(authorAdapter);
-                        }
-
-                        if (book.has("publishedDate")) {
-                            String publishedDate = book.getString("publishedDate");
-                            if (publishedDate != null) {
-                                if (publishedDate.contains("-"))
-                                    mResultBook.setPublishYear(Integer.parseInt(book.getString("publishedDate").split("-")[0]));
-                                else
-                                    mResultBook.setPublishYear(book.getInt("publishedDate"));
-
-                                int currentYear, publishYear;
-                                currentYear = Calendar.getInstance().get(Calendar.YEAR);
-                                publishYear = mResultBook.getPublishYear();
-                                mPublishYearSpinner.setSelection(currentYear - publishYear);
-                                mPublishYearSpinner.setEnabled(false);
-                            }
-                        }
-
-
-                        if (book.has("imageLinks")) {
-                            JSONObject imageLinks = book.getJSONObject("imageLinks");
-                            if (imageLinks.length() > 0 &&
-                                    imageLinks.has("thumbnail")) {
-                                mResultBook.setWebThumbnail(imageLinks.getString("thumbnail"));
-                                Glide.with(getApplicationContext())
-                                        .load(mResultBook.getWebThumbnail())
-                                        .into(mBookWebThumbnailImageView);
-                            }
-                        }
-
-                        if (book.has("infoLink"))
-                            mResultBook.setInfoLink(book.getString("infoLink"));
-                        else if (book.has("canonicalVolumeLink"))
-                            mResultBook.setInfoLink(book.getString("canonicalVolumeLink"));
-
-                        mActivityState = State.ISBN_ACQUIRED;
-                        updateActivityState();
-                    } else {
-                        // second request
-                        if (alternativeEndPoint) {
-                            showSnackBar(R.string.load_book_book_not_found);
-                            updateActivityState();
-                        } else
-                            makeRequestBookApi(finalReadIsbn, true);
+            public void onSuccess(DocumentReference documentReference) {
+                // using documentReference create a folder on storage for storing photos
+                //  clean photos
+                if (mPhotosPath != null)
+                    for (String path : mPhotosPath) {
+                        removePhotoPath(path);
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+
+                uploadOnAlgolia(mResultBook, documentReference.getId());
+
+                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                setResult(RESULT_OK);
+                finish();
             }
-        }, new Response.ErrorListener() {
+        }).addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                updateActivityState();
-                mProgressBar.setVisibility(View.GONE);
-                showSnackBar(R.string.load_book_autofill_request_error);
+            public void onFailure(@NonNull Exception e) {
+                cleanUpload();
             }
         });
-        jsonRequest.setTag(Constants.ISBN_REQUEST_TAG);
-        if (mRequestQueue == null)
-            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
-        mRequestQueue.add(jsonRequest);
     }
 
     @Override
@@ -866,35 +898,9 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 .show();
     }
 
-    private void uploadBookInfo() {
-        mResultBook.setUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        // fix spinners variable
-        mResultBook.setTimeInserted(System.currentTimeMillis());
-        db.collection("books").add(mResultBook).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                // using documentReference create a folder on storage for storing photos
-                //  clean photos
-                if (mPhotosPath != null)
-                    for (String path : mPhotosPath) {
-                        removePhotoPath(path);
-                    }
-
-                uploadOnAlgolia(mResultBook, documentReference.getId());
-
-                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-                setResult(RESULT_OK);
-                finish();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                cleanUpload();
-            }
-        });
+    public enum Keys {
+        ACTIVITY_STATE, RESULT_BOOK, PHOTOS_KEY, PUBLISH_YEAR_SPINNER, CONDITION_SPINNER,
+        GENRE_SPINNER, ISBN, CURRENT_PHOTO, UPLOADING, AUTHORS, AUTHORS_EDITABLE, TAGS
     }
 
     private void prepareAndStartUpload() {
@@ -1022,38 +1028,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 storageReference.delete();
             }
         }
-    }
-
-    private void uploadBookInfo() {
-        mResultBook.setUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        // fix spinners variable
-        mResultBook.setTimeInserted(System.currentTimeMillis());
-        db.collection("books").add(mResultBook).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                // using documentReference create a folder on storage for storing photos
-                //  clean photos
-                PhotosAdapter ph = (PhotosAdapter) mPhotosRecyclerView.getAdapter();
-                if (ph.getModel() != null)
-                    for (String s : ph.getModel()) {
-                        removePhotoPath(s);
-                    }
-
-                uploadOnAlgolia(mResultBook, documentReference.getId());
-
-                Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-                setResult(RESULT_OK);
-                finish();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                cleanUpload();
-            }
-        });
     }
 
     private enum State {
