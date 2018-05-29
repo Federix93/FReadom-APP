@@ -169,7 +169,7 @@
     <string name="upload_photo">Upload photo</string>
     <string name="book_detail_title">Book details</string>
     <string name="start_loan">Start loan</string>
-
+    <string name="confirm_date">Confirm date</string>
 
 
 </resources>

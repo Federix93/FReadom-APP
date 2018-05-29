@@ -39,6 +39,7 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
+import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.profile.EditProfileActivity;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -250,6 +251,16 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
         mMessagesReference.child(mChatID).addChildEventListener(mChildEventListener);
+        mStartLoan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                Boolean startLoan = true;
+                intent.putExtra("start_loan", startLoan);
+                startActivity(intent);
+            }
+        });
     }
 
     private void setInputLinearLayout() {

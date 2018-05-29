@@ -367,7 +367,6 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         setupOnClickListeners(book);
 
-
         // storage photos
         if (mGalleryRecyclerView != null) {
             if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
