@@ -1,6 +1,8 @@
 package com.example.android.lab1.ui.searchbooks;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -97,6 +99,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private TextView mUnknownErrorTextViewBottom;
     private AppCompatButton mNoConnectionButton;
 
+    private int mShortAnimationDuration;
+
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private RecyclerSearchAdapter mAdapter;
@@ -131,6 +135,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         mUnknownErrorTextViewTop = findViewById(R.id.search_book_unknown_error_top);
         mUnknownErrorTextViewBottom = findViewById(R.id.search_book_unknown_error_bottom);
         mRecyclerView = findViewById(R.id.results_recycler_view);
+
+        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null)
@@ -236,7 +242,12 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
                 int itemID = item.getItemId();
                 if (itemID == R.id.action_filter) {
-                    showDialog();
+//                    showDialog();
+                    Log.d("GNIPPO", "IntroTop="+mIntroTextViewTop.getVisibility());
+                    Log.d("GNIPPO", "IntroBottom="+mIntroTextViewBottom.getVisibility());
+                    Log.d("GNIPPO", "NoConnectionTop="+mNoConnectionTextViewTop.getVisibility());
+                    Log.d("GNIPPO", "NoConnectionBottom="+mNoConnectionTextViewBottom.getVisibility());
+                    Log.d("GNIPPO", "NoConnectionButton="+mNoConnectionButton.getVisibility());
                 }
             }
         });
@@ -266,17 +277,13 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     }
 
     private void preSearch(String searchString) {
-//        if (Utilities.isOnline(SearchBookActivity.this)) {
         if (searchString.isEmpty() || searchString.length() < 2) {
-            if (!currentView[INTRO_VIEW])
+            if (!currentView[INTRO_VIEW]) {
                 showIntroView();
+            }
             return;
         }
         search(searchString);
-//        } else {
-//            if (!currentView[OFFLINE_VIEW])
-//                showOfflineView();
-//        }
     }
 
     private void search(final String searchString) {
@@ -328,6 +335,15 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                             book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
                             booksDataSet.add(book);
                         }
+                    }
+
+                    if (bookUIDs.size() == 0) {
+                        if (!currentView[NO_RESULTS_VIEW])
+                            showNoResultsView();
+                        updateNoResultsTextView(booksQuery.getQuery());
+
+                        mSearchView.hideProgress();
+                        return;
                     }
 
                     StringBuilder stringBuilder = new StringBuilder(400);
@@ -579,98 +595,61 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     }
 
     private void showOfflineView() {
+
+        if (currentView[RESULTS_VIEW]) {
+            currentView[RESULTS_VIEW] = false;
+            fadeOutViews(mRecyclerView, null, null, mNoConnectionTextViewTop, mNoConnectionTextViewBottom, mNoConnectionButton);
+        } else if (currentView[INTRO_VIEW]) {
+            currentView[INTRO_VIEW] = false;
+            fadeOutViews(mIntroTextViewTop, mIntroTextViewBottom, null, mNoConnectionTextViewTop, mNoConnectionTextViewBottom, mNoConnectionButton);
+        } else if (currentView[NO_RESULTS_VIEW]) {
+            currentView[NO_RESULTS_VIEW] = false;
+            fadeOutViews(mNoResultsTextViewTop, mNoResultsTextViewBottom, null, mNoConnectionTextViewTop, mNoConnectionTextViewBottom, mNoConnectionButton);
+        } else if (currentView[UNKNOWN_ERROR_VIEW]) {
+            currentView[UNKNOWN_ERROR_VIEW] = false;
+            fadeOutViews(mUnknownErrorTextViewTop, mUnknownErrorTextViewBottom, null, mNoConnectionTextViewTop, mNoConnectionTextViewBottom, mNoConnectionButton);
+        }
+
         currentView[OFFLINE_VIEW] = true;
-        currentView[NO_RESULTS_VIEW] = false;
-        currentView[INTRO_VIEW] = false;
-        currentView[RESULTS_VIEW] = false;
-        currentView[UNKNOWN_ERROR_VIEW] = false;
-
-        if (mRecyclerView.getVisibility() != View.GONE)
-            mRecyclerView.setVisibility(View.GONE);
-        if (mIntroTextViewTop.getVisibility() != View.GONE) {
-            mIntroTextViewTop.setVisibility(View.GONE);
-            mIntroTextViewBottom.setVisibility(View.GONE);
-        }
-
-        if (mNoResultsTextViewTop.getVisibility() != View.GONE) {
-            mNoResultsTextViewTop.setVisibility(View.GONE);
-            mNoResultsTextViewBottom.setVisibility(View.GONE);
-        }
-
-        if (mUnknownErrorTextViewTop.getVisibility() != View.GONE) {
-            mUnknownErrorTextViewTop.setVisibility(View.GONE);
-            mUnknownErrorTextViewBottom.setVisibility(View.GONE);
-        }
-
-
-        mNoConnectionTextViewTop.setVisibility(View.VISIBLE);
-        mNoConnectionTextViewBottom.setVisibility(View.VISIBLE);
-        mNoConnectionButton.setVisibility(View.VISIBLE);
-
-
     }
 
     private void showResultsView() {
-        currentView[OFFLINE_VIEW] = false;
-        currentView[NO_RESULTS_VIEW] = false;
-        currentView[INTRO_VIEW] = false;
+
+        if (currentView[OFFLINE_VIEW]) {
+            currentView[OFFLINE_VIEW] = false;
+            fadeOutViews(mNoConnectionTextViewTop, mNoConnectionTextViewBottom, mNoConnectionButton, mRecyclerView, null, null);
+
+        } else if (currentView[INTRO_VIEW]) {
+            currentView[INTRO_VIEW] = false;
+            fadeOutViews(mIntroTextViewTop, mIntroTextViewBottom, null, mRecyclerView, null, null);
+        } else if (currentView[NO_RESULTS_VIEW]) {
+            currentView[NO_RESULTS_VIEW] = false;
+            fadeOutViews(mNoResultsTextViewTop, mNoResultsTextViewBottom, null, mRecyclerView, null, null);
+        } else if (currentView[UNKNOWN_ERROR_VIEW]) {
+            currentView[UNKNOWN_ERROR_VIEW] = false;
+            fadeOutViews(mUnknownErrorTextViewTop, mUnknownErrorTextViewBottom, null, mRecyclerView, null, null);
+        }
+
         currentView[RESULTS_VIEW] = true;
-        currentView[UNKNOWN_ERROR_VIEW] = false;
-
-        if (mNoConnectionTextViewTop.getVisibility() != View.GONE) {
-            mNoConnectionTextViewTop.setVisibility(View.GONE);
-            mNoConnectionTextViewBottom.setVisibility(View.GONE);
-            mNoConnectionButton.setVisibility(View.GONE);
-        }
-
-        if (mIntroTextViewTop.getVisibility() != View.GONE) {
-            mIntroTextViewTop.setVisibility(View.GONE);
-            mIntroTextViewBottom.setVisibility(View.GONE);
-        }
-
-        if (mNoResultsTextViewTop.getVisibility() != View.GONE) {
-            mNoResultsTextViewTop.setVisibility(View.GONE);
-            mNoResultsTextViewBottom.setVisibility(View.GONE);
-        }
-
-        if (mUnknownErrorTextViewTop.getVisibility() != View.GONE) {
-            mUnknownErrorTextViewTop.setVisibility(View.GONE);
-            mUnknownErrorTextViewBottom.setVisibility(View.GONE);
-        }
-
-        mRecyclerView.setVisibility(View.VISIBLE);
-
     }
 
     private void showNoResultsView() {
-        currentView[OFFLINE_VIEW] = false;
+
+        if (currentView[OFFLINE_VIEW]) {
+            currentView[OFFLINE_VIEW] = false;
+            fadeOutViews(mNoConnectionTextViewTop, mNoResultsTextViewBottom, mNoConnectionButton, mNoResultsTextViewTop, mNoResultsTextViewBottom, null);
+        } else if (currentView[INTRO_VIEW]) {
+            currentView[INTRO_VIEW] = false;
+            fadeOutViews(mIntroTextViewTop, mIntroTextViewBottom, null, mNoResultsTextViewTop, mNoResultsTextViewBottom, null);
+        } else if (currentView[UNKNOWN_ERROR_VIEW]) {
+            currentView[UNKNOWN_ERROR_VIEW] = false;
+            fadeOutViews(mUnknownErrorTextViewTop, mUnknownErrorTextViewBottom, null, mNoResultsTextViewTop, mNoResultsTextViewBottom, null);
+        } else if (currentView[RESULTS_VIEW]) {
+            currentView[RESULTS_VIEW] = false;
+            fadeOutViews(mRecyclerView, null, null, mNoResultsTextViewTop, mNoResultsTextViewBottom, null);
+        }
+
         currentView[NO_RESULTS_VIEW] = true;
-        currentView[INTRO_VIEW] = false;
-        currentView[RESULTS_VIEW] = false;
-        currentView[UNKNOWN_ERROR_VIEW] = false;
-
-        if (mNoConnectionTextViewTop.getVisibility() != View.GONE) {
-            mNoConnectionTextViewTop.setVisibility(View.GONE);
-            mNoConnectionTextViewBottom.setVisibility(View.GONE);
-            mNoConnectionButton.setVisibility(View.GONE);
-        }
-
-        if (mIntroTextViewTop.getVisibility() != View.GONE) {
-            mIntroTextViewTop.setVisibility(View.GONE);
-            mIntroTextViewBottom.setVisibility(View.GONE);
-        }
-
-        if (mUnknownErrorTextViewTop.getVisibility() != View.GONE) {
-            mUnknownErrorTextViewTop.setVisibility(View.GONE);
-            mUnknownErrorTextViewBottom.setVisibility(View.GONE);
-        }
-
-        if (mRecyclerView.getVisibility() != View.GONE)
-            mRecyclerView.setVisibility(View.GONE);
-
-        mNoResultsTextViewTop.setVisibility(View.VISIBLE);
-        mNoResultsTextViewBottom.setVisibility(View.VISIBLE);
-
     }
 
     private void updateNoResultsTextView(String text) {
@@ -678,67 +657,159 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     }
 
     private void showIntroView() {
-        currentView[OFFLINE_VIEW] = false;
-        currentView[NO_RESULTS_VIEW] = false;
+
+        if (currentView[OFFLINE_VIEW]) {
+            currentView[OFFLINE_VIEW] = false;
+            fadeOutViews(mNoConnectionTextViewTop, mNoConnectionTextViewBottom, mNoConnectionButton, mIntroTextViewTop, mIntroTextViewBottom, null);
+        } else if (currentView[UNKNOWN_ERROR_VIEW]) {
+            currentView[UNKNOWN_ERROR_VIEW] = false;
+            fadeOutViews(mUnknownErrorTextViewTop, mUnknownErrorTextViewBottom, null, mIntroTextViewTop, mIntroTextViewBottom, null);
+        } else if (currentView[RESULTS_VIEW]) {
+            currentView[RESULTS_VIEW] = false;
+            fadeOutViews(mRecyclerView, null, null, mIntroTextViewTop, mIntroTextViewBottom, null);
+        } else if (currentView[NO_RESULTS_VIEW]) {
+            currentView[NO_RESULTS_VIEW] = false;
+            fadeOutViews(mNoResultsTextViewTop, mNoResultsTextViewBottom, null, mIntroTextViewTop, mIntroTextViewBottom, null);
+        }
+
         currentView[INTRO_VIEW] = true;
-        currentView[RESULTS_VIEW] = false;
-        currentView[UNKNOWN_ERROR_VIEW] = false;
-
-        if (mNoConnectionTextViewTop.getVisibility() != View.GONE) {
-            mNoConnectionTextViewTop.setVisibility(View.GONE);
-            mNoConnectionTextViewBottom.setVisibility(View.GONE);
-            mNoConnectionButton.setVisibility(View.GONE);
-        }
-
-        if (mUnknownErrorTextViewTop.getVisibility() != View.GONE) {
-            mUnknownErrorTextViewTop.setVisibility(View.GONE);
-            mUnknownErrorTextViewBottom.setVisibility(View.GONE);
-        }
-
-        if (mRecyclerView.getVisibility() != View.GONE)
-            mRecyclerView.setVisibility(View.GONE);
-
-        if (mNoResultsTextViewTop.getVisibility() != View.GONE) {
-            mNoResultsTextViewTop.setVisibility(View.GONE);
-            mNoResultsTextViewBottom.setVisibility(View.GONE);
-        }
-
-        mIntroTextViewTop.setVisibility(View.VISIBLE);
-        mIntroTextViewBottom.setVisibility(View.VISIBLE);
-
-
     }
 
     private void showUnknownErrorView() {
-        currentView[OFFLINE_VIEW] = false;
-        currentView[NO_RESULTS_VIEW] = false;
-        currentView[INTRO_VIEW] = false;
-        currentView[RESULTS_VIEW] = false;
+
+        if (currentView[OFFLINE_VIEW]) {
+            currentView[OFFLINE_VIEW] = false;
+            fadeOutViews(mNoConnectionTextViewTop, mNoConnectionTextViewBottom, mNoConnectionButton, mUnknownErrorTextViewTop, mUnknownErrorTextViewBottom, null);
+        } else if (currentView[INTRO_VIEW]) {
+            currentView[INTRO_VIEW] = false;
+            fadeOutViews(mIntroTextViewTop, mIntroTextViewBottom, null, mUnknownErrorTextViewTop, mUnknownErrorTextViewBottom, null);
+        } else if (currentView[RESULTS_VIEW]) {
+            currentView[RESULTS_VIEW] = false;
+            fadeOutViews(mRecyclerView, null, null, mUnknownErrorTextViewTop, mUnknownErrorTextViewBottom, null);
+        } else if (currentView[NO_RESULTS_VIEW]) {
+            currentView[NO_RESULTS_VIEW] = false;
+            fadeOutViews(mNoResultsTextViewTop, mNoResultsTextViewBottom, null, mUnknownErrorTextViewTop, mUnknownErrorTextViewBottom, null);
+        }
+
         currentView[UNKNOWN_ERROR_VIEW] = true;
+    }
 
-        if (mNoConnectionTextViewTop.getVisibility() != View.GONE) {
-            mNoConnectionTextViewTop.setVisibility(View.GONE);
-            mNoConnectionTextViewBottom.setVisibility(View.GONE);
-            mNoConnectionButton.setVisibility(View.GONE);
-        }
+    private void fadeOutViews(final View vOut1, final View vOut2, final View vOut3, final View vIn1, final View vIn2, final View vIn3) {
 
-        if (mIntroTextViewTop.getVisibility() != View.GONE) {
-            mIntroTextViewTop.setVisibility(View.GONE);
-            mIntroTextViewBottom.setVisibility(View.GONE);
-        }
+        Log.d("GNIPPO", "Al fadeOut sono stati passati:");
+        Log.d("GNIPPO", "vOut1= "+((TextView)vOut1).getText());
+        if(vOut2 != null)
+            Log.d("GNIPPO", "vOut2= "+((TextView)vOut2).getText());
+        else
+            Log.d("GNIPPO", "vOut2= null");
+        if(vOut3 != null)
+            Log.d("GNIPPO", "vOut3= "+((TextView)vOut3).getText());
+        else
+            Log.d("GNIPPO", "vOut3= null");
 
-        if (mRecyclerView.getVisibility() != View.GONE)
-            mRecyclerView.setVisibility(View.GONE);
+        Log.d("GNIPPO", "vIn1= "+((TextView)vIn1).getText());
+        if(vIn2 != null)
+            Log.d("GNIPPO", "vIn2= "+((TextView)vIn2).getText());
+        else
+            Log.d("GNIPPO", "vIn2= null");
+        if(vIn3 != null)
+            Log.d("GNIPPO", "vIn3= "+((TextView)vIn3).getText());
+        else
+            Log.d("GNIPPO", "vIn3= null");
 
-        if (mNoResultsTextViewTop.getVisibility() != View.GONE) {
-            mNoResultsTextViewTop.setVisibility(View.GONE);
-            mNoResultsTextViewBottom.setVisibility(View.GONE);
-        }
+        vOut1.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        if (vOut2 != null) {
+                            vOut2.animate()
+                                    .alpha(0f)
+                                    .setDuration(mShortAnimationDuration)
+                                    .setListener(new AnimatorListenerAdapter() {
+                                        @Override
+                                        public void onAnimationStart(Animator animation) {
+                                        }
 
+                                        @Override
+                                        public void onAnimationEnd(Animator animation) {
+                                            Log.d("GNIPPO", "V2GONE-> "+((TextView)vOut2).getText());
+                                            vOut2.setVisibility(View.GONE);
+                                            if (vOut3 == null)
+                                                fadeInViews(vIn1, vIn2, vIn3);
+                                        }
+                                    });
+                        }
 
-        mUnknownErrorTextViewTop.setVisibility(View.VISIBLE);
-        mUnknownErrorTextViewBottom.setVisibility(View.VISIBLE);
+                        if (vOut3 != null) {
+                            vOut3.animate()
+                                    .alpha(0f)
+                                    .setDuration(mShortAnimationDuration)
+                                    .setListener(new AnimatorListenerAdapter() {
+                                        @Override
+                                        public void onAnimationStart(Animator animation) {
 
+                                        }
+
+                                        @Override
+                                        public void onAnimationEnd(Animator animation) {
+                                            Log.d("GNIPPO", "V3GONE-> "+((TextView)vOut3).getText());
+                                            vOut3.setVisibility(View.GONE);
+                                            fadeInViews(vIn1, vIn2, vIn3);
+                                        }
+                                    });
+                        }
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        Log.d("GNIPPO", "V1GONE-> "+((TextView)vOut1).getText());
+                        vOut1.setVisibility(View.GONE);
+                        if (vOut2 == null)
+                            fadeInViews(vIn1, vIn2, vIn3);
+                    }
+                });
+    }
+
+    private void fadeInViews(final View v1, final View v2, final View v3) {
+        v1.setAlpha(0f);
+        Log.d("GNIPPO", "V1VISIBLE-> "+((TextView)v1).getText());
+        v1.setVisibility(View.VISIBLE);
+
+        v1.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        if (v2 != null) {
+                            v2.setAlpha(0f);
+                            Log.d("GNIPPO", "V2VISIBLE-> "+((TextView)v2).getText());
+                            v2.setVisibility(View.VISIBLE);
+
+                            v2.animate()
+                                    .alpha(1f)
+                                    .setDuration(mShortAnimationDuration)
+                                    .setListener(new AnimatorListenerAdapter() {
+                                        @Override
+                                        public void onAnimationStart(Animator animation) {
+                                            if (v3 != null) {
+                                                v3.setAlpha(0f);
+                                                Log.d("GNIPPO", "V3VISIBLE-> "+((TextView)v3).getText());
+                                                v3.setVisibility(View.VISIBLE);
+                                                v3.animate()
+                                                        .alpha(1f)
+                                                        .setDuration(mShortAnimationDuration);
+                                            }
+                                        }
+
+                                    });
+                        }
+                    }
+
+                });
 
     }
 
@@ -827,7 +898,9 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             mAdapter = new RecyclerSearchAdapter(backupDataSet, currentLat, currentLong);
             mRecyclerView.setAdapter(mAdapter);
             showResultsView();
-        }
+        } else if (currentView[UNKNOWN_ERROR_VIEW])
+            showUnknownErrorView();
+
         lastSearchedSeqNo = savedInstanceState.getInt("LAST_SEARCHED_SEQ_NO");
         lastDisplayedSeqNo = savedInstanceState.getInt("LAST_DISPLAYED_SEQ_NO");
         lastRequestedPage = savedInstanceState.getInt("LAST_REQUESTED_PAGE");

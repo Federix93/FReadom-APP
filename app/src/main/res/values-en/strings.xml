@@ -165,6 +165,10 @@
     <string name="book_removed">Book removed from favorites</string>
     <string name="search_unknown_error_top">An unknown error occurred</string>
     <string name="search_unknown_error_bottom">Please try again later</string>
+    <string name="new_request_notification_title">You received a new request</string>
+    <string name="new_request_notification_content">%1$s requested %2$s</string>
+    <string name="reply">Reply</string>
+    <string name="answer_to">Answer to %1$s</string>
     <string name="remove_from_favorites">Remove from favorites</string>
     <string name="upload_photo">Upload photo</string>
 
