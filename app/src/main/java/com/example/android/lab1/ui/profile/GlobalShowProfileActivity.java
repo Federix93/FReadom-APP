@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -55,17 +56,13 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_global_show_profile);
 
-        /*
-        mToolbar = findViewById(R.id.global_profile_toolbar);
-
-        mToolbar.setTitle(getResources().getString(R.string.title_profile));
-        mToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp));
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });*/
+        if(getIntent().getExtras() != null) {
+            mUser = getIntent().getExtras().getParcelable("UserObject");
+            mUserId = getIntent().getExtras().getString("UserID");
+        }else{
+            Toast.makeText(this, "Si è verificato un errore sconosciuto", Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         Utilities.setupStatusBarColor(this);
 

@@ -144,6 +144,10 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
             mPublicationDateTextView.setText(String.valueOf(mBook.getPublishYear()));
         else
             mPublicationDateTextView.setText(getResources().getString(R.string.date_not_available));
+        if (mBook.getDescription() != null)
+            mBookDescription.setText(mBook.getDescription());
+        else
+            mBookDescriptionLayout.setVisibility(GONE);
         if (mBook.getGeoPoint() != null) {
             Location location = new Location("location");
             location.setLongitude(mBook.getGeoPoint().getLongitude());
@@ -184,7 +188,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
+                intent.putExtra("BookDescription", mBook.getDescription());
                 intent.putExtra("Title", mBook.getTitle());
                 startActivity(intent);
             }

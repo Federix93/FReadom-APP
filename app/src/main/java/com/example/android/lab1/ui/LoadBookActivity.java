@@ -215,7 +215,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         mResultBook.setTitle(mCurrentTitle);
                         mTitleTextView.setText(mCurrentTitle);
 
-                        //mResultBook.setDescription(book.optString("description"));
+                        mResultBook.setDescription(book.optString("description"));
                         mResultBook.setPublisher(book.optString("publisher"));
                         if (mPublisherTextInputLayout != null && mPublisherTextInputLayout.getEditText() != null) {
                             mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());

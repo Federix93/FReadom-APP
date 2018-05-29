@@ -213,17 +213,21 @@ public class BookDetailsActivity extends AppCompatActivity {
             mEditorTextView.setText(getResources().getString(R.string.editor_not_available));
         if (!String.valueOf(mBook.getPublishYear()).isEmpty())
             mPublicationDateTextView.setText(String.valueOf(mBook.getPublishYear()));
-        if (book.getGeoPoint() != null) {
-            Location location = new Location("location");
-            location.setLongitude(book.getGeoPoint().getLongitude());
-            location.setLatitude(book.getGeoPoint().getLatitude());
+        if (mBook.getDescription() != null)
+            mBookDescription.setText(mBook.getDescription());
+        else
+            mBookDescriptionLayout.setVisibility(GONE);
+        if (mBook.getGeoPoint() != null) {
+        Location location = new Location("location");
+        location.setLongitude(mBook.getGeoPoint().getLongitude());
+        location.setLatitude(mBook.getGeoPoint().getLatitude());
 
-            resolveCityLocation(location);
+        resolveCityLocation(location);
         }
         else
             mBookPosition.setText(getResources().getString(R.string.position_not_available));
-        if (!String.valueOf(book.getPublishYear()).isEmpty())
-            mPublicationDateTextView.setText(String.valueOf(book.getPublishYear()));
+        if (!String.valueOf(mBook.getPublishYear()).isEmpty())
+            mPublicationDateTextView.setText(String.valueOf(mBook.getPublishYear()));
         else
             mPublicationDateTextView.setText(getResources().getString(R.string.date_not_available));
         if (!String.valueOf(mBook.getCondition()).isEmpty()) {
@@ -315,7 +319,7 @@ public class BookDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), TextDetailActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra("BookDescription", "The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid.");
+                intent.putExtra("BookDescription", mBook.getDescription());
                 intent.putExtra("Title", mBook.getTitle());
                 startActivity(intent);
             }
@@ -348,7 +352,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 //                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                 intent.putExtra("UserObject", mUser);
-                intent.putExtra("UserID", book.getUid());
+                intent.putExtra("UserID", mBook.getUid());
                 startActivity(intent);
             }
         });
@@ -376,6 +380,8 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     int imageResource = getResources().getIdentifier(uri, null, getPackageName());
                                     Drawable res = getResources().getDrawable(imageResource);
                                     mFavoritesImageView.setImageDrawable(res);
+                                    mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
+
 
                                     Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
                                             R.string.book_removed, Snackbar.LENGTH_LONG).setDuration(4000);

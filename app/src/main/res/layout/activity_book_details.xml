@@ -300,7 +300,6 @@
                     android:ellipsize="end"
                     android:maxLines="4"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:text="The book description goes on the back cover (for paperbacks) or the inside flap copy (for hard copies) and right below the price (on Amazon). It’s crucial that this short paragraph be right. There are so many examples of how book descriptions led to huge changes in sales, it’s incredible authors don’t spend more time getting it right. One of our favorite stories is Mark Edwards’ book, Killing Cupid."
                     android:textStyle="italic"
                     android:layout_marginBottom="20dp"/>
 

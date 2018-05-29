@@ -219,7 +219,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
 
         mSharedPreferencesManager = SharedPreferencesManager.getInstance(this);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        mUserRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
+        mUserRef = db.collection("users").document(mFirebaseAuth.getUid());
 
         mCurrentPhotoPath = mSharedPreferencesManager.getImage();
 

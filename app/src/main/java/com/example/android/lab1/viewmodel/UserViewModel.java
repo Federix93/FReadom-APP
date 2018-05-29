@@ -50,7 +50,6 @@ public class UserViewModel extends ViewModel {
                         @Override
                         public void run() {
                             User user = snapshot.toObject(User.class);
-                            user.setUserId(snapshot.getId());
                             userLiveData.postValue(user);
                         }
                     }).start();

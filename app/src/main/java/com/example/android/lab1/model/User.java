@@ -11,7 +11,6 @@ public class User implements Parcelable {
 
     private static User instance = null;
 
-    private String mUserId;
     private String mUsername;
     private String mEmail;
     private String mPhone;
@@ -88,7 +87,6 @@ public class User implements Parcelable {
     }
 
     private User(Parcel in) {
-        mUserId = in.readString();
         mUsername = in.readString();
         mEmail = in.readString();
         mPhone = in.readString();
@@ -110,7 +108,6 @@ public class User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mUserId);
         dest.writeString(mUsername);
         dest.writeString(mEmail);
         dest.writeString(mPhone);
@@ -120,13 +117,6 @@ public class User implements Parcelable {
         dest.writeFloat(mRating);
     }
 
-    public String getUserId() {
-        return mUserId;
-    }
-
-    public void setUserId(String mUserId) {
-        this.mUserId = mUserId;
-    }
 
     public static class Utils{
         public static final String USERNAME_KEY = "username";

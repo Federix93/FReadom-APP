@@ -15,6 +15,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.applandeo.materialcalendarview.CalendarView;
@@ -88,19 +89,18 @@ public class CalendarActivity extends AppCompatActivity {
                     // set the View for the AlertDialog
                     alertDialogBuilder.setView(mDialogView);
 
-                    AppCompatButton btnCancel  = mDialogView.findViewById(R.id.cancel_button_dialog);
+                    TextView btnCancel  = mDialogView.findViewById(R.id.cancel_button_dialog);
                     btnCancel.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             finish();
                         }
                     });
-                    AppCompatButton btnConfirm  = mDialogView.findViewById(R.id.confirm_button_dialog);
+                    TextView btnConfirm  = mDialogView.findViewById(R.id.confirm_button_dialog);
                     btnConfirm.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Snackbar mySnackbar = Snackbar.make(v.getRootView().findViewById(R.id.chat_layout_container),
-                                    "Prestito iniziato con successo", Snackbar.LENGTH_LONG).setDuration(4000);
+                            Snackbar mySnackbar = Snackbar.make(mDialogView,"Prestito iniziato con successo", Snackbar.LENGTH_LONG).setDuration(4000);
                             mySnackbar.show();
 
                             new Handler().postDelayed(new Runnable() {
@@ -110,7 +110,7 @@ public class CalendarActivity extends AppCompatActivity {
                                     result.putExtra(FIRST_DATE, mCalendar.getSelectedDates().get(0));
                                     if (mCalendar.getSelectedDates().size() > 1)
                                         result.putExtra(LAST_DATE, mCalendar.getSelectedDates().get(mCalendar.getSelectedDates().size() - 1));
-
+                                    startActivity(result);
                                     CalendarActivity.this.finish();
                                 }
                             }, 4000);

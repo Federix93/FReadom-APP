@@ -28,6 +28,7 @@ import com.example.android.lab1.ui.BookPhotoDetailActivity;
 import com.example.android.lab1.ui.ReviewListFragment;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
+import com.google.firebase.auth.FirebaseAuth;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -193,7 +194,7 @@ public class ProfileActivity extends AppCompatActivity {
         adapter.addFragment(new ProfileInfoFragment(), getResources().getString(R.string.profile_info_fragment));
 
         ReviewListFragment reviewListFragment = ReviewListFragment.Companion
-                .newInstance(mUser.getUserId());
+                .newInstance(FirebaseAuth.getInstance().getUid());
         adapter.addFragment(reviewListFragment, getResources().getString(R.string.profile_reviews_fragment));
         viewPager.setAdapter(adapter);
     }
