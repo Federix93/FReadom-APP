@@ -49,7 +49,9 @@ public class UserViewModel extends ViewModel {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            userLiveData.postValue(snapshot.toObject(User.class));
+                            User user = snapshot.toObject(User.class);
+                            user.setUserId(snapshot.getId());
+                            userLiveData.postValue(user);
                         }
                     }).start();
                 }else{

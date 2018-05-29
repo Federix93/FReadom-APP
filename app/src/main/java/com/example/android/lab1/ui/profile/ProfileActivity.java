@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.TabLayout;
@@ -12,7 +13,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,7 +28,6 @@ import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
-import static com.example.android.lab1.ui.profile.ProfileActivity.Constants.USER_ID;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -44,12 +43,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     public static User mUser;
     SharedPreferencesManager mSharedPreferencesManager;
-    private String mUserID;
-
-    public enum Constants
-    {
-        USER_ID
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -63,7 +56,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         Utilities.setupStatusBarColor(this);
         mUser = getIntent().getExtras().getParcelable("user");
-        mUserID = getIntent().getStringExtra(USER_ID.toString());
 
         mFt = getSupportFragmentManager();
 
@@ -186,12 +178,9 @@ public class ProfileActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(mFt);
         adapter.addFragment(new ProfileInfoFragment(), getResources().getString(R.string.profile_info_fragment));
-        // create reviews fragment
-        Bundle args = new Bundle();
-        args.putString(ReviewListFragment.Constants.REVIEWED_ID.toString(), mUserID);
 
-        ReviewListFragment reviewListFragment = ReviewListFragment.Companion.newInstance(mUserID);
-
+        ReviewListFragment reviewListFragment = ReviewListFragment.Companion
+                .newInstance(mUser.getUserId());
         adapter.addFragment(reviewListFragment, getResources().getString(R.string.profile_reviews_fragment));
         viewPager.setAdapter(adapter);
     }

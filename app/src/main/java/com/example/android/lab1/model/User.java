@@ -11,6 +11,7 @@ public class User implements Parcelable {
 
     private static User instance = null;
 
+    private String mUserId;
     private String mUsername;
     private String mEmail;
     private String mPhone;
@@ -86,16 +87,15 @@ public class User implements Parcelable {
         return 0;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-        dest.writeString(mUsername);
-        dest.writeString(mEmail);
-        dest.writeString(mPhone);
-        dest.writeString(mAddress);
-        dest.writeString(mImage);
-        dest.writeString(mShortBio);
-        dest.writeFloat(mRating);
+    private User(Parcel in) {
+        mUserId = in.readString();
+        mUsername = in.readString();
+        mEmail = in.readString();
+        mPhone = in.readString();
+        mAddress = in.readString();
+        mImage = in.readString();
+        mShortBio = in.readString();
+        mRating = in.readFloat();
     }
 
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
@@ -108,14 +108,24 @@ public class User implements Parcelable {
         }
     };
 
-    private User(Parcel in) {
-        mUsername = in.readString();
-        mEmail = in.readString();
-        mPhone = in.readString();
-        mAddress = in.readString();
-        mImage = in.readString();
-        mShortBio = in.readString();
-        mRating = in.readFloat();
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mUserId);
+        dest.writeString(mUsername);
+        dest.writeString(mEmail);
+        dest.writeString(mPhone);
+        dest.writeString(mAddress);
+        dest.writeString(mImage);
+        dest.writeString(mShortBio);
+        dest.writeFloat(mRating);
+    }
+
+    public String getUserId() {
+        return mUserId;
+    }
+
+    public void setUserId(String mUserId) {
+        this.mUserId = mUserId;
     }
 
     public static class Utils{
