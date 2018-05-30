@@ -104,7 +104,7 @@ public class BooksViewModel extends ViewModel {
                             Collections.sort(books, new Comparator<Book>() {
                                 @Override
                                 public int compare(Book o1, Book o2) {
-                                    return o1.getTimeInserted().compareTo(o2.getTimeInserted());
+                                    return o2.getTimeInserted().compareTo(o1.getTimeInserted());
                                 }
                             });
                             booksSecondRecyclerLiveData.postValue(books);
