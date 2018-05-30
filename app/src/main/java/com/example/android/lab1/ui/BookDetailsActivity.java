@@ -100,6 +100,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     FirebaseAuth mFirebaseAuth;
     RecyclerView mGalleryRecyclerView;
     TextView mBookPosition;
+    View mSeparatorDescriptionView;
 
     private User mUser;
     private Book mBook;
@@ -138,6 +139,8 @@ public class BookDetailsActivity extends AppCompatActivity {
         mFavoriteContainer = findViewById(R.id.add_to_favorite_container);
         mFavoriteText = findViewById(R.id.add_to_favorite_text);
         mBookPosition = findViewById(R.id.book_position);
+        mSeparatorDescriptionView = findViewById(R.id.separator_view_description);
+
         mSelf = this;
 
         if(getIntent().getExtras() != null) {
@@ -238,9 +241,10 @@ public class BookDetailsActivity extends AppCompatActivity {
             mPublicationDateTextView.setText(String.valueOf(mBook.getPublishYear()));
         if (mBook.getDescription() != null)
             mBookDescription.setText(mBook.getDescription());
-        else
+        else {
+            mSeparatorDescriptionView.setVisibility(GONE);
             mBookDescriptionLayout.setVisibility(GONE);
-        if (mBook.getGeoPoint() != null) {
+        }if (mBook.getGeoPoint() != null) {
         Location location = new Location("location");
         location.setLongitude(mBook.getGeoPoint().getLongitude());
         location.setLatitude(mBook.getGeoPoint().getLatitude());
@@ -265,11 +269,6 @@ public class BookDetailsActivity extends AppCompatActivity {
             Glide.with(this).load(R.drawable.book_thumbnail_placeholder)
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
-
-        String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
-        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-        Drawable res = getResources().getDrawable(imageResource);
-        mFavoritesImageView.setImageDrawable(res);
 
         // storage photos
         if (mGalleryRecyclerView != null) {

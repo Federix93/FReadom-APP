@@ -152,6 +152,7 @@
     <string name="ok">OK</string>
     <string name="choose_end_date">Seleziona data fine prestito</string>
     <string name="confirm_date">Conferma data</string>
+    <string name="loan_successfully_done">Prestito iniziato con successo</string>
 
     <string name="click_position_button">Aggiungi posizione</string>
     <string name="select_genres">Selezionare i generi che si vogliono visualizzare</string>

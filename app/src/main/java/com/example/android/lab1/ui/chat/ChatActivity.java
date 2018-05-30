@@ -1,11 +1,13 @@
 package com.example.android.lab1.ui.chat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -22,6 +24,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -40,6 +43,7 @@ import com.example.android.lab1.adapter.ChatMessageAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.CalendarActivity;
+import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.ui.profile.EditProfileActivity;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -109,6 +113,7 @@ public class ChatActivity extends AppCompatActivity {
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
     String mPhotoPath;
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -256,9 +261,22 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                Boolean startLoan = true;
-                intent.putExtra("start_loan", startLoan);
-                startActivity(intent);
+                startActivityForResult(intent, CalendarActivity.CHOOSE_DATE);
+            }
+        });
+        mInfoLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
+                alertDialog.setTitle("Info");
+                alertDialog.setMessage("Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l'utente premi il pulsante \"Inizia prestito\"");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
             }
         });
     }
@@ -411,7 +429,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Uri photoUri = null;
         switch (requestCode) {
@@ -426,6 +444,34 @@ public class ChatActivity extends AppCompatActivity {
                     mPhotoPath = mPhotoFile.getAbsolutePath();
                     photoUri = Uri.fromFile(mPhotoFile.getAbsoluteFile());
                 }
+                break;
+            case CalendarActivity.CHOOSE_DATE:
+                if (resultCode == RESULT_OK && data != null) {
+                    Log.d("TAGGA", "onActivityResult: ");
+                    long firstDate = 0;
+                    long lastDate = 0;
+                    if (data.getExtras().getLong(CalendarActivity.FIRST_DATE) != 0 && data.getExtras().getLong(CalendarActivity.LAST_DATE) != 0) {
+                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                        intent.putExtra(CalendarActivity.FIRST_DATE, firstDate);
+                        intent.putExtra(CalendarActivity.LAST_DATE, lastDate);
+                        startActivity(intent);
+                        finish();
+                    }
+                    new CountDownTimer(200, 1000) {
+
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+
+                        }
+
+                        @Override
+                        public void onFinish() {
+
+                        }
+                    }.start();
+                }
+                break;
+            default:
                 break;
         }
 
