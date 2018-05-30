@@ -8,6 +8,7 @@ import android.util.Log;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +38,7 @@ public class Book implements Parcelable, Comparable<Book> {
     private String mAuthors;
     private String mPublisher;
     private Integer mPublishYear;
-    private int mCondition;
+    private Integer mCondition;
     private String mAddress;
     private GeoPoint mGeoPoint;
     private String mUid; // user id
@@ -46,24 +47,41 @@ public class Book implements Parcelable, Comparable<Book> {
     private String mSearchTags;
     private Long mLoanStart;
     private Long mLoanEnd;
-    private int mGenre;
+    private Integer mGenre;
     private String mInfoLink;
     private @ServerTimestamp
     Date mTimeInserted;
     private String mDescription;
-    private boolean mIsAlreadyLent;
+    private String mLentTo;
     private String mBookID;
+
+    public Book(Book toBeCopied) {
+        setTitle(toBeCopied.getTitle());
+        setIsbn(toBeCopied.getIsbn());
+        setAuthors(toBeCopied.getAuthors());
+        setPublisher(toBeCopied.getPublisher());
+        setPublishYear(toBeCopied.getPublishYear());
+        setCondition(toBeCopied.getCondition());
+        setAddress(toBeCopied.getAddress());
+        setGeoPoint(toBeCopied.getGeoPoint());
+        setUid(toBeCopied.getUid());
+        setWebThumbnail(toBeCopied.getWebThumbnail());
+        setUserBookPhotosStoragePath(new ArrayList<>(toBeCopied.getUserBookPhotosStoragePath()));
+        setTags(toBeCopied.getTags());
+        setLoanStart(toBeCopied.getLoanStart());
+        setLoanEnd(toBeCopied.getLoanEnd());
+        setGenre(toBeCopied.getGenre());
+        setInfoLink(toBeCopied.getInfoLink());
+        setTimeInserted(toBeCopied.getTimeInserted());
+        setDescription(toBeCopied.getDescription());
+        setLentTo(toBeCopied.getLentTo());
+        setBookID(toBeCopied.getBookID());
+    }
 
     public Book() {
     }
 
-    public boolean isAlreadyLent() {
-        return mIsAlreadyLent;
-    }
 
-    public void setIsAlreadyLent(boolean isAlreadyLent) {
-        this.mIsAlreadyLent = isAlreadyLent;
-    }
 
     public String getWebThumbnail() {
         return mWebThumbnail;
@@ -113,11 +131,57 @@ public class Book implements Parcelable, Comparable<Book> {
         mPublishYear = publishYear;
     }
 
-    public int getCondition() {
+    @SuppressWarnings("unchecked")
+    protected Book(Parcel in) {
+        mDescription = in.readString();
+        mIsbn = in.readString();
+        Log.d("LULLO", "ISBN ON READ: " + mIsbn);
+        mTitle = in.readString();
+        Log.d("LULLO", "Title ON READ: " + mTitle);
+        mBookPhotosPaths = in.readArrayList(String.class.getClassLoader());
+        Log.d("LULLO", "LIST ON READ: " + mBookPhotosPaths.size());
+        mWebThumbnail = in.readString();
+        Log.d("LULLO", "WTHUMB ON READ: " + mWebThumbnail);
+        mUid = in.readString();
+        Log.d("LULLO", "UID ON READ: " + mUid);
+        mAddress = in.readString();
+        Log.d("LULLO", "ADDRESS ON READ: " + mAddress);
+        mPublisher = in.readString();
+        Log.d("LULLO", "PUBLISHER ON READ: " + mPublisher);
+        mAuthors = in.readString();
+        Log.d("LULLO", "AUTHORS ON READ: " + mAuthors);
+        mGeoPoint = new GeoPoint(in.readDouble(), in.readDouble());
+        mPublishYear = in.readInt();
+        Log.d("LULLO", "PUBLISHYEAR ON READ: " + mPublishYear);
+        mLoanStart = in.readLong();
+        Log.d("LULLO", "LOAN START ON READ: " + mLoanStart);
+        mLoanEnd = in.readLong();
+        Log.d("LULLO", "LOAN END ON READ: " + mLoanEnd);
+        mInfoLink = in.readString();
+        Log.d("LULLO", "INFO LINK ON READ: " + mInfoLink);
+        Long time = in.readLong();
+        if (time != DEFAULT_VALUE_INT) {
+            Date d = new Date();
+            d.setTime(time);
+            mTimeInserted = d;
+        } else
+            mTimeInserted = null;
+        Log.d("LULLO", "TimeINS ON READ: " + mTimeInserted);
+        mSearchTags = in.readString();
+        Log.d("LULLO", "TAGS ON READ: " + mSearchTags);
+        mCondition = (Integer) in.readValue(Integer.class.getClassLoader());
+        Log.d("LULLO", "CONDITION ON READ: " + mCondition);
+        mGenre = (Integer) in.readValue(Integer.class.getClassLoader());
+        Log.d("LULLO", "GENRE ON READ: " + mGenre);
+        mBookID = in.readString();
+        Log.d("LULLO", "BOOOKID ON READ: " + mBookID);
+    }
+
+    public Integer getCondition() {
         return mCondition;
     }
 
-    public void setCondition(int condition) {
+    public void setCondition(Integer condition) {
         mCondition = condition;
     }
 
@@ -130,7 +194,7 @@ public class Book implements Parcelable, Comparable<Book> {
     }
 
     public List<String> getUserBookPhotosStoragePath() {
-        return null;
+        return mBookPhotosPaths;
     }
 
     public void setUserBookPhotosStoragePath(ArrayList<String> mUserBookPhotosWebStoragePath) {
@@ -176,57 +240,11 @@ public class Book implements Parcelable, Comparable<Book> {
         this.mBookID = bookID;
     }
 
-    @SuppressWarnings("unchecked")
-    protected Book(Parcel in) {
-        mDescription = in.readString();
-        mIsbn = in.readString();
-        Log.d("LULLO", "ISBN ON READ: " + mIsbn);
-        mTitle = in.readString();
-        Log.d("LULLO", "Title ON READ: " + mTitle);
-        mBookPhotosPaths = in.readArrayList(String.class.getClassLoader());
-        Log.d("LULLO", "LIST ON READ: " + mBookPhotosPaths.size());
-        mWebThumbnail = in.readString();
-        Log.d("LULLO", "WTHUMB ON READ: " + mWebThumbnail);
-        mUid = in.readString();
-        Log.d("LULLO", "UID ON READ: " + mUid);
-        mAddress = in.readString();
-        Log.d("LULLO", "ADDRESS ON READ: " + mAddress);
-        mPublisher = in.readString();
-        Log.d("LULLO", "PUBLISHER ON READ: " + mPublisher);
-        mAuthors = in.readString();
-        Log.d("LULLO", "AUTHORS ON READ: " + mAuthors);
-        mGeoPoint = new GeoPoint(in.readDouble(), in.readDouble());
-        mPublishYear = in.readInt();
-        Log.d("LULLO", "PUBLISHYEAR ON READ: " + mPublishYear);
-        mLoanStart = in.readLong();
-        Log.d("LULLO", "LOAN START ON READ: " + mLoanStart);
-        mLoanEnd = in.readLong();
-        Log.d("LULLO", "LOAN END ON READ: " + mLoanEnd);
-        mInfoLink = in.readString();
-        Log.d("LULLO", "INFO LINK ON READ: " + mInfoLink);
-        Long time = in.readLong();
-        if (time != DEFAULT_VALUE_INT) {
-            Date d = new Date();
-            d.setTime(time);
-            mTimeInserted = d;
-        } else
-            mTimeInserted = null;
-        Log.d("LULLO", "TimeINS ON READ: " + mTimeInserted);
-        mSearchTags = in.readString();
-        Log.d("LULLO", "TAGS ON READ: " + mSearchTags);
-        mCondition = in.readInt();
-        Log.d("LULLO", "CONDITION ON READ: " + mCondition);
-        mGenre = in.readInt();
-        Log.d("LULLO", "GENRE ON READ: " + mGenre);
-        mBookID = in.readString();
-        Log.d("LULLO", "BOOOKID ON READ: " + mBookID);
-    }
-
-    public int getGenre() {
+    public Integer getGenre() {
         return mGenre;
     }
 
-    public void setGenre(int genre) {
+    public void setGenre(Integer genre) {
         this.mGenre = genre;
     }
 
@@ -333,9 +351,9 @@ public class Book implements Parcelable, Comparable<Book> {
             dest.writeString(mSearchTags);
         else
             dest.writeString(DEFAULT_VALUE_STRING);
-        dest.writeInt(mCondition);
+        dest.writeValue(mCondition);
         Log.d("LULLO", "CONDITION ON WRITE: " + mCondition);
-        dest.writeInt(mGenre);
+        dest.writeValue(mGenre);
         dest.writeString(mBookID);
 
     }
@@ -378,5 +396,27 @@ public class Book implements Parcelable, Comparable<Book> {
 
     public void setDescription(String description) {
         this.mDescription = description;
+    }
+
+    public void nullifyInvalidStrings() {
+        for (Field field : this.getClass().getDeclaredFields()) {
+            if (field.getType().isAssignableFrom(String.class)) {
+                try {
+                    String o = (String) field.get(this);
+                    if (o != null && o.equals(""))
+                        field.set(this, null);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public String getLentTo() {
+        return mLentTo;
+    }
+
+    public void setLentTo(String mLentTo) {
+        this.mLentTo = mLentTo;
     }
 }
