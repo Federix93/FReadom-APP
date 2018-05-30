@@ -61,6 +61,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 
@@ -105,6 +106,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     private User mUser;
     private Book mBook;
+    private ListenerRegistration mListenerRegistration;
 
     private GeoCodingTask mCurrentlyExecuting;
     private Location mCurrentlyResolving;
@@ -198,9 +200,16 @@ public class BookDetailsActivity extends AppCompatActivity {
             }
         });
 
+
+        updateUI();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         if (mFirebaseAuth.getUid() != null) {
             DocumentReference doc = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
-            doc.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+            mListenerRegistration = doc.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
                 @Override
                 public void onEvent(@javax.annotation.Nullable DocumentSnapshot snapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     if (snapshot != null) {
@@ -221,7 +230,13 @@ public class BookDetailsActivity extends AppCompatActivity {
                 }
             });
         }
-        updateUI();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mListenerRegistration != null)
+            mListenerRegistration.remove();
     }
 
     private void updateUI() {
