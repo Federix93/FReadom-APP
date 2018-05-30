@@ -973,17 +973,19 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
+                            if (!Utilities.isOnline(getApplicationContext()))
+                                Toast.makeText(LoadBookActivity.this,
+                                        R.string.no_internet_connection,
+                                        Toast.LENGTH_SHORT).show();
                             LoadBookActivity.this.setUploading(false);
-                            ArrayList<String> remove = new ArrayList<>();
                             for (String s : mResultBook.getUserBookPhotosStoragePath()) {
                                 if (!mBeforeEditBook.getUserBookPhotosStoragePath()
                                         .contains(s))
                                     // remove new photos
                                     FirebaseStorage.getInstance()
                                             .getReferenceFromUrl(s).delete();
-                                else
-                                    remove.add(s);
                             }
+                            finish();
                         }
                     });
 
