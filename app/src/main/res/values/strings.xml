@@ -248,4 +248,7 @@
     <string name="select_genre">Selezionare il genere del libro</string>
     <string name="insert_position">Aggiungere una posizione</string>
     <string name="insert_photo">Inserire almeno una foto del libro</string>
+    <string name="modify_book">Modifica libro</string>
+    <string name="photo_detail">Dettaglio foto</string>
+    <string name="max_photos">Raggiunto limite massimo foto</string>
 </resources>

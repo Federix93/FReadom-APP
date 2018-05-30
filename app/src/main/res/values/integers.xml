@@ -6,4 +6,5 @@
     <integer name="homepage_recycler_view_animation_duration">400</integer>
     <integer name="reviews_per_page">20</integer>
     <integer name="max_authors">5</integer>
+    <integer name="max_photos">5</integer>
 </resources>

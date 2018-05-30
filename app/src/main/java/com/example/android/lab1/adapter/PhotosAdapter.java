@@ -11,13 +11,19 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.example.android.lab1.R;
+import com.example.android.lab1.ui.listeners.OnPhotoClickListenerDefaultImpl;
 
 import java.util.List;
 
 public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.PhotosViewHolder> {
 
-    List<String> mPhotosPaths;
+    private List<String> mPhotosPaths;
     private Context mContext;
+    private OnPhotoClickListenerDefaultImpl mPhotoClickListener;
+
+    public void setPhotoClickListener(OnPhotoClickListenerDefaultImpl mPhotoClickListener) {
+        this.mPhotoClickListener = mPhotoClickListener;
+    }
 
     public PhotosAdapter(List<String> model) {
         mPhotosPaths = model;
@@ -56,7 +62,10 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.PhotosView
             mPhotoImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO open photo gallery activity
+                    int adapterPosition = getAdapterPosition();
+                    if (mPhotoClickListener != null) {
+                        mPhotoClickListener.onPhotoClicked(adapterPosition);
+                    }
                 }
             });
             mRemovePhotoButton.setOnClickListener(new View.OnClickListener() {

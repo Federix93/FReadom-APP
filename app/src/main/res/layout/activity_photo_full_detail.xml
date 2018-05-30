@@ -20,13 +20,23 @@
     <android.support.v4.view.ViewPager
         android:id="@+id/image_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
 
     <LinearLayout
-        android:id="@+id/image_dots"
-            android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/image_dots"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="horizontal" />
+            android:layout_marginEnd="@dimen/activity_load_book_content_padding"
+            android:layout_marginStart="@dimen/activity_load_book_content_padding"
+            android:orientation="horizontal" />
+
+    </LinearLayout>
+
 
 </android.support.design.widget.CoordinatorLayout>

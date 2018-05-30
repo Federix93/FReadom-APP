@@ -14,7 +14,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
@@ -42,18 +41,12 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.android.SphericalUtil;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static com.example.android.lab1.utils.Constants.SCAN_REQUEST_TAG;
@@ -187,17 +180,6 @@ public abstract class Utilities {
         activity.startActivityForResult(i, SCAN_REQUEST_TAG);
     }
 
-    public static File saveThumbnail(Context c) throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = c.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-    }
-
     public static String getSha1Hex(String clearString) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
@@ -312,7 +294,7 @@ public abstract class Utilities {
         out = new ByteArrayOutputStream();
         if (rotationAngle > 0) {
             Matrix m = new Matrix();
-            m.postRotate(90);
+            m.postRotate(rotationAngle);
             compressedRotated = Bitmap.createBitmap(bitmap,
                     0,
                     0,
@@ -349,11 +331,6 @@ public abstract class Utilities {
         return (rad * 180.0 / Math.PI);
     }
 
-    @Nullable
-    public static Intent getUserReviewsIntent(@NotNull Activity currentActivity,
-                                              @NotNull String reviewedId) {
-        return null;
-    }
 
     private GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
 
@@ -373,13 +350,3 @@ public abstract class Utilities {
         return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
     }
 }
-
-
-//    if (ContextCompat.checkSelfPermission(getApplicationContext(),
-//    Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-//        startBarCodeScanner();
-//    } else {
-//        ActivityCompat.requestPermissions(thisActivity,
-//                new String[]{Manifest.permission.CAMERA},
-//                SCAN_REQUEST_TAG);
-//    }

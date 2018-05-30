@@ -14,14 +14,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -32,12 +30,6 @@ import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.IOException;
 import java.util.List;
@@ -182,6 +174,17 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
                 mGalleryLayout.setVisibility(GONE);
             }
         }
+
+        mEditButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(BookDetailsLibraryActivity.this,
+                        LoadBookActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                i.putExtra(LoadBookActivity.Keys.BOOK.toString(), mBook);
+                startActivity(i);
+            }
+        });
 
         mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
             @Override

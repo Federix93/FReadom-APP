@@ -1,8 +1,8 @@
 package com.example.android.lab1.ui;
 
+import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
@@ -11,18 +11,16 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.Snackbar;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,7 +35,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ImageGalleryAdapter;
-import com.example.android.lab1.model.Address;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.Condition;
@@ -48,25 +45,18 @@ import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.OpenedChatViewModel;
 import com.example.android.lab1.viewmodel.UserViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
-import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import com.google.firebase.firestore.GeoPoint;
 
 import static android.view.View.GONE;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -178,7 +168,7 @@ public class BookDetailsActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
             finish();
         }
-        if(mBook.isAlreadyLent()){
+        if (mBook.getLentTo() != null) {
             mBookButton.setText(getResources().getString(R.string.book_not_available));
             mBookButton.setEnabled(false);
         }
