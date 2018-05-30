@@ -57,7 +57,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
@@ -198,11 +200,11 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         if (mFirebaseAuth.getUid() != null) {
             DocumentReference doc = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
-            doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            doc.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
                 @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    if (documentSnapshot != null)
-                        if (documentSnapshot.exists()) {
+                public void onEvent(@javax.annotation.Nullable DocumentSnapshot snapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    if (snapshot != null) {
+                        if (snapshot.exists()) {
                             mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
                             String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
                             int imageResource = getResources().getIdentifier(uri, null, getPackageName());
@@ -215,6 +217,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                             mFavoritesImageView.setImageDrawable(res);
                             mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
                         }
+                    }
                 }
             });
         }
@@ -265,11 +268,6 @@ public class BookDetailsActivity extends AppCompatActivity {
             Glide.with(this).load(R.drawable.book_thumbnail_placeholder)
                     .apply(new RequestOptions().centerCrop())
                     .into(mBookThumbnailImageView);
-
-        String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
-        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-        Drawable res = getResources().getDrawable(imageResource);
-        mFavoritesImageView.setImageDrawable(res);
 
         // storage photos
         if (mGalleryRecyclerView != null) {
@@ -391,21 +389,14 @@ public class BookDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (mFirebaseAuth.getUid() != null) {
-                    DocumentReference documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+                    final DocumentReference documentReference = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
                     documentReference.get().addOnSuccessListener(BookDetailsActivity.this, new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot snapshot) {
                             if(snapshot != null) {
                                 Log.d("LULLO", "SNAPSHOT != null");
                                 if (snapshot.exists()) {
-                                    Log.d("LULLO", "SNAPSHOT EXISTS");
-                                    String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
-                                    int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-                                    Drawable res = getResources().getDrawable(imageResource);
-                                    mFavoritesImageView.setImageDrawable(res);
-                                    mFavoriteText.setText(getResources().getString(R.string.add_to_favorite));
-
-
+                                    documentReference.delete();
                                     Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
                                             R.string.book_removed, Snackbar.LENGTH_LONG).setDuration(4000);
                                     mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
@@ -418,11 +409,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     });
                                     mySnackbar.show();
                                 } else {
-                                    Log.d("LULLO", "SNAPSHOT !EXISTS");
                                     addBookToFavorite();
                                 }
                             } else{
-                                Log.d("LULLO", "SNAPSHOT == null");
                                 addBookToFavorite();
                             }
                         }
@@ -437,11 +426,6 @@ public class BookDetailsActivity extends AppCompatActivity {
     private void addBookToFavorite(){
         final DocumentReference reqDocRef = mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
         reqDocRef.set(mBook, SetOptions.merge());
-        mFavoriteText.setText(getResources().getString(R.string.remove_from_favorites));
-        String uri = "@drawable/ic_favorite_orange_24dp";  // where myresource (without the extension) is the file
-        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-        Drawable res = getResources().getDrawable(imageResource);
-        mFavoritesImageView.setImageDrawable(res);
 
         Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
                 R.string.book_added, Snackbar.LENGTH_LONG).setDuration(4000);
