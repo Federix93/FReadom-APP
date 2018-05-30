@@ -4,7 +4,9 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.User;
+import com.google.firebase.firestore.GeoPoint;
 
 public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
@@ -14,10 +16,13 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
      */
 
     private String[] params;
+    private GeoPoint geoPoint;
 
     public ViewModelFactory(String...  params) {
         this.params = params;
     }
+
+    public ViewModelFactory(GeoPoint geoPoint) { this.geoPoint = geoPoint; }
 
     @NonNull
     @Override
@@ -31,6 +36,8 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
         }else if(modelClass == UserRealtimeDBViewModel.class){
             return (T) new UserRealtimeDBViewModel(params[0]);
         }else if(modelClass == BooksViewModel.class){
+            if(geoPoint != null)
+                return (T) new BooksViewModel(geoPoint);
             if(params.length > 0)
                 return (T) new BooksViewModel(params[0]);
             else
