@@ -82,7 +82,7 @@ public class RecyclerReqReceivedAdapter extends RecyclerView.Adapter<RecyclerReq
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ConversationsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("ID_BOOK_SELECTED", book.getBookID());
+                    intent.putExtra("BOOK_SELECTED", book);
                     v.getContext().startActivity(intent);
                 }
             });

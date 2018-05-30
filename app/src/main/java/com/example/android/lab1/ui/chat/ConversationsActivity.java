@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.utils.Utilities;
@@ -47,7 +48,7 @@ import javax.annotation.Nullable;
 public class ConversationsActivity extends AppCompatActivity {
 
     Toolbar mToolbar;
-    String mBookID;
+    Book mBook;
     RecyclerView mRecyclerView;
     private RecyclerConversationAdapter mAdapter;
     private ShimmerFrameLayout mShimmerViewContainer;
@@ -59,7 +60,7 @@ public class ConversationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversations);
 
-        mBookID = getIntent().getStringExtra("ID_BOOK_SELECTED");
+        mBook = getIntent().getExtras().getParcelable("BOOK_SELECTED");
         Utilities.setupStatusBarColor(this);
         mToolbar = findViewById(R.id.toolbar_conversations_activity);
         mToolbar.setTitle(R.string.conversations_title);
@@ -79,7 +80,7 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
-        mAdapter = new RecyclerConversationAdapter(mBookID);
+        mAdapter = new RecyclerConversationAdapter(mBook);
         mRecyclerView.setAdapter(mAdapter);
 
         final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -87,7 +88,7 @@ public class ConversationsActivity extends AppCompatActivity {
 
         if (firebaseAuth != null) {
 
-            ConversationsViewModel conversationsViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBookID)).get(ConversationsViewModel.class);
+            ConversationsViewModel conversationsViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBook.getBookID())).get(ConversationsViewModel.class);
             conversationsViewModel.getSnapshotLiveData().observe(this, new Observer<DataSnapshot>() {
                         @Override
                         public void onChanged(@android.support.annotation.Nullable DataSnapshot dataSnapshot) {

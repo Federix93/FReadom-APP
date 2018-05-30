@@ -40,6 +40,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.CalendarActivity;
@@ -86,7 +87,8 @@ public class ChatActivity extends AppCompatActivity {
     String mChatID;
     String mUsername;
     String mPhotoProfileURL;
-    String mBookID;
+    Book mBook;
+    String mSenderUID;
 
     RecyclerView mMessagesRecyclerView;
     EditText mMessageEditText;
@@ -144,10 +146,10 @@ public class ChatActivity extends AppCompatActivity {
         mChatID = getIntent().getStringExtra("ChatID");
         mUsername = getIntent().getStringExtra("Username");
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
-        mBookID = getIntent().getStringExtra("BookID");
-        String senderUID = getIntent().getStringExtra("SenderUID");
+        mBook = getIntent().getExtras().getParcelable("Book");
+        mSenderUID = getIntent().getStringExtra("SenderUID");
 
-        if (senderUID != null && !senderUID.equals(mFirebaseAuth.getUid()))
+        if (mSenderUID != null && !mSenderUID.equals(mFirebaseAuth.getUid()))
             mChatsReference.child(mChatID).child("counter").setValue(0);
 
         mToolbar = findViewById(R.id.toolbar_chat_activity);
@@ -198,7 +200,7 @@ public class ChatActivity extends AppCompatActivity {
                     dbRef.removeEventListener(this);
 
                 } else {
-                    mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    mConversationsReference.child(mBook.getBookID()).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (mFirebaseAuth.getUid().equals(dataSnapshot.getValue())) {
@@ -447,13 +449,21 @@ public class ChatActivity extends AppCompatActivity {
                 break;
             case CalendarActivity.CHOOSE_DATE:
                 if (resultCode == RESULT_OK && data != null) {
-                    Log.d("TAGGA", "onActivityResult: ");
                     long firstDate = 0;
                     long lastDate = 0;
+                    Log.d("VINCI", "FIRST LONG: " + data.getExtras().getLong(CalendarActivity.FIRST_DATE));
+                    Log.d("VINCI", "LAST LONG: " + data.getExtras().getLong(CalendarActivity.LAST_DATE));
+                    Log.d("VINCI", "BOOK " + mBook.getBookID());
+                    Log.d("VINCI", "SENDERID " + mSenderUID);
                     if (data.getExtras().getLong(CalendarActivity.FIRST_DATE) != 0 && data.getExtras().getLong(CalendarActivity.LAST_DATE) != 0) {
+                        Log.d("VINCI", "ci entro2 ?");
+                        firstDate = data.getExtras().getLong(CalendarActivity.FIRST_DATE);
+                        lastDate = data.getExtras().getLong(CalendarActivity.LAST_DATE);
                         Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                         intent.putExtra(CalendarActivity.FIRST_DATE, firstDate);
                         intent.putExtra(CalendarActivity.LAST_DATE, lastDate);
+                        intent.putExtra("Book", mBook);
+                        intent.putExtra("SenderID", mSenderUID);
                         startActivity(intent);
                         finish();
                     }

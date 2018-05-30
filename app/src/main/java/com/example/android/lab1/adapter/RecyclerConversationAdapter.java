@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
@@ -36,14 +37,14 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     private Map<String, User> mMap;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mChatsReference;
-    private String mBookID;
+    private Book mBook;
     private String mSenderUID;
 
-    public RecyclerConversationAdapter(String bookID){
+    public RecyclerConversationAdapter(Book book){
         mMap = new HashMap<>();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mChatsReference = mFirebaseDatabase.getReference().child("chats");
-        mBookID = bookID;
+        mBook = book;
     }
 
     public void setItems(String chatID, User user){
@@ -143,7 +144,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     intent.putExtra("ChatID", chatID);
                     intent.putExtra("Username", user.getUsername());
                     intent.putExtra("ImageURL", user.getPhotoURL());
-                    intent.putExtra("BookID", mBookID);
+                    intent.putExtra("Book", mBook);
                     intent.putExtra("SenderUID", mSenderUID);
                     v.getContext().startActivity(intent);
                 }

@@ -20,6 +20,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,7 +36,9 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.FavoriteBooksActivity;
 import com.example.android.lab1.ui.LoadBookActivity;
 import com.example.android.lab1.ui.profile.ProfileActivity;
@@ -46,6 +49,7 @@ import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.UserViewModel;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
@@ -55,6 +59,9 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.Date;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -63,11 +70,14 @@ public class HomePageActivity extends AppCompatActivity
 
     AHBottomNavigation mBottomNavigation;
 
+    FirebaseFirestore mFirebaseFirestore;
+
     ImageView mProfileImage;
     TextView mUsernameTextView;
     TextView mEmailTextView;
     LinearLayout mSideNavLinearLayout;
     private User mUser;
+    private Book mBook;
 
     private static final int HOME_FRAGMENT = 0;
     private static final int YOUR_LIBRARY_FRAGMENT = 1;
@@ -109,11 +119,11 @@ public class HomePageActivity extends AppCompatActivity
         mFAB = findViewById(R.id.floating_action_button_library);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build();
-        firebaseFirestore.setFirestoreSettings(settings);
+        mFirebaseFirestore.setFirestoreSettings(settings);
         if (mFirebaseAuth.getCurrentUser() != null) {
             UserViewModel userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
             final LiveData<User> liveData = userViewModel.getSnapshotLiveData();
@@ -166,6 +176,47 @@ public class HomePageActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+
+        long firstDate = 0;
+        long lastDate = 0;
+        String senderID = null;
+        Log.d("VINCI", "FIRST LONG: " + getIntent().getLongExtra(CalendarActivity.FIRST_DATE, 0));
+        Log.d("VINCI", "LAST LONG: " + getIntent().getLongExtra(CalendarActivity.LAST_DATE, 0));
+        Log.d("VINCI", "BOOK " + getIntent().getExtras().getParcelable("Book"));
+        Log.d("VINCI", "SENDERID " + getIntent().getStringExtra("SenderID"));
+
+        if (getIntent().getLongExtra(CalendarActivity.FIRST_DATE, 0) != 0 &&
+                getIntent().getLongExtra(CalendarActivity.LAST_DATE, 0) != 0 &&
+                getIntent().getExtras().getParcelable("Book") != null &&
+                getIntent().getStringExtra("SenderID") != null) {
+
+            firstDate = getIntent().getExtras().getLong(CalendarActivity.FIRST_DATE);
+            lastDate = getIntent().getExtras().getLong(CalendarActivity.LAST_DATE);
+            mBook = getIntent().getExtras().getParcelable("Book");
+            senderID = getIntent().getStringExtra("SenderID");
+
+            mBook.setIsAlreadyLent(true);
+            mBook.setLoanStart(firstDate);
+            mBook.setLoanEnd(lastDate);
+
+            final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBook.getUid())
+                    .collection(senderID).document(mBook.getBookID());
+            docLoanRef.set(mBook, SetOptions.merge());
+            final DocumentReference docBorrowedRef = mFirebaseFirestore.collection("borrowed").document(senderID)
+                    .collection("books").document(mBook.getBookID());
+            docBorrowedRef.set(mBook, SetOptions.merge());
+
+            final DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(mBook.getBookID());
+            docBookRef.update("alreadyLent", "true", "loanEnd", lastDate, "loanStart", firstDate);
+
+            mBottomNavigationViewPager.setCurrentItem(LOANS_FRAGMENT, false);
+            mBottomNavigationViewPager.setOffscreenPageLimit(4);
+            mFragmentAdapter = new FragmentAdapter(getSupportFragmentManager());
+            mBottomNavigationViewPager.setAdapter(mFragmentAdapter);
+
+            mCurrentFragment = mFragmentAdapter.getCurrentFragment();
+
+        }
 
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override

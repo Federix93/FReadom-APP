@@ -14,6 +14,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -104,10 +105,11 @@ public class CalendarActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             final Intent result = new Intent();
+                            long lastDate = 0;
                             long firstDate = mCalendar.getSelectedDates().get(0).getTimeInMillis();
                             result.putExtra(FIRST_DATE, firstDate);
                             if (mCalendar.getSelectedDates().size() > 1) {
-                                long lastDate = mCalendar.getSelectedDates().get(mCalendar.getSelectedDates().size() - 1).getTimeInMillis();
+                                lastDate = mCalendar.getSelectedDates().get(mCalendar.getSelectedDates().size() - 1).getTimeInMillis();
                                 result.putExtra(LAST_DATE, lastDate);
                             }
                             setResult(RESULT_OK, result);
