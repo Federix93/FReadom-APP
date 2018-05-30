@@ -12,10 +12,14 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.searchbooks.BookSearchItem;
 import com.example.android.lab1.utils.Utilities;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -116,11 +120,21 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
         }
 
         @Override
-        public void onClick(View v) {
-            Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            intent.putExtra("ID_BOOK_SELECTED", mBookId);
-            v.getContext().startActivity(intent);
+        public void onClick(final View v) {
+
+            FirebaseFirestore.getInstance().collection("books").document(mBookId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                    Book clickedBook = documentSnapshot.toObject(Book.class);
+                    Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("BookSelected", clickedBook);
+                    v.getContext().startActivity(intent);
+
+                }
+            });
+
         }
     }
 
