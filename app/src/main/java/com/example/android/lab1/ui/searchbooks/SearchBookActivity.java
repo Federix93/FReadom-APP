@@ -697,7 +697,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private void fadeOutViews(final View vOut1, final View vOut2, final View vOut3, final View vIn1, final View vIn2, final View vIn3) {
 
         Log.d("GNIPPO", "Al fadeOut sono stati passati:");
-        Log.d("GNIPPO", "vOut1= "+((TextView)vOut1).getText());
+//        Log.d("GNIPPO", "vOut1= "+((TextView)vOut1).getText());
         if(vOut2 != null)
             Log.d("GNIPPO", "vOut2= "+((TextView)vOut2).getText());
         else
@@ -707,7 +707,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         else
             Log.d("GNIPPO", "vOut3= null");
 
-        Log.d("GNIPPO", "vIn1= "+((TextView)vIn1).getText());
+//        Log.d("GNIPPO", "vIn1= "+((TextView)vIn1).getText());
         if(vIn2 != null)
             Log.d("GNIPPO", "vIn2= "+((TextView)vIn2).getText());
         else
@@ -765,7 +765,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        Log.d("GNIPPO", "V1GONE-> "+((TextView)vOut1).getText());
+//                        Log.d("GNIPPO", "V1GONE-> "+((TextView)vOut1).getText());
                         vOut1.setVisibility(View.GONE);
                         if (vOut2 == null)
                             fadeInViews(vIn1, vIn2, vIn3);
@@ -775,7 +775,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private void fadeInViews(final View v1, final View v2, final View v3) {
         v1.setAlpha(0f);
-        Log.d("GNIPPO", "V1VISIBLE-> "+((TextView)v1).getText());
+//        Log.d("GNIPPO", "V1VISIBLE-> "+((TextView)v1).getText());
         v1.setVisibility(View.VISIBLE);
 
         v1.animate()

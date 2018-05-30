@@ -32,6 +32,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.algolia.search.saas.AbstractQuery;
+import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
 import com.example.android.lab1.R;
@@ -49,9 +51,14 @@ import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -89,7 +96,6 @@ public class TabFragment extends Fragment {
 
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
-    private boolean[] mRecyclerUpdating;
     private Integer mSelectedGenre;
     private GeoPoint mCurrentPosition;
     //YourLibraryFragment variables
@@ -164,10 +170,6 @@ public class TabFragment extends Fragment {
         mPositionFilterButton = view.findViewById(R.id.position_filter_button);
         mFirstOtherTextView = view.findViewById(R.id.button_first_recycler_view);
         mSecondOtherTextView = view.findViewById(R.id.button_second_recycler_view);
-        mRecyclerUpdating = new boolean[2];
-        for (int i = 0; i < mRecyclerUpdating.length; i++) {
-            mRecyclerUpdating[i] = false;
-        }
 
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         books = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
@@ -527,7 +529,6 @@ public class TabFragment extends Fragment {
             @Override
             public void onChanged(@Nullable List<Book> books) {
                 if (books != null) {
-                    Log.d("LULLO", "SIZEEEEEEEEEEEEgdsE: " + books.size());
                     updateListOfBooks(books);
                 }
             }
@@ -618,25 +619,29 @@ public class TabFragment extends Fragment {
         }
     }
 
-    public int getFragmentType()
-    {
+    public int getFragmentType() {
         return mFragmentType;
     }
 
-    private void queryDatabaseWithViewModel(){
+    private void queryDatabaseWithViewModel() {
         BooksViewModel bookViewModel = ViewModelProviders.of(getActivity()).get(BooksViewModel.class);
         final LiveData<List<Book>> firstLiveData = bookViewModel.getBooksFirstRecycler();
 
         firstLiveData.observe(getActivity(), new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
-                if(mFirstRecyclerBookAdapter == null) {
+                if (mFirstRecyclerBookAdapter == null) {
                     if (books != null) {
                         mFirstRecyclerBookAdapter = new RecyclerBookAdapter(books);
                         mFirstRecyclerView.setAdapter(mFirstRecyclerBookAdapter);
+                        mFirstRecyclerView.smoothScrollToPosition(0);
+
                     }
-                    firstLiveData.removeObserver(this);
+                } else {
+                    mFirstRecyclerBookAdapter.updateItems(books);
+                    mFirstRecyclerBookAdapter.notifyDataSetChanged();
                 }
+                firstLiveData.removeObserver(this);
             }
         });
 
@@ -645,13 +650,21 @@ public class TabFragment extends Fragment {
         secondLiveData.observe(getActivity(), new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
-                if(mSecondRecyclerBookAdapter == null) {
-                    if (books != null) {
+                Log.d("LULLO", "11111111111111111111111111:");
+                if (books != null) {
+                    if (mSecondRecyclerBookAdapter == null) {
+                        Log.d("LULLO", "2222222222222222222222222:" + books.size());
                         mSecondRecyclerBookAdapter = new RecyclerBookAdapter(books);
                         mSecondRecyclerView.setAdapter(mSecondRecyclerBookAdapter);
+                    } else {
+                        Log.d("LULLO", "3333333333333333333333333333333:" + books.size());
+                        mSecondRecyclerBookAdapter.updateItems(books);
+                        mSecondRecyclerBookAdapter.notifyDataSetChanged();
+                        mRefreshLayout.setRefreshing(false);
+                        mSecondRecyclerView.smoothScrollToPosition(0);
                     }
-                    secondLiveData.removeObserver(this);
                 }
+                secondLiveData.removeObserver(this);
             }
         });
 
