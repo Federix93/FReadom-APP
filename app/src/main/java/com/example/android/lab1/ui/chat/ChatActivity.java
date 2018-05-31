@@ -14,6 +14,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -42,10 +44,13 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.CalendarActivity;
-import com.example.android.lab1.ui.profile.EditProfileActivity;
+import com.example.android.lab1.ui.homepage.HomePageActivity;
+import com.example.android.lab1.ui.listeners.RatingActivityOpener;
+import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.ChatViewModel;
 import com.example.android.lab1.viewmodel.MessagesViewModel;
@@ -58,7 +63,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -67,12 +77,12 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import static com.example.android.lab1.utils.Constants.CAPTURE_IMAGE;
-import static com.example.android.lab1.utils.Constants.RESULT_LOAD_IMAGE;
+import javax.annotation.Nullable;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -85,12 +95,15 @@ public class ChatActivity extends AppCompatActivity {
 
     FirebaseAuth mFirebaseAuth;
     FirebaseStorage mFirebaseStorage;
+    FirebaseFirestore mFirebaseFirestore;
     StorageReference mChatPhotosStorageReference;
 
     String mChatID;
     String mUsername;
     String mPhotoProfileURL;
     String mBookID;
+    String mOtherPerson;
+    String mSenderUID;
 
     RecyclerView mMessagesRecyclerView;
     EditText mMessageEditText;
@@ -103,7 +116,13 @@ public class ChatActivity extends AppCompatActivity {
     LinearLayout mInputTextLinearLayout;
 
     AppCompatButton mStartLoan;
-    LinearLayout mInfoLayout;
+    AppCompatButton mEndLoan;
+    LinearLayout mInfoStartLoanLayout;
+    LinearLayout mInfoEndLoanLayout;
+    TextView mFromText;
+    TextView mToText;
+    ConstraintLayout mStartLoanLayout;
+    ConstraintLayout mEndLoanLayout;
 
     ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
@@ -140,17 +159,24 @@ public class ChatActivity extends AppCompatActivity {
         mMessagesReference = mFirebaseDatabase.getReference().child("messages");
         mConversationsReference = mFirebaseDatabase.getReference().child("conversations");
         mFirebaseStorage = FirebaseStorage.getInstance();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
         mStartLoan = findViewById(R.id.start_loan_button);
-        mInfoLayout = findViewById(R.id.info_button_layout);
+        mInfoStartLoanLayout = findViewById(R.id.info_button_layout);
+        mEndLoan = findViewById(R.id.end_loan_button);
+        mInfoEndLoanLayout = findViewById(R.id.info_button_layout_end);
+        mFromText = findViewById(R.id.from_text);
+        mToText = findViewById(R.id.to_text);
+        mStartLoanLayout = findViewById(R.id.chat_layout_container_loan_start);
+        mEndLoanLayout = findViewById(R.id.chat_layout_container_loan_end);
 
         mChatID = getIntent().getStringExtra("ChatID");
         mUsername = getIntent().getStringExtra("Username");
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
-        String senderUID = getIntent().getStringExtra("SenderUID");
+        mSenderUID = getIntent().getStringExtra("SenderUID");
 
-        if (senderUID != null && !senderUID.equals(mFirebaseAuth.getUid()))
+        if (mSenderUID != null && !mSenderUID.equals(mFirebaseAuth.getUid()))
             mChatsReference.child(mChatID).child("counter").setValue(0);
 
         mToolbar = findViewById(R.id.toolbar_chat_activity);
@@ -219,12 +245,63 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getChildrenCount() > 1) {
-                    if (mInputTextLinearLayout.getVisibility() == View.GONE) {
+                    if (mInputTextLinearLayout.getVisibility() == GONE) {
                         mInputTextLinearLayout.setVisibility(View.VISIBLE);
-                        mNoMessagesReceiverTextView.setVisibility(View.GONE);
+                        mNoMessagesReceiverTextView.setVisibility(GONE);
                     } else {
-                        mNoMessagesOwnerTextView.setVisibility(View.GONE);
+                        mNoMessagesOwnerTextView.setVisibility(GONE);
                     }
+                    mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot != null && dataSnapshot.exists()) {
+                                if (mFirebaseAuth.getUid().equals(dataSnapshot.getValue())) {
+                                    //sono l'utente richiedente e devo vedere solo da quando a quando il prestito sarà valido
+                                    if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                        mEndLoanLayout.setVisibility(GONE);
+                                    if (mStartLoanLayout.getVisibility() == VISIBLE)
+                                        mStartLoanLayout.setVisibility(GONE);
+                                } else {
+                                    mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                            if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                mStartLoanLayout.setVisibility(GONE);
+                                                Book book = documentSnapshot.toObject(Book.class);
+
+                                                String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+                                                String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                                mFromText.setText(String.format(getResources().getString(R.string.from_date), dateFrom));
+                                                mToText.setText(String.format(getResources().getString(R.string.to_date), dateTo));
+                                                mEndLoanLayout.setVisibility(View.VISIBLE);
+                                            } else {
+                                                mFirebaseFirestore.collection("history").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                        if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                            if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                                mEndLoanLayout.setVisibility(GONE);
+                                                        } else {
+                                                            mStartLoanLayout.setVisibility(View.VISIBLE);
+                                                            if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                                mEndLoanLayout.setVisibility(GONE);
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
                     setInputLinearLayout();
                     dbRef.removeEventListener(this);
 
@@ -233,13 +310,48 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (mFirebaseAuth.getUid().equals(dataSnapshot.getValue())) {
-                                mInputTextLinearLayout.setVisibility(View.GONE);
+                                if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                    mEndLoanLayout.setVisibility(GONE);
+                                if (mStartLoanLayout.getVisibility() == VISIBLE)
+                                    mStartLoanLayout.setVisibility(GONE);
+
+                                mInputTextLinearLayout.setVisibility(GONE);
                                 mNoMessagesReceiverTextView.setVisibility(View.VISIBLE);
                             } else {
-                                if (mInputTextLinearLayout.getVisibility() == View.GONE) {
+                                if (mInputTextLinearLayout.getVisibility() == GONE) {
                                     mInputTextLinearLayout.setVisibility(View.VISIBLE);
                                 }
                                 mNoMessagesOwnerTextView.setVisibility(View.VISIBLE);
+
+                                mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                        if (documentSnapshot != null && documentSnapshot.exists()) {
+                                            mStartLoanLayout.setVisibility(GONE);
+                                            Book book = documentSnapshot.toObject(Book.class);
+
+                                            String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+                                            String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                            mFromText.setText(String.format(getResources().getString(R.string.from_date), dateFrom));
+                                            mToText.setText(String.format(getResources().getString(R.string.to_date), dateTo));
+                                            mEndLoanLayout.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mFirebaseFirestore.collection("history").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                        if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                            mEndLoanLayout.setVisibility(GONE);
+                                                    } else {
+                                                        mStartLoanLayout.setVisibility(View.VISIBLE);
+                                                        if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                            mEndLoanLayout.setVisibility(GONE);
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
                                 setInputLinearLayout();
                             }
                         }
@@ -294,9 +406,76 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                Boolean startLoan = true;
-                intent.putExtra("start_loan", startLoan);
-                startActivity(intent);
+                startActivityForResult(intent, CalendarActivity.CHOOSE_DATE);
+            }
+        });
+        mInfoStartLoanLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
+                alertDialog.setTitle(getResources().getString(R.string.loan_button_info_title));
+                alertDialog.setMessage(getResources().getString(R.string.loan_button_info_text));
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
+        mEndLoan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setTitle(getResources().getString(R.string.confirm_end_title));
+                builder.setMessage(getResources().getString(R.string.confirm_end_text));
+                builder.setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot != null) {
+                                    mOtherPerson = (String) dataSnapshot.getValue();
+                                    Log.d("VINCI", "onDataChange: " + mOtherPerson);
+                                    if (mOtherPerson != null) {
+                                        RatingActivityOpener ratingActivityOpener = new RatingActivityOpener(ChatActivity.this, mFirebaseAuth.getUid(), mOtherPerson, mBookID);
+                                        ratingActivityOpener.onClick(v);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
+                builder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.create();
+                builder.show();
+            }
+        });
+        mInfoEndLoanLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
+                alertDialog.setTitle(getResources().getString(R.string.loan_button_info_title));
+                alertDialog.setMessage(getResources().getString(R.string.loan_button_info_text));
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
             }
         });
     }
@@ -456,7 +635,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Uri photoUri = null;
         switch (requestCode) {
@@ -471,6 +650,90 @@ public class ChatActivity extends AppCompatActivity {
                     mPhotoPath = mPhotoFile.getAbsolutePath();
                     photoUri = Uri.fromFile(mPhotoFile.getAbsoluteFile());
                 }
+                break;
+            case CalendarActivity.CHOOSE_DATE:
+                if (resultCode == RESULT_OK && data != null) {
+                    final long firstDate;
+                    final long lastDate;
+                    if (data.getExtras().getLong(CalendarActivity.FIRST_DATE) != 0 && data.getExtras().getLong(CalendarActivity.LAST_DATE) != 0) {
+                        firstDate = data.getExtras().getLong(CalendarActivity.FIRST_DATE);
+                        lastDate = data.getExtras().getLong(CalendarActivity.LAST_DATE);
+
+                        mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot != null) {
+                                    mOtherPerson = (String) dataSnapshot.getValue();
+                                    if (mOtherPerson != null) {
+                                        mFirebaseFirestore.collection("books").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                    Book book = documentSnapshot.toObject(Book.class);
+                                                    if (book != null) {
+                                                        book.setLoanStart(firstDate);
+                                                        book.setLoanEnd(lastDate);
+                                                        book.setLentTo(mOtherPerson);
+                                                        final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBookID);
+                                                        docLoanRef.set(book, SetOptions.merge());
+
+                                                        final DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(mBookID);
+                                                        docBookRef.delete();
+                                                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                                        boolean startLoan = true;
+                                                        intent.putExtra("LoanStart", startLoan);
+                                                        startActivity(intent);
+                                                        finish();
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
+                    }
+                }
+                break;
+            case Constants.RATING_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    final DocumentReference docHistoryRef = mFirebaseFirestore.collection("history").document(mBookID);
+                    final DocumentReference docLoansRef =  mFirebaseFirestore.collection("loans").document(mBookID);
+                    mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            if (documentSnapshot!= null && documentSnapshot.exists()) {
+                                Book book = documentSnapshot.toObject(Book.class);
+                                if (book != null) {
+                                    docHistoryRef.set(book, SetOptions.merge());
+
+                                    DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(book.getBookID());
+
+                                    book.setLoanStart(Long.valueOf(-1));
+                                    book.setLoanEnd(Long.valueOf(-1));
+                                    book.setLentTo(null);
+                                    docBookRef.set(book, SetOptions.merge());
+
+                                    docLoansRef.delete();
+                                }
+                            }
+                        }
+                    });
+                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                    boolean loanEnd = true;
+                    intent.putExtra("LoanEnd", loanEnd);
+                    startActivity(intent);
+                    this.finish();
+                } else if (resultCode == RESULT_CANCELED){
+                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                    startActivity(intent);
+                    this.finish();
+                }
+            default:
                 break;
         }
 
@@ -543,12 +806,14 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("LULLO", "onResume: ");
         CurrentOpenChat.setOpenChatID(mChatID);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d("LULLO", "onStop: ");
         CurrentOpenChat.setOpenChatID(null);
     }
 }

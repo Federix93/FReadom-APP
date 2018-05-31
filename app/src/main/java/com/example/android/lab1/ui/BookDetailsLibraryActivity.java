@@ -54,6 +54,9 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
     ImageView mBookDetailConditionColor;
     TextView mBookDetailCondition;
     TextView mBookPosition;
+    View mSeparatorDescriptionView;
+    View mSeparatorGlobalProfileView;
+    View mSeparatorShareView;
 
     AppCompatButton mEditButton;
     AppCompatButton mDeleteButton;
@@ -94,6 +97,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
         mBookDescriptionLayout = findViewById(R.id.library_book_description_container);
         mGalleryLayout = findViewById(R.id.relative_library_gallery_layout);
         mBookPosition = findViewById(R.id.library_book_position);
+        mSeparatorDescriptionView = findViewById(R.id.separator_desciption_library);
         mSelf = this;
 
         mToolbar = findViewById(R.id.toolbar_library_book_detail);
@@ -138,9 +142,10 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
             mPublicationDateTextView.setText(getResources().getString(R.string.date_not_available));
         if (mBook.getDescription() != null)
             mBookDescription.setText(mBook.getDescription());
-        else
+        else {
+            mSeparatorDescriptionView.setVisibility(GONE);
             mBookDescriptionLayout.setVisibility(GONE);
-        if (mBook.getGeoPoint() != null) {
+        }if (mBook.getGeoPoint() != null) {
             Location location = new Location("location");
             location.setLongitude(mBook.getGeoPoint().getLongitude());
             location.setLatitude(mBook.getGeoPoint().getLatitude());

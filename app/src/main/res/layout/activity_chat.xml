@@ -7,46 +7,49 @@
     android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar_chat_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background_app"
-        android:id="@+id/appbar_chat_activity">
+        android:background="@color/background_app">
+
         <include
             android:id="@+id/toolbar_chat_activity"
             layout="@layout/toolbar_chat"/>
     </android.support.design.widget.AppBarLayout>
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/chat_layout_container"
+        android:id="@+id/chat_layout_container_loan_start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/grey"
         android:alpha="0.8"
-        android:elevation="4dp">
+        android:background="@color/grey"
+        android:elevation="4dp"
+        android:visibility="gone">
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/start_loan_button"
-            style="@style/AppTheme.RoundedCornerMaterialButton"
+            style="@style/AppTheme.RoundedGreenCornerMaterialButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
+            android:alpha="1.0"
             android:paddingBottom="8dp"
             android:paddingEnd="16dp"
             android:paddingStart="16dp"
             android:paddingTop="8dp"
             android:text="@string/start_loan"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/info_button_layout"
-            app:layout_constraintTop_toTopOf="parent"
-            android:alpha="1.0"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/info_button_layout"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginEnd="4dp"
             android:padding="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -59,6 +62,81 @@
         </LinearLayout>
 
 
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/chat_layout_container_loan_end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.8"
+        android:background="@color/grey"
+        android:elevation="4dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/from_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/from_date"
+            android:textSize="14sp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintEnd_toStartOf="@+id/end_loan_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/to_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/to_date"
+            android:textSize="14sp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/end_loan_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/from_text" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/end_loan_button"
+            style="@style/AppTheme.RoundedOrangeCornerMaterialButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
+            android:alpha="1.0"
+            android:paddingBottom="8dp"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:text="@string/end_loan"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/info_button_layout_end"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/info_button_layout_end"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="4dp"
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_info_black_24dp" />
+        </LinearLayout>
     </android.support.constraint.ConstraintLayout>
 
     <RelativeLayout

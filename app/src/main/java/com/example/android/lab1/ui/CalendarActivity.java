@@ -5,10 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -16,14 +15,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
 import com.applandeo.materialcalendarview.exceptions.OutOfDateRangeException;
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener;
 import com.example.android.lab1.R;
-import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.Utilities;
 
 import java.util.Calendar;
@@ -32,6 +29,8 @@ import java.util.Date;
 public class CalendarActivity extends AppCompatActivity {
     public static final String FIRST_DATE = "FIRST_DATE";
     public static final String LAST_DATE = "LAST_DATE";
+
+    public static final int CHOOSE_DATE = 5;
     private CalendarView mCalendar; // https://github.com/Applandeo/Material-Calendar-View
     private Toolbar mToolbar;
     private AppCompatButton mConfirmButton;
@@ -81,43 +80,50 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 if (mCalendar.getSelectedDates().size() > 0) {
-
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
-                    LayoutInflater inflater = (LayoutInflater) v.getContext().getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-                    // inflate the custom dialog view
-                    final View mDialogView = inflater.inflate(R.layout.dialog_layout, null);
-                    // set the View for the AlertDialog
-                    alertDialogBuilder.setView(mDialogView);
-
-                    TextView btnCancel  = mDialogView.findViewById(R.id.cancel_button_dialog);
-                    btnCancel.setOnClickListener(new View.OnClickListener() {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                    builder.setTitle(getResources().getString(R.string.confirm_loan_title));
+                    builder.setMessage(getResources().getString(R.string.confirm_loan_text));
+                    builder.setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
                         @Override
-                        public void onClick(View view) {
-                            finish();
-                        }
-                    });
-                    TextView btnConfirm  = mDialogView.findViewById(R.id.confirm_button_dialog);
-                    btnConfirm.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Snackbar mySnackbar = Snackbar.make(mDialogView,"Prestito iniziato con successo", Snackbar.LENGTH_LONG).setDuration(4000);
-                            mySnackbar.show();
+                        public void onClick(DialogInterface dialog, int which) {
+                            final Intent result = new Intent();
+                            long lastDate;
+                            long firstDate = mCalendar.getSelectedDates().get(0).getTimeInMillis();
+                            result.putExtra(FIRST_DATE, firstDate);
+                            if (mCalendar.getSelectedDates().size() > 1) {
+                                lastDate = mCalendar.getSelectedDates().get(mCalendar.getSelectedDates().size() - 1).getTimeInMillis();
+                                result.putExtra(LAST_DATE, lastDate);
+                            }
+                            setResult(RESULT_OK, result);
 
-                            new Handler().postDelayed(new Runnable() {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
+                            LayoutInflater inflater = (LayoutInflater) v.getContext().getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+                            // inflate the custom dialog view
+                            final View mDialogView = inflater.inflate(R.layout.dialog_layout_confirmation, null);
+                            // set the View for the AlertDialog
+                            alertDialogBuilder.setView(mDialogView);
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+                            alertDialog.show();
+
+                            new CountDownTimer(2600, 1000) {
                                 @Override
-                                public void run() {
-                                    Intent result = new Intent(getApplicationContext(), HomePageActivity.class);
-                                    result.putExtra(FIRST_DATE, mCalendar.getSelectedDates().get(0));
-                                    if (mCalendar.getSelectedDates().size() > 1)
-                                        result.putExtra(LAST_DATE, mCalendar.getSelectedDates().get(mCalendar.getSelectedDates().size() - 1));
-                                    startActivity(result);
+                                public void onTick(long millisUntilFinished) {
+                                }
+
+                                @Override
+                                public void onFinish() {
                                     CalendarActivity.this.finish();
                                 }
-                            }, 4000);
+                            }.start();
                         }
                     });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
+                    builder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.show();
                 }
 
             }

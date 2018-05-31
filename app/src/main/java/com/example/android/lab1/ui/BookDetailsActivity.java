@@ -93,6 +93,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     FirebaseAuth mFirebaseAuth;
     RecyclerView mGalleryRecyclerView;
     TextView mBookPosition;
+    View mSeparatorDescriptionView;
 
     private User mUser;
     private Book mBook;
@@ -132,6 +133,8 @@ public class BookDetailsActivity extends AppCompatActivity {
         mFavoriteContainer = findViewById(R.id.add_to_favorite_container);
         mFavoriteText = findViewById(R.id.add_to_favorite_text);
         mBookPosition = findViewById(R.id.book_position);
+        mSeparatorDescriptionView = findViewById(R.id.separator_view_description);
+
         mSelf = this;
 
         if(getIntent().getExtras() != null) {
@@ -171,11 +174,11 @@ public class BookDetailsActivity extends AppCompatActivity {
         if(mBook == null) {
             Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
             finish();
-        }
-        if (mBook.getLentTo() != null) {
+        }/*
+        if(mBook.isAlreadyLent()){
             mBookButton.setText(getResources().getString(R.string.book_not_available));
             mBookButton.setEnabled(false);
-        }
+        }*/
         //Verifico se la chat è aperta
         OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
         openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
@@ -246,9 +249,10 @@ public class BookDetailsActivity extends AppCompatActivity {
             mPublicationDateTextView.setText(String.valueOf(mBook.getPublishYear()));
         if (mBook.getDescription() != null)
             mBookDescription.setText(mBook.getDescription());
-        else
+        else {
+            mSeparatorDescriptionView.setVisibility(GONE);
             mBookDescriptionLayout.setVisibility(GONE);
-        if (mBook.getGeoPoint() != null) {
+        }if (mBook.getGeoPoint() != null) {
         Location location = new Location("location");
         location.setLongitude(mBook.getGeoPoint().getLongitude());
         location.setLatitude(mBook.getGeoPoint().getLatitude());
@@ -374,8 +378,6 @@ public class BookDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                 intent.putExtra("UserObject", mUser);
                 intent.putExtra("UserID", mBook.getUid());
@@ -399,7 +401,6 @@ public class BookDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(DocumentSnapshot snapshot) {
                             if(snapshot != null) {
-                                Log.d("LULLO", "SNAPSHOT != null");
                                 if (snapshot.exists()) {
                                     documentReference.delete();
                                     Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
@@ -414,9 +415,11 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     });
                                     mySnackbar.show();
                                 } else {
+                                    Log.d("LULLO", "SNAPSHOT !EXISTS");
                                     addBookToFavorite();
                                 }
                             } else{
+                                Log.d("LULLO", "SNAPSHOT == null");
                                 addBookToFavorite();
                             }
                         }

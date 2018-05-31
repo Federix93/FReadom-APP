@@ -19,10 +19,11 @@
     <com.applandeo.materialcalendarview.CalendarView
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:headerColor="@color/colorPrimaryDark"
-        app:layout_constraintBottom_toTopOf="@id/confirm_date"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:layout_height="wrap_content"
+        app:headerColor="@color/colorSecondaryAccent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appbar_calendar_activity"
         app:selectionColor="@color/colorSecondaryAccent"
         app:type="range_picker" />
 
@@ -32,7 +33,9 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/ok"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:background="@color/colorSecondaryAccent"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar_view" />
 
 </android.support.constraint.ConstraintLayout>

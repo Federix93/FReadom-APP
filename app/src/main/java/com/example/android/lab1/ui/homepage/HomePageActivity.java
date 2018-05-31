@@ -12,8 +12,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
@@ -35,26 +33,28 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.FavoriteBooksActivity;
 import com.example.android.lab1.ui.LoadBookActivity;
 import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
-import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.UserViewModel;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.SetOptions;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -62,6 +62,8 @@ public class HomePageActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     AHBottomNavigation mBottomNavigation;
+
+    FirebaseFirestore mFirebaseFirestore;
 
     ImageView mProfileImage;
     TextView mUsernameTextView;
@@ -109,11 +111,11 @@ public class HomePageActivity extends AppCompatActivity
         mFAB = findViewById(R.id.floating_action_button_library);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build();
-        firebaseFirestore.setFirestoreSettings(settings);
+        mFirebaseFirestore.setFirestoreSettings(settings);
         if (mFirebaseAuth.getCurrentUser() != null) {
             UserViewModel userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
             final LiveData<User> liveData = userViewModel.getSnapshotLiveData();
@@ -166,7 +168,6 @@ public class HomePageActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
-
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
@@ -240,13 +241,18 @@ public class HomePageActivity extends AppCompatActivity
             }
         });
 
-
         mBottomNavigationViewPager.setOffscreenPageLimit(4);
         mFragmentAdapter = new FragmentAdapter(getSupportFragmentManager());
         mBottomNavigationViewPager.setAdapter(mFragmentAdapter);
 
         mCurrentFragment = mFragmentAdapter.getCurrentFragment();
 
+        if (getIntent().getBooleanExtra("LoanStart", false)) {
+            mBottomNavigation.setCurrentItem(LOANS_FRAGMENT);
+        }
+        if (getIntent().getBooleanExtra("LoanEnd", false)) {
+
+        }
 
     }
 

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,7 +83,7 @@ public class RecyclerReqReceivedAdapter extends RecyclerView.Adapter<RecyclerReq
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ConversationsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("ID_BOOK_SELECTED", book.getBookID());
+                    intent.putExtra("BOOK_SELECTED", book.getBookID());
                     v.getContext().startActivity(intent);
                 }
             });
