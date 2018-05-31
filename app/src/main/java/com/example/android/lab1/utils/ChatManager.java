@@ -90,7 +90,7 @@ public class ChatManager {
     }
 
     private void createChat() {
-        String defaultMessage = String.format(mContext.getResources().getString(R.string.default_message), mBookOwnerUserDatabase.getUsername());
+        String defaultMessage = String.format(mContext.getResources().getString(R.string.default_message), mBookOwnerUserDatabase.getUsername(), mBookName);
         Chat chat = new Chat(mBookID, mBookOwnerUserID, defaultMessage, System.currentTimeMillis() / 1000, "true");
         chat.setCounter(1);
         chat.setSenderUID(firebaseAuth.getUid());
