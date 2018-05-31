@@ -1,14 +1,18 @@
 package com.example.android.lab1.ui.chat;
 
 import android.Manifest;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +24,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -42,6 +47,9 @@ import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.profile.EditProfileActivity;
 import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.viewmodel.ChatViewModel;
+import com.example.android.lab1.viewmodel.MessagesViewModel;
+import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -109,15 +117,15 @@ public class ChatActivity extends AppCompatActivity {
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
     String mPhotoPath;
+    private boolean isObservable = true;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-
         Utilities.setupStatusBarColor(this);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         mMessagesRecyclerView = findViewById(R.id.chat_recyclerView);
         mMessageEditText = findViewById(R.id.edittext_chat_message);
         mSendButton = findViewById(R.id.sendButton);
@@ -163,21 +171,49 @@ public class ChatActivity extends AppCompatActivity {
                 .bitmapTransform(new CircleCrop()))
                 .into(mToolbarProfileImage);
 
-        final List<Message> chatMessages = new ArrayList<>();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mMessagesRecyclerView.setHasFixedSize(true);
         mMessagesRecyclerView.setLayoutManager(layoutManager);
         mMessagesRecyclerView.setNestedScrollingEnabled(false);
 
-        mChatArrayAdapter = new ChatMessageAdapter(this, chatMessages);
-        mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
+        final ChatViewModel chatViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(ChatViewModel.class);
+        final MessagesViewModel messagesViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(MessagesViewModel.class);
 
-        mChatArrayAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+        final Observer<Message> chatObserver = new Observer<Message>() {
+            @Override
+            public void onChanged(@Nullable Message message) {
+                Log.d("LULLO", "uuuuuuuuuuuuuuuuuu");
+                if (mChatArrayAdapter != null && isObservable) {
+                    Log.d("LULLO", "10000000000000");
+                    mChatArrayAdapter.addMessage(message);
+                    mChatArrayAdapter.notifyDataSetChanged();
+                    mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+                }else{
+                    isObservable = true;
+                }
             }
-        });
+        };
+
+        final Observer<List<Message>> messageObserver = new Observer<List<Message>>() {
+            @Override
+            public void onChanged(@Nullable List<Message> messages) {
+                Log.d("LULLO", "888888888888888");
+                if (mChatArrayAdapter == null) {
+                    Log.d("LULLO", "999999999999999999999");
+                    mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
+                    mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
+                }
+                mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+                messagesViewModel.getSnapshotLiveData().removeObserver(this);
+                isObservable = false;
+                chatViewModel.getSnapshotLiveData().observe(ChatActivity.this, chatObserver);
+            }
+        };
+        messagesViewModel.getSnapshotLiveData().observe(this, messageObserver);
+
+
+
         final DatabaseReference dbRef = mMessagesReference.child(mChatID);
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
@@ -223,7 +259,8 @@ public class ChatActivity extends AppCompatActivity {
         };
         dbRef.addValueEventListener(valueEventListener);
 
-        mChildEventListener = new ChildEventListener() {
+
+        /*mChildEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Message chatMessage = dataSnapshot.getValue(Message.class);
@@ -251,6 +288,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
         mMessagesReference.child(mChatID).addChildEventListener(mChildEventListener);
+        */
         mStartLoan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -264,6 +302,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setInputLinearLayout() {
+
         // Enable Send button when there's text to send
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -370,6 +409,11 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
@@ -379,6 +423,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
         }
     }
+
 
     public File saveThumbnail() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());

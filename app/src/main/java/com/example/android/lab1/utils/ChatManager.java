@@ -3,6 +3,7 @@ package com.example.android.lab1.utils;
 import android.content.Context;
 import android.content.Intent;
 
+import com.example.android.lab1.R;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.model.chatmodels.User;
@@ -21,6 +22,7 @@ public class ChatManager {
     private Context mContext;
     private String mChatID;
     private User mBookOwnerUserDatabase;
+    private String mBookName;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase firebaseDatabase;
@@ -30,9 +32,10 @@ public class ChatManager {
     private final DatabaseReference openedChatReference;
     private final DatabaseReference messageReference;
 
-    public ChatManager(String bookID, final String bookOwnerID, Context context) {
+    public ChatManager(String bookID, final String bookOwnerID, final String bookName, Context context) {
         mBookID = bookID;
         mBookOwnerUserID = bookOwnerID;
+        mBookName = bookName;
         mContext = context;
 
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -86,7 +89,7 @@ public class ChatManager {
     }
 
     private void createChat() {
-        String defaultMessage = "HAI RICHIESTO IL LIBRO ALLO STRONZO";
+        String defaultMessage = String.format(mContext.getResources().getString(R.string.default_message), mBookOwnerUserDatabase.getUsername());
         Chat chat = new Chat(mBookID, mBookOwnerUserID, defaultMessage, System.currentTimeMillis() / 1000, "true");
         chat.setCounter(1);
         chat.setSenderUID(firebaseAuth.getUid());

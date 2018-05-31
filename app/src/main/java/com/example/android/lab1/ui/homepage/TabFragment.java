@@ -54,8 +54,11 @@ import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -170,6 +173,7 @@ public class TabFragment extends Fragment {
         mPositionFilterButton = view.findViewById(R.id.position_filter_button);
         mFirstOtherTextView = view.findViewById(R.id.button_first_recycler_view);
         mSecondOtherTextView = view.findViewById(R.id.button_second_recycler_view);
+
 
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         books = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
@@ -624,7 +628,7 @@ public class TabFragment extends Fragment {
     }
 
     private void queryDatabaseWithViewModel() {
-        BooksViewModel bookViewModel = ViewModelProviders.of(getActivity()).get(BooksViewModel.class);
+        BooksViewModel bookViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(new GeoPoint(0, 0))).get(BooksViewModel.class);
         final LiveData<List<Book>> firstLiveData = bookViewModel.getBooksFirstRecycler();
 
         firstLiveData.observe(getActivity(), new Observer<List<Book>>() {

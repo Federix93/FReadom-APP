@@ -362,7 +362,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                     reqDocRef.set(mBook, SetOptions.merge());
                     final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
                     reqReceivedDocRef.set(mBook, SetOptions.merge());
-                    new ChatManager(mBook.getBookID(), mBook.getUid(), getApplicationContext());
+                    new ChatManager(mBook.getBookID(), mBook.getUid(), mBook.getTitle(), getApplicationContext());
 
                 } else {
                     Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();

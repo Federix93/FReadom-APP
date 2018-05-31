@@ -77,7 +77,8 @@
             android:layout_marginBottom="4dp"
             android:minHeight="44dp"
             android:orientation="horizontal"
-            android:elevation="3dp">
+            android:elevation="3dp"
+            android:visibility="gone">
 
             <ImageButton
                 android:id="@+id/buttonUpload"

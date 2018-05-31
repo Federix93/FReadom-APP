@@ -332,7 +332,7 @@ public abstract class Utilities {
     }
 
 
-    private GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
+    public static GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
 
         // ~1 mile of lat and lon in degrees
         Double lat = 0.0144927536231884;
