@@ -241,4 +241,5 @@
     <string name="new_request_notification_content">%1$s ha richiesto %2$s</string>
     <string name="reply">Rispondi</string>
     <string name="answer_to">Rispondi a %1$s</string>
+    <string name="default_message">Ciao %1$s, mi piacerebbe prendere in prestito il libro %2$s</string>
 </resources>
