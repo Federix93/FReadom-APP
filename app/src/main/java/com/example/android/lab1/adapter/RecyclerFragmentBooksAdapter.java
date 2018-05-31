@@ -43,16 +43,14 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
 
     private List<Book> mBookList;
     private List<User> mUsersOwner;
-    private FragmentActivity mFragmentActivity;
 
     private Context mContext;
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
 
-    public RecyclerFragmentBooksAdapter(FragmentActivity fragmentActivity, List<Book> listBooks, List<User> users) {
+    public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
         mUsersOwner = users;
-        mFragmentActivity = fragmentActivity;
     }
 
 

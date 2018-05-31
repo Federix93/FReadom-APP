@@ -12,20 +12,23 @@ import com.example.android.lab1.utils.firebaseutils.FirebaseQueryLiveDataFiresto
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 
 public class LoansViewModel extends ViewModel {
 
-    private static final CollectionReference LOANS = FirebaseFirestore.getInstance()
-            .collection("requestsDone").document(FirebaseAuth.getInstance().getUid()).collection("books");
+    Query LOANS = null;
 
-    private final FirebaseQueryLiveDataFirestore liveData = new FirebaseQueryLiveDataFirestore(LOANS);
+    private FirebaseQueryLiveDataFirestore liveData = null;
 
     private final MediatorLiveData<List<Book>> loanBooksLiveData = new MediatorLiveData<>();
 
     public LoansViewModel() {
+        LOANS = FirebaseFirestore.getInstance()
+                .collection("loans").whereEqualTo("uid", FirebaseAuth.getInstance().getUid());
+        liveData = new FirebaseQueryLiveDataFirestore(LOANS);
         loanBooksLiveData.addSource(liveData, new Observer<QuerySnapshot>() {
             @Override
             public void onChanged(@Nullable final QuerySnapshot queryDocumentSnapshots) {
