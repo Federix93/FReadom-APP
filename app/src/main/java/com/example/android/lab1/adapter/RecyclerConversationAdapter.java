@@ -37,14 +37,14 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     private Map<String, User> mMap;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mChatsReference;
-    private Book mBook;
+    private String mBookID;
     private String mSenderUID;
 
-    public RecyclerConversationAdapter(Book book){
+    public RecyclerConversationAdapter(String bookID){
         mMap = new HashMap<>();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mChatsReference = mFirebaseDatabase.getReference().child("chats");
-        mBook = book;
+        mBookID = bookID;
     }
 
     public void setItems(String chatID, User user){
@@ -144,7 +144,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     intent.putExtra("ChatID", chatID);
                     intent.putExtra("Username", user.getUsername());
                     intent.putExtra("ImageURL", user.getPhotoURL());
-                    intent.putExtra("Book", mBook);
+                    intent.putExtra("BookID", mBookID);
                     intent.putExtra("SenderUID", mSenderUID);
                     v.getContext().startActivity(intent);
                 }

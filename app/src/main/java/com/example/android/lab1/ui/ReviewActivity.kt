@@ -91,7 +91,7 @@ class ReviewActivity : AppCompatActivity() {
 
                 val firebaseFirestore = FirebaseFirestore.getInstance()
 
-                firebaseFirestore.collection("books")
+                firebaseFirestore.collection("loans")
                         .document(mBookId)
                         .get().addOnCompleteListener { task ->
                             if (task.isSuccessful &&

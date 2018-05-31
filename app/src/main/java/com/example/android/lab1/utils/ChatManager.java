@@ -17,7 +17,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class ChatManager {
 
-    private Book mBook;
+    private String mBookID;
     private final String mBookOwnerUserID;
     private Context mContext;
     private String mChatID;
@@ -31,8 +31,8 @@ public class ChatManager {
     private final DatabaseReference openedChatReference;
     private final DatabaseReference messageReference;
 
-    public ChatManager(Book book, final String bookOwnerID, Context context) {
-        mBook = book;
+    public ChatManager(String bookID, final String bookOwnerID, Context context) {
+        mBookID = bookID;
         mBookOwnerUserID = bookOwnerID;
         mContext = context;
 
@@ -48,14 +48,14 @@ public class ChatManager {
 
     private void linkUsersToChat(){
         if (firebaseAuth != null && firebaseAuth.getUid() != null) {
-            openedChatReference.child(mBook.getBookID()).child(mBookOwnerUserID).child(firebaseAuth.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot != null && !dataSnapshot.exists()){
                         getUserOwnerForFirstTime();
                     }else{
 
-                        openedChatReference.child(mBook.getBookID()).child(mBookOwnerUserID).child(firebaseAuth.getUid()).addValueEventListener(new ValueEventListener() {
+                        openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                mChatID = (String) dataSnapshot.getValue();
@@ -82,22 +82,21 @@ public class ChatManager {
         intent.putExtra("ChatID", mChatID);
         intent.putExtra("Username", mBookOwnerUserDatabase.getUsername());
         intent.putExtra("ImageURL", mBookOwnerUserDatabase.getPhotoURL());
-        intent.putExtra("Book", mBook);
-        intent.putExtra("SenderUID", firebaseAuth.getUid());
+        intent.putExtra("BookID", mBookID);
         mContext.startActivity(intent);
     }
 
     private void createChat() {
         String defaultMessage = "HAI RICHIESTO IL LIBRO ALLO STRONZO";
-        Chat chat = new Chat(mBook.getBookID(), mBookOwnerUserID, defaultMessage, System.currentTimeMillis() / 1000, "true");
+        Chat chat = new Chat(mBookID, mBookOwnerUserID, defaultMessage, System.currentTimeMillis() / 1000, "true");
         chat.setCounter(1);
         chat.setSenderUID(firebaseAuth.getUid());
         DatabaseReference newChat = chatsReference.push();
         mChatID = newChat.getKey();
         newChat.setValue(chat);
         Message message = new Message(firebaseAuth.getUid(), defaultMessage, System.currentTimeMillis() / 1000, null);
-        conversationsReference.child(mBook.getBookID()).child(mChatID).setValue(firebaseAuth.getUid());
-        openedChatReference.child(mBook.getBookID()).child(mBookOwnerUserID).child(firebaseAuth.getUid()).setValue(mChatID);
+        conversationsReference.child(mBookID).child(mChatID).setValue(firebaseAuth.getUid());
+        openedChatReference.child(mBookID).child(mBookOwnerUserID).child(firebaseAuth.getUid()).setValue(mChatID);
         messageReference.child(mChatID).push().setValue(message);
         openChat();
     }

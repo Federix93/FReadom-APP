@@ -175,6 +175,12 @@
     <string name="start_loan">Start loan</string>
     <string name="confirm_date">Confirm date</string>
     <string name="loan_successfully_done">Loan successfully started</string>
-
+    <string name="confirm_loan_title">Confirm loan start?</string>
+    <string name="confirm_loan_text">"Once confirmed, other opened chats will be deleted. This book won't be available from other users until the loan is ended. "</string>
+    <string name="loan_button_info_title">Info</string>
+    <string name="loan_button_info_text">Start loan button is used to signal all other users that this book is lent. When a deal with this user is reached click the \"start loan\" button</string>
+    <string name="end_loan">Finish loan</string>
+    <string name="from_date">From %1$s</string>
+    <string name="to_date">To %1$s</string>
 
 </resources>

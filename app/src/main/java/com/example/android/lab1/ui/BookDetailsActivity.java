@@ -180,11 +180,11 @@ public class BookDetailsActivity extends AppCompatActivity {
         if(mBook == null) {
             Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
             finish();
-        }
+        }/*
         if(mBook.isAlreadyLent()){
             mBookButton.setText(getResources().getString(R.string.book_not_available));
             mBookButton.setEnabled(false);
-        }
+        }*/
         //Verifico se la chat è aperta
         OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
         openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
@@ -358,7 +358,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                     reqDocRef.set(mBook, SetOptions.merge());
                     final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
                     reqReceivedDocRef.set(mBook, SetOptions.merge());
-                    new ChatManager(mBook, mBook.getUid(), getApplicationContext());
+                    new ChatManager(mBook.getBookID(), mBook.getUid(), getApplicationContext());
                 } else {
                     Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
                 }
@@ -392,9 +392,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(DocumentSnapshot snapshot) {
                             if(snapshot != null) {
-                                Log.d("LULLO", "SNAPSHOT != null");
                                 if (snapshot.exists()) {
-                                    Log.d("LULLO", "SNAPSHOT EXISTS");
                                     String uri = "@drawable/ic_favorite_border_orange_24dp";  // where myresource (without the extension) is the file
                                     int imageResource = getResources().getIdentifier(uri, null, getPackageName());
                                     Drawable res = getResources().getDrawable(imageResource);
@@ -414,11 +412,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     });
                                     mySnackbar.show();
                                 } else {
-                                    Log.d("LULLO", "SNAPSHOT !EXISTS");
                                     addBookToFavorite();
                                 }
                             } else{
-                                Log.d("LULLO", "SNAPSHOT == null");
                                 addBookToFavorite();
                             }
                         }

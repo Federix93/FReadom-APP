@@ -21,6 +21,7 @@ import com.example.android.lab1.utils.glideimageloader.GlideApp;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -33,9 +34,9 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
     Context mContext;
     private List<Message> mMessageList;
 
-    public ChatMessageAdapter(Context context, List<Message> messageList) {
+    public ChatMessageAdapter(Context context) {
         mContext = context;
-        mMessageList = messageList;
+        mMessageList = new ArrayList<>();
     }
     // Inflates the appropriate layout according to the ViewType.
     @Override

@@ -153,6 +153,15 @@
     <string name="choose_end_date">Seleziona data fine prestito</string>
     <string name="confirm_date">Conferma data</string>
     <string name="loan_successfully_done">Prestito iniziato con successo</string>
+    <string name="confirm_loan_title">Confermi inizio prestito?</string>
+    <string name="confirm_loan_text">Una volta confermato le altre chat aperte saranno cancellate. Questo libro non sarà più disponibile da altri utenti finché non terminerai il tuo prestito.</string>
+    <string name="loan_button_info_title">Info</string>
+    <string name="loan_button_info_text">Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l\'utente premi il pulsante \"Inizia prestito\"</string>
+    <string name="end_loan">Termina prestito</string>
+    <string name="from_date">Da %1$s</string>
+    <string name="to_date">A %1$s</string>
+    <string name="confirm_end_title">Confermi fine prestito?</string>
+    <string name="confirm_end_text">L\'utente ti ha effettivamente restituito il libro? In caso affermativo il libro tornerà disponibile e potrai ricevere nuove richieste da altri utenti</string>
 
     <string name="click_position_button">Aggiungi posizione</string>
     <string name="select_genres">Selezionare i generi che si vogliono visualizzare</string>

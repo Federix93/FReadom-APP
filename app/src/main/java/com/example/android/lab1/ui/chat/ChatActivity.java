@@ -1,17 +1,16 @@
 package com.example.android.lab1.ui.chat;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,7 +23,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -45,7 +43,8 @@ import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
-import com.example.android.lab1.ui.profile.EditProfileActivity;
+import com.example.android.lab1.ui.listeners.RatingActivityOpener;
+import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -55,7 +54,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -64,12 +68,11 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import static com.example.android.lab1.utils.Constants.CAPTURE_IMAGE;
-import static com.example.android.lab1.utils.Constants.RESULT_LOAD_IMAGE;
+import javax.annotation.Nullable;
+
+import static android.view.View.GONE;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -82,12 +85,14 @@ public class ChatActivity extends AppCompatActivity {
 
     FirebaseAuth mFirebaseAuth;
     FirebaseStorage mFirebaseStorage;
+    FirebaseFirestore mFirebaseFirestore;
     StorageReference mChatPhotosStorageReference;
 
     String mChatID;
     String mUsername;
     String mPhotoProfileURL;
-    Book mBook;
+    String mBookID;
+    String mOtherPerson;
     String mSenderUID;
 
     RecyclerView mMessagesRecyclerView;
@@ -101,7 +106,13 @@ public class ChatActivity extends AppCompatActivity {
     LinearLayout mInputTextLinearLayout;
 
     AppCompatButton mStartLoan;
-    LinearLayout mInfoLayout;
+    AppCompatButton mEndLoan;
+    LinearLayout mInfoStartLoanLayout;
+    LinearLayout mInfoEndLoanLayout;
+    TextView mFromText;
+    TextView mToText;
+    ConstraintLayout mStartLoanLayout;
+    ConstraintLayout mEndLoanLayout;
 
     ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
@@ -122,9 +133,10 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         Utilities.setupStatusBarColor(this);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
         mMessagesRecyclerView = findViewById(R.id.chat_recyclerView);
         mMessageEditText = findViewById(R.id.edittext_chat_message);
         mSendButton = findViewById(R.id.sendButton);
@@ -139,14 +151,21 @@ public class ChatActivity extends AppCompatActivity {
         mMessagesReference = mFirebaseDatabase.getReference().child("messages");
         mConversationsReference = mFirebaseDatabase.getReference().child("conversations");
         mFirebaseStorage = FirebaseStorage.getInstance();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
         mStartLoan = findViewById(R.id.start_loan_button);
-        mInfoLayout = findViewById(R.id.info_button_layout);
+        mInfoStartLoanLayout = findViewById(R.id.info_button_layout);
+        mEndLoan = findViewById(R.id.end_loan_button);
+        mInfoEndLoanLayout = findViewById(R.id.info_button_layout_end);
+        mFromText = findViewById(R.id.from_text);
+        mToText = findViewById(R.id.to_text);
+        mStartLoanLayout = findViewById(R.id.chat_layout_container_loan_start);
+        mEndLoanLayout = findViewById(R.id.chat_layout_container_loan_end);
 
         mChatID = getIntent().getStringExtra("ChatID");
         mUsername = getIntent().getStringExtra("Username");
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
-        mBook = getIntent().getExtras().getParcelable("Book");
+        mBookID = getIntent().getStringExtra("BookID");
         mSenderUID = getIntent().getStringExtra("SenderUID");
 
         if (mSenderUID != null && !mSenderUID.equals(mFirebaseAuth.getUid()))
@@ -170,14 +189,13 @@ public class ChatActivity extends AppCompatActivity {
                 .bitmapTransform(new CircleCrop()))
                 .into(mToolbarProfileImage);
 
-        final List<Message> chatMessages = new ArrayList<>();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mMessagesRecyclerView.setHasFixedSize(true);
         mMessagesRecyclerView.setLayoutManager(layoutManager);
         mMessagesRecyclerView.setNestedScrollingEnabled(false);
 
-        mChatArrayAdapter = new ChatMessageAdapter(this, chatMessages);
+        mChatArrayAdapter = new ChatMessageAdapter(this);
         mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
 
         mChatArrayAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -190,24 +208,40 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getChildrenCount() > 1) {
-                    if (mInputTextLinearLayout.getVisibility() == View.GONE) {
+                    if (mInputTextLinearLayout.getVisibility() == GONE) {
                         mInputTextLinearLayout.setVisibility(View.VISIBLE);
-                        mNoMessagesReceiverTextView.setVisibility(View.GONE);
+                        mNoMessagesReceiverTextView.setVisibility(GONE);
                     } else {
-                        mNoMessagesOwnerTextView.setVisibility(View.GONE);
+                        mNoMessagesOwnerTextView.setVisibility(GONE);
                     }
                     setInputLinearLayout();
                     dbRef.removeEventListener(this);
 
                 } else {
-                    mConversationsReference.child(mBook.getBookID()).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (mFirebaseAuth.getUid().equals(dataSnapshot.getValue())) {
-                                mInputTextLinearLayout.setVisibility(View.GONE);
+                                /*final DocumentReference docRef = mFirebaseFirestore.collection("loans")
+                                        .document(mBookID)
+                                        .collection(mSenderUID)
+                                        .document(mBookID);
+                                docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                    //mostrare tab dove il prestito è iniziato ma l'altro utente non può fare niente
+                                                } else {
+                                                    mStartLoanLayout.setVisibility(GONE);
+                                                    mEndLoanLayout.setVisibility(GONE);
+                                                }
+                                            }
+                                        });
+                                   */
+                                mInputTextLinearLayout.setVisibility(GONE);
                                 mNoMessagesReceiverTextView.setVisibility(View.VISIBLE);
                             } else {
-                                if (mInputTextLinearLayout.getVisibility() == View.GONE) {
+                                if (mInputTextLinearLayout.getVisibility() == GONE) {
                                     mInputTextLinearLayout.setVisibility(View.VISIBLE);
                                 }
                                 mNoMessagesOwnerTextView.setVisibility(View.VISIBLE);
@@ -266,12 +300,66 @@ public class ChatActivity extends AppCompatActivity {
                 startActivityForResult(intent, CalendarActivity.CHOOSE_DATE);
             }
         });
-        mInfoLayout.setOnClickListener(new View.OnClickListener() {
+        mInfoStartLoanLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
-                alertDialog.setTitle("Info");
-                alertDialog.setMessage("Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l'utente premi il pulsante \"Inizia prestito\"");
+                alertDialog.setTitle(getResources().getString(R.string.loan_button_info_title));
+                alertDialog.setMessage(getResources().getString(R.string.loan_button_info_text));
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
+        mEndLoan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setTitle(getResources().getString(R.string.confirm_end_title));
+                builder.setMessage(getResources().getString(R.string.confirm_end_text));
+                builder.setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot != null) {
+                                    mOtherPerson = (String) dataSnapshot.getValue();
+                                    Log.d("VINCI", "onDataChange: " + mOtherPerson);
+                                    if (mOtherPerson != null) {
+                                        RatingActivityOpener ratingActivityOpener = new RatingActivityOpener(ChatActivity.this, mFirebaseAuth.getUid(), mOtherPerson, mBookID);
+                                        ratingActivityOpener.onClick(v);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
+                builder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.create();
+                builder.show();
+            }
+        });
+        mInfoEndLoanLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
+                alertDialog.setTitle(getResources().getString(R.string.loan_button_info_title));
+                alertDialog.setMessage(getResources().getString(R.string.loan_button_info_text));
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -449,38 +537,87 @@ public class ChatActivity extends AppCompatActivity {
                 break;
             case CalendarActivity.CHOOSE_DATE:
                 if (resultCode == RESULT_OK && data != null) {
-                    long firstDate = 0;
-                    long lastDate = 0;
-                    Log.d("VINCI", "FIRST LONG: " + data.getExtras().getLong(CalendarActivity.FIRST_DATE));
-                    Log.d("VINCI", "LAST LONG: " + data.getExtras().getLong(CalendarActivity.LAST_DATE));
-                    Log.d("VINCI", "BOOK " + mBook.getBookID());
-                    Log.d("VINCI", "SENDERID " + mSenderUID);
+                    final long firstDate;
+                    final long lastDate;
                     if (data.getExtras().getLong(CalendarActivity.FIRST_DATE) != 0 && data.getExtras().getLong(CalendarActivity.LAST_DATE) != 0) {
-                        Log.d("VINCI", "ci entro2 ?");
                         firstDate = data.getExtras().getLong(CalendarActivity.FIRST_DATE);
                         lastDate = data.getExtras().getLong(CalendarActivity.LAST_DATE);
-                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                        intent.putExtra(CalendarActivity.FIRST_DATE, firstDate);
-                        intent.putExtra(CalendarActivity.LAST_DATE, lastDate);
-                        intent.putExtra("Book", mBook);
-                        intent.putExtra("SenderID", mSenderUID);
-                        startActivity(intent);
-                        finish();
+
+                        mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot != null) {
+                                    mOtherPerson = (String) dataSnapshot.getValue();
+                                    if (mOtherPerson != null) {
+                                        mFirebaseFirestore.collection("books").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                    Book book = documentSnapshot.toObject(Book.class);
+                                                    if (book != null) {
+                                                        book.setLoanStart(firstDate);
+                                                        book.setLoanEnd(lastDate);
+                                                        book.setLentTo(mOtherPerson);
+                                                        final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBookID);
+                                                        docLoanRef.set(book, SetOptions.merge());
+
+                                                        final DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(mBookID);
+                                                        docBookRef.delete();
+                                                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                                                        boolean startLoan = true;
+                                                        intent.putExtra("LoanStart", startLoan);
+                                                        startActivity(intent);
+                                                        finish();
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
                     }
-                    new CountDownTimer(200, 1000) {
-
-                        @Override
-                        public void onTick(long millisUntilFinished) {
-
-                        }
-
-                        @Override
-                        public void onFinish() {
-
-                        }
-                    }.start();
                 }
                 break;
+            case Constants.RATING_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    final DocumentReference docHistoryRef = mFirebaseFirestore.collection("history").document(mBookID);
+                    final DocumentReference docLoansRef =  mFirebaseFirestore.collection("loans").document(mBookID);
+                    mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            if (documentSnapshot!= null && documentSnapshot.exists()) {
+                                Book book = documentSnapshot.toObject(Book.class);
+                                if (book != null) {
+                                    docHistoryRef.set(book, SetOptions.merge());
+
+                                    DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(book.getBookID());
+
+                                    book.setLoanStart(Long.valueOf(-1));
+                                    book.setLoanEnd(Long.valueOf(-1));
+                                    book.setLentTo(null);
+                                    docBookRef.set(book, SetOptions.merge());
+
+                                    docLoansRef.delete();
+                                }
+                            }
+                        }
+                    });
+                    Log.d("VINCI", "onActivityResult: RATING REQUEST");
+                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                    boolean loanEnd = true;
+                    intent.putExtra("LoanEnd", loanEnd);
+                    startActivity(intent);
+                    this.finish();
+                } else if (resultCode == RESULT_CANCELED){
+                    Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                    startActivity(intent);
+                    this.finish();
+                }
             default:
                 break;
         }
@@ -554,12 +691,14 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("LULLO", "onResume: ");
         CurrentOpenChat.setOpenChatID(mChatID);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d("LULLO", "onStop: ");
         CurrentOpenChat.setOpenChatID(null);
     }
 }

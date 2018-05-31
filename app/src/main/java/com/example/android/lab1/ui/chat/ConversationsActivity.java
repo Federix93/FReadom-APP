@@ -48,7 +48,7 @@ import javax.annotation.Nullable;
 public class ConversationsActivity extends AppCompatActivity {
 
     Toolbar mToolbar;
-    Book mBook;
+    String mBookID;
     RecyclerView mRecyclerView;
     private RecyclerConversationAdapter mAdapter;
     private ShimmerFrameLayout mShimmerViewContainer;
@@ -60,7 +60,7 @@ public class ConversationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversations);
 
-        mBook = getIntent().getExtras().getParcelable("BOOK_SELECTED");
+        mBookID = getIntent().getStringExtra("BOOK_SELECTED");
         Utilities.setupStatusBarColor(this);
         mToolbar = findViewById(R.id.toolbar_conversations_activity);
         mToolbar.setTitle(R.string.conversations_title);
@@ -80,7 +80,7 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
-        mAdapter = new RecyclerConversationAdapter(mBook);
+        mAdapter = new RecyclerConversationAdapter(mBookID);
         mRecyclerView.setAdapter(mAdapter);
 
         final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -88,7 +88,7 @@ public class ConversationsActivity extends AppCompatActivity {
 
         if (firebaseAuth != null) {
 
-            ConversationsViewModel conversationsViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBook.getBookID())).get(ConversationsViewModel.class);
+            ConversationsViewModel conversationsViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBookID)).get(ConversationsViewModel.class);
             conversationsViewModel.getSnapshotLiveData().observe(this, new Observer<DataSnapshot>() {
                         @Override
                         public void onChanged(@android.support.annotation.Nullable DataSnapshot dataSnapshot) {
