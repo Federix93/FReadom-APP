@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -73,6 +74,7 @@ import java.util.Date;
 import javax.annotation.Nullable;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -214,6 +216,57 @@ public class ChatActivity extends AppCompatActivity {
                     } else {
                         mNoMessagesOwnerTextView.setVisibility(GONE);
                     }
+                    mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot != null && dataSnapshot.exists()) {
+                                if (mFirebaseAuth.getUid().equals(dataSnapshot.getValue())) {
+                                    //sono l'utente richiedente e devo vedere solo da quando a quando il prestito sarà valido
+                                    if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                        mEndLoanLayout.setVisibility(GONE);
+                                    if (mStartLoanLayout.getVisibility() == VISIBLE)
+                                        mStartLoanLayout.setVisibility(GONE);
+                                } else {
+                                    mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                            if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                mStartLoanLayout.setVisibility(GONE);
+                                                Book book = documentSnapshot.toObject(Book.class);
+
+                                                String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+                                                String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                                mFromText.setText(String.format(getResources().getString(R.string.from_date), dateFrom));
+                                                mToText.setText(String.format(getResources().getString(R.string.to_date), dateTo));
+                                                mEndLoanLayout.setVisibility(View.VISIBLE);
+                                            } else {
+                                                mFirebaseFirestore.collection("history").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                        if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                            if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                                mEndLoanLayout.setVisibility(GONE);
+                                                        } else {
+                                                            mStartLoanLayout.setVisibility(View.VISIBLE);
+                                                            if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                                mEndLoanLayout.setVisibility(GONE);
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
                     setInputLinearLayout();
                     dbRef.removeEventListener(this);
 
@@ -222,22 +275,11 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (mFirebaseAuth.getUid().equals(dataSnapshot.getValue())) {
-                                /*final DocumentReference docRef = mFirebaseFirestore.collection("loans")
-                                        .document(mBookID)
-                                        .collection(mSenderUID)
-                                        .document(mBookID);
-                                docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                                            @Override
-                                            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                                                if (documentSnapshot != null && documentSnapshot.exists()) {
-                                                    //mostrare tab dove il prestito è iniziato ma l'altro utente non può fare niente
-                                                } else {
-                                                    mStartLoanLayout.setVisibility(GONE);
-                                                    mEndLoanLayout.setVisibility(GONE);
-                                                }
-                                            }
-                                        });
-                                   */
+                                if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                    mEndLoanLayout.setVisibility(GONE);
+                                if (mStartLoanLayout.getVisibility() == VISIBLE)
+                                    mStartLoanLayout.setVisibility(GONE);
+
                                 mInputTextLinearLayout.setVisibility(GONE);
                                 mNoMessagesReceiverTextView.setVisibility(View.VISIBLE);
                             } else {
@@ -245,6 +287,36 @@ public class ChatActivity extends AppCompatActivity {
                                     mInputTextLinearLayout.setVisibility(View.VISIBLE);
                                 }
                                 mNoMessagesOwnerTextView.setVisibility(View.VISIBLE);
+
+                                mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                        if (documentSnapshot != null && documentSnapshot.exists()) {
+                                            mStartLoanLayout.setVisibility(GONE);
+                                            Book book = documentSnapshot.toObject(Book.class);
+
+                                            String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+                                            String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                            mFromText.setText(String.format(getResources().getString(R.string.from_date), dateFrom));
+                                            mToText.setText(String.format(getResources().getString(R.string.to_date), dateTo));
+                                            mEndLoanLayout.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mFirebaseFirestore.collection("history").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                        if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                            mEndLoanLayout.setVisibility(GONE);
+                                                    } else {
+                                                        mStartLoanLayout.setVisibility(View.VISIBLE);
+                                                        if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                            mEndLoanLayout.setVisibility(GONE);
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
                                 setInputLinearLayout();
                             }
                         }
@@ -607,7 +679,6 @@ public class ChatActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    Log.d("VINCI", "onActivityResult: RATING REQUEST");
                     Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                     boolean loanEnd = true;
                     intent.putExtra("LoanEnd", loanEnd);

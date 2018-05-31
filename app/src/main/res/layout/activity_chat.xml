@@ -22,7 +22,8 @@
         android:layout_height="wrap_content"
         android:alpha="0.8"
         android:background="@color/grey"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        android:visibility="gone">
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/start_loan_button"
@@ -68,7 +69,8 @@
         android:layout_height="wrap_content"
         android:alpha="0.8"
         android:background="@color/grey"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/from_text"
