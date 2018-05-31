@@ -17,6 +17,7 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.BookPhotoDetailActivity;
+import com.example.android.lab1.ui.PhotoDetailActivity;
 import com.example.android.lab1.utils.glideimageloader.GlideApp;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -123,8 +124,8 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
             int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
                 BookPhoto bookPhoto = new BookPhoto(mMessageList.get(position).getPhotoURL(), "chat photo");
-                Intent intent = new Intent(mContext, BookPhotoDetailActivity.class);
-                intent.putExtra(BookPhotoDetailActivity.BOOK_PHOTO, bookPhoto);
+                Intent intent = new Intent(mContext, PhotoDetailActivity.class);
+                intent.putExtra(PhotoDetailActivity.BOOK_PHOTO, bookPhoto);
                 mContext.startActivity(intent);
             }
         }
@@ -206,11 +207,12 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
         public void onClick(View v) {
             int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-                BookPhoto bookPhoto =  new BookPhoto(mMessageList.get(position).getPhotoURL(), "chat photo");
-                Intent intent = new Intent(mContext, BookPhotoDetailActivity.class);
-                intent.putExtra(BookPhotoDetailActivity.BOOK_PHOTO, bookPhoto);
+                BookPhoto bookPhoto = new BookPhoto(mMessageList.get(position).getPhotoURL(), "chat photo");
+                Intent intent = new Intent(mContext, PhotoDetailActivity.class);
+                intent.putExtra(PhotoDetailActivity.BOOK_PHOTO, bookPhoto);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 mContext.startActivity(intent);
+
             }
         }
     }

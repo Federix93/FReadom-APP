@@ -247,12 +247,13 @@ public class BookDetailsActivity extends AppCompatActivity {
             mEditorTextView.setText(getResources().getString(R.string.editor_not_available));
         if (!String.valueOf(mBook.getPublishYear()).isEmpty())
             mPublicationDateTextView.setText(String.valueOf(mBook.getPublishYear()));
-        if (mBook.getDescription() != null)
+        if (mBook.getDescription() != null) {
             mBookDescription.setText(mBook.getDescription());
-        else {
+        } else {
             mSeparatorDescriptionView.setVisibility(GONE);
             mBookDescriptionLayout.setVisibility(GONE);
-        }if (mBook.getGeoPoint() != null) {
+        }
+        if (mBook.getGeoPoint() != null) {
         Location location = new Location("location");
         location.setLongitude(mBook.getGeoPoint().getLongitude());
         location.setLatitude(mBook.getGeoPoint().getLatitude());

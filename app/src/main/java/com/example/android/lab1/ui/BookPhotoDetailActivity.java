@@ -40,7 +40,7 @@ public class BookPhotoDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_photo_full_detail);
+        setContentView(R.layout.activity_photos_full_detail);
 
         Utilities.setupStatusBarColor(this);
 

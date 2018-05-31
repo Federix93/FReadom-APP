@@ -75,7 +75,6 @@ public class RequestsFragmentDoneItem extends Fragment {
                                     mUsersOwner.add(dataSnapshot.getValue(User.class));
                                     mAdapter.setItems(listBooks, mUsersOwner);
                                     mAdapter.notifyDataSetChanged();
-
                             }
 
                             @Override
