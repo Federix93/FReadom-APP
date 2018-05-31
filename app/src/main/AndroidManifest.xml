@@ -122,6 +122,7 @@
         <activity android:name=".ui.chat.ConversationsActivity"/>
         <activity android:name=".ui.TextDetailActivity" />
         <activity android:name=".ui.BookDetailsLibraryActivity"/>
+        <activity android:name=".ui.PhotoDetailActivity"/>
 
         <receiver
             android:name=".utils.DirectReplyReceiver"

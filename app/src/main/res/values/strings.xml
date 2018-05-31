@@ -262,4 +262,7 @@
     <string name="photo_detail">Dettaglio foto</string>
     <string name="max_photos">Raggiunto limite massimo foto</string>
     <string name="default_message">Ciao %1$s, mi piacerebbe prendere in prestito il libro %2$s</string>
+
+    <string name="history">Storia</string>
+    <string name="logout">Logout</string>
 </resources>

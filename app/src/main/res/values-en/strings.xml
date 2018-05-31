@@ -183,5 +183,7 @@
     <string name="end_loan">Finish loan</string>
     <string name="from_date">From %1$s</string>
     <string name="to_date">To %1$s</string>
+    <string name="history">History</string>
+    <string name="logout">Logout</string>
 
 </resources>

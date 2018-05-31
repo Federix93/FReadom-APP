@@ -5,6 +5,9 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Geocoder;
+import android.location.Location;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -22,9 +25,11 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
+import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.example.android.lab1.viewmodel.OpenedChatViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,8 +39,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.IOException;
 import java.security.acl.Owner;
 import java.util.List;
+import java.util.Locale;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -48,6 +55,10 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
     private Context mContext;
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
+
+    private GeoCodingTask mCurrentlyExecuting;
+    private Location mCurrentlyResolving;
+    private Location mResolveLater;
 
     public RecyclerFragmentBooksAdapter(FragmentActivity fragmentActivity, List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
@@ -105,11 +116,14 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
             mBookTitle.setText(book.getTitle());
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
             mBookAuthor.setText(book.getAuthors());
-            if (book.getAddress()==null) {
+            if (book.getGeoPoint() != null) {
+                Location location = new Location("location");
+                location.setLongitude(book.getGeoPoint().getLongitude());
+                location.setLatitude(book.getGeoPoint().getLatitude());
+
+                resolveCityLocation(location);
+            }  else
                 mBookCity.setText(mContext.getResources().getString(R.string.position_not_available));
-            } else {
-                mBookCity.setText(book.getAddress());
-            }
             if (book.getWebThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mBookThumbnail);
             } else if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
@@ -156,6 +170,62 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
                     });
                 }
             });
+
+        }
+        private void resolveCityLocation(Location location) {
+            // This method will change address mResultAddress var
+            mCurrentlyResolving = location;
+            mCurrentlyExecuting = new GeoCodingTask(mBookCity);
+            mCurrentlyExecuting.execute(new LatLng(location.getLatitude(),
+                    location.getLongitude()));
+        }
+    }
+
+    private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
+
+        private TextView mTarget;
+
+        public GeoCodingTask(TextView target) {
+            this.mTarget = target;
+        }
+
+        @Override
+        protected String doInBackground(LatLng... latLngs) {
+            if (latLngs.length > 0) {
+                Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+                List<android.location.Address> fromLocation = null;
+                try {
+                    if (!isCancelled())
+                        fromLocation = geocoder.getFromLocation(latLngs[0].latitude,
+                                latLngs[0].longitude,
+                                1);
+                    else
+                        return null;
+
+                } catch (IOException e) {
+                    return null;
+                }
+                if (fromLocation == null || fromLocation.size() == 0)
+                    return null;
+                else {
+                    return fromLocation.get(0).getLocality();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String city) {
+            if (mTarget != null && !this.isCancelled()) {
+                if (city == null) {
+                    mTarget.setText(R.string.no_address_found);
+                } else {
+                    mTarget.setText(city);
+                    mCurrentlyExecuting = null;
+                    mCurrentlyResolving = null;
+                    mResolveLater = null;
+                }
+            }
 
         }
     }
