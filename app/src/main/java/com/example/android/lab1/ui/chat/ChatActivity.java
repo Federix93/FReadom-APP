@@ -78,8 +78,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import javax.annotation.Nullable;
+import java.util.List;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;

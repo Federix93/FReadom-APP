@@ -34,9 +34,9 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
     Context mContext;
     private List<Message> mMessageList;
 
-    public ChatMessageAdapter(Context context) {
+    public ChatMessageAdapter(Context context, List<Message> messages) {
         mContext = context;
-        mMessageList = new ArrayList<>();
+        mMessageList = messages;
     }
     // Inflates the appropriate layout according to the ViewType.
     @Override
