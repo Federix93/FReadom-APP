@@ -59,12 +59,10 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
     private Location mCurrentlyResolving;
     private Location mResolveLater;
 
-    public RecyclerFragmentBooksAdapter(FragmentActivity fragmentActivity, List<Book> listBooks, List<User> users) {
     public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
         mUsersOwner = users;
     }
-
 
     @NonNull
     @Override
