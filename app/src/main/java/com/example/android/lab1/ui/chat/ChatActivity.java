@@ -20,6 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -117,7 +118,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         Utilities.setupStatusBarColor(this);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         mMessagesRecyclerView = findViewById(R.id.chat_recyclerView);
         mMessageEditText = findViewById(R.id.edittext_chat_message);
         mSendButton = findViewById(R.id.sendButton);
@@ -264,6 +265,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setInputLinearLayout() {
+        Log.d("LULLO", "SetInputLinearLayout");
         // Enable Send button when there's text to send
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
