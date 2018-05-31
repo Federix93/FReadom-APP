@@ -38,6 +38,9 @@ public class ChatMessageAdapter extends RecyclerView.Adapter {
         mContext = context;
         mMessageList = messages;
     }
+    public void setItems(List<Message> messages){
+        mMessageList = messages;
+    }
     // Inflates the appropriate layout according to the ViewType.
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

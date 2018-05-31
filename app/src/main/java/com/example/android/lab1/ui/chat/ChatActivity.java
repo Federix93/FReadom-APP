@@ -88,6 +88,8 @@ public class ChatActivity extends AppCompatActivity {
     Toolbar mToolbar;
     FirebaseDatabase mFirebaseDatabase;
 
+    ChatViewModel chatViewModel = null;
+    MessagesViewModel messagesViewModel = null;
     DatabaseReference mChatsReference;
     DatabaseReference mMessagesReference;
     DatabaseReference mConversationsReference;
@@ -143,6 +145,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         Utilities.setupStatusBarColor(this);
+        Log.d("LULLO", "OnCreate");
         //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         mMessagesRecyclerView = findViewById(R.id.chat_recyclerView);
         mMessageEditText = findViewById(R.id.edittext_chat_message);
@@ -202,23 +205,22 @@ public class ChatActivity extends AppCompatActivity {
         mMessagesRecyclerView.setLayoutManager(layoutManager);
         mMessagesRecyclerView.setNestedScrollingEnabled(false);
 
-        final ChatViewModel chatViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(ChatViewModel.class);
-        final MessagesViewModel messagesViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(MessagesViewModel.class);
+        messagesViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(MessagesViewModel.class);
 
-        final Observer<Message> chatObserver = new Observer<Message>() {
-            @Override
-            public void onChanged(@Nullable Message message) {
-                Log.d("LULLO", "uuuuuuuuuuuuuuuuuu");
-                if (mChatArrayAdapter != null && isObservable) {
-                    Log.d("LULLO", "10000000000000");
-                    mChatArrayAdapter.addMessage(message);
-                    mChatArrayAdapter.notifyDataSetChanged();
-                    mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
-                }else{
-                    isObservable = true;
+            /*final Observer<Message> chatObserver = new Observer<Message>() {
+                @Override
+                public void onChanged(@Nullable Message message) {
+                    Log.d("LULLO", "IS OBSERVABLE " + isObservable);
+                    if (mChatArrayAdapter != null && isObservable) {
+                        Log.d("LULLO", "10000000000000");
+                        mChatArrayAdapter.addMessage(message);
+                        mChatArrayAdapter.notifyDataSetChanged();
+                        mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+                    } else {
+                        isObservable = true;
+                    }
                 }
-            }
-        };
+            };*/
 
         final Observer<List<Message>> messageObserver = new Observer<List<Message>>() {
             @Override
@@ -229,15 +231,17 @@ public class ChatActivity extends AppCompatActivity {
                     mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
                     mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
                 }
+                else{
+                    mChatArrayAdapter.setItems(messages);
+                    mChatArrayAdapter.notifyDataSetChanged();
+                }
                 mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
-                messagesViewModel.getSnapshotLiveData().removeObserver(this);
+                //messagesViewModel.getSnapshotLiveData().removeObserver(this);
                 isObservable = false;
-                chatViewModel.getSnapshotLiveData().observe(ChatActivity.this, chatObserver);
+                //chatViewModel.getSnapshotLiveData().observe(ChatActivity.this, chatObserver);
             }
         };
         messagesViewModel.getSnapshotLiveData().observe(this, messageObserver);
-
-
 
         final DatabaseReference dbRef = mMessagesReference.child(mChatID);
         ValueEventListener valueEventListener = new ValueEventListener() {
@@ -370,36 +374,6 @@ public class ChatActivity extends AppCompatActivity {
         };
         dbRef.addValueEventListener(valueEventListener);
 
-
-        /*mChildEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Message chatMessage = dataSnapshot.getValue(Message.class);
-                mChatArrayAdapter.addMessage(chatMessage);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        mMessagesReference.child(mChatID).addChildEventListener(mChildEventListener);
-        */
         mStartLoan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -478,6 +452,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void setInputLinearLayout() {
 
@@ -589,6 +565,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        Log.d("LULLO", "OnConfigurationChanged");
     }
 
     @Override
@@ -805,7 +782,6 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("LULLO", "onResume: ");
         CurrentOpenChat.setOpenChatID(mChatID);
     }
 
