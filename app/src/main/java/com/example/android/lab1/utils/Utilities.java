@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -16,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -34,10 +36,20 @@ import com.example.android.lab1.ui.ReviewActivity;
 import com.example.android.lab1.ui.ScanBarCodeActivity;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.android.SphericalUtil;
 
@@ -65,11 +77,19 @@ public abstract class Utilities {
         ActivityCompat.requestPermissions(activity, new String[]{permission}, callbackRequest);
     }
 
-    public static Intent getSearchBarIntent(Activity activity, LatLng center, Double radius, int selectedFilter) throws GooglePlayServicesNotAvailableException, GooglePlayServicesRepairableException {
-        return new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                .setFilter(new AutocompleteFilter.Builder().setTypeFilter(selectedFilter).build())
-                .setBoundsBias(Utilities.toBounds(center, radius))
-                .build(activity);
+    public static Intent getSearchBarIntent(Activity activity,
+                                            LatLng center,
+                                            Double radius,
+                                            int selectedFilter) throws GooglePlayServicesNotAvailableException, GooglePlayServicesRepairableException {
+        if (center != null && radius != null) {
+            return new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                    .setFilter(new AutocompleteFilter.Builder().setTypeFilter(selectedFilter).build())
+                    .setBoundsBias(Utilities.toBounds(center, radius))
+                    .build(activity);
+        } else
+            return new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                    .setFilter(new AutocompleteFilter.Builder().setTypeFilter(selectedFilter).build())
+                    .build(activity);
     }
 
     public static LatLngBounds toBounds(LatLng center, double radiusInMeters) {
@@ -331,6 +351,54 @@ public abstract class Utilities {
         return (rad * 180.0 / Math.PI);
     }
 
+    public static void enableLoc(final Activity activity) {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(LocationRequest.create());
+        SettingsClient client = LocationServices.getSettingsClient(activity);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+        task.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response =
+                            task.getResult(ApiException.class);
+                } catch (ApiException ex) {
+                    switch (ex.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            try {
+                                ResolvableApiException resolvableApiException =
+                                        (ResolvableApiException) ex;
+                                resolvableApiException
+                                        .startResolutionForResult(activity,
+                                                Constants.PLAY_SERVICES_RESOLUTION_REQUEST);
+                            } catch (IntentSender.SendIntentException e) {
+
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
+    public static void getGoogleAddressSearchBar(Activity container,
+                                                 LatLng location,
+                                                 boolean searchCities,
+                                                 int requestCode) throws GooglePlayServicesNotAvailableException, GooglePlayServicesRepairableException {
+        try {
+            Intent googleAddressSearchBar = Utilities.getSearchBarIntent(container,
+                    location,
+                    Double.valueOf(Integer.toString(container.getResources().getInteger(R.integer.position_radius_address))),
+                    searchCities ? AutocompleteFilter.TYPE_FILTER_CITIES : AutocompleteFilter.TYPE_FILTER_ADDRESS);
+            container.startActivityForResult(googleAddressSearchBar,
+                    requestCode);
+        } catch (GooglePlayServicesNotAvailableException | GooglePlayServicesRepairableException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
 

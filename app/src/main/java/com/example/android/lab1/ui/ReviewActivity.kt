@@ -15,11 +15,9 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.android.lab1.R
-import com.example.android.lab1.model.Book
 import com.example.android.lab1.model.Review
 import com.example.android.lab1.model.User
 import com.example.android.lab1.utils.Utilities
-import com.google.android.gms.tasks.OnFailureListener
 import com.google.firebase.firestore.FirebaseFirestore
 import io.techery.properratingbar.ProperRatingBar
 
@@ -75,52 +73,54 @@ class ReviewActivity : AppCompatActivity() {
 
     private fun setupConfirm() {
         mConfirmButton.setOnClickListener {
-            val failureFunction = {
+            val failureFunction = { exception: Exception ->
                 mUploading = false
                 Toast.makeText(applicationContext,
                         "Errore durante il caricamento, riprovare assicurandosi di avere una connessione ad internet attiva",
                         Toast.LENGTH_SHORT).show()
             }
 
+
+
             if (mRatingBar.rating > 0 && Utilities.isOnline(applicationContext)) {
                 mUploading = true
-
-
-
-                val failureListener = OnFailureListener { failureFunction() }
-
                 val firebaseFirestore = FirebaseFirestore.getInstance()
-
-                firebaseFirestore.collection("loans")
+                val bookReference = firebaseFirestore.collection("history")
                         .document(mBookId)
-                        .get().addOnCompleteListener { task ->
-                            if (task.isSuccessful &&
-                                    task.result.exists() &&
-                                    task.result.toObject(Book::class.java) != null) {
-                                val readBook = task.result.toObject(Book::class.java)!!
-                                firebaseFirestore.collection("users")
-                                        .document(mReviewedId)
-                                        .collection("ratings").add(Review(reviewerId = mReviewerId,
-                                                bookId = mBookId,
-                                                bookTitle = readBook.title,
-                                                text = mCommentEditText.text.toString().trimEnd(),
-                                                fiveStarRating = mRatingBar.rating.toFloat(),
-                                                timestamp = null))
-                                        .addOnCompleteListener { task2 ->
-                                            if (task2.isSuccessful) {
-                                                Toast.makeText(applicationContext,
-                                                        "Recensione pubblicata!",
-                                                        Toast.LENGTH_SHORT).show()
-                                                setResult(RESULT_OK)
-                                                finish()
-                                            }
-                                        }
-                                        .addOnFailureListener(failureListener)
-                            } else {
-                                failureFunction()
-                            }
-                        }
-                        .addOnFailureListener(failureListener)
+                val userReference = firebaseFirestore.collection("users")
+                        .document(mReviewedId)
+                val newRatingReference = userReference.collection("ratings")
+                        .document()
+
+                bookReference.get().addOnSuccessListener { bookSnapshot ->
+                    firebaseFirestore.runTransaction { transaction ->
+                        val user = transaction[userReference]
+                        //val batch = firebaseFirestore.batch()
+                        val newReview = Review(reviewerId = mReviewerId,
+                                bookId = mBookId,
+                                bookTitle = bookSnapshot.get("title").toString(),
+                                text = mCommentEditText.text.toString().trimEnd(),
+                                fiveStarRating = mRatingBar.rating.toFloat(),
+                                timestamp = null)
+                        transaction[newRatingReference] = newReview
+                        val currentRating = user["rating"] as Double
+                        var numRatings = user["numRatings"] as Long
+                        val newRating = (currentRating * numRatings + newReview.fiveStarRating) /
+                                (numRatings + 1)
+                        numRatings++
+                        transaction.update(userReference, mapOf(
+                                Pair("rating", newRating),
+                                Pair("numRatings", numRatings)
+                        ))
+                        //batch.commit()
+                    }.addOnSuccessListener {
+                        Toast.makeText(applicationContext,
+                                "Recensione pubblicata!",
+                                Toast.LENGTH_SHORT).show()
+                        setResult(RESULT_OK)
+                        finish()
+                    }.addOnFailureListener(failureFunction)
+                }.addOnFailureListener(failureFunction)
             } else {
                 Toast.makeText(applicationContext,
                         R.string.express_rating,

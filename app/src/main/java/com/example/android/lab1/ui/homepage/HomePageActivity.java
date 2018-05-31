@@ -18,7 +18,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
@@ -38,8 +37,8 @@ import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.FavoriteBooksActivity;
 import com.example.android.lab1.ui.LoadBookActivity;
-import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
+import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.UserViewModel;
@@ -52,9 +51,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.GeoPoint;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -168,6 +167,7 @@ public class HomePageActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
@@ -240,6 +240,7 @@ public class HomePageActivity extends AppCompatActivity
 
             }
         });
+
 
         mBottomNavigationViewPager.setOffscreenPageLimit(4);
         mFragmentAdapter = new FragmentAdapter(getSupportFragmentManager());
@@ -399,17 +400,17 @@ public class HomePageActivity extends AppCompatActivity
         }
     }
 
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        switch (requestCode) {
-//            case Constants.POSITION_ACTIVITY_REQUEST:
-//                break;
-//            case Constants.PICK_GENRE:
-//                Log.d(TAG, "onActivityResult: passo al fragment");
-//                mCurrentFragment.onActivityResult(requestCode, resultCode, data);
-//                break;
-//        }
-//
-//    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mFragmentAdapter.getCurrentFragment().onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mFragmentAdapter.getCurrentFragment().onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -418,15 +419,35 @@ public class HomePageActivity extends AppCompatActivity
         {
             outState.putBoolean("SHOW_FAB", true);
         }
+        if (mFragmentAdapter.getItem(0) != null) {
+            TabFragment item = mFragmentAdapter.getItem(0);
+            if (item.getFragmentType() == HOME_FRAGMENT) {
+                if (item.getPosition() != null) {
+                    outState.putDouble(Keys.POSITION_LAT.toString(), item.getPosition().getLatitude());
+                    outState.putDouble(Keys.POSITION_LON.toString(), item.getPosition().getLongitude());
+                }
+            }
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if(savedInstanceState.getBoolean("SHOW_FAB", false))
-        {
+        if(savedInstanceState.getBoolean("SHOW_FAB", false)) {
             mFAB.setVisibility(View.VISIBLE);
         }
+        if (mFragmentAdapter.getItem(0) != null &&
+                savedInstanceState.containsKey(Keys.POSITION_LAT.toString()) &&
+                savedInstanceState.containsKey(Keys.POSITION_LON.toString())) {
+            mFragmentAdapter.getItem(0).setPosition(new GeoPoint(
+                    savedInstanceState.getDouble(Keys.POSITION_LAT.toString()),
+                    savedInstanceState.getDouble(Keys.POSITION_LON.toString())
+            ));
+        }
+    }
+
+    private enum Keys {
+        POSITION_LAT, POSITION_LON
     }
 }
 

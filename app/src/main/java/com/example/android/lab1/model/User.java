@@ -18,6 +18,7 @@ public class User implements Parcelable {
     private String mImage;
     private String mShortBio;
     private Float mRating;
+    private Integer mNumRatings;
 
     public User(){}
 
@@ -94,6 +95,7 @@ public class User implements Parcelable {
         mImage = in.readString();
         mShortBio = in.readString();
         mRating = in.readFloat();
+        mNumRatings = (Integer) in.readValue(Integer.class.getClassLoader());
     }
 
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
@@ -115,6 +117,15 @@ public class User implements Parcelable {
         dest.writeString(mImage);
         dest.writeString(mShortBio);
         dest.writeFloat(mRating);
+        dest.writeValue(mNumRatings);
+    }
+
+    public Integer getNumRatings() {
+        return mNumRatings;
+    }
+
+    public void setNumRatings(Integer mNumRatings) {
+        this.mNumRatings = mNumRatings;
     }
 
 

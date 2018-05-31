@@ -168,6 +168,7 @@ public class Book implements Parcelable, Comparable<Book> {
             mTimeInserted = null;
         Log.d("LULLO", "TimeINS ON READ: " + mTimeInserted);
         mSearchTags = in.readString();
+        mLentTo = (String) in.readValue(String.class.getClassLoader());
         Log.d("LULLO", "TAGS ON READ: " + mSearchTags);
         mCondition = (Integer) in.readValue(Integer.class.getClassLoader());
         Log.d("LULLO", "CONDITION ON READ: " + mCondition);
@@ -351,6 +352,7 @@ public class Book implements Parcelable, Comparable<Book> {
             dest.writeString(mSearchTags);
         else
             dest.writeString(DEFAULT_VALUE_STRING);
+        dest.writeValue(mLentTo);
         dest.writeValue(mCondition);
         Log.d("LULLO", "CONDITION ON WRITE: " + mCondition);
         dest.writeValue(mGenre);

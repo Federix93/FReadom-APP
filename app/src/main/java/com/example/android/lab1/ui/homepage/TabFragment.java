@@ -1,10 +1,15 @@
 package com.example.android.lab1.ui.homepage;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.location.Geocoder;
+import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -19,8 +24,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -32,8 +35,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.algolia.search.saas.AbstractQuery;
-import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
 import com.example.android.lab1.R;
@@ -51,7 +52,14 @@ import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -60,15 +68,17 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import static android.app.Activity.RESULT_OK;
 
 public class TabFragment extends Fragment {
 
@@ -92,31 +102,28 @@ public class TabFragment extends Fragment {
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
     FirebaseFirestore mFirebaseFirestore;
-
-    private Index books;
-    private Index users;
-    private Bundle savedState = null;
-
-    private RecyclerView mFirstRecyclerView;
-    private RecyclerView mSecondRecyclerView;
-    private Integer mSelectedGenre;
-    private GeoPoint mCurrentPosition;
-    //YourLibraryFragment variables
-    private RecyclerView mYourLibraryRecyclerView;
     RecyclerYourLibraryAdapter mAdapter;
     RecyclerBookAdapter mFirstRecyclerBookAdapter;
     RecyclerBookAdapter mSecondRecyclerBookAdapter;
     List<Book> mBookIds;
     List<Book> mBookListHomeFragment = new ArrayList<>();
-
-    //LoanFragment variables
-
-    //RequestsFragment variables
-
     //General variables
     FragmentManager mFt = null;
     View fragmentContainer;
     int mFragmentType;
+    private Index books;
+    private Index users;
+    private Bundle savedState = null;
+    private RecyclerView mFirstRecyclerView;
+    private RecyclerView mSecondRecyclerView;
+
+    //LoanFragment variables
+
+    //RequestsFragment variables
+    private Integer mSelectedGenre;
+    private GeoPoint mCurrentPosition;
+    //YourLibraryFragment variables
+    private RecyclerView mYourLibraryRecyclerView;
 
     public static TabFragment newInstance(int fragmentTab) {
 
@@ -174,7 +181,6 @@ public class TabFragment extends Fragment {
         mFirstOtherTextView = view.findViewById(R.id.button_first_recycler_view);
         mSecondOtherTextView = view.findViewById(R.id.button_second_recycler_view);
 
-
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         books = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
         users = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
@@ -192,8 +198,15 @@ public class TabFragment extends Fragment {
         mPositionFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent positionActivityIntent = Utilities.getPositionActivityIntent(getActivity(), true);
-                getActivity().startActivityForResult(positionActivityIntent, Constants.POSITION_ACTIVITY_REQUEST);
+                try {
+                    Utilities.getGoogleAddressSearchBar(getActivity(),
+                            mCurrentPosition == null ? null : new LatLng(mCurrentPosition.getLatitude(),
+                                    mCurrentPosition.getLongitude()),
+                            true,
+                            Constants.ADDRESS_SEARCH_BAR);
+                } catch (GooglePlayServicesNotAvailableException | GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -269,9 +282,102 @@ public class TabFragment extends Fragment {
     }
 
     private void getUserPosition() {
-        /* TODO query firebase to see if user has ever setup position otherwise do
-           TODO a location request asking permission first
-         */
+        if (Utilities.checkPermissionActivity(getActivity(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+            makePositionRequest();
+        } else {
+            Utilities.askPermissionActivity(getActivity(),
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    Constants.POSITION_PERMISSION);
+        }
+    }
+
+    public GeoPoint getPosition() {
+        return mCurrentPosition;
+    }
+
+    public void setPosition(GeoPoint value) {
+        mCurrentPosition = value;
+    }
+
+    @SuppressLint("MissingPermission")
+    private void makePositionRequest() {
+        if (!Utilities.isLocationEnabled(getContext()))
+            Utilities.enableLoc(getActivity());
+        else {
+            LocationServices.getFusedLocationProviderClient(getActivity())
+                    .requestLocationUpdates(LocationRequest.create(),
+                            new LocationCallback() {
+                                @Override
+                                public void onLocationResult(LocationResult locationResult) {
+                                    if (locationResult == null || locationResult.getLocations().size() == 0) {
+                                        return;
+                                    }
+                                    final Location location = locationResult.getLocations().get(0);
+                                    mCurrentPosition = new GeoPoint(location.getLatitude(),
+                                            location.getLongitude());
+                                    resolveLocation(location);
+                                }
+                            }, null);
+        }
+    }
+
+    private void resolveLocation(Location location) {
+        new GeoCodingTask(mPositionFilterButton).execute(new LatLng(
+                location.getLatitude(),
+                location.getLongitude()
+        ));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length > 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                makePositionRequest();
+            } else {
+                try {
+                    Utilities.getGoogleAddressSearchBar(getActivity(),
+                            mCurrentPosition != null ? new LatLng(mCurrentPosition.getLatitude(),
+                                    mCurrentPosition.getLongitude()) : null,
+                            true,
+                            Constants.ADDRESS_SEARCH_BAR);
+                } catch (GooglePlayServicesNotAvailableException | GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void processFilteredResultIntoRecyclerView(JSONObject result, RecyclerView recyclerView) {
+        try {
+            JSONArray hits = result.getJSONArray("hits");
+            if (hits.length() > 0) {
+                final ArrayList<Book> booksDataSet = new ArrayList<>();
+                ArrayList<String> IDs = new ArrayList<>();
+
+                for (int i = 0; i < hits.length(); i++) {
+                    JSONObject jsonBook = hits.optJSONObject(i);
+                    String uid = jsonBook.optString("uid");
+
+                    Book book = new Book();
+                    book.setTitle(jsonBook.optString("title"));
+                    book.setAuthors(jsonBook.optString("author"));
+                    book.setCondition(jsonBook.optInt("conditions"));
+                    book.setWebThumbnail(jsonBook.optString("thumbnail"));
+                    book.setUid(uid);
+                    //IDs.add(jsonBook.optString("objectID"));
+                    JSONObject geoLocation = jsonBook.optJSONObject("_geoloc");
+                    book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
+                    booksDataSet.add(book);
+                }
+
+                recyclerView.setAdapter(new RecyclerBookAdapter(booksDataSet));
+            }
+        } catch (JSONException ex) {
+        }
     }
 
     /*private void queryDatabase() {
@@ -418,32 +524,55 @@ public class TabFragment extends Fragment {
 
     }*/
 
-    private void processFilteredResultIntoRecyclerView(JSONObject result, RecyclerView recyclerView) {
-        try {
-            JSONArray hits = result.getJSONArray("hits");
-            if (hits.length() > 0) {
-                final ArrayList<Book> booksDataSet = new ArrayList<>();
-                ArrayList<String> IDs = new ArrayList<>();
+    private void initYourLibraryFragment(final View view) {
 
-                for (int i = 0; i < hits.length(); i++) {
-                    JSONObject jsonBook = hits.optJSONObject(i);
-                    String uid = jsonBook.optString("uid");
+        fragmentContainer = view.findViewById(R.id.fragment_container);
+        mYourLibraryRecyclerView = view.findViewById(R.id.rv_fragment_books_library);
 
-                    Book book = new Book();
-                    book.setTitle(jsonBook.optString("title"));
-                    book.setAuthors(jsonBook.optString("author"));
-                    book.setCondition(jsonBook.optInt("conditions"));
-                    book.setWebThumbnail(jsonBook.optString("thumbnail"));
-                    book.setUid(uid);
-                    //IDs.add(jsonBook.optString("objectID"));
-                    JSONObject geoLocation = jsonBook.optJSONObject("_geoloc");
-                    book.setGeoPoint(new GeoPoint(geoLocation.optDouble("lat"), geoLocation.optDouble("lng")));
-                    booksDataSet.add(book);
+        final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+
+        BooksViewModel booksViewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(BooksViewModel.class);
+        booksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
+            @Override
+            public void onChanged(@Nullable List<Book> books) {
+                if (books != null) {
+                    updateListOfBooks(books);
                 }
-
-                recyclerView.setAdapter(new RecyclerBookAdapter(booksDataSet));
             }
-        } catch (JSONException ex) {
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Constants.PLAY_SERVICES_RESOLUTION_REQUEST:
+                if (resultCode == RESULT_OK)
+                    makePositionRequest();
+                break;
+            case Constants.ADDRESS_SEARCH_BAR:
+                if (resultCode == RESULT_OK) {
+                    Location location = new Location("google");
+                    LatLng latLng = PlaceAutocomplete.getPlace(getContext(), data).getLatLng();
+                    mCurrentPosition = new GeoPoint(latLng.latitude, latLng.longitude);
+                    location.setLatitude(latLng.latitude);
+                    location.setLongitude(latLng.longitude);
+                    resolveLocation(location);
+                } else {
+                    // keep asking position
+                    if (mCurrentPosition == null) {
+                        try {
+                            Utilities.getGoogleAddressSearchBar(getActivity(),
+                                    mCurrentPosition != null ? new LatLng(mCurrentPosition.getLatitude(),
+                                            mCurrentPosition.getLongitude()) : null,
+                                    true,
+                                    Constants.ADDRESS_SEARCH_BAR);
+                        } catch (GooglePlayServicesNotAvailableException | GooglePlayServicesRepairableException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                break;
         }
     }
 
@@ -520,25 +649,6 @@ public class TabFragment extends Fragment {
 //            queryDatabase();
 //        }
 //    }
-
-    private void initYourLibraryFragment(final View view) {
-
-        fragmentContainer = view.findViewById(R.id.fragment_container);
-        mYourLibraryRecyclerView = view.findViewById(R.id.rv_fragment_books_library);
-
-        final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-
-        BooksViewModel booksViewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(BooksViewModel.class);
-        booksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@Nullable List<Book> books) {
-                if (books != null) {
-                    updateListOfBooks(books);
-                }
-            }
-        });
-
-    }
 
     private void updateListOfBooks(List<Book> books) {
         RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
@@ -671,6 +781,51 @@ public class TabFragment extends Fragment {
                 secondLiveData.removeObserver(this);
             }
         });
+
+    }
+
+    private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
+
+        private AppCompatButton mTarget;
+        private LatLng mParam;
+
+        public GeoCodingTask(AppCompatButton target) {
+            this.mTarget = target;
+        }
+
+        @Override
+        protected String doInBackground(LatLng... latLngs) {
+            if (latLngs.length > 0) {
+                mParam = latLngs[0];
+                Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+                List<android.location.Address> fromLocation = null;
+                try {
+                    if (!isCancelled())
+                        fromLocation = geocoder.getFromLocation(latLngs[0].latitude,
+                                latLngs[0].longitude,
+                                1);
+                    else
+                        return null;
+
+                } catch (IOException e) {
+                    return null;
+                }
+                if (fromLocation == null || fromLocation.size() == 0)
+                    return null;
+                else {
+                    return fromLocation.get(0).getLocality();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (mTarget != null && !this.isCancelled()) {
+                if (s != null)
+                    mTarget.setText(s);
+            }
+        }
 
     }
 
