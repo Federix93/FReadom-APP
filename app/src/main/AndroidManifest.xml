@@ -108,7 +108,8 @@
         <activity android:name=".ui.profile.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
         <activity android:name=".ui.chat.ChatActivity"
-            android:parentActivityName=".ui.homepage.HomePageActivity" />
+            android:parentActivityName=".ui.homepage.HomePageActivity"
+            android:configChanges="orientation"/>
         <activity android:name=".ui.FavoriteBooksActivity"/>
 
         <service android:name=".utils.FirebaseNotificationService"

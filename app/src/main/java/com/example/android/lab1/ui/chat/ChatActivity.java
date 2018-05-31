@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -116,13 +117,13 @@ public class ChatActivity extends AppCompatActivity {
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
     String mPhotoPath;
+    private boolean isObservable = true;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-
         Utilities.setupStatusBarColor(this);
         //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         mMessagesRecyclerView = findViewById(R.id.chat_recyclerView);
@@ -176,18 +177,41 @@ public class ChatActivity extends AppCompatActivity {
         mMessagesRecyclerView.setLayoutManager(layoutManager);
         mMessagesRecyclerView.setNestedScrollingEnabled(false);
 
-        MessagesViewModel messagesViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(MessagesViewModel.class);
-        messagesViewModel.getSnapshotLiveData().observe(this, new Observer<List<Message>>() {
+        final ChatViewModel chatViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(ChatViewModel.class);
+        final MessagesViewModel messagesViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(MessagesViewModel.class);
+
+        final Observer<Message> chatObserver = new Observer<Message>() {
             @Override
-            public void onChanged(@Nullable List<Message> messages) {
-                if(mChatArrayAdapter == null){
-                    mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
-                    mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
-                }else{
+            public void onChanged(@Nullable Message message) {
+                Log.d("LULLO", "uuuuuuuuuuuuuuuuuu");
+                if (mChatArrayAdapter != null && isObservable) {
+                    Log.d("LULLO", "10000000000000");
+                    mChatArrayAdapter.addMessage(message);
+                    mChatArrayAdapter.notifyDataSetChanged();
                     mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+                }else{
+                    isObservable = true;
                 }
             }
-        });
+        };
+
+        final Observer<List<Message>> messageObserver = new Observer<List<Message>>() {
+            @Override
+            public void onChanged(@Nullable List<Message> messages) {
+                Log.d("LULLO", "888888888888888");
+                if (mChatArrayAdapter == null) {
+                    Log.d("LULLO", "999999999999999999999");
+                    mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
+                    mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
+                }
+                mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+                messagesViewModel.getSnapshotLiveData().removeObserver(this);
+                isObservable = false;
+                chatViewModel.getSnapshotLiveData().observe(ChatActivity.this, chatObserver);
+            }
+        };
+        messagesViewModel.getSnapshotLiveData().observe(this, messageObserver);
+
 
 
         final DatabaseReference dbRef = mMessagesReference.child(mChatID);
@@ -235,14 +259,7 @@ public class ChatActivity extends AppCompatActivity {
         };
         dbRef.addValueEventListener(valueEventListener);
 
-        ChatViewModel chatViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(ChatViewModel.class);
-        chatViewModel.getSnapshotLiveData().observe(this, new Observer<Message>() {
-            @Override
-            public void onChanged(@Nullable Message message) {
-                mChatArrayAdapter.addMessage(message);
-                mChatArrayAdapter.notifyDataSetChanged();
-            }
-        });
+
         /*mChildEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -392,6 +409,11 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
@@ -401,6 +423,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
         }
     }
+
 
     public File saveThumbnail() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
