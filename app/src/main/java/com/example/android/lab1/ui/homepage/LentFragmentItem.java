@@ -77,5 +77,6 @@ public class LentFragmentItem extends Fragment {
         });
         return view;
     }
+
 }
 

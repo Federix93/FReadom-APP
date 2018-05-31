@@ -7,42 +7,47 @@ import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BorrowedBooks;
-import com.example.android.lab1.utils.firebaseutils.FirebaseDocumentSnapshotLiveDataFirestore;
+import com.example.android.lab1.utils.firebaseutils.FirebaseQueryLiveDataFirestore;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.List;
 
 public class BorrowedBooksViewModel extends ViewModel {
-    private static final DocumentReference BORROWED_BOOKS_REF = FirebaseFirestore.getInstance()
-            .collection("borrowedBooks")
-            .document(FirebaseAuth.getInstance().getUid());
 
-    private final FirebaseDocumentSnapshotLiveDataFirestore liveData = new FirebaseDocumentSnapshotLiveDataFirestore(BORROWED_BOOKS_REF);
+    Query BORROWED = null;
 
-    private final MediatorLiveData<BorrowedBooks> borrowedBooksLiveData = new MediatorLiveData<>();
+    private FirebaseQueryLiveDataFirestore liveData = null;
+
+    private final MediatorLiveData<List<Book>> borrowedBooksLiveData = new MediatorLiveData<>();
 
     public BorrowedBooksViewModel(){
-        borrowedBooksLiveData.addSource(liveData, new Observer<DocumentSnapshot>() {
+        BORROWED = FirebaseFirestore.getInstance()
+                .collection("loans").whereEqualTo("lentTo", FirebaseAuth.getInstance().getUid());
+        liveData = new FirebaseQueryLiveDataFirestore(BORROWED);
+        borrowedBooksLiveData.addSource(liveData, new Observer<QuerySnapshot>() {
             @Override
-            public void onChanged(@Nullable final DocumentSnapshot snapshot) {
-                if(snapshot != null){
+            public void onChanged(@Nullable final QuerySnapshot queryDocumentSnapshots) {
+                if(queryDocumentSnapshots != null){
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            borrowedBooksLiveData.postValue(snapshot.toObject(BorrowedBooks.class));
+                            borrowedBooksLiveData.postValue(queryDocumentSnapshots.toObjects(Book.class));
                         }
                     }).start();
-                }else{
-                    borrowedBooksLiveData.setValue(null);
                 }
+                else
+                    borrowedBooksLiveData.setValue(null);
             }
         });
     }
 
     @NonNull
-    public LiveData<BorrowedBooks> getSnapshotLiveData(){
+    public LiveData<List<Book>> getSnapshotLiveData(){
         return borrowedBooksLiveData;
     }
 }
