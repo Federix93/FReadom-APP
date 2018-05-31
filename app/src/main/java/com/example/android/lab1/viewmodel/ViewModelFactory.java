@@ -35,7 +35,12 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
             return (T) new ConversationsViewModel(params[0]);
         }else if(modelClass == UserRealtimeDBViewModel.class){
             return (T) new UserRealtimeDBViewModel(params[0]);
-        }else if(modelClass == BooksViewModel.class){
+        }else if(modelClass == ChatViewModel.class){
+            return (T) new ChatViewModel(params[0]);
+        }else if(modelClass == MessagesViewModel.class){
+            return (T) new MessagesViewModel(params[0]);
+        }
+        else if(modelClass == BooksViewModel.class){
             if(geoPoint != null)
                 return (T) new BooksViewModel(geoPoint);
             if(params.length > 0)

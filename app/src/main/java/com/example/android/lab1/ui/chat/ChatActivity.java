@@ -1,6 +1,8 @@
 package com.example.android.lab1.ui.chat;
 
 import android.Manifest;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,6 +11,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -43,6 +46,9 @@ import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.profile.EditProfileActivity;
 import com.example.android.lab1.utils.Utilities;
+import com.example.android.lab1.viewmodel.ChatViewModel;
+import com.example.android.lab1.viewmodel.MessagesViewModel;
+import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -164,21 +170,26 @@ public class ChatActivity extends AppCompatActivity {
                 .bitmapTransform(new CircleCrop()))
                 .into(mToolbarProfileImage);
 
-        final List<Message> chatMessages = new ArrayList<>();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mMessagesRecyclerView.setHasFixedSize(true);
         mMessagesRecyclerView.setLayoutManager(layoutManager);
         mMessagesRecyclerView.setNestedScrollingEnabled(false);
 
-        mChatArrayAdapter = new ChatMessageAdapter(this, chatMessages);
-        mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
-
-        mChatArrayAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+        MessagesViewModel messagesViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(MessagesViewModel.class);
+        messagesViewModel.getSnapshotLiveData().observe(this, new Observer<List<Message>>() {
+            @Override
+            public void onChanged(@Nullable List<Message> messages) {
+                if(mChatArrayAdapter == null){
+                    mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
+                    mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
+                }else{
+                    mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
+                }
             }
         });
+
+
         final DatabaseReference dbRef = mMessagesReference.child(mChatID);
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
@@ -224,7 +235,15 @@ public class ChatActivity extends AppCompatActivity {
         };
         dbRef.addValueEventListener(valueEventListener);
 
-        mChildEventListener = new ChildEventListener() {
+        ChatViewModel chatViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(ChatViewModel.class);
+        chatViewModel.getSnapshotLiveData().observe(this, new Observer<Message>() {
+            @Override
+            public void onChanged(@Nullable Message message) {
+                mChatArrayAdapter.addMessage(message);
+                mChatArrayAdapter.notifyDataSetChanged();
+            }
+        });
+        /*mChildEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Message chatMessage = dataSnapshot.getValue(Message.class);
@@ -252,6 +271,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
         mMessagesReference.child(mChatID).addChildEventListener(mChildEventListener);
+        */
         mStartLoan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -265,7 +285,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setInputLinearLayout() {
-        Log.d("LULLO", "SetInputLinearLayout");
+
         // Enable Send button when there's text to send
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
