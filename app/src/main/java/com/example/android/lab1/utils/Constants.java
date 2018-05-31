@@ -11,4 +11,7 @@ public class Constants {
     public static final int RATING_REQUEST = 10;
     public static final int SHOW_DETAIL = 12;
     public static final int MEMORY_PERMISSION = 13;
+    public static final int POSITION_PERMISSION = 14;
+    public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 15;
+    public static final int ADDRESS_SEARCH_BAR = 50; // avoid collisions
 }

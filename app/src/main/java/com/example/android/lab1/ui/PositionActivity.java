@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
 import android.location.Location;
@@ -33,16 +32,10 @@ import com.example.android.lab1.model.Address;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
@@ -53,8 +46,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,7 +62,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
     private static final int ADDRESS_SEARCH_BAR_REQUEST = 11;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
+    public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 11;
     public static final String SEARCH_CITY_EXTRA = "SEARCH_CITIES_EXTRA";
     public static final String START_SEARCH = "START_SEARCH";
@@ -184,7 +175,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                 == PackageManager.PERMISSION_GRANTED) {
             if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 mLocationSettingWasEnabled = true;
-                enableLoc();
+                Utilities.enableLoc(PositionActivity.this);
             }
         } else {
             ActivityCompat.requestPermissions(this, new String[]{
@@ -261,38 +252,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
-    private void enableLoc() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(LocationRequest.create());
-        SettingsClient client = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-        task.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
-                try {
-                    LocationSettingsResponse response =
-                            task.getResult(ApiException.class);
-                } catch (ApiException ex) {
-                    switch (ex.getStatusCode()) {
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            try {
-                                ResolvableApiException resolvableApiException =
-                                        (ResolvableApiException) ex;
-                                resolvableApiException
-                                        .startResolutionForResult(mSelf,
-                                                PLAY_SERVICES_RESOLUTION_REQUEST);
-                            } catch (IntentSender.SendIntentException e) {
 
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-
-                            break;
-                    }
-                }
-            }
-        });
-    }
 
     @SuppressLint("MissingPermission")
     @Override
@@ -304,7 +264,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
                     if (mMap != null && !mMap.isMyLocationEnabled())
                         mMap.setMyLocationEnabled(true);
                     if (!Utilities.isLocationEnabled(getApplicationContext()))
-                        enableLoc();
+                        Utilities.enableLoc(PositionActivity.this);
                     else
                         getCurrentLocation();
                 } else {
@@ -352,7 +312,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private void getCurrentLocation() {
         if (Utilities.checkPermissionActivity(mSelf, Manifest.permission.ACCESS_FINE_LOCATION)) {
             if (!Utilities.isLocationEnabled(getApplicationContext()))
-                enableLoc();
+                Utilities.enableLoc(PositionActivity.this);
             else
                 // make one time position request
                 LocationServices.getFusedLocationProviderClient(mSelf)
