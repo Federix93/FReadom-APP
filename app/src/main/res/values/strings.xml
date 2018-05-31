@@ -156,7 +156,8 @@
     <string name="confirm_loan_title">Confermi inizio prestito?</string>
     <string name="confirm_loan_text">Una volta confermato le altre chat aperte saranno cancellate. Questo libro non sarà più disponibile da altri utenti finché non terminerai il tuo prestito.</string>
     <string name="loan_button_info_title">Info</string>
-    <string name="loan_button_info_text">Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l\'utente premi il pulsante \"Inizia prestito\"</string>
+    <string name="start_loan_button_info_text">Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l\'utente premi il pulsante \"Inizia prestito\"</string>
+    <string name="end_loan_button_info_text">Il pulsante di fine prestito deve essere premuto una volta che il libro è stato restituito. Una volta premuto il libro tornerà disponibile per nuove richieste</string>
     <string name="end_loan">Termina prestito</string>
     <string name="from_date">Da %1$s</string>
     <string name="to_date">A %1$s</string>
@@ -263,6 +264,6 @@
     <string name="max_photos">Raggiunto limite massimo foto</string>
     <string name="default_message">Ciao %1$s, mi piacerebbe prendere in prestito il libro %2$s</string>
 
-    <string name="history">Storia</string>
+    <string name="history">Storico</string>
     <string name="logout">Logout</string>
 </resources>

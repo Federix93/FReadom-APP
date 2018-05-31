@@ -25,12 +25,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -65,9 +63,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
@@ -413,7 +409,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
                 alertDialog.setTitle(getResources().getString(R.string.loan_button_info_title));
-                alertDialog.setMessage(getResources().getString(R.string.loan_button_info_text));
+                alertDialog.setMessage(getResources().getString(R.string.start_loan_button_info_text));
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -467,7 +463,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
                 alertDialog.setTitle(getResources().getString(R.string.loan_button_info_title));
-                alertDialog.setMessage(getResources().getString(R.string.loan_button_info_text));
+                alertDialog.setMessage(getResources().getString(R.string.end_loan_button_info_text));
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {

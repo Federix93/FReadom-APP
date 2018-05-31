@@ -37,6 +37,7 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.FavoriteBooksActivity;
+import com.example.android.lab1.ui.HistoryActivity;
 import com.example.android.lab1.ui.LoadBookActivity;
 import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.SignInActivity;
@@ -361,6 +362,10 @@ public class HomePageActivity extends AppCompatActivity
                     });
         } else if (id == R.id.nav_favorite) {
             Intent intent = new Intent(this, FavoriteBooksActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+        } else if (id == R.id.nav_history) {
+            Intent intent = new Intent(this, HistoryActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         }

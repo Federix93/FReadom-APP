@@ -16,8 +16,9 @@
             android:title="@string/favorite_title"/>
 
         <item
-            android:id="@+id/history"
+            android:id="@+id/nav_history"
             android:title="@string/history"
+            android:icon="@drawable/ic_history_black_24dp"
             />
         <item
             android:id="@+id/nav_settings"
