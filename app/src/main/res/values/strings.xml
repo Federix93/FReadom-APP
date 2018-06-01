@@ -279,4 +279,5 @@
     <string name="review_published">Recensione pubblicata</string>
     <string name="load_review">Caricamento della recensione…</string>
     <string name="may_have_new_messages">Potresti avere nuovi messaggi</string>
+    <string name="no_books_lent_or_borrowed">Non hai ancora prestato nè preso in prestito alcun libro. Qui troverai uno storico dei tuoi scambi</string>
 </resources>

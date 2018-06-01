@@ -24,6 +24,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -95,7 +99,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private FloatingSearchView mSearchView;
 
-    private LinearLayout mSceneRoot;
     private TextView mIntroTextViewTop;
     private TextView mIntroTextViewBottom;
     private TextView mNoResultsTextViewTop;
@@ -132,7 +135,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         Utilities.setupStatusBarColor(this);
 
         mSearchView = findViewById(R.id.floating_search_view);
-        mSceneRoot = findViewById(R.id.scene_root);
         mIntroTextViewTop = findViewById(R.id.search_book_intro_top);
         mIntroTextViewBottom = findViewById(R.id.search_book_intro_bottom);
         mNoResultsTextViewTop = findViewById(R.id.search_book_no_results_top);
@@ -312,9 +314,11 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     hits = result.optJSONArray("hits");
                     if (hits.length() == 0) {
                         endReached = true;
+
+                        updateNoResultsTextView(booksQuery.getQuery());
                         if (!currentView[NO_RESULTS_VIEW])
                             showNoResultsView();
-                        updateNoResultsTextView(booksQuery.getQuery());
+
 
                         mSearchView.hideProgress();
                         return;
@@ -343,9 +347,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     }
 
                     if (bookUIDs.size() == 0) {
+                        updateNoResultsTextView(booksQuery.getQuery());
                         if (!currentView[NO_RESULTS_VIEW])
                             showNoResultsView();
-                        updateNoResultsTextView(booksQuery.getQuery());
+
 
                         mSearchView.hideProgress();
                         return;
@@ -402,9 +407,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                                         showResultsView();
                                 } else {
                                     endReached = true;
+                                    updateNoResultsTextView(booksQuery.getQuery());
                                     if (!currentView[NO_RESULTS_VIEW])
                                         showNoResultsView();
-                                    updateNoResultsTextView(booksQuery.getQuery());
+
                                 }
                                 mAdapter.notifyDataSetChanged();
                                 mRecyclerView.smoothScrollToPosition(0);
@@ -704,67 +710,60 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private void fadeOutViews(View vOut1, View vOut2, View vOut3, View vIn1, View vIn2, View vIn3) {
 
-        TransitionManager.endTransitions(mSceneRoot);
-        TransitionSet transitionSet = new TransitionSet();
-        transitionSet.addTransition(new Fade());
-        transitionSet.addTransition(new ChangeBounds());
-        TransitionManager.beginDelayedTransition(mSceneRoot, transitionSet);
-        vOut1.setVisibility(View.GONE);
-        if(vOut2 != null) {
-            vOut2.setVisibility(View.GONE);
-        }
-        if(vOut3 != null) {
-            vOut3.setVisibility(View.GONE);
-        }
-        vIn1.setVisibility(View.VISIBLE);
-        if(vIn2 != null) {
-            vIn2.setVisibility(View.VISIBLE);
-        }
-        if(vIn3 != null) {
-            vIn3.setVisibility(View.VISIBLE);
-        }
+        fadeOutAnimation(vOut1);
+        if(vOut2 != null)
+            fadeOutAnimation(vOut2);
+        if(vOut3 != null)
+            fadeOutAnimation(vOut3);
+
+        fadeInAnimation(vIn1);
+        if(vIn2 != null)
+            fadeInAnimation(vIn2);
+        if(vIn3 != null)
+            fadeInAnimation(vIn3);
     }
 
-    private void fadeInViews(final View v1, final View v2, final View v3) {
-        v1.setAlpha(0f);
-//        Log.d("GNIPPO", "V1VISIBLE-> "+((TextView)v1).getText());
-        v1.setVisibility(View.VISIBLE);
 
-        v1.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        if (v2 != null) {
-                            v2.setAlpha(0f);
-                            Log.d("GNIPPO", "V2VISIBLE-> "+((TextView)v2).getText());
-                            v2.setVisibility(View.VISIBLE);
+    public void fadeOutAnimation(final View view) {
+        Animation fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator());
+        fadeOut.setDuration(mShortAnimationDuration);
+        fadeOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setVisibility(View.GONE);
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
 
-                            v2.animate()
-                                    .alpha(1f)
-                                    .setDuration(mShortAnimationDuration)
-                                    .setListener(new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationStart(Animator animation) {
-                                            if (v3 != null) {
-                                                v3.setAlpha(0f);
-                                                Log.d("GNIPPO", "V3VISIBLE-> "+((TextView)v3).getText());
-                                                v3.setVisibility(View.VISIBLE);
-                                                v3.animate()
-                                                        .alpha(1f)
-                                                        .setDuration(mShortAnimationDuration);
-                                            }
-                                        }
-
-                                    });
-                        }
-                    }
-
-                });
-
+        view.startAnimation(fadeOut);
     }
 
+    public void fadeInAnimation(final View view) {
+        Animation fadeIn = new AlphaAnimation(0, 1);
+        fadeIn.setInterpolator(new DecelerateInterpolator());
+        fadeIn.setStartOffset(mShortAnimationDuration/2);
+        fadeIn.setDuration(mShortAnimationDuration);
+        fadeIn.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setVisibility(View.VISIBLE);
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
+        view.startAnimation(fadeIn);
+    }
     @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
