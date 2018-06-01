@@ -58,6 +58,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -323,18 +324,20 @@ public class TabFragment extends Fragment {
                                     final Location location = locationResult.getLocations().get(0);
                                     mCurrentPosition = new GeoPoint(location.getLatitude(),
                                             location.getLongitude());
-                                    resolveLocation(location);
+                                    mPositionFilterButton.setText(R.string.current_position);
+                                    queryDatabase(mCurrentPosition);
+                                    //resolveLocation(location);
                                 }
                             }, null);
         }
     }
 
-    private void resolveLocation(Location location) {
+    /*private void resolveLocation(Location location) {
         new GeoCodingTask(mPositionFilterButton).execute(new LatLng(
                 location.getLatitude(),
                 location.getLongitude()
         ));
-    }
+    }*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -560,11 +563,11 @@ public class TabFragment extends Fragment {
             case Constants.ADDRESS_SEARCH_BAR:
                 if (resultCode == RESULT_OK) {
                     Location location = new Location("google");
-                    LatLng latLng = PlaceAutocomplete.getPlace(getContext(), data).getLatLng();
-                    mCurrentPosition = new GeoPoint(latLng.latitude, latLng.longitude);
-                    location.setLatitude(latLng.latitude);
-                    location.setLongitude(latLng.longitude);
-                    resolveLocation(location);
+                    Place place = PlaceAutocomplete.getPlace(getContext(), data);
+                    mCurrentPosition = new GeoPoint(place.getLatLng().latitude, place.getLatLng().longitude);
+                    mPositionFilterButton.setText(place.getName());
+                    queryDatabase(mCurrentPosition);
+                    //resolveLocation(location);
                 } else {
                     // keep asking position
                     if (mCurrentPosition == null) {
@@ -792,7 +795,7 @@ public class TabFragment extends Fragment {
 
     }*/
 
-    private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
+    /*private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
 
         private AppCompatButton mTarget;
         private LatLng mParam;
@@ -805,7 +808,7 @@ public class TabFragment extends Fragment {
         protected String doInBackground(LatLng... latLngs) {
             if (latLngs.length > 0) {
                 mParam = latLngs[0];
-                Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+                Geocoder geocoder = new Geocoder(, Locale.getDefault());
                 List<android.location.Address> fromLocation = null;
                 try {
                     if (!isCancelled())
@@ -836,7 +839,7 @@ public class TabFragment extends Fragment {
                 }
             }
         }
-    }
+    }*/
 
     public void queryDatabase(GeoPoint geoPoint) {
         GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),

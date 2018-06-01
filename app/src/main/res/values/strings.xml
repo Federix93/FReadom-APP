@@ -272,4 +272,5 @@
     <string name="to">A:</string>
     <string name="from">Da:</string>
     <string name="review_exchange">Recensisci scambio</string>
+    <string name="current_position">POSIZIONE</string>
 </resources>

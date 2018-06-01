@@ -191,5 +191,6 @@
     <string name="to">To:</string>
     <string name="from">From:</string>
     <string name="review_exchange">Review loan</string>
+    <string name="current_position">POSITION</string>
 
 </resources>
