@@ -174,6 +174,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         if(mBook == null) {
             Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
             finish();
+            return;
         }/*
         if(mBook.isAlreadyLent()){
             mBookButton.setText(getResources().getString(R.string.book_not_available));
@@ -311,9 +312,14 @@ public class BookDetailsActivity extends AppCompatActivity {
                             mUsernameTextView.setText(mUser.getUsername());
                         }
                         if (Float.compare(mUser.getRating(), 0) != 0) {
-                            mRatingTextView.setText(String.valueOf(mUser.getRating()));
+                            mRatingTextView.setText(String.format(Locale.getDefault(),
+                                    "%.1f", mUser.getRating()));
+                            Glide.with(BookDetailsActivity.this).load(R.drawable.ic_star_orange_24dp).into(mStarImageView);
                         } else {
                             mRatingTextView.setText(getResources().getString(R.string.not_rated_yet));
+                            Glide.with(BookDetailsActivity.this)
+                                    .load(R.drawable.ic_star_empty_24dp)
+                                    .into(mStarImageView);
                         }
                         setupOnClickListeners();
                     }

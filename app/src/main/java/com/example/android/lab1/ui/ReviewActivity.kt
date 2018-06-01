@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import android.support.v7.widget.Toolbar
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -18,6 +19,7 @@ import com.example.android.lab1.R
 import com.example.android.lab1.model.Review
 import com.example.android.lab1.model.User
 import com.example.android.lab1.utils.Utilities
+import com.firebase.ui.auth.ui.ProgressDialogHolder
 import com.google.firebase.firestore.FirebaseFirestore
 import io.techery.properratingbar.ProperRatingBar
 
@@ -29,12 +31,26 @@ class ReviewActivity : AppCompatActivity() {
     private lateinit var mToolbar: Toolbar
     private lateinit var mUserPhotoImageView: ImageView
     private lateinit var mUserName: TextView
+    private var mProgressDialog : ProgressDialogHolder? = null
 
     private lateinit var mReviewerId: String
     private lateinit var mReviewedId: String
     private lateinit var mBookId: String
 
     private var mUploading: Boolean = false
+    set(value) {
+        field = value
+        if (value) {
+            mProgressDialog = ProgressDialogHolder(this)
+            mProgressDialog?.showLoadingDialog(R.string.load_review)
+        }
+        else
+        {
+            if (mProgressDialog != null &&
+                    mProgressDialog!!.isProgressDialogShowing)
+                mProgressDialog!!.dismissDialog()
+        }
+    }
     private var mUserImageUrl: String? = null
 
     object Keys {
