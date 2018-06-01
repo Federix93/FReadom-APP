@@ -875,7 +875,7 @@ public class TabFragment extends Fragment {
 
         final GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
-                (double) 60000);
+                (double) 15000);
         Query query2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
                 .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
         secondListener = query2.addSnapshotListener(new EventListener<QuerySnapshot>() {
