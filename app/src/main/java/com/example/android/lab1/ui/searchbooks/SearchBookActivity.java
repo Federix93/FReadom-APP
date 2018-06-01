@@ -300,13 +300,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
         booksQuery.setQuery(searchString);
         mSearchView.showProgress();
-        Log.d("GNIPPO", "Ma che cazz0000");
         booksIndex.searchAsync(booksQuery, new CompletionHandler() {
             @Override
             public void requestCompleted(final JSONObject result, AlgoliaException error) {
-                Log.d("GNIPPO", "Supercomincio00");
                 if (result != null && error == null) {
-                    Log.d("GNIPPO", "Comincio");
                     if (currentSearchSeqNo <= lastDisplayedSeqNo) {
                         mSearchView.hideProgress();
                         return;
@@ -323,7 +320,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         mSearchView.hideProgress();
                         return;
                     }
-                    Log.d("GNIPPO", "Continuo1");
                     final ArrayList<BookSearchItem> booksDataSet = new ArrayList<>();
                     Set<String> bookUIDs = new HashSet<>();
 
@@ -417,14 +413,12 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                                 mSearchView.hideProgress();
 
                             } else if (e != null) {
-                                Log.d("GNIPPO", "E != null");
                                 manageSearchError();
                             }
                         }
 
                     });
                 } else if (error != null) {
-                    Log.d("GNIPPO", "Error != null");
                     manageSearchError();
                 }
 
@@ -597,7 +591,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private void manageSearchError() {
         mSearchView.hideProgress();
-        Log.d("GNIPPO", "Ci entro???");
 
         if (Utilities.isOnline(SearchBookActivity.this)) {
             if (!currentView[UNKNOWN_ERROR_VIEW])

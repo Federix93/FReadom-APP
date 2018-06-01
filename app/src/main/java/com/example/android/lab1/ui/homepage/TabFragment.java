@@ -224,7 +224,11 @@ public class TabFragment extends Fragment {
         mFirstOtherTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                Intent moreIntent = new Intent(getActivity(), MoreActivity.class);
+                moreIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                moreIntent.putExtra("latitude", mCurrentPosition.getLatitude());
+                moreIntent.putExtra("longitude", mCurrentPosition.getLongitude());
+                startActivity(moreIntent);
             }
         });
 
