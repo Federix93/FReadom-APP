@@ -3,7 +3,6 @@ package com.example.android.lab1.ui.chat;
 import android.Manifest;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.app.Notification;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -50,12 +49,12 @@ import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.ui.listeners.RatingActivityOpener;
 import com.example.android.lab1.utils.Constants;
-import com.example.android.lab1.ui.profile.EditProfileActivity;
 import com.example.android.lab1.utils.NotificationUtilities;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.ChatViewModel;
 import com.example.android.lab1.viewmodel.MessagesViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -67,7 +66,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
@@ -116,8 +114,8 @@ public class ChatActivity extends AppCompatActivity {
     TextView mNoMessagesReceiverTextView;
     LinearLayout mInputTextLinearLayout;
 
-    AppCompatButton mStartLoan;
-    AppCompatButton mEndLoan;
+    AppCompatButton mStartLoanButton;
+    AppCompatButton mEndLoanButton;
     LinearLayout mInfoStartLoanLayout;
     LinearLayout mInfoEndLoanLayout;
     TextView mFromText;
@@ -162,9 +160,9 @@ public class ChatActivity extends AppCompatActivity {
         mFirebaseStorage = FirebaseStorage.getInstance();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
-        mStartLoan = findViewById(R.id.start_loan_button);
+        mStartLoanButton = findViewById(R.id.start_loan_button);
         mInfoStartLoanLayout = findViewById(R.id.info_button_layout);
-        mEndLoan = findViewById(R.id.end_loan_button);
+        mEndLoanButton = findViewById(R.id.end_loan_button);
         mInfoEndLoanLayout = findViewById(R.id.info_button_layout_end);
         mFromText = findViewById(R.id.from_text);
         mToText = findViewById(R.id.to_text);
@@ -378,7 +376,7 @@ public class ChatActivity extends AppCompatActivity {
         };
         dbRef.addValueEventListener(valueEventListener);
 
-        mStartLoan.setOnClickListener(new View.OnClickListener() {
+        mStartLoanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
@@ -401,7 +399,7 @@ public class ChatActivity extends AppCompatActivity {
                 alertDialog.show();
             }
         });
-        mEndLoan.setOnClickListener(new View.OnClickListener() {
+        mEndLoanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -411,12 +409,13 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mEndLoanLayout.setVisibility(GONE);
+                        final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(ChatActivity.this);
+                        progressDialogHolder.showLoadingDialog(R.string.end_loan_progress);
                         mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot != null) {
                                     mOtherPerson = (String) dataSnapshot.getValue();
-                                    Log.d("VINCI", "onDataChange: " + mOtherPerson);
                                     if (mOtherPerson != null) {
                                         final DocumentReference docHistoryRef = mFirebaseFirestore.collection("history").document();
                                         final String id = docHistoryRef.getId();
@@ -430,14 +429,13 @@ public class ChatActivity extends AppCompatActivity {
                                                     if (book != null) {
                                                         docHistoryRef.set(book, SetOptions.merge());
                                                         DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(book.getBookID());
-
                                                         book.setLoanStart(Long.valueOf(-1));
                                                         book.setLoanEnd(Long.valueOf(-1));
                                                         book.setLentTo(null);
                                                         docBookRef.set(book, SetOptions.merge());
-
                                                         docLoansRef.delete();
-                                                        Log.d("VINCI", "Document id: "+ id);
+                                                        if(progressDialogHolder.isProgressDialogShowing())
+                                                            progressDialogHolder.dismissDialog();
                                                         RatingActivityOpener ratingActivityOpener = new RatingActivityOpener(ChatActivity.this, mFirebaseAuth.getUid(), mOtherPerson, book.getBookID());
                                                         ratingActivityOpener.onClick(v);
                                                     }
@@ -657,6 +655,8 @@ public class ChatActivity extends AppCompatActivity {
                 break;
             case CalendarActivity.CHOOSE_DATE:
                 if (resultCode == RESULT_OK && data != null) {
+                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(this);
+                    progressDialogHolder.showLoadingDialog(R.string.start_loan_progress);
                     final long firstDate;
                     final long lastDate;
                     if (data.getExtras().getLong(CalendarActivity.FIRST_DATE) != 0 && data.getExtras().getLong(CalendarActivity.LAST_DATE) != 0) {
@@ -680,7 +680,6 @@ public class ChatActivity extends AppCompatActivity {
                                                         book.setLentTo(mOtherPerson);
                                                         final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBookID);
                                                         docLoanRef.set(book, SetOptions.merge());
-
                                                         final DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(mBookID);
                                                         docBookRef.delete();
                                                         DocumentReference reqDone = mFirebaseFirestore.collection("requestsDone").document(mOtherPerson).collection("books").document(mBookID);
@@ -689,6 +688,8 @@ public class ChatActivity extends AppCompatActivity {
                                                         reqReceived.delete();
                                                         Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                                                         boolean startLoan = true;
+                                                        if(progressDialogHolder.isProgressDialogShowing())
+                                                            progressDialogHolder.dismissDialog();
                                                         intent.putExtra("LoanStart", startLoan);
                                                         startActivity(intent);
                                                         finish();

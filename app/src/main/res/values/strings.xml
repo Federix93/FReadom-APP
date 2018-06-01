@@ -273,4 +273,7 @@
     <string name="from">Da:</string>
     <string name="review_exchange">Recensisci scambio</string>
     <string name="current_position">POSIZIONE</string>
+    <string name="start_loan_progress">Inizio del prestito in corso...</string>
+    <string name="end_loan_progress">Fine del prestito in corso...</string>
+
 </resources>
