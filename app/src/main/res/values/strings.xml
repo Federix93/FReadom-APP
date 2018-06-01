@@ -267,4 +267,9 @@
     <string name="history">Storico</string>
     <string name="logout">Logout</string>
     <string name="open_conversations"><![CDATA[Apri\nconversazioni]]></string>
+    <string name="you_borrowed">Hai prestato:</string>
+    <string name="you_lent">Hai ricevuto:</string>
+    <string name="to">A:</string>
+    <string name="from">Da:</string>
+    <string name="review_exchange">Recensisci scambio</string>
 </resources>
