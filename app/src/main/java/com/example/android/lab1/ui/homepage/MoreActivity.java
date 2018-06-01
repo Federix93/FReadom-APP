@@ -17,6 +17,7 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
@@ -32,7 +33,7 @@ public class MoreActivity extends AppCompatActivity {
     private GeoPoint mCurrentPosition;
     private Toolbar mToolbar;
     private AppCompatButton button;
-    private String mNodeID = null;
+    private DocumentSnapshot lastVisible;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -60,8 +61,7 @@ public class MoreActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("GNIPPO", "onClick: LastItemID= "+mAdapter.getLastItemId());
-                queryDatabase(mCurrentPosition, mAdapter.getLastItemId());
+                queryDatabase(mCurrentPosition);
             }
         });
 
@@ -78,6 +78,7 @@ public class MoreActivity extends AppCompatActivity {
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 List<Book> books = new ArrayList<>();
                 if (queryDocumentSnapshots != null) {
+                    lastVisible = queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size() -1);
                     for (Book b : queryDocumentSnapshots.toObjects(Book.class)) {
                         if (!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/) {
                             books.add(b);
@@ -92,13 +93,13 @@ public class MoreActivity extends AppCompatActivity {
         });
     }
 
-    public void queryDatabase(GeoPoint currentPosition, String nodeID) {
+    public void queryDatabase(GeoPoint currentPosition) {
         GeoPoint[] geoPoint = Utilities.buildBoundingBox(currentPosition.getLatitude(),
                 currentPosition.getLongitude(),
                 (double) 15000);
         Log.d("GNIPPO", "Buildo la query");
         Query query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", geoPoint[0])
-                .whereLessThan("geoPoint", geoPoint[1]).orderBy("geoPoint").startAt(nodeID).limit(3);
+                .whereLessThan("geoPoint", geoPoint[1]).orderBy("geoPoint").startAfter(lastVisible).limit(3);
         Log.d("GNIPPO", "Lancio la query");
         query.get().addOnSuccessListener(this, new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -106,6 +107,7 @@ public class MoreActivity extends AppCompatActivity {
                 Log.d("GNIPPO", "Onsuccess!!!");
                 List<Book> books = new ArrayList<>();
                 if (queryDocumentSnapshots != null) {
+                    lastVisible = queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size() -1);
                     for (Book b : queryDocumentSnapshots.toObjects(Book.class)) {
                         if (!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/) {
                             books.add(b);
@@ -113,7 +115,6 @@ public class MoreActivity extends AppCompatActivity {
                         }
                     }
                     mAdapter.addAll(books);
-                    mAdapter.notifyDataSetChanged();
 
                 }
             }
