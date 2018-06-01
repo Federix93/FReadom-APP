@@ -94,6 +94,26 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
     private final static String ALGOLIA_BOOK_INDEX = "books";
+    private static final String ACTIVITY_STATE = "ACTIVITY_STATE";
+    public static final String BOOK = "BOOK";
+    private static final String PHOTOS_KEY = "PHOTOS_KEY";
+    private static final String PUBLISH_YEAR_SPINNER = "PUBLISH_YEAR_SPINNER";
+    private static final String CONDITION_SPINNER = "CONDITION_SPINNER";
+    private static final String GENRE_SPINNER = "GENRE_SPINNER";
+    private static final String ISBN = "ISBN";
+    private static final String CURRENT_PHOTO = "CURRENT_PHOTO";
+    private static final String UPLOADING = "UPLOADING";
+    private static final String AUTHORS = "AUTHORS";
+    private static final String AUTHORS_EDITABLE = "AUTHORS_EDITABLE";
+    private static final String TAGS = "TAGS";
+    private static final String EDITING = "EDITING";
+    private static final String MARKED_TO_BE_REMOVED = "MARKED_TO_BE_REMOVED";
+    private static final String CURRENT_TAG = "CURRENT_TAG";
+    private static final String CURRENT_PUBLISHER = "CURRENT_PUBLISHER";
+    private static final int ISBN_CHOICE = 1;
+    private static final int ISBN_MANUALLY = 2;
+    private static final int ISBN_ACQUIRED = 3;
+    private static final int EDIT_BOOK = 4;
     /*Algolia connection variables*/
     Client algoliaClient;
     Index algoliaIndex;
@@ -123,7 +143,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private Book mResultBook;
     private List<String> mTags;
     private File mPhotoFile;
-    private State mActivityState;
+    private Integer mActivityState;
     private boolean mUploading;
     private AppCompatButton mConfirmButton;
     private int mProgressRate;
@@ -131,49 +151,48 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     private Book mBeforeEditBook;
     private ArrayList<String> mMarkedToBeRemoved;
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mMarkedToBeRemoved != null)
-            outState.putStringArrayList(Keys.MARKED_TO_BE_REMOVED.toString(),
+            outState.putStringArrayList(MARKED_TO_BE_REMOVED,
                     mMarkedToBeRemoved);
         if (mBeforeEditBook != null)
-            outState.putParcelable(Keys.EDITING.toString(), mBeforeEditBook);
+            outState.putParcelable(EDITING, mBeforeEditBook);
         if (mActivityState != null)
-            outState.putString(Keys.ACTIVITY_STATE.toString(), mActivityState.toString());
-        if (mActivityState != null && mActivityState.equals(State.ISBN_MANUALLY) && mIsbnEditText != null)
-            outState.putString(Keys.ISBN.toString(), mIsbnEditText.getText().toString());
+            outState.putInt(ACTIVITY_STATE, mActivityState);
+        if (mActivityState != null && mActivityState.equals(ISBN_MANUALLY) && mIsbnEditText != null)
+            outState.putString(ISBN, mIsbnEditText.getText().toString());
         if (mResultBook != null)
-            outState.putParcelable(Keys.BOOK.toString(), mResultBook);
+            outState.putParcelable(BOOK, mResultBook);
         if (mPhotosPath != null)
-            outState.putStringArrayList(Keys.PHOTOS_KEY.toString(), (ArrayList<String>) mPhotosPath);
+            outState.putStringArrayList(PHOTOS_KEY, (ArrayList<String>) mPhotosPath);
         if (mTags != null)
-            outState.putStringArrayList(Keys.TAGS.toString(), (ArrayList<String>) mTags);
+            outState.putStringArrayList(TAGS, (ArrayList<String>) mTags);
         if (mPublishYearSpinner.getSelectedItemPosition() > 0)
-            outState.putInt(Keys.PUBLISH_YEAR_SPINNER.toString(), mPublishYearSpinner.getSelectedItemPosition());
+            outState.putInt(PUBLISH_YEAR_SPINNER, mPublishYearSpinner.getSelectedItemPosition());
         if (mConditionsSpinner.getSelectedItemPosition() > 0)
-            outState.putInt(Keys.CONDITION_SPINNER.toString(), mConditionsSpinner.getSelectedItemPosition());
+            outState.putInt(CONDITION_SPINNER, mConditionsSpinner.getSelectedItemPosition());
         if (mGenreSpinner.getSelectedItemPosition() > 0)
-            outState.putInt(Keys.GENRE_SPINNER.toString(), mGenreSpinner.getSelectedItemPosition());
+            outState.putInt(GENRE_SPINNER, mGenreSpinner.getSelectedItemPosition());
         if (mPhotoFile != null)
-            outState.putString(Keys.CURRENT_PHOTO.toString(), mPhotoFile.getAbsolutePath());
+            outState.putString(CURRENT_PHOTO, mPhotoFile.getAbsolutePath());
         if (mAuthorsListView != null && mAuthorsListView.getAdapter() != null) {
             AuthorAdapter ph = (AuthorAdapter) mAuthorsListView.getAdapter();
             if (ph.getAuthors() != null) {
-                outState.putStringArrayList(Keys.AUTHORS.toString(), ph.getAuthors());
-                outState.putBoolean(Keys.AUTHORS_EDITABLE.toString(), ph.isEditable());
+                outState.putStringArrayList(AUTHORS, ph.getAuthors());
+                outState.putBoolean(AUTHORS_EDITABLE, ph.isEditable());
             }
         }
         if (mTagsTextInputLayout != null && mTagsTextInputLayout.getEditText() != null)
-            outState.putString(Keys.CURRENT_TAG.toString(), mTagsTextInputLayout.getEditText()
+            outState.putString(CURRENT_TAG, mTagsTextInputLayout.getEditText()
                     .getText()
                     .toString());
         if (mPublisherTextInputLayout != null && mPublisherTextInputLayout.getEditText() != null)
-            outState.putString(Keys.CURRENT_PUBLISHER.toString(), mPublisherTextInputLayout.getEditText()
+            outState.putString(CURRENT_PUBLISHER, mPublisherTextInputLayout.getEditText()
                     .getText()
                     .toString());
-        outState.putBoolean(Keys.UPLOADING.toString(), mUploading);
+        outState.putBoolean(UPLOADING, mUploading);
     }
 
     private void errorDownloadApi(boolean bookNotFound) {
@@ -185,9 +204,16 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 Toast.LENGTH_SHORT).show();
     }
 
+    /*private void showSnackBar(int messageResourceId) {
+        Snackbar.make(findViewById(R.id.load_book_coordinator_root),
+                messageResourceId,
+                Snackbar.LENGTH_SHORT)
+                .show();
+    }*/
+
     private void makeRequestBookApi(final String isbn, final boolean alternativeEndPoint) {
         mInsertManuallyButton.setOnClickListener(null);
-        if (mActivityState == State.ISBN_MANUALLY)
+        if (mActivityState == ISBN_MANUALLY)
             Utilities.hideKeyboard(getApplicationContext(), LoadBookActivity.this);
         final ProgressBar mProgressBar = findViewById(R.id.load_book_progress_bar);
         mProgressBar.setVisibility(View.VISIBLE);
@@ -277,7 +303,11 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         else if (book.has("canonicalVolumeLink"))
                             mResultBook.setInfoLink(book.getString("canonicalVolumeLink"));
 
-                        mActivityState = State.ISBN_ACQUIRED;
+                        mActivityState = ISBN_ACQUIRED;
+                        mTags = new ArrayList<>();
+                        mTagsRecyclerView.setAdapter(new TagsAdapter(mTags));
+                        mPhotosPath = new ArrayList<>();
+                        mPhotosRecyclerView.setAdapter(new PhotosAdapter(mPhotosPath));
                         updateUI(mResultBook);
                         updateActivityState();
                     } else {
@@ -312,20 +342,17 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
 
         // urgent InstanceState to restore
         if (savedInstanceState != null) {
-            mActivityState = savedInstanceState.containsKey(Keys.ACTIVITY_STATE.toString()) ?
-                    State.valueOf(savedInstanceState.getString(Keys.ACTIVITY_STATE.toString()))
-                    : null;
-            mPhotosPath = savedInstanceState.containsKey(Keys.PHOTOS_KEY.toString()) ?
-                    savedInstanceState.getStringArrayList(Keys.PHOTOS_KEY.toString()) : null;
+            mActivityState = savedInstanceState.getInt(ACTIVITY_STATE);
+            mPhotosPath = savedInstanceState.getStringArrayList(PHOTOS_KEY);
         }
         // check if edit mode
         if (getIntent() != null &&
-                getIntent().hasExtra(Keys.BOOK.toString()) &&
+                getIntent().hasExtra(BOOK) &&
                 mActivityState == null) {
             // edit book
-            mBeforeEditBook = getIntent().getParcelableExtra(Keys.BOOK.toString());
+            mBeforeEditBook = getIntent().getParcelableExtra(BOOK);
             mResultBook = new Book(mBeforeEditBook);
-            mActivityState = State.EDIT_BOOK;
+            mActivityState = EDIT_BOOK;
             if (mResultBook.getUserBookPhotosStoragePath() != null)
                 mPhotosPath = mResultBook.getUserBookPhotosStoragePath();
             if (mResultBook.getTags() != null)
@@ -333,7 +360,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                         .asList(TextUtils.split(mResultBook.getTags(), " ")));
 
         } else if (mActivityState == null) {
-            mActivityState = State.ISBN_CHOICE;
+            mActivityState = ISBN_CHOICE;
         }
         initializeWidgets();
         if (mBeforeEditBook != null && savedInstanceState == null)
@@ -410,79 +437,78 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mMarkedToBeRemoved = savedInstanceState.containsKey(Keys.MARKED_TO_BE_REMOVED.toString()) ?
-                savedInstanceState.getStringArrayList(Keys.MARKED_TO_BE_REMOVED.toString()) : null;
-        mBeforeEditBook = savedInstanceState.containsKey(Keys.EDITING.toString()) ?
-                (Book) savedInstanceState.getParcelable(Keys.EDITING.toString()) : null;
+        mMarkedToBeRemoved = savedInstanceState.getStringArrayList(MARKED_TO_BE_REMOVED);
+        mBeforeEditBook = savedInstanceState.getParcelable(EDITING);
         if (mBeforeEditBook != null) updateUI(mBeforeEditBook);
-        setUploading(savedInstanceState.getBoolean(Keys.UPLOADING.toString()));
-        if (savedInstanceState.containsKey(Keys.ACTIVITY_STATE.toString()))
-            mActivityState = State.valueOf(savedInstanceState.getString(Keys.ACTIVITY_STATE.toString()));
-        if (savedInstanceState.containsKey(Keys.ISBN.toString()) && mIsbnEditText != null)
-            mIsbnEditText.setText(savedInstanceState.getString(Keys.ISBN.toString()));
-        mTags = savedInstanceState.containsKey(Keys.TAGS.toString()) ?
-                savedInstanceState.getStringArrayList(Keys.TAGS.toString()) : null;
+        setUploading(savedInstanceState.getBoolean(UPLOADING));
+        mActivityState = savedInstanceState.getInt(ACTIVITY_STATE);
+        if (mIsbnEditText != null)
+            mIsbnEditText.setText(savedInstanceState.getString(ISBN));
+        mTags = savedInstanceState.getStringArrayList(TAGS);
+        if (mTags == null)
+            mTags = new ArrayList<>();
         mTagsRecyclerView.setAdapter(new TagsAdapter(mTags));
-        mPhotoFile = savedInstanceState.containsKey(Keys.CURRENT_PHOTO.toString()) ?
-                new File(Objects.requireNonNull(savedInstanceState.getString(Keys.CURRENT_PHOTO.toString()))) : null;
+        mPhotoFile = savedInstanceState.containsKey(CURRENT_PHOTO) ?
+                new File(Objects.requireNonNull(savedInstanceState.getString(CURRENT_PHOTO))) : null;
 
-        if ((mActivityState.equals(State.ISBN_ACQUIRED) || mActivityState.equals(State.EDIT_BOOK)) &&
-                savedInstanceState.containsKey(Keys.BOOK.toString())) {
-            mResultBook = savedInstanceState.getParcelable(Keys.BOOK.toString());
-            if (mResultBook != null && mResultBook.getWebThumbnail() != null && mBookWebThumbnailImageView != null)
-                Glide.with(getApplicationContext())
-                        .load(mResultBook.getWebThumbnail())
-                        .into(mBookWebThumbnailImageView);
-            else
-                Glide.with(getApplicationContext())
-                        .load(R.drawable.book_thumbnail_placeholder)
-                        .into(mBookWebThumbnailImageView);
+        if ((mActivityState.equals(ISBN_ACQUIRED) || mActivityState.equals(EDIT_BOOK)) &&
+                savedInstanceState.containsKey(BOOK)) {
+            mResultBook = savedInstanceState.getParcelable(BOOK);
+            if (mResultBook != null) {
+                if (mResultBook.getWebThumbnail() != null && mBookWebThumbnailImageView != null)
+                    Glide.with(getApplicationContext())
+                            .load(mResultBook.getWebThumbnail())
+                            .into(mBookWebThumbnailImageView);
+                else if (mBookWebThumbnailImageView != null)
+                    Glide.with(getApplicationContext())
+                            .load(R.drawable.book_thumbnail_placeholder)
+                            .into(mBookWebThumbnailImageView);
 
-            if (mResultBook != null && mResultBook.getIsbn() != null && mIsbnEditText != null &&
-                    mResultBook.getIsbn().length() > 0)
-                mIsbnEditText.setText(mResultBook.getIsbn());
-            if (mResultBook != null && mResultBook.getTitle() != null) {
+                if (mIsbnEditText != null && mResultBook.getIsbn() != null &&
+                        mResultBook.getIsbn().length() > 0)
+                    mIsbnEditText.setText(mResultBook.getIsbn());
                 mCurrentTitle = mResultBook.getTitle();
                 if (mTitleTextView != null) {
                     mTitleTextView.setText(mCurrentTitle);
                 }
+
+                if (mResultBook.getAuthors() != null) {
+                    String[] authors = mResultBook.getAuthors().split(",");
+                    ArrayList<String> authorsList = new ArrayList<>();
+                    Collections.addAll(authorsList, authors);
+                    mAuthorsListView.setAdapter(new AuthorAdapter(getApplicationContext(), authorsList));
+                }
+
+                if (mResultBook.getPublisher() != null && mPublisherTextInputLayout != null &&
+                        mPublisherTextInputLayout.getEditText() != null) {
+                    mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
+                    mPublisherTextInputLayout.getEditText().setEnabled(false);
+                } else if (mPublisherTextInputLayout != null && mPublisherTextInputLayout.getEditText() != null &&
+                        savedInstanceState.containsKey(CURRENT_PUBLISHER))
+                    mPublisherTextInputLayout.getEditText().setText(savedInstanceState.getString(CURRENT_PUBLISHER));
+
+                if (mResultBook.getPublishYear() != null && mPublishYearSpinner != null) {
+                    int currentYear, publishYear;
+                    currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                    publishYear = mResultBook.getPublishYear();
+                    mPublishYearSpinner.setSelection(currentYear + 1 - publishYear);
+                    mPublishYearSpinner.setEnabled(false);
+                } else if (mPublishYearSpinner != null)
+                    mPublishYearSpinner.setEnabled(true);
+
+                if (mPositionTextView != null)
+                    mPositionTextView.setText(mResultBook.getAddress());
             }
-            if (mResultBook != null && mResultBook.getAuthors() != null) {
-                String[] authors = mResultBook.getAuthors().split(",");
-                ArrayList<String> authorsList = new ArrayList<>();
-                Collections.addAll(authorsList, authors);
-                mAuthorsListView.setAdapter(new AuthorAdapter(getApplicationContext(), authorsList));
-            }
+            if (savedInstanceState.containsKey(CONDITION_SPINNER) && mConditionsSpinner != null)
+                mConditionsSpinner.setSelection(savedInstanceState.getInt(CONDITION_SPINNER));
+            if (savedInstanceState.containsKey(GENRE_SPINNER) && mGenreSpinner != null)
+                mGenreSpinner.setSelection(savedInstanceState.getInt(GENRE_SPINNER));
 
-            if (mResultBook != null && mResultBook.getPublisher() != null && mPublisherTextInputLayout != null &&
-                    mPublisherTextInputLayout.getEditText() != null) {
-                mPublisherTextInputLayout.getEditText().setText(mResultBook.getPublisher());
-                mPublisherTextInputLayout.getEditText().setEnabled(false);
-            } else if (mPublisherTextInputLayout != null && mPublisherTextInputLayout.getEditText() != null &&
-                    savedInstanceState.containsKey(Keys.CURRENT_PUBLISHER.toString()))
-                mPublisherTextInputLayout.getEditText().setText(savedInstanceState.getString(Keys.CURRENT_PUBLISHER.toString()));
-
-            if (mResultBook != null && mResultBook.getPublishYear() != null && mPublishYearSpinner != null) {
-                int currentYear, publishYear;
-                currentYear = Calendar.getInstance().get(Calendar.YEAR);
-                publishYear = mResultBook.getPublishYear();
-                mPublishYearSpinner.setSelection(currentYear + 1 - publishYear);
-                mPublishYearSpinner.setEnabled(false);
-            } else
-                mPublishYearSpinner.setEnabled(true);
-
-            if (mResultBook != null && mResultBook.getAddress() != null && mPositionTextView != null)
-                mPositionTextView.setText(mResultBook.getAddress());
-            if (savedInstanceState.containsKey(Keys.CONDITION_SPINNER.toString()) && mConditionsSpinner != null)
-                mConditionsSpinner.setSelection(savedInstanceState.getInt(Keys.CONDITION_SPINNER.toString()));
-            if (savedInstanceState.containsKey(Keys.GENRE_SPINNER.toString()) && mGenreSpinner != null)
-                mGenreSpinner.setSelection(savedInstanceState.getInt(Keys.GENRE_SPINNER.toString()));
-
-            if (savedInstanceState.containsKey(Keys.AUTHORS.toString())
-                    && savedInstanceState.containsKey(Keys.AUTHORS_EDITABLE.toString())) {
+            if (savedInstanceState.containsKey(AUTHORS)
+                    && savedInstanceState.containsKey(AUTHORS_EDITABLE)) {
                 AuthorAdapter authorAdapter = new AuthorAdapter(getApplicationContext(),
-                        savedInstanceState.getStringArrayList(Keys.AUTHORS.toString()));
-                authorAdapter.setEditable(savedInstanceState.getBoolean(Keys.AUTHORS_EDITABLE.toString()));
+                        savedInstanceState.getStringArrayList(AUTHORS));
+                authorAdapter.setEditable(savedInstanceState.getBoolean(AUTHORS_EDITABLE));
                 mAuthorsListView.setAdapter(authorAdapter);
             }
         }
@@ -536,7 +562,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 mInsertManuallyButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mActivityState = State.ISBN_MANUALLY;
+                        mActivityState = ISBN_MANUALLY;
                         Utilities.showSoftKeyboard(getApplicationContext(), mIsbnEditText);
                         updateActivityState();
                     }
@@ -793,7 +819,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         mProgressBar = findViewById(R.id.load_book_progress_bar);
         mPhotosRecyclerView = findViewById(R.id.load_book_loaded_photos);
         mConfirmButton = findViewById(R.id.load_book_confirm_book);
-        if (mActivityState.equals(State.EDIT_BOOK))
+        if (mActivityState.equals(EDIT_BOOK))
             mConfirmButton.setText(R.string.modify_book);
         mTagsTextInputLayout = findViewById(R.id.load_book_tags_edit_view);
         mAddPhotosTextView = findViewById(R.id.add_photos_text_view);
@@ -803,13 +829,13 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
     public void onBackPressed() {
         //super.onBackPressed();
         if (!mUploading) {
-            if (mActivityState.equals(State.ISBN_MANUALLY) || mActivityState.equals(State.ISBN_ACQUIRED)) {
-                if (mActivityState.equals(State.ISBN_ACQUIRED)) {
+            if (mActivityState.equals(ISBN_MANUALLY) || mActivityState.equals(ISBN_ACQUIRED)) {
+                if (mActivityState.equals(ISBN_ACQUIRED)) {
                     cleanPhotos();
 
                 }
                 mIsbnEditText.setText(null);
-                mActivityState = State.ISBN_CHOICE;
+                mActivityState = ISBN_CHOICE;
                 updateActivityState();
             } else {
                 setResult(RESULT_CANCELED);
@@ -889,12 +915,12 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onClick(View v) {
                 if (!mUploading) {
-                    if (mActivityState.equals(State.ISBN_MANUALLY) || mActivityState.equals(State.ISBN_ACQUIRED)) {
-                        if (mActivityState.equals(State.ISBN_ACQUIRED))
+                    if (mActivityState.equals(ISBN_MANUALLY) || mActivityState.equals(ISBN_ACQUIRED)) {
+                        if (mActivityState.equals(ISBN_ACQUIRED))
                             cleanPhotos();
-                        mActivityState = State.ISBN_CHOICE;
+                        mActivityState = ISBN_CHOICE;
                         updateActivityState();
-                    } else if (mActivityState.equals(State.EDIT_BOOK)) {
+                    } else if (mActivityState.equals(EDIT_BOOK)) {
                         // return where you were
                         finish();
                     } else {
@@ -1228,13 +1254,6 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    /*private void showSnackBar(int messageResourceId) {
-        Snackbar.make(findViewById(R.id.load_book_coordinator_root),
-                messageResourceId,
-                Snackbar.LENGTH_SHORT)
-                .show();
-    }*/
-
     public File saveThumbnail() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -1353,15 +1372,5 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
         }
 
 
-    }
-
-    public enum Keys {
-        ACTIVITY_STATE, BOOK, PHOTOS_KEY, PUBLISH_YEAR_SPINNER, CONDITION_SPINNER,
-        GENRE_SPINNER, ISBN, CURRENT_PHOTO, UPLOADING, AUTHORS, AUTHORS_EDITABLE, TAGS, EDITING,
-        MARKED_TO_BE_REMOVED, CURRENT_TAG, CURRENT_PUBLISHER
-    }
-
-    private enum State {
-        ISBN_CHOICE, ISBN_MANUALLY, ISBN_ACQUIRED, EDIT_BOOK
     }
 }

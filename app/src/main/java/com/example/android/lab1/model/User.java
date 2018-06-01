@@ -18,14 +18,10 @@ public class User implements Parcelable {
     private String mImage;
     private String mShortBio;
     private Float mRating;
-    private Integer mNumRatings;
+    private int mNumRatings;
 
-    public User(){}
-
-    public static User getInstance(){
-        if(instance == null)
-            instance = new User();
-        return instance;
+    public User(){
+        setRating(0f);
     }
 
     public String getShortBio(){ return mShortBio; }
@@ -95,7 +91,7 @@ public class User implements Parcelable {
         mImage = in.readString();
         mShortBio = in.readString();
         mRating = in.readFloat();
-        mNumRatings = (Integer) in.readValue(Integer.class.getClassLoader());
+        mNumRatings = in.readInt();
     }
 
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
@@ -117,24 +113,14 @@ public class User implements Parcelable {
         dest.writeString(mImage);
         dest.writeString(mShortBio);
         dest.writeFloat(mRating);
-        dest.writeValue(mNumRatings);
+        dest.writeInt(mNumRatings);
     }
 
-    public Integer getNumRatings() {
+    public int getNumRatings() {
         return mNumRatings;
     }
 
-    public void setNumRatings(Integer mNumRatings) {
+    public void setNumRatings(int mNumRatings) {
         this.mNumRatings = mNumRatings;
-    }
-
-
-    public static class Utils{
-        public static final String USERNAME_KEY = "username";
-        public static final String EMAIL_KEY = "email";
-        public static final String PICTURE_KEY = "image";
-        public static final String POSITION_KEY = "address";
-        public static final String PHONE_KEY = "phone";
-        public static final String SHORTBIO_KEY= "shortBio";
     }
 }

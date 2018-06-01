@@ -186,7 +186,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
                 Intent i = new Intent(BookDetailsLibraryActivity.this,
                         LoadBookActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                i.putExtra(LoadBookActivity.Keys.BOOK.toString(), mBook);
+                i.putExtra(LoadBookActivity.BOOK, mBook);
                 startActivity(i);
             }
         });
