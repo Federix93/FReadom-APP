@@ -1,5 +1,6 @@
 package com.example.android.lab1.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -19,6 +20,9 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.Review;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.HistoryActivity;
+import com.example.android.lab1.ui.chat.ChatActivity;
+import com.example.android.lab1.ui.listeners.RatingActivityOpener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -40,10 +44,10 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
     private static final int VIEW_TYPE_BOOK_LENT = 1;
     private static final int VIEW_TYPE_BOOK_BORROWED = 2;
 
-    Context mContext;
+    Activity mContext;
     List<Book> mBooks;
 
-    public RecyclerHistoryAdapter(Context contex, List<Book> books) {
+    public RecyclerHistoryAdapter(Activity contex, List<Book> books) {
         this.mContext = contex;
         this.mBooks = books;
     }
@@ -132,7 +136,6 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
             int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
             Drawable res = mContext.getResources().getDrawable(imageResource);
             mHistoryArrow.setImageDrawable(res);
-            //mHistoryToUser.setText(mContext.getResources().getString(R.string.to));
             if (book.getWebThumbnail() != null)
                 Glide.with(mContext).load(book.getWebThumbnail())
                         .apply(new RequestOptions().centerCrop())
@@ -156,22 +159,40 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
             String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
             mHistoryDateFrom.setText(String.format(mContext.getResources().getString(R.string.from_date), dateFrom));
             mHistoryDateTo.setText(String.format(mContext.getResources().getString(R.string.to_date), dateTo));
-        /*
-            firebaseFirestore.collection("users").document(book.getLentTo()).collection("ratings")
-                    .document(book.getBookID()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+
+            Query query = firebaseFirestore.collection("users").document(book.getLentTo())
+                    .collection("ratings").whereEqualTo("bookId", book.getBookID());
+            query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.getResult() != null) {
-                        Log.d("VINCI", "onComplete: bookID " + task.getResult().toObject(Review.class).getBookId());
-                        mHistoryLeaveRating.setVisibility(GONE);
-                    }
-                    else {
-                        mHistoryLeaveRating.setVisibility(VISIBLE);
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (!task.getResult().isEmpty()) {
+                        List<Review> reviews = task.getResult().toObjects(Review.class);
+                        for (Review r : reviews) {
+                            if (r.getReviewerId().equals(FirebaseAuth.getInstance().getUid())) {
+                                mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_published));
+                            } else {
+                                mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_exchange));
+                                mHistoryLeaveRating.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        RatingActivityOpener ratingActivityOpener = new RatingActivityOpener(mContext, FirebaseAuth.getInstance().getUid(), book.getLentTo() , book.getBookID());
+                                        ratingActivityOpener.onClick(v);
+                                    }
+                                });
+                            }
+                        }
+                    } else {
                         mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_exchange));
+                        mHistoryLeaveRating.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                RatingActivityOpener ratingActivityOpener = new RatingActivityOpener(mContext, FirebaseAuth.getInstance().getUid(), book.getLentTo() , book.getBookID());
+                                ratingActivityOpener.onClick(v);
+                            }
+                        });
                     }
                 }
-            });*/
-            mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_exchange));
+            });
 
 
         }
@@ -209,7 +230,6 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
             int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
             Drawable res = mContext.getResources().getDrawable(imageResource);
             mHistoryArrow.setImageDrawable(res);
-            //mHistoryToUser.setText(mContext.getResources().getString(R.string.from));
             if (book.getWebThumbnail() != null)
                 Glide.with(mContext).load(book.getWebThumbnail())
                         .apply(new RequestOptions().centerCrop())
@@ -233,21 +253,41 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
             mHistoryDateFrom.setText(String.format(mContext.getResources().getString(R.string.from_date), dateFrom));
             mHistoryDateTo.setText(String.format(mContext.getResources().getString(R.string.to_date), dateTo));
 
-            /*
-            firebaseFirestore.collection("users").document(book.getLentTo()).collection("ratings")
-                    .document(book.getBookID()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            Log.d("VINCI", "LENT");
+
+            Query query = firebaseFirestore.collection("users").document(book.getUid())
+                    .collection("ratings").whereEqualTo("bookId", book.getBookID());
+            query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.getResult() != null)
-                        mHistoryLeaveRating.setVisibility(GONE);
-                    else {
-                        mHistoryLeaveRating.setVisibility(VISIBLE);
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (!task.getResult().isEmpty()) {
+                        List<Review> reviews = task.getResult().toObjects(Review.class);
+                        for (Review r : reviews) {
+                            if (r.getReviewerId().equals(FirebaseAuth.getInstance().getUid())) {
+                                mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_published));
+                            } else {
+                                mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_exchange));
+                                mHistoryLeaveRating.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        RatingActivityOpener ratingActivityOpener = new RatingActivityOpener(mContext, FirebaseAuth.getInstance().getUid(), book.getUid() , book.getBookID());
+                                        ratingActivityOpener.onClick(v);
+                                    }
+                                });
+                            }
+                        }
+                    } else {
                         mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_exchange));
+                        mHistoryLeaveRating.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                RatingActivityOpener ratingActivityOpener = new RatingActivityOpener(mContext, FirebaseAuth.getInstance().getUid(), book.getUid() , book.getBookID());
+                                ratingActivityOpener.onClick(v);
+                            }
+                        });
                     }
                 }
-            });*/
-            mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_exchange));
-
+            });
         }
     }
 }

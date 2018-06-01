@@ -194,5 +194,7 @@
     <string name="current_position">POSITION</string>
     <string name="start_loan_progress">Beginning of the loan in progress...</string>
     <string name="end_loan_progress">End of the loan in progress...</string>
+    <string name="review_published">Review published</string>
+
 
 </resources>
