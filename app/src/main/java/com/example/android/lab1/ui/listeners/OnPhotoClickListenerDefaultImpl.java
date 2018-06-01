@@ -27,11 +27,11 @@ public class OnPhotoClickListenerDefaultImpl implements OnPhotoClickListener {
         if (position >= 0 && position <= mPhotoUrls.size()) {
             Intent i = new Intent(mContainer, BookPhotoDetailActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            i.putExtra(BookPhotoDetailActivity.Keys.BOOK_TITLE.toString(),
+            i.putExtra(BookPhotoDetailActivity.BOOK_TITLE,
                     mBookTitle);
-            i.putStringArrayListExtra(BookPhotoDetailActivity.Keys.URLS.toString(),
+            i.putStringArrayListExtra(BookPhotoDetailActivity.URLS,
                     (ArrayList<String>) mPhotoUrls);
-            i.putExtra(BookPhotoDetailActivity.Keys.SELECTED.toString(),
+            i.putExtra(BookPhotoDetailActivity.SELECTED,
                     position);
             mContainer.startActivityForResult(i, Constants.SHOW_DETAIL);
         }
