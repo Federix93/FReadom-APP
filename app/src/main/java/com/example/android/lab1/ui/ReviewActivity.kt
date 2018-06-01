@@ -37,21 +37,29 @@ class ReviewActivity : AppCompatActivity() {
     private var mUploading: Boolean = false
     private var mUserImageUrl: String? = null
 
-    enum class ConstantKeys {
-        REVIEWER_ID, REVIEWED_ID, BOOK_ID, NUM_STARS, COMMENT_TEXT, UPLOADING, USER_IMAGE, USERNAME
+    object Keys {
+        const val REVIEWER_ID = "RERID"
+        const val REVIEWED_ID = "REVIED"
+        const val BOOK_ID = "BID"
+        const val NUM_STARS = "NUMSTARS"
+        const val COMMENT_TEXT = "COMMENT"
+        const val UPLOADING = "UPLOADING"
+        const val USER_IMAGE = "USER_IMAGE"
+        const val USERNAME = "USERNAME"
     }
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (intent != null &&
-                intent.hasExtra(ConstantKeys.REVIEWER_ID.toString()) &&
-                intent.hasExtra(ConstantKeys.REVIEWED_ID.toString()) &&
-                intent.hasExtra(ConstantKeys.BOOK_ID.toString())) {
-            mReviewerId = intent.getStringExtra(ConstantKeys.REVIEWER_ID.toString())
-            mReviewedId = intent.getStringExtra(ConstantKeys.REVIEWED_ID.toString())
-            mBookId = intent.getStringExtra(ConstantKeys.BOOK_ID.toString())
+                intent.hasExtra(Keys.REVIEWER_ID) &&
+                intent.hasExtra(Keys.REVIEWED_ID) &&
+                intent.hasExtra(Keys.BOOK_ID)) {
+            mReviewerId = intent.getStringExtra(Keys.REVIEWER_ID)
+            mReviewedId = intent.getStringExtra(Keys.REVIEWED_ID)
+            mBookId = intent.getStringExtra(Keys.BOOK_ID)
         } else {
             setResult(Activity.RESULT_CANCELED)
             finish()
@@ -73,7 +81,7 @@ class ReviewActivity : AppCompatActivity() {
 
     private fun setupConfirm() {
         mConfirmButton.setOnClickListener {
-            val failureFunction = { exception: Exception ->
+            val failureFunction = { _: Exception ->
                 mUploading = false
                 Toast.makeText(applicationContext,
                         "Errore durante il caricamento, riprovare assicurandosi di avere una connessione ad internet attiva",
@@ -85,41 +93,36 @@ class ReviewActivity : AppCompatActivity() {
             if (mRatingBar.rating > 0 && Utilities.isOnline(applicationContext)) {
                 mUploading = true
                 val firebaseFirestore = FirebaseFirestore.getInstance()
-                val bookReference = firebaseFirestore.collection("history")
-                        .document(mBookId)
                 val userReference = firebaseFirestore.collection("users")
                         .document(mReviewedId)
                 val newRatingReference = userReference.collection("ratings")
                         .document()
 
-                bookReference.get().addOnSuccessListener { bookSnapshot ->
-                    firebaseFirestore.runTransaction { transaction ->
-                        val user = transaction[userReference]
-                        //val batch = firebaseFirestore.batch()
+                firebaseFirestore.runTransaction { transaction ->
+                    val user = transaction[userReference].toObject(User::class.java)
+                    //val batch = firebaseFirestore.batch()
+                    if (user != null) {
                         val newReview = Review(reviewerId = mReviewerId,
                                 bookId = mBookId,
-                                bookTitle = bookSnapshot.get("title").toString(),
                                 text = mCommentEditText.text.toString().trimEnd(),
                                 fiveStarRating = mRatingBar.rating.toFloat(),
                                 timestamp = null)
                         transaction[newRatingReference] = newReview
-                        val currentRating = user["rating"] as Double
-                        var numRatings = user["numRatings"] as Long
+                        val currentRating = user.rating ?: 0.0f
+                        var numRatings = user.numRatings
                         val newRating = (currentRating * numRatings + newReview.fiveStarRating) /
                                 (numRatings + 1)
-                        numRatings++
-                        transaction.update(userReference, mapOf(
-                                Pair("rating", newRating),
-                                Pair("numRatings", numRatings)
-                        ))
-                        //batch.commit()
-                    }.addOnSuccessListener {
-                        Toast.makeText(applicationContext,
-                                "Recensione pubblicata!",
-                                Toast.LENGTH_SHORT).show()
-                        setResult(RESULT_OK)
-                        finish()
-                    }.addOnFailureListener(failureFunction)
+                        user.rating = newRating
+                        user.numRatings++
+                        transaction[userReference] = user
+                    }
+                    //batch.commit()
+                }.addOnSuccessListener {
+                    Toast.makeText(applicationContext,
+                            "Recensione pubblicata!",
+                            Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    finish()
                 }.addOnFailureListener(failureFunction)
             } else {
                 Toast.makeText(applicationContext,
@@ -158,14 +161,14 @@ class ReviewActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         if (outState != null) {
             with(outState) {
-                putString(ConstantKeys.REVIEWER_ID.toString(), mReviewerId)
-                putString(ConstantKeys.REVIEWED_ID.toString(), mReviewedId)
-                putString(ConstantKeys.USERNAME.toString(), mUserName.text.toString())
-                putString(ConstantKeys.USER_IMAGE.toString(), mUserImageUrl)
-                putInt(ConstantKeys.NUM_STARS.toString(), mRatingBar.rating)
-                putBoolean(ConstantKeys.UPLOADING.toString(), mUploading)
+                putString(Keys.REVIEWER_ID, mReviewerId)
+                putString(Keys.REVIEWED_ID, mReviewedId)
+                putString(Keys.USERNAME, mUserName.text.toString())
+                putString(Keys.USER_IMAGE, mUserImageUrl)
+                putInt(Keys.NUM_STARS, mRatingBar.rating)
+                putBoolean(Keys.UPLOADING, mUploading)
                 if (mCommentEditText.text != null) {
-                    putString(ConstantKeys.COMMENT_TEXT.toString(),
+                    putString(Keys.COMMENT_TEXT,
                             mCommentEditText.text.toString())
                 }
             }
@@ -176,15 +179,15 @@ class ReviewActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         if (savedInstanceState != null) {
             with(savedInstanceState) {
-                if (containsKey(ConstantKeys.REVIEWER_ID.toString()))
-                    mReviewerId = getString(ConstantKeys.REVIEWER_ID.toString())!!
-                if (containsKey(ConstantKeys.REVIEWED_ID.toString()))
-                    mReviewedId = getString(ConstantKeys.REVIEWED_ID.toString())!!
-                mUploading = getBoolean(ConstantKeys.UPLOADING.toString())
-                mCommentEditText.setText(getString(ConstantKeys.COMMENT_TEXT.toString()))
-                mRatingBar.rating = getInt(ConstantKeys.NUM_STARS.toString())
-                mUserName.text = getString(ConstantKeys.USERNAME.toString())
-                mUserImageUrl = getString(ConstantKeys.USER_IMAGE.toString())
+                if (containsKey(Keys.REVIEWER_ID))
+                    mReviewerId = getString(Keys.REVIEWER_ID)!!
+                if (containsKey(Keys.REVIEWED_ID))
+                    mReviewedId = getString(Keys.REVIEWED_ID)!!
+                mUploading = getBoolean(Keys.UPLOADING)
+                mCommentEditText.setText(getString(Keys.COMMENT_TEXT))
+                mRatingBar.rating = getInt(Keys.NUM_STARS)
+                mUserName.text = getString(Keys.USERNAME)
+                mUserImageUrl = getString(Keys.USER_IMAGE)
             }
         }
     }

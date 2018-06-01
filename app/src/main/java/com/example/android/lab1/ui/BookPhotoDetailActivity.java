@@ -26,7 +26,6 @@ public class BookPhotoDetailActivity extends AppCompatActivity {
 
     public static final String BOOK_PHOTO = "BOOK_PHOTO_DETAIL";
     Toolbar mToolbar;
-    private ViewPager mImageGallery;
     private RecyclerView mCountImagesDots;
     private Integer mSelected;
     private ArrayList<String> mUrls;
@@ -44,7 +43,7 @@ public class BookPhotoDetailActivity extends AppCompatActivity {
 
         Utilities.setupStatusBarColor(this);
 
-        mImageGallery = findViewById(R.id.image_container);
+        ViewPager mImageGallery = findViewById(R.id.image_container);
         mCountImagesDots = findViewById(R.id.image_dots);
         mToolbar = findViewById(R.id.toolbar_library_book_detail);
 
@@ -57,17 +56,17 @@ public class BookPhotoDetailActivity extends AppCompatActivity {
         });
 
         if (getIntent() == null ||
-                !getIntent().hasExtra(Keys.URLS.toString()) ||
-                getIntent().getStringArrayListExtra(Keys.URLS.toString()) == null ||
-                getIntent().getStringArrayListExtra(Keys.URLS.toString()).isEmpty()) {
+                !getIntent().hasExtra(URLS) ||
+                getIntent().getStringArrayListExtra(URLS) == null ||
+                getIntent().getStringArrayListExtra(URLS).isEmpty()) {
             finish();
             return;
         }
 
-        String title = getIntent().hasExtra(Keys.BOOK_TITLE.toString()) ?
-                getIntent().getStringExtra(Keys.BOOK_TITLE.toString()) : getString(R.string.photo_detail);
-        mUrls = getIntent().getStringArrayListExtra(Keys.URLS.toString());
-        Integer initialPhoto = getIntent().getIntExtra(Keys.SELECTED.toString(), 0);
+        String title = getIntent().hasExtra(BOOK_TITLE) ?
+                getIntent().getStringExtra(BOOK_TITLE) : getString(R.string.photo_detail);
+        mUrls = getIntent().getStringArrayListExtra(URLS);
+        Integer initialPhoto = getIntent().getIntExtra(SELECTED, 0);
         mToolbar.setTitle(title);
 
         mImageGallery.setAdapter(new ImagePager());
@@ -98,15 +97,17 @@ public class BookPhotoDetailActivity extends AppCompatActivity {
         }
     }
 
-    public enum Keys {
-        BOOK_TITLE, URLS, SELECTED
-    }
+    public static final String BOOK_TITLE = "BOOK_TITLE";
+    public static final String URLS = "URLS";
+    public static final String SELECTED = "SELECTED";
+
 
     private class DotsAdapter extends RecyclerView.Adapter<DotsAdapter.DotsHolder> {
-        public DotsAdapter() {
+        DotsAdapter() {
             notifyItemRangeInserted(0, mUrls.size());
         }
 
+        @NonNull
         @Override
         public DotsHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = (LayoutInflater)
@@ -129,12 +130,12 @@ public class BookPhotoDetailActivity extends AppCompatActivity {
         class DotsHolder extends RecyclerView.ViewHolder {
             TextView mDot;
 
-            public DotsHolder(View itemView) {
+            DotsHolder(View itemView) {
                 super(itemView);
                 mDot = (TextView) itemView;
             }
 
-            public void update(boolean selected) {
+            void update(boolean selected) {
                 int color = getResources().getColor(selected ? R.color.white : R.color.gray_active_icon);
                 mDot.setTextColor(color);
             }

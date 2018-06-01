@@ -35,17 +35,15 @@ class ReviewListFragment : Fragment() {
     companion object {
         fun newInstance(userId: String): ReviewListFragment {
             val args = Bundle()
-            args.putString(Constants.REVIEWED_ID.toString(), userId)
+            args.putString(REVIEWED_ID, userId)
 
             val reviewListFragment = ReviewListFragment()
             reviewListFragment.arguments = args
 
             return reviewListFragment
         }
-    }
 
-    enum class Constants {
-        REVIEWED_ID
+        const val REVIEWED_ID = "REVIEWED_ID"
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -53,7 +51,7 @@ class ReviewListFragment : Fragment() {
         mReviewsPerPage = context?.resources?.getInteger(R.integer.reviews_per_page) ?: 10
         val rootView = layoutInflater.inflate(R.layout.fragment_review_list, container, false)
         findViews(rootView)
-        mReviewedId = arguments?.getString(Constants.REVIEWED_ID.toString())
+        mReviewedId = arguments?.getString(REVIEWED_ID)
 
         if (mReviewedId != null) {
             setupRecyclerView()
@@ -257,9 +255,7 @@ class ReviewListFragment : Fragment() {
                     .into(mUserImage)
 
             mUserNameTextView.text = user?.username
-            mTitleTextView.text = review.bookTitle
             mReviewRating.rating = review.fiveStarRating.toInt()
-            mTitleTextView.text = review.bookTitle
 
             with(mReviewTime) {
                 if (review.timestamp != null) {
@@ -279,7 +275,7 @@ class ReviewListFragment : Fragment() {
             with(mUserReviewTextView)
             {
                 text = review.text?.trimEnd()
-                visibility = if (review.text != null) View.VISIBLE else View.GONE
+                visibility = if (review.text != null && review.text != "") View.VISIBLE else View.GONE
             }
         }
     }

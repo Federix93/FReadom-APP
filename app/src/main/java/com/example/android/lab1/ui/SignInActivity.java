@@ -15,7 +15,6 @@ import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -29,11 +28,11 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
-import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.utils.NetworkConnectionReceiver;
-import com.example.android.lab1.R;
+import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
@@ -46,6 +45,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
@@ -57,18 +58,16 @@ import java.util.List;
 public class SignInActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 10;
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseFirestore mFirebaseFirestore;
-
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
     private final static String ALGOLIA_USER_INDEX = "users";
     private static Index algoliaIndex;
-
     ImageView mLogoImageView;
     ConstraintLayout mRootConstraintLayout;
     Button mLoginButton;
     Button mWithoutLoginButton;
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseFirestore mFirebaseFirestore;
     private User mUser;
 
     private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
@@ -86,7 +85,7 @@ public class SignInActivity extends AppCompatActivity {
 
         createNotificationChannel();
 
-        if(user != null){
+        if (user != null) {
             openHomePageActivity();
         }
 
@@ -145,30 +144,52 @@ public class SignInActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
             if (resultCode == RESULT_OK) {
-                FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
+                final FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
                     if (firebaseUser.getEmail() != null) {
-                        final DocumentReference documentReference = mFirebaseFirestore.collection("users").document(firebaseUser.getUid());
-                        mUser = User.getInstance();
-                        if (firebaseUser.getPhotoUrl() != null)
-                            mUser.setImage(firebaseUser.getPhotoUrl().toString());
-                        else
-                            mUser.setImage(null);
-                        mUser.setUsername(firebaseUser.getDisplayName());
-                        mUser.setPhone(firebaseUser.getPhoneNumber());
-                        mUser.setEmail(firebaseUser.getEmail());
-                        mUser.setRating(0.0f);
-                        final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(this);
-                        progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_signing_in);
-                        documentReference.set(mUser).addOnSuccessListener(this, new OnSuccessListener<Void>() {
+                        final DocumentReference userDocumentReference = mFirebaseFirestore.collection("users").document(firebaseUser.getUid());
+                        FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<User>() {
+                            @Nullable
                             @Override
-                            public void onSuccess(Void aVoid) {
+                            public User apply(@NonNull Transaction transaction) {
+                                User user = null;
+                                try {
+                                    user = transaction.get(userDocumentReference).toObject(User.class);
+                                    // set image
+                                    if (user != null) {
+                                        if (user.getImage() == null)
+                                            user.setImage(firebaseUser.getPhotoUrl() != null ?
+                                                    firebaseUser.getPhotoUrl().toString() : null);
+                                        if (user.getUsername() == null)
+                                            user.setUsername(firebaseUser.getDisplayName());
+                                        if (user.getPhone() == null)
+                                            user.setPhone(firebaseUser.getPhoneNumber());
+                                        if (user.getEmail() == null)
+                                            user.setEmail(firebaseUser.getEmail());
+                                        transaction.set(userDocumentReference, user);
+                                    }
+
+                                } catch (FirebaseFirestoreException e) {
+                                    user = null;
+                                }
+
+
+                                return user;
+                            }
+
+                        }).addOnSuccessListener(new OnSuccessListener<User>() {
+                            @Override
+                            public void onSuccess(User userResult) {
+                                mUser = userResult;
                                 FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                                 DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
-                                if (mFirebaseAuth != null && mFirebaseAuth.getUid() != null) {
+                                if (mFirebaseAuth != null && mFirebaseAuth.getUid() != null
+                                        && mUser != null) {
                                     String userID = mFirebaseAuth.getUid();
                                     setupAlgolia();
                                     loadUserOnAlgolia(userID);
+                                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(SignInActivity.this);
+                                    progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_signing_in);
                                     com.example.android.lab1.model.chatmodels.User user =
                                             new com.example.android.lab1.model.chatmodels.User(mUser.getUsername(), mUser.getImage(), FirebaseInstanceId.getInstance().getToken());
                                     usersReference.child(mFirebaseAuth.getUid()).setValue(user, new DatabaseReference.CompletionListener() {
@@ -178,7 +199,7 @@ public class SignInActivity extends AppCompatActivity {
                                                 if (progressDialogHolder.isProgressDialogShowing())
                                                     progressDialogHolder.dismissDialog();
 
-                                                    openHomePageActivity();
+                                                openHomePageActivity();
 
                                             } else {
                                                 if (progressDialogHolder.isProgressDialogShowing())
@@ -190,6 +211,7 @@ public class SignInActivity extends AppCompatActivity {
                                 }
                             }
                         });
+
                     }
                 }
             } else {

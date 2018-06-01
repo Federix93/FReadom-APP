@@ -427,8 +427,8 @@ public class HomePageActivity extends AppCompatActivity
             TabFragment item = mFragmentAdapter.getItem(0);
             if (item.getFragmentType() == HOME_FRAGMENT) {
                 if (item.getPosition() != null) {
-                    outState.putDouble(Keys.POSITION_LAT.toString(), item.getPosition().getLatitude());
-                    outState.putDouble(Keys.POSITION_LON.toString(), item.getPosition().getLongitude());
+                    outState.putDouble(POSITION_LAT, item.getPosition().getLatitude());
+                    outState.putDouble(POSITION_LON, item.getPosition().getLongitude());
                 }
             }
         }
@@ -441,17 +441,16 @@ public class HomePageActivity extends AppCompatActivity
             mFAB.setVisibility(View.VISIBLE);
         }
         if (mFragmentAdapter.getItem(0) != null &&
-                savedInstanceState.containsKey(Keys.POSITION_LAT.toString()) &&
-                savedInstanceState.containsKey(Keys.POSITION_LON.toString())) {
+                savedInstanceState.containsKey(POSITION_LAT) &&
+                savedInstanceState.containsKey(POSITION_LON)) {
             mFragmentAdapter.getItem(0).setPosition(new GeoPoint(
-                    savedInstanceState.getDouble(Keys.POSITION_LAT.toString()),
-                    savedInstanceState.getDouble(Keys.POSITION_LON.toString())
+                    savedInstanceState.getDouble(POSITION_LAT),
+                    savedInstanceState.getDouble(POSITION_LON)
             ));
         }
     }
 
-    private enum Keys {
-        POSITION_LAT, POSITION_LON
-    }
+    public static final String POSITION_LAT = "POSITION_LAT";
+    public static final String POSITION_LON = "POSITION_LON";
 }
 

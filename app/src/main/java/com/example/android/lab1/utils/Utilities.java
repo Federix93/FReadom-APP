@@ -234,9 +234,9 @@ public abstract class Utilities {
         if (currentActivity == null || reviewedId == null || reviewerId == null)
             return null;
         Intent i = new Intent(currentActivity, ReviewActivity.class);
-        i.putExtra(ReviewActivity.ConstantKeys.REVIEWER_ID.toString(), reviewerId);
-        i.putExtra(ReviewActivity.ConstantKeys.REVIEWED_ID.toString(), reviewedId);
-        i.putExtra(ReviewActivity.ConstantKeys.BOOK_ID.toString(), bookId);
+        i.putExtra(ReviewActivity.Keys.REVIEWER_ID, reviewerId);
+        i.putExtra(ReviewActivity.Keys.REVIEWED_ID, reviewedId);
+        i.putExtra(ReviewActivity.Keys.BOOK_ID, bookId);
         i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return i;
     }
