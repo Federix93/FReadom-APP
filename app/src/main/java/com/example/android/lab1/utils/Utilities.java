@@ -403,18 +403,31 @@ public abstract class Utilities {
     public static GeoPoint[] buildBoundingBox(Double latitude, Double longitude, Double distanceInKm) {
 
         // ~1 mile of lat and lon in degrees
-        Double lat = 0.0144927536231884;
-        Double lon = 0.0181818181818182;
+        //Double lat = 0.0144927536231884;
+        //Double lon = 0.0181818181818182;
 
-        Double lowerLat = latitude - (lat * distanceInKm);
-        Double lowerLon = longitude - (lon * distanceInKm);
+//        Double lowerLat = latitude - (lat * distanceInKm);
+//        Double lowerLon = longitude - (lon * distanceInKm);
+//
+//        Double greaterLat = latitude + (lat * distanceInKm);
+//        Double greaterLon = longitude + (lon * distanceInKm);
 
-        Double greaterLat = latitude + (lat * distanceInKm);
-        Double greaterLon = longitude + (lon * distanceInKm);
+        //GeoPoint lesserGeoPoint = new GeoPoint(lowerLat, lowerLon);
+        //GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
 
-        GeoPoint lesserGeoPoint = new GeoPoint(lowerLat, lowerLon);
-        GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
+        double lat = latitude;
+        double longi = longitude;
 
+// 6378000 Size of the Earth (in meters)
+        double longitudeD = (Math.asin(distanceInKm / (6378000 * Math.cos(Math.PI*lat/180))))*180/Math.PI;
+        double latitudeD = (Math.asin(distanceInKm / (double)6378000))*180/Math.PI;
+
+        double latitudeMax = lat+(latitudeD);
+        double latitudeMin = lat-(latitudeD);
+        double longitudeMax = longi+(longitudeD);
+        double longitudeMin = longi-(longitudeD);
+        GeoPoint lesserGeoPoint = new GeoPoint(latitudeMin, longitudeMin);
+        GeoPoint greaterGeoPoint = new GeoPoint(latitudeMax, longitudeMax);
         return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
     }
 }
