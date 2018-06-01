@@ -156,22 +156,24 @@ public class SignInActivity extends AppCompatActivity {
                                 try {
                                     user = transaction.get(userDocumentReference).toObject(User.class);
                                     // set image
-                                    if (user != null) {
-                                        if (user.getImage() == null)
-                                            user.setImage(firebaseUser.getPhotoUrl() != null ?
-                                                    firebaseUser.getPhotoUrl().toString() : null);
-                                        if (user.getUsername() == null)
-                                            user.setUsername(firebaseUser.getDisplayName());
-                                        if (user.getPhone() == null)
-                                            user.setPhone(firebaseUser.getPhoneNumber());
-                                        if (user.getEmail() == null)
-                                            user.setEmail(firebaseUser.getEmail());
-                                        if (user.getRating() == null)
-                                            user.setRating(0f);
-                                        if (user.getNumRatings() < 0)
-                                            user.setNumRatings(0);
-                                        transaction.set(userDocumentReference, user);
-                                    }
+                                    if (user == null)
+                                        user = new User();
+
+                                    if (user.getImage() == null)
+                                        user.setImage(firebaseUser.getPhotoUrl() != null ?
+                                                firebaseUser.getPhotoUrl().toString() : null);
+                                    if (user.getUsername() == null)
+                                        user.setUsername(firebaseUser.getDisplayName());
+                                    if (user.getPhone() == null)
+                                        user.setPhone(firebaseUser.getPhoneNumber());
+                                    if (user.getEmail() == null)
+                                        user.setEmail(firebaseUser.getEmail());
+                                    if (user.getRating() == null)
+                                        user.setRating(0f);
+                                    if (user.getNumRatings() < 0)
+                                        user.setNumRatings(0);
+
+                                    transaction.set(userDocumentReference, user);
 
                                 } catch (FirebaseFirestoreException e) {
                                     user = null;
