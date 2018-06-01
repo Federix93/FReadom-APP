@@ -3,6 +3,7 @@ package com.example.android.lab1.ui.chat;
 import android.Manifest;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.app.Notification;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -49,6 +50,8 @@ import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.ui.listeners.RatingActivityOpener;
 import com.example.android.lab1.utils.Constants;
+import com.example.android.lab1.ui.profile.EditProfileActivity;
+import com.example.android.lab1.utils.NotificationUtilities;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.ChatViewModel;
 import com.example.android.lab1.viewmodel.MessagesViewModel;
@@ -173,6 +176,9 @@ public class ChatActivity extends AppCompatActivity {
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
         mSenderUID = getIntent().getStringExtra("SenderUID");
+
+        if(getIntent().getBooleanExtra("FromNotification", false))
+            NotificationUtilities.removeNotification(mChatID, this);
 
         if (mSenderUID != null && !mSenderUID.equals(mFirebaseAuth.getUid()))
             mChatsReference.child(mChatID).child("counter").setValue(0);

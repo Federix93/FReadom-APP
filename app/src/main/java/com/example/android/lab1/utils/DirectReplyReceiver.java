@@ -26,6 +26,8 @@ public class DirectReplyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        NotificationUtilities.removeNotification(intent.getStringExtra("ChatID"), context);
+
         Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 
         if (remoteInput != null) {

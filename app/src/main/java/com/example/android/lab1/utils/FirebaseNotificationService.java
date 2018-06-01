@@ -1,6 +1,8 @@
 package com.example.android.lab1.utils;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.RemoteInput;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.ui.chat.ChatActivity;
@@ -22,7 +25,7 @@ import java.util.Map;
 
 public class FirebaseNotificationService extends com.google.firebase.messaging.FirebaseMessagingService {
 
-    private static final String TAG = "MyFirebaseMsgService";
+    private static final String TAG = "GNIPPO";
     public static final String MESSAGE_REPLY_KEY = "message_reply_key";
     public static final String FREADOM_GROUP = "freadom_app_group";
     public static final int SUMMARY_KEY = 478514;
@@ -50,15 +53,27 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
     private void sendNewMessageNotification(Map<String, String> data) {
 
+        if(!NotificationUtilities.notificationExist(data.get("chat")))
+            NotificationUtilities.addNotification(data.get("chat"));
+
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("ChatID", data.get("chat"));
         intent.putExtra("Username", data.get("sender"));
         intent.putExtra("ImageURL", data.get("senderPic"));
         intent.putExtra("BookID", data.get("book"));
         intent.putExtra("SenderUID", data.get("senderUID"));
+        intent.putExtra("FromNotification", true);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent;
 
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                1,
+                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("ChatID", data.get("chat")),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+
+        PendingIntent pendingIntent;
         if (!LifecycleHandler.isApplicationInForeground()) {
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
             stackBuilder.addNextIntentWithParentStack(intent);
@@ -107,6 +122,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
                 .addAction(action)
+                .setDeleteIntent(cancelIntent)
                 .setGroup(FREADOM_GROUP);
 
 
@@ -134,11 +150,15 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
-        notificationSummary();
+        if(NotificationUtilities.notificationsPending())
+            notificationSummary();
 
     }
 
     private void sendNewBookRequestNotification(Map<String, String> data) {
+
+        if(!NotificationUtilities.notificationExist(data.get("chat")))
+            NotificationUtilities.addNotification(data.get("chat"));
 
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("ChatID", data.get("chat"));
@@ -146,7 +166,16 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         intent.putExtra("ImageURL", data.get("senderPic"));
         intent.putExtra("BookID", data.get("book"));
         intent.putExtra("SenderUID", data.get("senderUID"));
+        intent.putExtra("FromNotification", true);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                1,
+                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("ChatID", data.get("chat")),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
         PendingIntent pendingIntent;
 
         if (!LifecycleHandler.isApplicationInForeground()) {
@@ -176,6 +205,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
+                .setDeleteIntent(cancelIntent)
                 .setGroup(FREADOM_GROUP);
 
         String contentText = String.format(getResources().getString(R.string.new_request_notification_content), data.get("sender"), data.get("bookTitle"));
@@ -189,7 +219,8 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
-        notificationSummary();
+        if(NotificationUtilities.notificationsPending())
+            notificationSummary();
     }
 
     private void notificationSummary()
@@ -206,7 +237,6 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 //                        .setSummaryText("Nuove notifiche"))
                 .setGroup(FREADOM_GROUP)
                 .setGroupSummary(true);
-
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(SUMMARY_KEY, summary.build());
