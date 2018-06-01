@@ -29,7 +29,6 @@ public class LentFragmentItem extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecyclerFragmentBooksAdapter mAdapter;
-    private List<User> mOtherUsers;
 
     public LentFragmentItem() {
     }
@@ -46,9 +45,7 @@ public class LentFragmentItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mOtherUsers = new ArrayList<>();
-
-        mAdapter = new RecyclerFragmentBooksAdapter(new ArrayList<Book>(), mOtherUsers, true);
+        mAdapter = new RecyclerFragmentBooksAdapter(new ArrayList<Book>(), new ArrayList<User>(), true);
         mRecyclerView.setAdapter(mAdapter);
         LoansViewModel loansViewModel = ViewModelProviders.of(getActivity()).get(LoansViewModel.class);
         loansViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
@@ -57,13 +54,14 @@ public class LentFragmentItem extends Fragment {
                 Log.d("LULLO", "MATTIA QUANDO LEGGERAI QUESTO LOG TI SENTIRAI UNA PERSONA MIGLIORE");
                 if(books != null) {
                     final List<Book> listBooks = new ArrayList<>();
+                    final List<User> otherUsers = new ArrayList<>();
                     for (final Book b : books) {
                         FirebaseDatabase.getInstance().getReference("users").child(b.getLentTo()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 listBooks.add(b);
-                                mOtherUsers.add(dataSnapshot.getValue(User.class));
-                                mAdapter.setItems(listBooks, mOtherUsers);
+                                otherUsers.add(dataSnapshot.getValue(User.class));
+                                mAdapter.setItems(listBooks, otherUsers);
                                 mAdapter.notifyDataSetChanged();                            }
 
                             @Override

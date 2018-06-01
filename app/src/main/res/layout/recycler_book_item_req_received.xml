@@ -51,7 +51,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
-            android:text="APRI CHATS"
+            android:maxLines="2"
+            android:ellipsize="marquee"
+            android:text="@string/open_conversations"
             android:textColor="@color/colorSecondaryAccent"
             android:textStyle="bold" />
     </RelativeLayout>

@@ -54,9 +54,7 @@ public class RequestsFragmentReceivedItem extends Fragment {
         reqRecBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
-                Log.d("LULLO", "LIST: " +  books);
                 if (books != null) {
-                    Log.d("LULLO", "LIST: " +  books.size());
                     mAdapter = new RecyclerReqReceivedAdapter(books);
                     mRecyclerView.setAdapter(mAdapter);
                 }

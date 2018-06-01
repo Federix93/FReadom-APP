@@ -34,11 +34,6 @@ import java.util.List;
 public class RequestsFragmentDoneItem extends Fragment {
 
     private RecyclerView mRecyclerView;
-    FirebaseFirestore mFirebaseFirestore;
-    FirebaseDatabase firebaseDatabase;
-    List<String> chatIDs;
-    List<User> mUsersOwner;
-    DatabaseReference openedChatReference;
     RecyclerFragmentBooksAdapter mAdapter;
 
     public void RequestsFragmentDoneItem() {
@@ -51,13 +46,11 @@ public class RequestsFragmentDoneItem extends Fragment {
 
         mRecyclerView = view.findViewById(R.id.recycler_fragment_content);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        chatIDs = new ArrayList<>();
-        mUsersOwner = new ArrayList<>();
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerFragmentBooksAdapter(new ArrayList<Book>(),  mUsersOwner);
+        mAdapter = new RecyclerFragmentBooksAdapter(new ArrayList<Book>(),  new ArrayList<User>());
 
         mRecyclerView.setAdapter(mAdapter);
 
@@ -67,13 +60,14 @@ public class RequestsFragmentDoneItem extends Fragment {
             public void onChanged(@Nullable List<Book> books) {
                 if(books != null) {
                     final List<Book> listBooks = new ArrayList<>();
+                    final List<User> usersOwner = new ArrayList<>();
                     for (final Book b : books) {
                         FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                     listBooks.add(b);
-                                    mUsersOwner.add(dataSnapshot.getValue(User.class));
-                                    mAdapter.setItems(listBooks, mUsersOwner);
+                                    usersOwner.add(dataSnapshot.getValue(User.class));
+                                    mAdapter.setItems(listBooks, usersOwner);
                                     mAdapter.notifyDataSetChanged();
                             }
 
