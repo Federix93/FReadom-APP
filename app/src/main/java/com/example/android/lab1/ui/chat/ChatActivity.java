@@ -1,6 +1,7 @@
 package com.example.android.lab1.ui.chat;
 
 import android.Manifest;
+import android.app.Notification;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -41,6 +42,7 @@ import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.profile.EditProfileActivity;
+import com.example.android.lab1.utils.NotificationUtilities;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -141,6 +143,9 @@ public class ChatActivity extends AppCompatActivity {
         mPhotoProfileURL = getIntent().getStringExtra("ImageURL");
         mBookID = getIntent().getStringExtra("BookID");
         String senderUID = getIntent().getStringExtra("SenderUID");
+
+        if(getIntent().getBooleanExtra("FromNotification", false))
+            NotificationUtilities.removeNotification(mChatID, this);
 
         if (senderUID != null && !senderUID.equals(mFirebaseAuth.getUid()))
             mChatsReference.child(mChatID).child("counter").setValue(0);
