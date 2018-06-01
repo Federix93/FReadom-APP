@@ -87,12 +87,6 @@ public class RecyclerReqReceivedAdapter extends RecyclerView.Adapter<RecyclerReq
                     v.getContext().startActivity(intent);
                 }
             });
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(v.getContext(), "You're opening book", Toast.LENGTH_SHORT).show();
-                }
-            });
         }
     }
 }
