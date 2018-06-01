@@ -46,7 +46,7 @@ import java.util.Locale;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerFragmentBooksAdapter.MyViewHolder>{
+public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerFragmentBooksAdapter.MyViewHolder> {
 
     private List<Book> mBookList;
     private List<User> mUsersOwner;
@@ -58,10 +58,18 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
     private GeoCodingTask mCurrentlyExecuting;
     private Location mCurrentlyResolving;
     private Location mResolveLater;
+    private boolean isLent;
 
     public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
         mUsersOwner = users;
+        isLent = false;
+    }
+
+    public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users, boolean isLent) {
+        mBookList = listBooks;
+        mUsersOwner = users;
+        this.isLent = isLent;
     }
 
     @NonNull
@@ -88,7 +96,7 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
         mUsersOwner = usersOwner;
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder{
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView mBookTitle;
         TextView mBookAuthor;
         TextView mBookCity;
@@ -109,7 +117,7 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
             userReference = firebaseDatabase.getReference().child("users");
         }
 
-        public void bind (final Book book, final int position) {
+        public void bind(final Book book, final int position) {
             mBookTitle.setText(book.getTitle());
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
             mBookAuthor.setText(book.getAuthors());
@@ -119,7 +127,7 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
                 location.setLatitude(book.getGeoPoint().getLatitude());
 
                 resolveCityLocation(location);
-            }  else
+            } else
                 mBookCity.setText(mContext.getResources().getString(R.string.position_not_available));
             if (book.getWebThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mBookThumbnail);
@@ -133,42 +141,66 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserPhoto);
             }
-            mChatLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    /*Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    //intent.putExtra("ChatID", mChatIds.get(position));
-                    intent.putExtra("Username", mUsersOwner.get(position).getUsername());
-                    intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
-                    intent.putExtra("BookID", mBookList.get(position).getBookID());
-                    v.getContext().startActivity(intent);*/
-                    final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
-                            .child(book.getBookID())
-                            .child(book.getUid())
-                            .child(FirebaseAuth.getInstance().getUid());
-                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            String chatID = (String) dataSnapshot.getValue();
-                            Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            intent.putExtra("ChatID", chatID);
-                            intent.putExtra("Username", mUsersOwner.get(position).getUsername());
-                            intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
-                            intent.putExtra("BookID", mBookList.get(position).getBookID());
-                            v.getContext().startActivity(intent);
-                        }
+            if (!isLent) {
+                mChatLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
+                                .child(book.getBookID())
+                                .child(book.getUid())
+                                .child(FirebaseAuth.getInstance().getUid());
+                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String chatID = (String) dataSnapshot.getValue();
+                                Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                intent.putExtra("ChatID", chatID);
+                                intent.putExtra("Username", mUsersOwner.get(position).getUsername());
+                                intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
+                                intent.putExtra("BookID", mBookList.get(position).getBookID());
+                                v.getContext().startActivity(intent);
+                            }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
-                }
-            });
+                            }
+                        });
+                    }
+                });
+            }else{
+                mChatLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
+                                .child(book.getBookID())
+                                .child(FirebaseAuth.getInstance().getUid())
+                                .child(book.getLentTo());
+                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String chatID = (String) dataSnapshot.getValue();
+                                Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                intent.putExtra("ChatID", chatID);
+                                intent.putExtra("Username", mUsersOwner.get(position).getUsername());
+                                intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
+                                intent.putExtra("BookID", mBookList.get(position).getBookID());
+                                v.getContext().startActivity(intent);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
+            }
 
         }
+
         private void resolveCityLocation(Location location) {
             // This method will change address mResultAddress var
             mCurrentlyResolving = location;

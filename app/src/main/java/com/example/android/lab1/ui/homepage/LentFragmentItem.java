@@ -48,7 +48,7 @@ public class LentFragmentItem extends Fragment {
 
         mOtherUsers = new ArrayList<>();
 
-        mAdapter = new RecyclerFragmentBooksAdapter(new ArrayList<Book>(), mOtherUsers);
+        mAdapter = new RecyclerFragmentBooksAdapter(new ArrayList<Book>(), mOtherUsers, true);
         mRecyclerView.setAdapter(mAdapter);
         LoansViewModel loansViewModel = ViewModelProviders.of(getActivity()).get(LoansViewModel.class);
         loansViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
@@ -58,7 +58,7 @@ public class LentFragmentItem extends Fragment {
                 if(books != null) {
                     final List<Book> listBooks = new ArrayList<>();
                     for (final Book b : books) {
-                        FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        FirebaseDatabase.getInstance().getReference("users").child(b.getLentTo()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 listBooks.add(b);
