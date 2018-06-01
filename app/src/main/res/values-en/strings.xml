@@ -188,8 +188,7 @@
     <string name="open_conversations"><![CDATA[Open\nconversations]]></string>
     <string name="you_lent">You lent:</string>
     <string name="you_borrowed">You borrowed:</string>
-    <string name="to">To:</string>
-    <string name="from">From:</string>
-    <string name="review_exchange">Review loan</string>
+    <string name="review_published">Review published</string>
+
 
 </resources>

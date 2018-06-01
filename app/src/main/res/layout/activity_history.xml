@@ -24,4 +24,22 @@
         android:clipToPadding="false"
         android:padding="4dp"/>
 
+    <LinearLayout
+        android:id="@+id/no_history"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:visibility="gone"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:textColor="@color/colorPrimaryDark"
+            android:gravity="center"
+            android:text="Non hai ancora concluso ne ricevuto alcun libro. Qui troverai uno storico dei tuoi scambi"/>
+
+    </LinearLayout>
+
 </LinearLayout>
