@@ -80,6 +80,7 @@
             android:layout_marginTop="12dp"
             android:ellipsize="end"
             android:maxLines="2"
+            android:textColor="@color/black"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             app:layout_constraintEnd_toStartOf="@+id/guideline14"
             app:layout_constraintStart_toEndOf="@+id/history_user_image"
