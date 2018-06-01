@@ -64,6 +64,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
@@ -141,8 +142,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         Utilities.setupStatusBarColor(this);
-        Log.d("LULLO", "OnCreate");
-        //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
         mMessagesRecyclerView = findViewById(R.id.chat_recyclerView);
         mMessageEditText = findViewById(R.id.edittext_chat_message);
         mSendButton = findViewById(R.id.sendButton);
@@ -221,9 +221,7 @@ public class ChatActivity extends AppCompatActivity {
         final Observer<List<Message>> messageObserver = new Observer<List<Message>>() {
             @Override
             public void onChanged(@Nullable List<Message> messages) {
-                Log.d("LULLO", "888888888888888");
                 if (mChatArrayAdapter == null) {
-                    Log.d("LULLO", "999999999999999999999");
                     mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
                     mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
                 }
@@ -232,9 +230,7 @@ public class ChatActivity extends AppCompatActivity {
                     mChatArrayAdapter.notifyDataSetChanged();
                 }
                 mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
-                //messagesViewModel.getSnapshotLiveData().removeObserver(this);
-                isObservable = false;
-                //chatViewModel.getSnapshotLiveData().observe(ChatActivity.this, chatObserver);
+
             }
         };
         messagesViewModel.getSnapshotLiveData().observe(this, messageObserver);
@@ -651,6 +647,12 @@ public class ChatActivity extends AppCompatActivity {
 
                                                         final DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(mBookID);
                                                         docBookRef.delete();
+                                                        Log.d("LULLO", "OTHER USER: " + mOtherPerson);
+                                                        Log.d("LULLO", "UID USER: " + book.getUid());
+                                                        DocumentReference reqDone = mFirebaseFirestore.collection("requestsDone").document(mOtherPerson).collection("books").document(mBookID);
+                                                        reqDone.delete();
+                                                        DocumentReference reqReceived = mFirebaseFirestore.collection("requestsReceived").document(book.getUid()).collection("books").document(mBookID);
+                                                        reqReceived.delete();
                                                         Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                                                         boolean startLoan = true;
                                                         intent.putExtra("LoanStart", startLoan);
