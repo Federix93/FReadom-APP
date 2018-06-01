@@ -42,7 +42,6 @@ public class BarCodeScannerFragment extends Fragment  implements ZXingScannerVie
     public void handleResult(Result result)
     {
         Intent res = new Intent();
-        Log.d("SCANBAR", "handleResult: " + result.getText());
         res.putExtra(ScanBarCodeActivity.BARCODE_KEY, result.getText());
         getActivity().setResult(Activity.RESULT_OK, res);
         getActivity().finish();

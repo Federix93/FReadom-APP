@@ -416,11 +416,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     });
                                     mySnackbar.show();
                                 } else {
-                                    Log.d("LULLO", "SNAPSHOT !EXISTS");
                                     addBookToFavorite();
                                 }
                             } else{
-                                Log.d("LULLO", "SNAPSHOT == null");
                                 addBookToFavorite();
                             }
                         }

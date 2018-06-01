@@ -845,9 +845,6 @@ public class TabFragment extends Fragment {
         GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
                 (double) 15000);
-        Log.d("LULLO", "QUERY1: " + "LONG: " + firstGeoPoints[0].getLongitude() + "LAT: " + firstGeoPoints[0].getLatitude());
-        Log.d("LULLO", "QUERY1: " + "LONG: " + firstGeoPoints[1].getLongitude() + "LAT: " + firstGeoPoints[1].getLatitude());
-
         Query query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
                 .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
          firstListener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -879,8 +876,6 @@ public class TabFragment extends Fragment {
         final GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
                 (double) 60000);
-        Log.d("LULLO", "QUERY2: " + "LONG: " + secondGeoPoints[0].getLongitude() + "LAT: " + secondGeoPoints[0].getLatitude());
-        Log.d("LULLO", "QUERY2: " + "LONG: " + secondGeoPoints[1].getLongitude() + "LAT: " + secondGeoPoints[1].getLatitude());
         Query query2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
                 .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
         secondListener = query2.addSnapshotListener(new EventListener<QuerySnapshot>() {

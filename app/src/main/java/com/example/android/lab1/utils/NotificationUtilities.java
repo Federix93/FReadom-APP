@@ -25,11 +25,9 @@ public abstract class NotificationUtilities {
     {
         activeNotifications.remove(notificationID);
         notificationCount--;
-        Log.d(TAG, "removeNotification");
         Log.d(TAG, "COUNT= "+notificationCount);
         if(!notificationsPending())
         {
-            Log.d(TAG, "Rimuovo il summary");
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.cancel(FirebaseNotificationService.SUMMARY_KEY);
         }

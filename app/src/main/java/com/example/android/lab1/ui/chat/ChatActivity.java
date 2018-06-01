@@ -594,7 +594,6 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        Log.d("LULLO", "OnConfigurationChanged");
     }
 
     @Override
@@ -684,8 +683,6 @@ public class ChatActivity extends AppCompatActivity {
 
                                                         final DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(mBookID);
                                                         docBookRef.delete();
-                                                        Log.d("LULLO", "OTHER USER: " + mOtherPerson);
-                                                        Log.d("LULLO", "UID USER: " + book.getUid());
                                                         DocumentReference reqDone = mFirebaseFirestore.collection("requestsDone").document(mOtherPerson).collection("books").document(mBookID);
                                                         reqDone.delete();
                                                         DocumentReference reqReceived = mFirebaseFirestore.collection("requestsReceived").document(book.getUid()).collection("books").document(mBookID);
@@ -801,7 +798,6 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d("LULLO", "onStop: ");
         CurrentOpenChat.setOpenChatID(null);
     }
 }

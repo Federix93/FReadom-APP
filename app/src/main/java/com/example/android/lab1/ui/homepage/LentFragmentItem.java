@@ -51,7 +51,6 @@ public class LentFragmentItem extends Fragment {
         loansViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
-                Log.d("LULLO", "MATTIA QUANDO LEGGERAI QUESTO LOG TI SENTIRAI UNA PERSONA MIGLIORE");
                 if(books != null) {
                     final List<Book> listBooks = new ArrayList<>();
                     final List<User> otherUsers = new ArrayList<>();

@@ -243,12 +243,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                 int itemID = item.getItemId();
                 if (itemID == R.id.action_filter) {
 //                    showDialog();
-                    Log.d("GNIPPO", "IntroTop="+mIntroTextViewTop.getVisibility());
-                    Log.d("GNIPPO", "IntroBottom="+mIntroTextViewBottom.getVisibility());
-                    Log.d("GNIPPO", "NoConnectionTop="+mNoConnectionTextViewTop.getVisibility());
-                    Log.d("GNIPPO", "NoConnectionBottom="+mNoConnectionTextViewBottom.getVisibility());
-                    Log.d("GNIPPO", "NoConnectionButton="+mNoConnectionButton.getVisibility());
-                }
+                    }
             }
         });
     }
@@ -696,7 +691,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private void fadeOutViews(final View vOut1, final View vOut2, final View vOut3, final View vIn1, final View vIn2, final View vIn3) {
 
-        Log.d("GNIPPO", "Al fadeOut sono stati passati:");
 //        Log.d("GNIPPO", "vOut1= "+((TextView)vOut1).getText());
         if(vOut2 != null)
             Log.d("GNIPPO", "vOut2= "+((TextView)vOut2).getText());

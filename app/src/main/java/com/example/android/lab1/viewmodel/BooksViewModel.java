@@ -73,7 +73,6 @@ public class BooksViewModel extends ViewModel {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.d("LULLO","PEZZO DI MERDA");
                             List<Book> books = new ArrayList<>();
                             for(Book b : queryDocumentSnapshots.toObjects(Book.class)){
                                 if(!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/){

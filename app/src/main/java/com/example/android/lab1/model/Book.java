@@ -135,30 +135,18 @@ public class Book implements Parcelable, Comparable<Book> {
     protected Book(Parcel in) {
         mDescription = in.readString();
         mIsbn = in.readString();
-        Log.d("LULLO", "ISBN ON READ: " + mIsbn);
         mTitle = in.readString();
-        Log.d("LULLO", "Title ON READ: " + mTitle);
         mBookPhotosPaths = in.readArrayList(String.class.getClassLoader());
-        Log.d("LULLO", "LIST ON READ: " + mBookPhotosPaths.size());
         mWebThumbnail = in.readString();
-        Log.d("LULLO", "WTHUMB ON READ: " + mWebThumbnail);
         mUid = in.readString();
-        Log.d("LULLO", "UID ON READ: " + mUid);
         mAddress = in.readString();
-        Log.d("LULLO", "ADDRESS ON READ: " + mAddress);
         mPublisher = in.readString();
-        Log.d("LULLO", "PUBLISHER ON READ: " + mPublisher);
         mAuthors = in.readString();
-        Log.d("LULLO", "AUTHORS ON READ: " + mAuthors);
         mGeoPoint = new GeoPoint(in.readDouble(), in.readDouble());
         mPublishYear = in.readInt();
-        Log.d("LULLO", "PUBLISHYEAR ON READ: " + mPublishYear);
         mLoanStart = in.readLong();
-        Log.d("LULLO", "LOAN START ON READ: " + mLoanStart);
         mLoanEnd = in.readLong();
-        Log.d("LULLO", "LOAN END ON READ: " + mLoanEnd);
         mInfoLink = in.readString();
-        Log.d("LULLO", "INFO LINK ON READ: " + mInfoLink);
         Long time = in.readLong();
         if (time != DEFAULT_VALUE_INT) {
             Date d = new Date();
@@ -166,16 +154,11 @@ public class Book implements Parcelable, Comparable<Book> {
             mTimeInserted = d;
         } else
             mTimeInserted = null;
-        Log.d("LULLO", "TimeINS ON READ: " + mTimeInserted);
         mSearchTags = in.readString();
         mLentTo = (String) in.readValue(String.class.getClassLoader());
-        Log.d("LULLO", "TAGS ON READ: " + mSearchTags);
         mCondition = (Integer) in.readValue(Integer.class.getClassLoader());
-        Log.d("LULLO", "CONDITION ON READ: " + mCondition);
         mGenre = (Integer) in.readValue(Integer.class.getClassLoader());
-        Log.d("LULLO", "GENRE ON READ: " + mGenre);
         mBookID = in.readString();
-        Log.d("LULLO", "BOOOKID ON READ: " + mBookID);
     }
 
     public Integer getCondition() {
@@ -354,7 +337,6 @@ public class Book implements Parcelable, Comparable<Book> {
             dest.writeString(DEFAULT_VALUE_STRING);
         dest.writeValue(mLentTo);
         dest.writeValue(mCondition);
-        Log.d("LULLO", "CONDITION ON WRITE: " + mCondition);
         dest.writeValue(mGenre);
         dest.writeString(mBookID);
 

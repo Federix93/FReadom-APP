@@ -97,15 +97,12 @@ public class HistoryActivity extends AppCompatActivity {
 
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-        Log.d("VINCI", "onCreate: Ci entro?");
-
         final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         Query query = firebaseFirestore.collection("history").whereEqualTo("uid", mFirebaseAuth.getUid());
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.getResult().isEmpty()){
-                    Log.d("VINCI", "task null");
                     Query query1 = firebaseFirestore.collection("history").whereEqualTo("lentTo", mFirebaseAuth.getUid());
                     query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                         @Override
@@ -118,7 +115,6 @@ public class HistoryActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    Log.d("VINCI", "onCreate: task not null");
                     mBooks.addAll(task.getResult().toObjects(Book.class));
                     mAdapter.setItems(mBooks);
                     mAdapter.notifyDataSetChanged();
@@ -140,7 +136,6 @@ public class HistoryActivity extends AppCompatActivity {
         query.get().addOnCanceledListener(new OnCanceledListener() {
             @Override
             public void onCanceled() {
-                Log.d("VINCI", "ON CANCELLED");
             }
         });
         /*
