@@ -62,7 +62,6 @@ public class HomePageActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     AHBottomNavigation mBottomNavigation;
-
     FirebaseFirestore mFirebaseFirestore;
 
     ImageView mProfileImage;
