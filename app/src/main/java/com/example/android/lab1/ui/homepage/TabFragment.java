@@ -60,6 +60,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -68,6 +69,8 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,6 +78,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -116,6 +121,8 @@ public class TabFragment extends Fragment {
     private Bundle savedState = null;
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
+    private LiveData<List<Book>> firstLiveData;
+    private BooksViewModel bookViewModel;
 
     //LoanFragment variables
 
@@ -236,7 +243,7 @@ public class TabFragment extends Fragment {
         secondSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
         mFirebaseFirestore = FirebaseFirestore.getInstance();
 
-        queryDatabaseWithViewModel();
+        getUserPosition();
 
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -244,14 +251,11 @@ public class TabFragment extends Fragment {
                 new Handler().post(new Runnable() {
                     @Override
                     public void run() {
-                        queryDatabaseWithViewModel();
+                        queryDatabase(mCurrentPosition);
                     }
                 });
             }
         });
-
-        getUserPosition();
-        //queryDatabase();
 
         if (SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
             Resources res = getResources();
@@ -738,8 +742,9 @@ public class TabFragment extends Fragment {
     }
 
     private void queryDatabaseWithViewModel() {
-        BooksViewModel bookViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(new GeoPoint(0, 0))).get(BooksViewModel.class);
-        final LiveData<List<Book>> firstLiveData = bookViewModel.getBooksFirstRecycler();
+        Log.d("LULLO","Current Position--> LAT: " + mCurrentPosition.getLatitude() + "  LONG: " + mCurrentPosition.getLongitude());
+        bookViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(mCurrentPosition)).get(BooksViewModel.class);
+        firstLiveData = bookViewModel.getBooksFirstRecycler();
 
         firstLiveData.observe(getActivity(), new Observer<List<Book>>() {
             @Override
@@ -808,7 +813,7 @@ public class TabFragment extends Fragment {
                         return null;
 
                 } catch (IOException e) {
-                    return null;
+                    return "POSIZIONE CORRENTE";
                 }
                 if (fromLocation == null || fromLocation.size() == 0)
                     return null;
@@ -822,13 +827,76 @@ public class TabFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             if (mTarget != null && !this.isCancelled()) {
-                if (s != null)
+                if (s != null) {
                     mTarget.setText(s);
+                    queryDatabase(mCurrentPosition);
+                }
             }
         }
-
     }
 
+    public void queryDatabase(GeoPoint geoPoint) {
+        GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
+                geoPoint.getLongitude(),
+                (double) 15);
+        Query query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
+                .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
+        query.get().addOnSuccessListener(getActivity(), new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                List<Book> books = new ArrayList<>();
+                for(Book b : queryDocumentSnapshots.toObjects(Book.class)){
+                    if(!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/){
+                        books.add(b);
+                    }
+                }
+                if (mFirstRecyclerBookAdapter == null) {
+                    if (books != null) {
+                        mFirstRecyclerBookAdapter = new RecyclerBookAdapter(books);
+                        mFirstRecyclerView.setAdapter(mFirstRecyclerBookAdapter);
+                        mFirstRecyclerView.smoothScrollToPosition(0);
+
+                    }
+                } else {
+                    mFirstRecyclerBookAdapter.updateItems(books);
+                    mFirstRecyclerBookAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+        GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
+                geoPoint.getLongitude(),
+                (double)60);
+        Query query2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
+                .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
+        query2.get().addOnSuccessListener(getActivity(), new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                List<Book> books = new ArrayList<>();
+                for(Book b : queryDocumentSnapshots.toObjects(Book.class)){
+                    if(!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/){
+                        books.add(b);
+                    }
+                }
+                Collections.sort(books, new Comparator<Book>() {
+                    @Override
+                    public int compare(Book o1, Book o2) {
+                        return o2.getTimeInserted().compareTo(o1.getTimeInserted());
+                    }
+                });
+                if (books != null) {
+                    if (mSecondRecyclerBookAdapter == null) {
+                        mSecondRecyclerBookAdapter = new RecyclerBookAdapter(books);
+                        mSecondRecyclerView.setAdapter(mSecondRecyclerBookAdapter);
+                    } else {
+                        mSecondRecyclerBookAdapter.updateItems(books);
+                        mSecondRecyclerBookAdapter.notifyDataSetChanged();
+                        mRefreshLayout.setRefreshing(false);
+                        mSecondRecyclerView.smoothScrollToPosition(0);
+                    }
+                }
+            }
+        });
+    }
 }
 
 

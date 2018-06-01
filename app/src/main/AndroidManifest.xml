@@ -102,7 +102,8 @@
         <activity
             android:name=".ui.homepage.HomePageActivity"
             android:label="@string/title_activity_home_page"
-            android:theme="@style/ThemeDrawer" />
+            android:theme="@style/ThemeDrawer"
+            android:configChanges="orientation"/>
         <activity android:name=".ui.GenreBooksActivity" />
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
         <activity android:name=".ui.profile.ProfileActivity" />

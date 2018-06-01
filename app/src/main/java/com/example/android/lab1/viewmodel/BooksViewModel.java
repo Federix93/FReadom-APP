@@ -6,6 +6,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.utils.Utilities;
@@ -44,18 +45,19 @@ public class BooksViewModel extends ViewModel {
 
     public BooksViewModel(GeoPoint geoPoint){
 
-        geoPoint = new GeoPoint(45.0599103, 7.657559399999968);
-
         GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
                 (double)15);
+        Log.d("LULLO","VIEW MODEL--> LAT: " + firstGeoPoints[0].getLatitude() + "  LONG: " + firstGeoPoints[0].getLongitude());
+        Log.d("LULLO","VIEW MODEL--> LAT: " + firstGeoPoints[1].getLatitude() + "  LONG: " + firstGeoPoints[1].getLongitude());
+
         BOOK_REF = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
                 .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
         liveFirstRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF);
         fetchBooksOnFirstRecycler();
         GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
-                (double)15);
+                (double)60);
         BOOK_REF = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
                 .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
         liveSecondRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF);
@@ -71,6 +73,7 @@ public class BooksViewModel extends ViewModel {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d("LULLO","PEZZO DI MERDA");
                             List<Book> books = new ArrayList<>();
                             for(Book b : queryDocumentSnapshots.toObjects(Book.class)){
                                 if(!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/){
