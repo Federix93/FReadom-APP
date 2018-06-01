@@ -12,6 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.transition.ChangeBounds;
+import android.support.transition.Fade;
+import android.support.transition.TransitionManager;
+import android.support.transition.TransitionSet;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -20,6 +24,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.algolia.search.saas.AbstractQuery;
@@ -89,6 +94,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private double currentLong;
 
     private FloatingSearchView mSearchView;
+
+    private LinearLayout mSceneRoot;
     private TextView mIntroTextViewTop;
     private TextView mIntroTextViewBottom;
     private TextView mNoResultsTextViewTop;
@@ -125,6 +132,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         Utilities.setupStatusBarColor(this);
 
         mSearchView = findViewById(R.id.floating_search_view);
+        mSceneRoot = findViewById(R.id.scene_root);
         mIntroTextViewTop = findViewById(R.id.search_book_intro_top);
         mIntroTextViewBottom = findViewById(R.id.search_book_intro_bottom);
         mNoResultsTextViewTop = findViewById(R.id.search_book_no_results_top);
@@ -242,8 +250,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
                 int itemID = item.getItemId();
                 if (itemID == R.id.action_filter) {
-//                    showDialog();
-                    }
+                    showDialog();
+                }
             }
         });
     }
@@ -290,12 +298,13 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
         booksQuery.setQuery(searchString);
         mSearchView.showProgress();
-
+        Log.d("GNIPPO", "Ma che cazz0000");
         booksIndex.searchAsync(booksQuery, new CompletionHandler() {
             @Override
             public void requestCompleted(final JSONObject result, AlgoliaException error) {
+                Log.d("GNIPPO", "Supercomincio00");
                 if (result != null && error == null) {
-
+                    Log.d("GNIPPO", "Comincio");
                     if (currentSearchSeqNo <= lastDisplayedSeqNo) {
                         mSearchView.hideProgress();
                         return;
@@ -310,6 +319,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                         mSearchView.hideProgress();
                         return;
                     }
+                    Log.d("GNIPPO", "Continuo1");
                     final ArrayList<BookSearchItem> booksDataSet = new ArrayList<>();
                     Set<String> bookUIDs = new HashSet<>();
 
@@ -401,12 +411,14 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                                 mSearchView.hideProgress();
 
                             } else if (e != null) {
+                                Log.d("GNIPPO", "E != null");
                                 manageSearchError();
                             }
                         }
 
                     });
                 } else if (error != null) {
+                    Log.d("GNIPPO", "Error != null");
                     manageSearchError();
                 }
 
@@ -579,6 +591,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     private void manageSearchError() {
         mSearchView.hideProgress();
+        Log.d("GNIPPO", "Ci entro???");
 
         if (Utilities.isOnline(SearchBookActivity.this)) {
             if (!currentView[UNKNOWN_ERROR_VIEW])
@@ -689,82 +702,27 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         currentView[UNKNOWN_ERROR_VIEW] = true;
     }
 
-    private void fadeOutViews(final View vOut1, final View vOut2, final View vOut3, final View vIn1, final View vIn2, final View vIn3) {
+    private void fadeOutViews(View vOut1, View vOut2, View vOut3, View vIn1, View vIn2, View vIn3) {
 
-//        Log.d("GNIPPO", "vOut1= "+((TextView)vOut1).getText());
-        if(vOut2 != null)
-            Log.d("GNIPPO", "vOut2= "+((TextView)vOut2).getText());
-        else
-            Log.d("GNIPPO", "vOut2= null");
-        if(vOut3 != null)
-            Log.d("GNIPPO", "vOut3= "+((TextView)vOut3).getText());
-        else
-            Log.d("GNIPPO", "vOut3= null");
-
-//        Log.d("GNIPPO", "vIn1= "+((TextView)vIn1).getText());
-        if(vIn2 != null)
-            Log.d("GNIPPO", "vIn2= "+((TextView)vIn2).getText());
-        else
-            Log.d("GNIPPO", "vIn2= null");
-        if(vIn3 != null)
-            Log.d("GNIPPO", "vIn3= "+((TextView)vIn3).getText());
-        else
-            Log.d("GNIPPO", "vIn3= null");
-
-        vOut1.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        if (vOut2 != null) {
-                            vOut2.animate()
-                                    .alpha(0f)
-                                    .setDuration(mShortAnimationDuration)
-                                    .setListener(new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationStart(Animator animation) {
-                                        }
-
-                                        @Override
-                                        public void onAnimationEnd(Animator animation) {
-                                            Log.d("GNIPPO", "V2GONE-> "+((TextView)vOut2).getText());
-                                            vOut2.setVisibility(View.GONE);
-                                            if (vOut3 == null)
-                                                fadeInViews(vIn1, vIn2, vIn3);
-                                        }
-                                    });
-                        }
-
-                        if (vOut3 != null) {
-                            vOut3.animate()
-                                    .alpha(0f)
-                                    .setDuration(mShortAnimationDuration)
-                                    .setListener(new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationStart(Animator animation) {
-
-                                        }
-
-                                        @Override
-                                        public void onAnimationEnd(Animator animation) {
-                                            Log.d("GNIPPO", "V3GONE-> "+((TextView)vOut3).getText());
-                                            vOut3.setVisibility(View.GONE);
-                                            fadeInViews(vIn1, vIn2, vIn3);
-                                        }
-                                    });
-                        }
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-//                        Log.d("GNIPPO", "V1GONE-> "+((TextView)vOut1).getText());
-                        vOut1.setVisibility(View.GONE);
-                        if (vOut2 == null)
-                            fadeInViews(vIn1, vIn2, vIn3);
-                    }
-                });
+        TransitionManager.endTransitions(mSceneRoot);
+        TransitionSet transitionSet = new TransitionSet();
+        transitionSet.addTransition(new Fade());
+        transitionSet.addTransition(new ChangeBounds());
+        TransitionManager.beginDelayedTransition(mSceneRoot, transitionSet);
+        vOut1.setVisibility(View.GONE);
+        if(vOut2 != null) {
+            vOut2.setVisibility(View.GONE);
+        }
+        if(vOut3 != null) {
+            vOut3.setVisibility(View.GONE);
+        }
+        vIn1.setVisibility(View.VISIBLE);
+        if(vIn2 != null) {
+            vIn2.setVisibility(View.VISIBLE);
+        }
+        if(vIn3 != null) {
+            vIn3.setVisibility(View.VISIBLE);
+        }
     }
 
     private void fadeInViews(final View v1, final View v2, final View v3) {
