@@ -22,7 +22,7 @@
         android:layout_centerVertical="true"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="56dp"
-        android:layout_marginStart="72dp"
+        android:layout_marginStart="96dp"
         android:layout_marginTop="8dp"
         android:orientation="vertical">
 
@@ -79,7 +79,6 @@
             android:id="@+id/message_counter_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_textview"
             android:textColor="@color/white"
             android:gravity="center"
             android:layout_gravity="center"

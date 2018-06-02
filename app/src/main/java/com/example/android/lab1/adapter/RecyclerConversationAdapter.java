@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
-import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
@@ -26,7 +25,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -78,7 +76,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         TextView mLastMessageTextView;
         TextView mTimetampTextView;
         TextView mMessageCounterTextView;
-        private ValueEventListener mChildEventListener;
+        private ValueEventListener mValueEventListener;
 
         ConversationViewHolder(View itemView) {
             super(itemView);
@@ -100,7 +98,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
             }
-            mChildEventListener = new ValueEventListener(){
+            mValueEventListener = new ValueEventListener(){
 
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -114,16 +112,19 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                             mLastMessageTextView.setText(chat.getLastMessage());
                         else
                             mLastMessageTextView.setText(R.string.photo_message_chat);
-                        if(chat.getSenderUID() != null && !chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())){
+                        if (chat.getSenderUID() != null && !chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())) {
                             mSenderUID = chat.getSenderUID();
-                            if(chat.getCounter() == 0) {
-                                mMessageCounterTextView.setText("");
-                                mMessageCounterTextView.setBackground(null);
-                            }
-                            else {
+                            if (chat.getCounter() == 0) {
+                                mMessageCounterTextView.setVisibility(View.GONE);
+                            } else {
+                                if (mMessageCounterTextView.getVisibility() == View.GONE) {
+                                    mMessageCounterTextView.setVisibility(View.VISIBLE);
+                                }
                                 mMessageCounterTextView.setText(String.valueOf(chat.getCounter()));
                                 mMessageCounterTextView.setBackground(itemView.getResources().getDrawable(R.drawable.rounded_textview));
                             }
+                        }else{
+                            mMessageCounterTextView.setVisibility(View.GONE);
                         }
                     }
                 }
@@ -134,7 +135,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                 }
             };
 
-            mChatsReference.child(chatID).addValueEventListener(mChildEventListener);
+            mChatsReference.child(chatID).addValueEventListener(mValueEventListener);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

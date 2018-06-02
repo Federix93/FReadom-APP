@@ -77,7 +77,6 @@ public class ConversationsActivity extends AppCompatActivity {
         mAdapter = new RecyclerConversationAdapter(mBookID);
         mRecyclerView.setAdapter(mAdapter);
 
-        final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
         if (firebaseAuth != null) {

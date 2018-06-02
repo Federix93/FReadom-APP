@@ -27,7 +27,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,7 +50,6 @@ import com.example.android.lab1.ui.listeners.RatingActivityOpener;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.NotificationUtilities;
 import com.example.android.lab1.utils.Utilities;
-import com.example.android.lab1.viewmodel.ChatViewModel;
 import com.example.android.lab1.viewmodel.MessagesViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
@@ -86,7 +84,6 @@ public class ChatActivity extends AppCompatActivity {
     Toolbar mToolbar;
     FirebaseDatabase mFirebaseDatabase;
 
-    ChatViewModel chatViewModel = null;
     MessagesViewModel messagesViewModel = null;
     DatabaseReference mChatsReference;
     DatabaseReference mMessagesReference;
@@ -207,20 +204,6 @@ public class ChatActivity extends AppCompatActivity {
 
         messagesViewModel = ViewModelProviders.of(this, new ViewModelFactory(mChatID)).get(MessagesViewModel.class);
 
-            /*final Observer<Message> chatObserver = new Observer<Message>() {
-                @Override
-                public void onChanged(@Nullable Message message) {
-                    Log.d("LULLO", "IS OBSERVABLE " + isObservable);
-                    if (mChatArrayAdapter != null && isObservable) {
-                        Log.d("LULLO", "10000000000000");
-                        mChatArrayAdapter.addMessage(message);
-                        mChatArrayAdapter.notifyDataSetChanged();
-                        mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
-                    } else {
-                        isObservable = true;
-                    }
-                }
-            };*/
 
         final Observer<List<Message>> messageObserver = new Observer<List<Message>>() {
             @Override
@@ -338,19 +321,6 @@ public class ChatActivity extends AppCompatActivity {
                                             mToText.setText(String.format(getResources().getString(R.string.to_date), dateTo));
                                             mEndLoanLayout.setVisibility(View.VISIBLE);
                                         } else {
-                                            /*mFirebaseFirestore.collection("history").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                                @Override
-                                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                                                        if (mEndLoanLayout.getVisibility() == VISIBLE)
-                                                            mEndLoanLayout.setVisibility(GONE);
-                                                    } else {
-                                                        mStartLoanLayout.setVisibility(View.VISIBLE);
-                                                        if (mEndLoanLayout.getVisibility() == VISIBLE)
-                                                            mEndLoanLayout.setVisibility(GONE);
-                                                    }
-                                                }
-                                            });*/
                                             mStartLoanLayout.setVisibility(View.VISIBLE);
                                             if (mEndLoanLayout.getVisibility() == VISIBLE)
                                                 mEndLoanLayout.setVisibility(GONE);
