@@ -49,6 +49,7 @@ import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.BooksViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
@@ -489,26 +490,14 @@ public class TabFragment extends Fragment {
     }
 
     private void queryDatabaseWithViewModel() {
-        Log.d("LULLO", "CURRENT POSIITON  " + mCurrentPosition.getLatitude());
         booksViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(mCurrentPosition)).get(BooksViewModel.class);
         firstLiveData = booksViewModel.getBooksFirstRecycler();
 
         firstLiveData.observe(getActivity(), new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
-                if (mFirstRecyclerBookAdapter == null) {
-                    if (books != null) {
-                        Log.d("LULLO", "SIZE BOOKS1: " + books.size());
-                        mFirstRecyclerBookAdapter = new RecyclerBookAdapter(books);
-                        mFirstRecyclerView.setAdapter(mFirstRecyclerBookAdapter);
-                        mFirstRecyclerView.smoothScrollToPosition(0);
-
-                    }
-                } else {
-                    Log.d("LULLO", "SIZE BOOKS2: " + books.size());
-                    mFirstRecyclerBookAdapter.updateItems(books);
-                    mFirstRecyclerBookAdapter.notifyDataSetChanged();
-                }
+                if(books != null)
+                    updateLayoutFirstRecyclerView(books);
                 firstLiveData.removeObserver(this);
             }
         });
@@ -519,15 +508,7 @@ public class TabFragment extends Fragment {
             @Override
             public void onChanged(@Nullable List<Book> books) {
                 if (books != null) {
-                    if (mSecondRecyclerBookAdapter == null) {
-                        mSecondRecyclerBookAdapter = new RecyclerBookAdapter(books);
-                        mSecondRecyclerView.setAdapter(mSecondRecyclerBookAdapter);
-                    } else {
-                        mSecondRecyclerBookAdapter.updateItems(books);
-                        mSecondRecyclerBookAdapter.notifyDataSetChanged();
-                        mRefreshLayout.setRefreshing(false);
-                        mSecondRecyclerView.smoothScrollToPosition(0);
-                    }
+                    updateLayoutSecondRecyclerView(books);
                 }
                 secondLiveData.removeObserver(this);
             }
@@ -550,15 +531,7 @@ public class TabFragment extends Fragment {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                     if (queryDocumentSnapshots != null)
-                        if (mFirstRecyclerBookAdapter == null) {
-                            mFirstRecyclerBookAdapter = new RecyclerBookAdapter(queryDocumentSnapshots.toObjects(Book.class));
-                            mFirstRecyclerView.setAdapter(mFirstRecyclerBookAdapter);
-                            mFirstRecyclerView.smoothScrollToPosition(0);
-
-                        } else {
-                            mFirstRecyclerBookAdapter.updateItems(queryDocumentSnapshots.toObjects(Book.class));
-                            mFirstRecyclerBookAdapter.notifyDataSetChanged();
-                        }
+                        updateLayoutFirstRecyclerView(queryDocumentSnapshots.toObjects(Book.class));
                 }
             });
             GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
@@ -570,28 +543,40 @@ public class TabFragment extends Fragment {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                     if (queryDocumentSnapshots != null) {
-                        if (mSecondRecyclerBookAdapter == null) {
-                            mSecondRecyclerBookAdapter = new RecyclerBookAdapter(queryDocumentSnapshots.toObjects(Book.class));
-                            mSecondRecyclerView.setAdapter(mSecondRecyclerBookAdapter);
-                        } else {
-                            mSecondRecyclerBookAdapter.updateItems(queryDocumentSnapshots.toObjects(Book.class));
-                            mSecondRecyclerBookAdapter.notifyDataSetChanged();
-                            mRefreshLayout.setRefreshing(false);
-                            mSecondRecyclerView.smoothScrollToPosition(0);
-                        }
+                        updateLayoutSecondRecyclerView(queryDocumentSnapshots.toObjects(Book.class));
                     }
                 }
             });
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void avoid) {
-        }
-
-
     }
 
+    public void updateLayoutSecondRecyclerView(List<Book> books){
+
+        if (mSecondRecyclerBookAdapter == null) {
+            mSecondRecyclerBookAdapter = new RecyclerBookAdapter(books);
+            mSecondRecyclerView.setAdapter(mSecondRecyclerBookAdapter);
+        } else {
+            mSecondRecyclerBookAdapter.updateItems(books);
+            mSecondRecyclerBookAdapter.notifyDataSetChanged();
+            if(mRefreshLayout.isRefreshing())
+                mRefreshLayout.setRefreshing(false);
+            mSecondRecyclerView.smoothScrollToPosition(0);
+        }
+    }
+
+    public void updateLayoutFirstRecyclerView(List<Book> books){
+        if (mFirstRecyclerBookAdapter == null) {
+            mFirstRecyclerBookAdapter = new RecyclerBookAdapter(books);
+            mFirstRecyclerView.setAdapter(mFirstRecyclerBookAdapter);
+            mFirstRecyclerView.smoothScrollToPosition(0);
+
+        } else {
+            mFirstRecyclerBookAdapter.updateItems(books);
+            mFirstRecyclerBookAdapter.notifyDataSetChanged();
+        }
+    }
 }
 
 

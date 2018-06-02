@@ -278,4 +278,5 @@
 
     <string name="review_published">Recensione pubblicata</string>
     <string name="load_review">Caricamento della recensione...</string>
+    <string name="wait_for">Attend...</string>
 </resources>
