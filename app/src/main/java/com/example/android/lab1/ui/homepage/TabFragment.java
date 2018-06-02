@@ -490,29 +490,31 @@ public class TabFragment extends Fragment {
     }
 
     private void queryDatabaseWithViewModel() {
-        booksViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(mCurrentPosition)).get(BooksViewModel.class);
-        firstLiveData = booksViewModel.getBooksFirstRecycler();
+        if (getActivity() != null) {
+            booksViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(mCurrentPosition)).get(BooksViewModel.class);
+            firstLiveData = booksViewModel.getBooksFirstRecycler();
 
-        firstLiveData.observe(getActivity(), new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@Nullable List<Book> books) {
-                if(books != null)
-                    updateLayoutFirstRecyclerView(books);
-                firstLiveData.removeObserver(this);
-            }
-        });
-
-        final LiveData<List<Book>> secondLiveData = booksViewModel.getBooksSecondRecycler();
-
-        secondLiveData.observe(getActivity(), new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@Nullable List<Book> books) {
-                if (books != null) {
-                    updateLayoutSecondRecyclerView(books);
+            firstLiveData.observe(getActivity(), new Observer<List<Book>>() {
+                @Override
+                public void onChanged(@Nullable List<Book> books) {
+                    if (books != null)
+                        updateLayoutFirstRecyclerView(books);
+                    firstLiveData.removeObserver(this);
                 }
-                secondLiveData.removeObserver(this);
-            }
-        });
+            });
+
+            final LiveData<List<Book>> secondLiveData = booksViewModel.getBooksSecondRecycler();
+
+            secondLiveData.observe(getActivity(), new Observer<List<Book>>() {
+                @Override
+                public void onChanged(@Nullable List<Book> books) {
+                    if (books != null) {
+                        updateLayoutSecondRecyclerView(books);
+                    }
+                    secondLiveData.removeObserver(this);
+                }
+            });
+        }
     }
 
     private class RefreshAsyncTask extends AsyncTask<Void, Void, Void> {
