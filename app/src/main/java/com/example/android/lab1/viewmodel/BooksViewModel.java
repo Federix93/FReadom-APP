@@ -11,6 +11,7 @@ import android.util.Log;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.utils.firebaseutils.FirebaseQueryLiveDataFirestore;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -24,7 +25,8 @@ import java.util.List;
 
 public class BooksViewModel extends ViewModel {
 
-    private static Query BOOK_REF;
+    private static Query BOOK_REF_1;
+    private static Query BOOK_REF_2;
 
     private FirebaseQueryLiveDataFirestore liveData;
     private FirebaseQueryLiveDataFirestore liveFirstRecyclerView;
@@ -34,8 +36,8 @@ public class BooksViewModel extends ViewModel {
     private final MediatorLiveData<List<Book>> booksSecondRecyclerLiveData = new MediatorLiveData<>();
 
     public BooksViewModel(String uid){
-        BOOK_REF = FirebaseFirestore.getInstance().collection("books").whereEqualTo("uid", uid);
-        liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF);
+        BOOK_REF_1 = FirebaseFirestore.getInstance().collection("books").whereEqualTo("uid", uid);
+        liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF_1);
         fetchData();
     }
 
@@ -47,20 +49,17 @@ public class BooksViewModel extends ViewModel {
 
         GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
-                (double)15);
-        Log.d("LULLO","VIEW MODEL--> LAT: " + firstGeoPoints[0].getLatitude() + "  LONG: " + firstGeoPoints[0].getLongitude());
-        Log.d("LULLO","VIEW MODEL--> LAT: " + firstGeoPoints[1].getLatitude() + "  LONG: " + firstGeoPoints[1].getLongitude());
-
-        BOOK_REF = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
+                (double)15000);
+        BOOK_REF_1 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
                 .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
-        liveFirstRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF);
+        liveFirstRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF_1);
         fetchBooksOnFirstRecycler();
         GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
-                (double)60);
-        BOOK_REF = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
+                (double)60000);
+        BOOK_REF_2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
                 .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
-        liveSecondRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF);
+        liveSecondRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF_2);
         fetchBooksOnSecondRecycler();
     }
 
@@ -132,7 +131,32 @@ public class BooksViewModel extends ViewModel {
         return booksSecondRecyclerLiveData;
     }
 
+    public void refreshLayout(GeoPoint geoPoint){
 
+        GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
+                geoPoint.getLongitude(),
+                (double)15000);
+        Query query1 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
+                .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
+        //liveFirstRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF_1);
+        query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                booksFirstRecyclerLiveData.setValue(queryDocumentSnapshots.toObjects(Book.class));
+            }
+        });
+        GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
+                geoPoint.getLongitude(),
+                (double)60000);
+        Query query2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
+                .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
+        query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                booksSecondRecyclerLiveData.setValue(queryDocumentSnapshots.toObjects(Book.class));
+            }
+        });
+    }
 
 
     public void fetchData(){
