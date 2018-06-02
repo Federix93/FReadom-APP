@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerHistoryAdapter;
@@ -40,19 +41,9 @@ public class HistoryActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     RecyclerHistoryAdapter mAdapter;
     Toolbar mToolbar;
-/*
-    TextView mHistoryVerb;
-    ImageView mHistoryArrow;
-    TextView mHistoryBookTitle;
-    ImageView mHistoryBookThumbnail;
-    TextView mHistoryToUser;
-    TextView mHistoryUser;
-    ImageView mHistoryUserImage;
-    TextView mHistoryLeaveRating;
-    TextView mHistoryDateFrom;
-    TextView mHistoryDateTo;*/
 
     LinearLayout mNoLayout;
+    TextView mHistoryLeaveRating;
 
     List<Book> mBooks;
     List<User> mUsers;
@@ -65,17 +56,7 @@ public class HistoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
-//        mHistoryVerb = findViewById(R.id.history_verb);
-//        mHistoryArrow = findViewById(R.id.history_arrow);
-//        mHistoryBookTitle = findViewById(R.id.history_title);
-//        mHistoryBookThumbnail = findViewById(R.id.history_thumbnail);
-//        mHistoryToUser = findViewById(R.id.history_to_user);
-//        mHistoryUser = findViewById(R.id.history_username);
-//        mHistoryUserImage = findViewById(R.id.history_user_image);
-//        mHistoryLeaveRating = findViewById(R.id.history_leave_rating);
-//        mHistoryDateFrom = findViewById(R.id.history_from_date);
-//        mHistoryDateTo = findViewById(R.id.history_to_date);
-
+        mHistoryLeaveRating = findViewById(R.id.history_leave_rating);
         mNoLayout = findViewById(R.id.no_history);
 
         mToolbar = findViewById(R.id.toolbar_history);
@@ -153,6 +134,7 @@ public class HistoryActivity extends AppCompatActivity {
         if (requestCode == Constants.RATING_REQUEST) {
             if (resultCode == RESULT_OK) {
                 mAdapter.notifyDataSetChanged();
+                mHistoryLeaveRating.setOnClickListener(null);
             }
         }
     }

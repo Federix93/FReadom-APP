@@ -7,26 +7,19 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.RecyclerFragmentBooksAdapter;
+import com.example.android.lab1.adapter.RecyclerFragmentRequestsDoneAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.viewmodel.RequestedDoneBooksViewModel;
-import com.example.android.lab1.viewmodel.UserRealtimeDBViewModel;
-import com.example.android.lab1.viewmodel.ViewModelFactory;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +27,7 @@ import java.util.List;
 public class RequestsFragmentDoneItem extends Fragment {
 
     private RecyclerView mRecyclerView;
-    RecyclerFragmentBooksAdapter mAdapter;
+    RecyclerFragmentRequestsDoneAdapter mAdapter;
 
     public void RequestsFragmentDoneItem() {
     }
@@ -50,7 +43,7 @@ public class RequestsFragmentDoneItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerFragmentBooksAdapter(new ArrayList<Book>(),  new ArrayList<User>());
+        mAdapter = new RecyclerFragmentRequestsDoneAdapter(new ArrayList<Book>(),  new ArrayList<User>());
 
         mRecyclerView.setAdapter(mAdapter);
 

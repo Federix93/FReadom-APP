@@ -24,13 +24,13 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.4"
+                android:layout_weight="0.3"
                 android:orientation="vertical">
 
                 <ImageView
                     android:id="@+id/rv_book_thumbnail_lent"
-                    android:layout_width="156dp"
-                    android:layout_height="200dp"
+                    android:layout_width="116dp"
+                    android:layout_height="140dp"
                     android:contentDescription="Book Thumbnail"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/book_thumbnail_placeholder" />
@@ -39,7 +39,7 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.6"
+                android:layout_weight="0.7"
                 android:orientation="vertical">
 
                 <android.support.constraint.ConstraintLayout
@@ -52,7 +52,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginEnd="24dp"
+                        android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="16dp"
                         android:ellipsize="end"
@@ -73,7 +73,7 @@
                         android:layout_gravity="start"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="4dp"
                         android:ellipsize="end"
                         android:gravity="start"
                         android:textSize="12sp"
@@ -90,12 +90,12 @@
                         android:layout_gravity="end"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="32dp"
-                        android:gravity="start"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:maxLines="1"
+                        android:layout_marginTop="8dp"
                         android:ellipsize="end"
+                        android:gravity="start"
+                        android:maxLines="1"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/position_lent"
                         app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_author" />
@@ -105,55 +105,44 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="32dp"
+                        android:layout_marginTop="8dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_author"
                         app:srcCompat="@drawable/ic_location_on_orange_24dp" />
 
-
-                    <ImageView
-                        android:id="@+id/dash_chat_item"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_marginBottom="12dp"
-                        android:layout_marginEnd="24dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:srcCompat="@drawable/ic_chat_grey_32dp" />
-
-                    <TextView
-                        android:id="@+id/dash_chat_notifications"
+                    <LinearLayout
+                        android:id="@+id/open_chat_books_lent"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        android:layout_marginEnd="16dp"
-                        android:background="@drawable/rounded_textview"
-                        android:gravity="center"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
+                        android:layout_height="28dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginEnd="12dp"
+                        android:padding="4dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/open_chat"
+                            android:textAllCaps="true"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                            android:textColor="@color/colorSecondaryAccent"
+                            android:textSize="14sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                    </LinearLayout>
 
                     <ImageView
-                        android:id="@+id/dash_delete_item"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_marginBottom="12dp"
-                        android:layout_marginEnd="24dp"
+                        android:id="@+id/book_owner_profile_picture"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginBottom="4dp"
+                        android:layout_marginEnd="8dp"
+                        android:scaleType="fitCenter"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/dash_chat_item"
-                        app:srcCompat="@drawable/ic_delete_grey_24dp" />
-
-                    <ImageView
-                        android:id="@+id/dash_edit_item"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_marginBottom="12dp"
-                        android:layout_marginEnd="24dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/dash_delete_item"
-                        app:srcCompat="@drawable/ic_edit_grey_24dp" />
-
+                        app:layout_constraintEnd_toStartOf="@+id/open_chat_books_lent"
+                        app:srcCompat="@drawable/ic_person_black_24dp" />
                 </android.support.constraint.ConstraintLayout>
             </LinearLayout>
         </LinearLayout>

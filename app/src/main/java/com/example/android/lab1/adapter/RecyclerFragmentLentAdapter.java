@@ -1,5 +1,4 @@
 package com.example.android.lab1.adapter;
-
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -12,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,12 +41,13 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.security.acl.Owner;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerFragmentBooksAdapter.MyViewHolder> {
+public class RecyclerFragmentLentAdapter extends RecyclerView.Adapter<RecyclerFragmentLentAdapter.MyViewHolder> {
 
     private List<Book> mBookList;
     private List<User> mUsersOwner;
@@ -55,26 +56,14 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
 
-    private GeoCodingTask mCurrentlyExecuting;
-    private Location mCurrentlyResolving;
-    private Location mResolveLater;
-    private boolean isLent;
-
-    public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users) {
+    public RecyclerFragmentLentAdapter(List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
         mUsersOwner = users;
-        isLent = false;
-    }
-
-    public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users, boolean isLent) {
-        mBookList = listBooks;
-        mUsersOwner = users;
-        this.isLent = isLent;
     }
 
     @NonNull
     @Override
-    public RecyclerFragmentBooksAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View cardView = inflater.inflate(R.layout.recycler_book_item_lent, parent, false);
@@ -82,7 +71,7 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerFragmentBooksAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.bind(mBookList.get(position), position);
     }
 
@@ -99,19 +88,21 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView mBookTitle;
         TextView mBookAuthor;
-        TextView mBookCity;
         ImageView mBookThumbnail;
         LinearLayout mChatLayout;
         ImageView mUserPhoto;
+        TextView mLentFromDate;
+        TextView mLentToDate;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             mBookTitle = itemView.findViewById(R.id.rv_book_lent_title);
-            mBookAuthor = itemView.findViewById(R.id.rv_book_lent_author);
-            mBookCity = itemView.findViewById(R.id.rv_book_lent_city);
+            //mBookAuthor = itemView.findViewById(R.id.rv_book_lent_author);
             mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_lent);
             mChatLayout = itemView.findViewById(R.id.open_chat_books_lent);
             mUserPhoto = itemView.findViewById(R.id.book_owner_profile_picture);
+            mLentFromDate = itemView.findViewById(R.id.lent_from_date);
+            mLentToDate = itemView.findViewById(R.id.lent_to_date);
 
             firebaseDatabase = FirebaseDatabase.getInstance();
             userReference = firebaseDatabase.getReference().child("users");
@@ -120,15 +111,15 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
         public void bind(final Book book, final int position) {
             mBookTitle.setText(book.getTitle());
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
-            mBookAuthor.setText(book.getAuthors());
-            if (book.getGeoPoint() != null) {
-                Location location = new Location("location");
-                location.setLongitude(book.getGeoPoint().getLongitude());
-                location.setLatitude(book.getGeoPoint().getLatitude());
-
-                resolveCityLocation(location);
-            } else
-                mBookCity.setText(mContext.getResources().getString(R.string.position_not_available));
+            //mBookAuthor.setText(book.getAuthors());
+//            if (book.getGeoPoint() != null) {
+//                Location location = new Location("location");
+//                location.setLongitude(book.getGeoPoint().getLongitude());
+//                location.setLatitude(book.getGeoPoint().getLatitude());
+//
+//                resolveCityLocation(location);
+//            } else
+//                mBookCity.setText(mContext.getResources().getString(R.string.position_not_available));
             if (book.getWebThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mBookThumbnail);
             } else if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
@@ -141,76 +132,51 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserPhoto);
             }
-            if (!isLent) {
-                mChatLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
-                                .child(book.getBookID())
-                                .child(book.getUid())
-                                .child(FirebaseAuth.getInstance().getUid());
-                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                String chatID = (String) dataSnapshot.getValue();
-                                Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                intent.putExtra("ChatID", chatID);
-                                intent.putExtra("Username", mUsersOwner.get(position).getUsername());
-                                intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
-                                intent.putExtra("BookID", mBookList.get(position).getBookID());
-                                v.getContext().startActivity(intent);
-                            }
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+            String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+            String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+            mLentFromDate.setText(String.format(mContext.getResources().getString(R.string.from_date), dateFrom));
+            mLentToDate.setText(String.format(mContext.getResources().getString(R.string.to_date), dateTo));
 
-                            }
-                        });
-                    }
-                });
-            }else{
-                mChatLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
-                                .child(book.getBookID())
-                                .child(FirebaseAuth.getInstance().getUid())
-                                .child(book.getLentTo());
-                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                String chatID = (String) dataSnapshot.getValue();
-                                Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                intent.putExtra("ChatID", chatID);
-                                intent.putExtra("Username", mUsersOwner.get(position).getUsername());
-                                intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
-                                intent.putExtra("BookID", mBookList.get(position).getBookID());
-                                v.getContext().startActivity(intent);
-                            }
+            mChatLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
+                            .child(book.getBookID())
+                            .child(FirebaseAuth.getInstance().getUid())
+                            .child(book.getLentTo());
+                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String chatID = (String) dataSnapshot.getValue();
+                            Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            intent.putExtra("ChatID", chatID);
+                            intent.putExtra("Username", mUsersOwner.get(position).getUsername());
+                            intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
+                            intent.putExtra("BookID", mBookList.get(position).getBookID());
+                            v.getContext().startActivity(intent);
+                        }
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
-                            }
-                        });
-                    }
-                });
-            }
-
+                        }
+                    });
+                }
+            });
         }
 
-        private void resolveCityLocation(Location location) {
-            // This method will change address mResultAddress var
-            mCurrentlyResolving = location;
-            mCurrentlyExecuting = new GeoCodingTask(mBookCity);
-            mCurrentlyExecuting.execute(new LatLng(location.getLatitude(),
-                    location.getLongitude()));
-        }
+//        private void resolveCityLocation(Location location) {
+//            // This method will change address mResultAddress var
+//            mCurrentlyResolving = location;
+//            mCurrentlyExecuting = new GeoCodingTask(mBookCity);
+//            mCurrentlyExecuting.execute(new LatLng(location.getLatitude(),
+//                    location.getLongitude()));
+//        }
     }
 
-    private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
+    /*private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
 
         private TextView mTarget;
 
@@ -257,5 +223,5 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
             }
 
         }
-    }
+    }*/
 }

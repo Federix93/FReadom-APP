@@ -51,7 +51,7 @@
     <string name="verification_email_confirm">OK</string>
     <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
     <string name="confirm">Conferma</string>
-    <string name="loan_your_item">Libri in prestito</string>
+    <string name="loan_your_item">Libri presi in prestito</string>
     <string name="loan_other_book_item">Libri ricevuti</string>
     <string name="request_done_item">Effettuate</string>
     <string name="request_received_item">Ricevute</string>
@@ -159,8 +159,8 @@
     <string name="start_loan_button_info_text">Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l\'utente premi il pulsante \"Inizia prestito\"</string>
     <string name="end_loan_button_info_text">Il pulsante di fine prestito deve essere premuto una volta che il libro è stato restituito. Una volta premuto il libro tornerà disponibile per nuove richieste</string>
     <string name="end_loan">Termina prestito</string>
-    <string name="from_date">Da %1$s</string>
-    <string name="to_date">A %1$s</string>
+    <string name="from_date">Dal %1$s</string>
+    <string name="to_date">Al %1$s</string>
     <string name="confirm_end_title">Confermi fine prestito?</string>
     <string name="confirm_end_text">L\'utente ti ha effettivamente restituito il libro? In caso affermativo il libro tornerà disponibile e potrai ricevere nuove richieste da altri utenti</string>
 

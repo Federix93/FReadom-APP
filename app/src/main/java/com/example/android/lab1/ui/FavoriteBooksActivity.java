@@ -91,6 +91,9 @@ public class FavoriteBooksActivity extends AppCompatActivity {
                     mAdapter.notifyDataSetChanged();
                 }
             });
+            if (mAdapter.getItemCount() == 0) {
+                mTextAdviceLayout.setVisibility(View.VISIBLE);
+            }
         } else {
             Toast.makeText(this, "Devi essere loggato!", Toast.LENGTH_LONG).show();
         }
