@@ -39,6 +39,8 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.model.User;
+import com.example.android.lab1.ui.listeners.OnPhotoClickListener;
+import com.example.android.lab1.ui.listeners.OnPhotoClickListenerDefaultImpl;
 import com.example.android.lab1.ui.profile.GlobalShowProfileActivity;
 import com.example.android.lab1.utils.ChatManager;
 import com.example.android.lab1.utils.Utilities;
@@ -287,7 +289,12 @@ public class BookDetailsActivity extends AppCompatActivity {
                 for (int i = 0; i < mBook.getUserBookPhotosStoragePath().size(); i++) {
                     bookPhotos[i] = new BookPhoto(mBook.getUserBookPhotosStoragePath().get(i), mBook.getTitle());
                 }
-                mGalleryRecyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
+                OnPhotoClickListener photoClickListener = new OnPhotoClickListenerDefaultImpl(BookDetailsActivity.this,
+                        mBook.getUserBookPhotosStoragePath(),
+                        mBook.getTitle());
+                mGalleryRecyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos,
+                        getApplicationContext(),
+                        photoClickListener));
             } else {
                 mGalleryLayout.setVisibility(GONE);
             }

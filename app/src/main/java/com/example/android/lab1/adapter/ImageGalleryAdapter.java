@@ -15,15 +15,19 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.BookPhoto;
 
 import com.example.android.lab1.ui.BookPhotoDetailActivity;
+import com.example.android.lab1.ui.listeners.OnPhotoClickListener;
+import com.example.android.lab1.ui.listeners.OnPhotoClickListenerDefaultImpl;
 
 public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapter.MyViewHolder> {
 
     private BookPhoto[] mBookPhoto;
     private Context mContext;
+    private OnPhotoClickListener mPhotoClickListener;
 
-    public ImageGalleryAdapter(BookPhoto[] mBookPhoto, Context mContext) {
+    public ImageGalleryAdapter(BookPhoto[] mBookPhoto, Context mContext, OnPhotoClickListener photoClickListener) {
         this.mBookPhoto = mBookPhoto;
         this.mContext = mContext;
+        this.mPhotoClickListener = photoClickListener;
     }
 
     @NonNull
@@ -69,10 +73,8 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
         public void onClick(View view) {
             int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-                BookPhoto bookPhoto = mBookPhoto[position];
-                Intent intent = new Intent(mContext, BookPhotoDetailActivity.class);
-                intent.putExtra(BookPhotoDetailActivity.BOOK_PHOTO, bookPhoto);
-                mContext.startActivity(intent);
+                if (mPhotoClickListener != null)
+                    mPhotoClickListener.onPhotoClicked(position);
             }
         }
     }
