@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
@@ -47,8 +48,11 @@ import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.OpenedChatViewModel;
 import com.example.android.lab1.viewmodel.UserViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -177,11 +181,12 @@ public class BookDetailsActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Errore nel caricamento del libro, riprovare più tardi", Toast.LENGTH_SHORT).show();
             finish();
             return;
-        }/*
-        if(mBook.isAlreadyLent()){
+        }
+
+        if(mBook.getLentTo() != null){
             mBookButton.setText(getResources().getString(R.string.book_not_available));
             mBookButton.setEnabled(false);
-        }*/
+        }
         //Verifico se la chat è aperta
         OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
         openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
@@ -193,11 +198,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                 else {
                     mBookButton.setText(getResources().getString(R.string.open_chat));
                 }
+                updateUI();
             }
         });
-
-
-        updateUI();
     }
 
     @Override
@@ -374,13 +377,28 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         mBookButton.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(final View v) {
                 if (mFirebaseAuth.getUid() != null) {
-                    final DocumentReference reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
-                    reqDocRef.set(mBook, SetOptions.merge());
-                    final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
-                    reqReceivedDocRef.set(mBook, SetOptions.merge());
-                    new ChatManager(mBook.getBookID(), mBook.getUid(), mBook.getTitle(), getApplicationContext());
+                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
+                    progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_loading);
+                    DocumentReference documentReference = mFirebaseFirestore.collection("books").document(mBook.getUid());
+                    documentReference.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if(task.getResult().exists()){
+                                final DocumentReference reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+                                reqDocRef.set(mBook, SetOptions.merge());
+                                final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
+                                reqReceivedDocRef.set(mBook, SetOptions.merge());
+                                new ChatManager(mBook.getBookID(), mBook.getUid(), mBook.getTitle(), getApplicationContext());
+                                if(progressDialogHolder.isProgressDialogShowing())
+                                    progressDialogHolder.dismissDialog();
+                            }else{
+                                Snackbar.make(v, "Libro non più disponibile", Snackbar.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
 
                 } else {
                     Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();

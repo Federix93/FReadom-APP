@@ -8,12 +8,15 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,9 +34,30 @@ import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.ui.listeners.OnPhotoClickListener;
 import com.example.android.lab1.ui.listeners.OnPhotoClickListenerDefaultImpl;
 import com.example.android.lab1.utils.Utilities;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCanceledListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -194,6 +218,97 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
                 i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 i.putExtra(LoadBookActivity.BOOK, mBook);
                 startActivity(i);
+            }
+        });
+
+        mDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                if(FirebaseAuth.getInstance() != null){
+                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
+                    progressDialogHolder.showLoadingDialog(R.string.deleting_book_dialog);
+                    final DocumentReference documentReference = FirebaseFirestore.getInstance().collection("books").document(mBook.getBookID());
+                    documentReference.get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if(task.getResult().exists()){
+                                final Book book = task.getResult().toObject(Book.class);
+                                if(book != null && book.getLentTo() == null){
+                                    documentReference.delete();
+                                    DocumentReference reqDone = FirebaseFirestore.getInstance().collection("requestsReceived")
+                                            .document(FirebaseAuth.getInstance().getUid())
+                                            .collection("books")
+                                            .document(book.getBookID());
+                                    reqDone.delete();
+                                    CollectionReference collectionReference = FirebaseFirestore.getInstance().collection("requestsDone");
+                                    collectionReference.get().addOnSuccessListener(BookDetailsLibraryActivity.this, new OnSuccessListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            List<DocumentReference> docSnap = queryDocumentSnapshots.toObjects(DocumentReference.class);
+                                            List<DocumentSnapshot> docSnap2 = queryDocumentSnapshots.toObjects(DocumentSnapshot.class);
+                                            List<DocumentChange> docSnap3 = queryDocumentSnapshots.toObjects(DocumentChange.class);
+                                            List<DocumentSnapshot> docSnap4 = queryDocumentSnapshots.getDocuments();
+                                            List<DocumentChange> docSnap5 = queryDocumentSnapshots.getDocumentChanges();
+
+                                            Log.d("LULLO", "A Pezzo de merda1: " + docSnap.size());
+                                            Log.d("LULLO", "A Pezzo de merda2: " + docSnap2.size());
+                                            Log.d("LULLO", "A Pezzo de merda3: " + docSnap3.size());
+                                            Log.d("LULLO", "A Pezzo de merda4: " + docSnap4.size());
+                                            Log.d("LULLO", "A Pezzo de merda5: " + docSnap5.size());
+                                        }
+                                    }); /*new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()){
+
+                                                for (DocumentSnapshot document: task.getResult()){
+                                                    Log.d("LULLO", document.getId() + " => " + document.getData());
+                                                }
+                                            } else {
+                                                Log.d("LULLO", "error getting documents: ", task.getException());
+                                            }
+                                            /*for(DocumentSnapshot d : task.getResult()){
+                                                Log.d("LULLO", "Document: " + d.getReference().toString());
+                                                //d.getReference().collection("books").document(book.getBookID()).delete();
+                                            }
+                                        }
+                                    */
+
+                                    FirebaseDatabase.getInstance().getReference("conversations").child(book.getBookID()).removeValue();
+                                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID())
+                                            .child(FirebaseAuth.getInstance().getUid());
+                                    final List<String> chatIDs = new ArrayList<>();
+                                    dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                                    for(DataSnapshot d : dataSnapshot.getChildren()){
+                                                        Log.d("LULLO", "ChatID: " + d.getValue());
+                                                        chatIDs.add((String) d.getValue());
+                                                    }
+                                                    for(String s : chatIDs){
+                                                        FirebaseDatabase.getInstance().getReference("chats").child(s).removeValue();
+                                                        Log.d("LULLO", "ChatID: " + s);
+                                                    }
+                                                    if (progressDialogHolder.isProgressDialogShowing())
+                                                        progressDialogHolder.dismissDialog();
+                                                }
+
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                }else{
+                                    Snackbar.make(v, "Il libro è attualmente in prestito. Impossibile eliminare il libro", Snackbar.LENGTH_SHORT).show();
+                                }
+                            }else{
+                                if(progressDialogHolder.isProgressDialogShowing())
+                                    progressDialogHolder.dismissDialog();
+                                Toast.makeText(getApplicationContext(), "Qualcosa è andato storto", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }
             }
         });
 
