@@ -56,9 +56,17 @@ public class RecyclerFragmentLentAdapter extends RecyclerView.Adapter<RecyclerFr
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
 
+    boolean isLent = false;
+
     public RecyclerFragmentLentAdapter(List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
         mUsersOwner = users;
+    }
+
+    public RecyclerFragmentLentAdapter(List<Book> listBooks, List<User> users, boolean lent) {
+        mBookList = listBooks;
+        mUsersOwner = users;
+        this.isLent = lent;
     }
 
     @NonNull
@@ -138,33 +146,72 @@ public class RecyclerFragmentLentAdapter extends RecyclerView.Adapter<RecyclerFr
             mLentFromDate.setText(String.format(mContext.getResources().getString(R.string.from_date), dateFrom));
             mLentToDate.setText(String.format(mContext.getResources().getString(R.string.to_date), dateTo));
 
-            mChatLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
-                            .child(book.getBookID())
-                            .child(FirebaseAuth.getInstance().getUid())
-                            .child(book.getLentTo());
-                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            String chatID = (String) dataSnapshot.getValue();
-                            Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            intent.putExtra("ChatID", chatID);
-                            intent.putExtra("Username", mUsersOwner.get(position).getUsername());
-                            intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
-                            intent.putExtra("BookID", mBookList.get(position).getBookID());
-                            v.getContext().startActivity(intent);
-                        }
+            if (isLent) {
+                mChatLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
+                                .child(book.getBookID())
+                                .child(FirebaseAuth.getInstance().getUid())
+                                .child(book.getLentTo());
+                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String chatID = (String) dataSnapshot.getValue();
+                                Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                Log.d("VINCI", "onDataChange:  username " + mUsersOwner.get(position).getUsername());
+                                Log.d("VINCI", "onDataChange:  chatid " + chatID);
+                                Log.d("VINCI", "onDataChange:  imageurl " + mUsersOwner.get(position).getPhotoURL());
+                                Log.d("VINCI", "onDataChange:  BOOKID " + mBookList.get(position).getBookID());
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
-                }
-            });
+
+                                intent.putExtra("ChatID", chatID);
+                                intent.putExtra("Username", mUsersOwner.get(position).getUsername());
+                                intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
+                                intent.putExtra("BookID", mBookList.get(position).getBookID());
+                                v.getContext().startActivity(intent);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
+            } else {
+                mChatLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
+                                .child(book.getBookID())
+                                .child(book.getUid())
+                                .child(FirebaseAuth.getInstance().getUid());
+                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String chatID = (String) dataSnapshot.getValue();
+                                Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                intent.putExtra("ChatID", chatID);
+                                intent.putExtra("Username", mUsersOwner.get(position).getUsername());
+                                intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
+                                intent.putExtra("BookID", mBookList.get(position).getBookID());
+                                v.getContext().startActivity(intent);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
+            }
+
+
         }
 
 //        private void resolveCityLocation(Location location) {

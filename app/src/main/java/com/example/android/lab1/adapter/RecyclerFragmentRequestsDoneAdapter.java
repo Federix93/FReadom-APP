@@ -19,6 +19,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
+import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
@@ -151,6 +152,16 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
 
                         }
                     });
+                }
+            });
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), BookDetailsActivity.class);
+                    intent.putExtra("BookSelected", mBookList.get(position));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    v.getContext().startActivity(intent);
                 }
             });
 

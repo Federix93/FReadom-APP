@@ -26,11 +26,18 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.SignInActivity;
+import com.example.android.lab1.ui.chat.ChatActivity;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -119,6 +126,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                 int clicked = item.getItemId();
                 if(clicked == R.id.confirm_updates) {
                     if (mChangedPicture && mCurrentPhotoPath != null) {
+                        final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(EditProfileActivity.this);
+                        progressDialogHolder.showLoadingDialog(R.string.saving);
                         FirebaseStorage storage = FirebaseStorage.getInstance();
                         final StorageReference reference = storage.getReference(FirebaseAuth.getInstance()
                                 .getCurrentUser()
@@ -159,6 +168,25 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                                                                         if (mShortBioTextInputLayout.getEditText() != null)
                                                                             mUser.setShortBio(mShortBioTextInputLayout.getEditText().getText().toString());
                                                                         docRef.set(mUser, SetOptions.merge());
+
+                                                                        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                                                        final DatabaseReference databaseReference = firebaseDatabase.getReference("users").child(mFirebaseAuth.getUid());
+                                                                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                            @Override
+                                                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                                                com.example.android.lab1.model.chatmodels.User user = dataSnapshot.getValue(com.example.android.lab1.model.chatmodels.User.class);
+                                                                                user.setPhotoURL(mUser.getImage());
+                                                                                user.setUsername(mUser.getUsername());
+                                                                                databaseReference.setValue(user);
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onCancelled(DatabaseError databaseError) {
+
+                                                                            }
+                                                                        });
+                                                                        if(progressDialogHolder.isProgressDialogShowing())
+                                                                            progressDialogHolder.dismissDialog();
                                                                         Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
                                                                         intent.putExtra("user", mUser);
                                                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

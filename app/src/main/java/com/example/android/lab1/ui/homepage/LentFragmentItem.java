@@ -45,7 +45,7 @@ public class LentFragmentItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerFragmentLentAdapter(new ArrayList<Book>(), new ArrayList<User>());
+        mAdapter = new RecyclerFragmentLentAdapter(new ArrayList<Book>(), new ArrayList<User>(), true);
         mRecyclerView.setAdapter(mAdapter);
         LoansViewModel loansViewModel = ViewModelProviders.of(getActivity()).get(LoansViewModel.class);
         loansViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {

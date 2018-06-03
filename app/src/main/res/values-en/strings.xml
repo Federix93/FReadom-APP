@@ -195,6 +195,11 @@
     <string name="start_loan_progress">Beginning of the loan in progress...</string>
     <string name="end_loan_progress">End of the loan in progress...</string>
     <string name="review_published">Review published</string>
+    <string name="saving...">Saving...</string>
+    <string name="load_review">Review loading</string>
+    <string name="loan_to_be_closed_owner">Available again: %1$s</string>
+    <string name="loan_to_be_closed">To return: %1$s</string>
+    <string name="loan_started_from">Loan started: %1$s</string>
 
 
 </resources>
