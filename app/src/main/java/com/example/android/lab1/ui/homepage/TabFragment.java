@@ -567,7 +567,6 @@ public class TabFragment extends Fragment {
             mSecondRecyclerView.smoothScrollToPosition(0);
         }
     }
-
     public void updateLayoutFirstRecyclerView(List<Book> books){
         if (mFirstRecyclerBookAdapter == null) {
             mFirstRecyclerBookAdapter = new RecyclerBookAdapter(books);
