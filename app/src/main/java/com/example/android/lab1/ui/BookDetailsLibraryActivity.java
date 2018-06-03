@@ -28,6 +28,8 @@ import com.example.android.lab1.adapter.ImageGalleryAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.Condition;
+import com.example.android.lab1.ui.listeners.OnPhotoClickListener;
+import com.example.android.lab1.ui.listeners.OnPhotoClickListenerDefaultImpl;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -174,12 +176,16 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
                 for (int i = 0; i < mBook.getUserBookPhotosStoragePath().size(); i++) {
                     bookPhotos[i] = new BookPhoto(mBook.getUserBookPhotosStoragePath().get(i), mBook.getTitle());
                 }
-                mGalleryRecyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos, getApplicationContext()));
+                OnPhotoClickListener onPhotoClickListener = new OnPhotoClickListenerDefaultImpl(BookDetailsLibraryActivity.this,
+                        mBook.getUserBookPhotosStoragePath(),
+                        mBook.getTitle());
+                mGalleryRecyclerView.setAdapter(new ImageGalleryAdapter(bookPhotos,
+                        getApplicationContext(),
+                        onPhotoClickListener));
             } else {
                 mGalleryLayout.setVisibility(GONE);
             }
         }
-
         mEditButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

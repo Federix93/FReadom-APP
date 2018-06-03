@@ -1,18 +1,14 @@
 package com.example.android.lab1.adapter;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,13 +18,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.example.android.lab1.AddressReciever;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
-import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.chat.ChatActivity;
-import com.example.android.lab1.viewmodel.OpenedChatViewModel;
-import com.example.android.lab1.viewmodel.ViewModelFactory;
+import com.example.android.lab1.utils.FetchAddressIntentService;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -40,35 +35,49 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
-import java.security.acl.Owner;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerFragmentBooksAdapter.MyViewHolder> {
+public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerFragmentBooksAdapter.MyViewHolder>
+implements AddressResultReciever {
 
     private List<Book> mBookList;
     private List<User> mUsersOwner;
+    private List<String> mCities;
 
     private Context mContext;
+    private Activity mContainer;
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
 
     private GeoCodingTask mCurrentlyExecuting;
     private Location mCurrentlyResolving;
     private Location mResolveLater;
+    private AddressReciever mAddressReciever;
     private boolean isLent;
 
-    public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users) {
+    public RecyclerFragmentBooksAdapter(Activity container, List<Book> listBooks, List<User> users) {
+        mContainer = container;
         mBookList = listBooks;
         mUsersOwner = users;
+        mCities = new ArrayList<>(mBookList != null?mBookList.size() : 0);
+        for (int i = 0; i < mBookList.size(); i++) {
+            mCities.add("");
+        }
         isLent = false;
     }
 
-    public RecyclerFragmentBooksAdapter(List<Book> listBooks, List<User> users, boolean isLent) {
+    public RecyclerFragmentBooksAdapter(Activity container, List<Book> listBooks, List<User> users, boolean isLent) {
+        mContainer = container;
         mBookList = listBooks;
         mUsersOwner = users;
+        mCities = new ArrayList<>(mBookList != null?mBookList.size() : 0);
+        for (int i = 0; i < mBookList.size(); i++) {
+            mCities.add("");
+        }
         this.isLent = isLent;
     }
 
@@ -94,6 +103,31 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
     public void setItems(List<Book> listBooks, List<User> usersOwner) {
         mBookList = listBooks;
         mUsersOwner = usersOwner;
+        mCities = new ArrayList<>(mBookList != null?mBookList.size() : 0);
+        for (int i = 0; i < mBookList.size(); i++) {
+            mCities.add("");
+        }
+    }
+
+    @Override
+    public void onPositionResolved(String address, boolean isCity, int position) {
+        if (position >= 0 && position < mCities.size()) {
+            mCities.set(position, address);
+            notifyItemChanged(position);
+        }
+    }
+
+    private void resolveCityLocation(Location location, int position) {
+        // This method will change address mResultAddress var
+        Intent intent = new Intent(mContainer, FetchAddressIntentService.class);
+        if (mAddressReciever == null)
+            mAddressReciever = new AddressReciever(new Handler(), this);
+        intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mAddressReciever);
+        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, location);
+        intent.putExtra(FetchAddressIntentService.Constants.RESOLVE_CITY, true);
+        intent.putExtra(FetchAddressIntentService.Constants.ADAPTER_POSITION, position);
+        mContainer.startService(intent);
+
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -122,11 +156,16 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
             mBookAuthor.setText(book.getAuthors());
             if (book.getGeoPoint() != null) {
-                Location location = new Location("location");
-                location.setLongitude(book.getGeoPoint().getLongitude());
-                location.setLatitude(book.getGeoPoint().getLatitude());
+                if (mCities.get(position) != null && mCities.get(position).equals("")) {
+                    Location location = new Location("location");
+                    location.setLongitude(book.getGeoPoint().getLongitude());
+                    location.setLatitude(book.getGeoPoint().getLatitude());
 
-                resolveCityLocation(location);
+                    resolveCityLocation(location, getAdapterPosition());
+                }
+                else
+                    mBookCity.setText(mCities.get(position));
+
             } else
                 mBookCity.setText(mContext.getResources().getString(R.string.position_not_available));
             if (book.getWebThumbnail() != null) {
@@ -201,13 +240,7 @@ public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerF
 
         }
 
-        private void resolveCityLocation(Location location) {
-            // This method will change address mResultAddress var
-            mCurrentlyResolving = location;
-            mCurrentlyExecuting = new GeoCodingTask(mBookCity);
-            mCurrentlyExecuting.execute(new LatLng(location.getLatitude(),
-                    location.getLongitude()));
-        }
+
     }
 
     private class GeoCodingTask extends AsyncTask<LatLng, String, String> {

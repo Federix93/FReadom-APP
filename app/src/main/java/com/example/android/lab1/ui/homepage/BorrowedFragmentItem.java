@@ -47,7 +47,7 @@ public class BorrowedFragmentItem extends Fragment {
 
         mUserOwners = new ArrayList<>();
 
-        mAdapter = new RecyclerFragmentBooksAdapter(new ArrayList<Book>(), mUserOwners);
+        mAdapter = new RecyclerFragmentBooksAdapter(getActivity(), new ArrayList<Book>(), mUserOwners);
         mRecyclerView.setAdapter(mAdapter);
         BorrowedBooksViewModel borrowedBooksViewModel = ViewModelProviders.of(getActivity()).get(BorrowedBooksViewModel.class);
         borrowedBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
