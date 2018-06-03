@@ -26,7 +26,6 @@ import java.util.List;
 public class ReyclerMoreAdapter extends RecyclerView.Adapter<ReyclerMoreAdapter.BookViewHolder> {
 
     private List<Book> books;
-    private Integer mAnimationDuration;
 
     public ReyclerMoreAdapter(List<Book> books) {
         if (this.books == null) {
@@ -40,39 +39,19 @@ public class ReyclerMoreAdapter extends RecyclerView.Adapter<ReyclerMoreAdapter.
 
     }
 
-    public void updateItems(List<Book> books) {
-        this.books = books;
-    }
-
     @NonNull
     @Override
     public BookViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.recycler_book_item, parent, false);
+        View view = inflater.inflate(R.layout.recycler_book_item_more, parent, false);
         return new BookViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final BookViewHolder holder, int position) {
-        /*if (mFilteredIds != null && mFilteredIds.contains(IDs.get(position)))
-            holder.layoutHide();
-        else */
         holder.bind(books.get(position));
-        setFadeAnimation(holder.mRootView);
 
     }
-
-    private void setFadeAnimation(View view) {
-        AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-        if (mAnimationDuration == null)
-            mAnimationDuration = view.getContext().getResources().getInteger(R.integer.homepage_recycler_view_animation_duration);
-        anim.setDuration(mAnimationDuration);
-        view.startAnimation(anim);
-    }
-
-    /**
-     * Showing popup menu when tapping on 3 dots
-     */
 
     @Override
     public int getItemCount() {
@@ -81,27 +60,22 @@ public class ReyclerMoreAdapter extends RecyclerView.Adapter<ReyclerMoreAdapter.
         return books.size();
     }
 
-    public class BookViewHolder extends RecyclerView.ViewHolder {
+    class BookViewHolder extends RecyclerView.ViewHolder {
 
-        View mRootView;
         TextView mTitle, mAuthor;
         ImageView mThumbnail;
         StorageReference mStorageReference;
-        private ViewGroup.LayoutParams mOldParams;
 
-        public BookViewHolder(final View itemView) {
+        BookViewHolder(final View itemView) {
             super(itemView);
-            mRootView = itemView;
             mTitle = itemView.findViewById(R.id.title);
             mAuthor = itemView.findViewById(R.id.author);
             mThumbnail = itemView.findViewById(R.id.thumbnail);
-            //mOverflow = itemView.findViewById(R.id.overflow);
 
         }
 
         void bind(final Book book) {
-           /* mRootView.setVisibility(View.VISIBLE);
-            if (mOldParams != null) mRootView.setLayoutParams(mOldParams); */
+
             mTitle.setText(book.getTitle());
             mAuthor.setText(book.getAuthors());
             if (book.getWebThumbnail() != null) {
@@ -122,81 +96,17 @@ public class ReyclerMoreAdapter extends RecyclerView.Adapter<ReyclerMoreAdapter.
                 }
             });
 
-            /*mOverflow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showPopupMenu(mOverflow);
-                }
-            });*/
         }
 
-        /*private void layoutHide() {
-            mOldParams = mRootView.getLayoutParams();
-            mRootView.setVisibility(View.GONE);
-            mRootView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
-        } */
     }
 
 
-    /*private void showPopupMenu(View view) {
-        // inflate menu
-        PopupMenu popup = new PopupMenu(view.getContext(), view);
-        MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(R.menu.book_item, popup.getMenu());
-        popup.setOnMenuItemClickListener(new MyMenuItemClickListener());
-        popup.show();
-    }*/
 
-    class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
 
-        public MyMenuItemClickListener() {
-        }
-
-        @Override
-        public boolean onMenuItemClick(MenuItem menuItem) {
-            switch (menuItem.getItemId()) {
-                case R.id.action_view_preview:
-                    return true;
-                case R.id.action_add_wishlist:
-                    return true;
-                default:
-            }
-            return false;
-        }
-    }
 
     public void addAll(List<Book> newBooks) {
         int initialSize = books.size();
         books.addAll(newBooks);
         notifyItemRangeInserted(initialSize, books.size());
     }
-
-    public String getLastItemId() {
-        return books.get(books.size() - 1).getBookID();
-    }
-
-    /*private class DownLoadImageTask extends AsyncTask<String, Void, Bitmap> {
-        // TODO move this inner class somewhere else
-        private ImageView mTarget;
-
-        public DownLoadImageTask(ImageView target) {
-            mTarget = target;
-        }
-        @Override
-        protected Bitmap doInBackground(String... strings) {
-            Bitmap logo = null;
-            try {
-                InputStream is = new URL(strings[0]).openStream();
-                    //decodeStream(InputStream is)
-                      //  Decode an input stream into a bitmap.
-                logo = BitmapFactory.decodeStream(is);
-            } catch (Exception e) { // Catch the download exception
-                e.printStackTrace();
-            }
-            return logo;
-        }
-        protected void onPostExecute(Bitmap result) {
-            mTarget.setImageBitmap(result);
-        }
-    }*/
 }

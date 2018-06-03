@@ -101,6 +101,7 @@ public class TabFragment extends Fragment {
     private static final String CITY = "CITY";
     private static final String GENRES = "GENRES";
     private static final String GENRE_PLACE_HOLDER = "GENRE_PLACE_HOLDER";
+    private static final int HITS = 30;
 
     CustomSwipeRefresh mRefreshLayout;
     AppCompatButton mGenreFilterButton;
@@ -850,7 +851,7 @@ public class TabFragment extends Fragment {
                 geoPoint.getLongitude(),
                 (double) 15000);
         Query query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
-                .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
+                .whereLessThan("geoPoint", firstGeoPoints[1]).limit(HITS);
         query.get().addOnSuccessListener(getActivity(), new OnSuccessListener<QuerySnapshot>() {
              @Override
              public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -878,7 +879,7 @@ public class TabFragment extends Fragment {
                 geoPoint.getLongitude(),
                 (double) 15000);
         Query query2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
-                .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
+                .whereLessThan("geoPoint", secondGeoPoints[1]).limit(HITS);
         query2.get().addOnSuccessListener(getActivity(), new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {

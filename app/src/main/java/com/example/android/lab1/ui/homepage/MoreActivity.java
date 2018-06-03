@@ -4,9 +4,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -28,12 +27,15 @@ import java.util.List;
 
 public class MoreActivity extends AppCompatActivity {
 
+    private final static int HITS_PER_PAGE = 50;
+    private final static int LOAD_MORE_THRESHOLD = 20;
+
+    private GridLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
     private ReyclerMoreAdapter mAdapter;
-    private GeoPoint mCurrentPosition;
-    private Toolbar mToolbar;
-    private AppCompatButton button;
-    private DocumentSnapshot lastVisible;
+    private GeoPoint[] mGeoBox;
+    private DocumentSnapshot lastVisible = null;
+    private boolean endReached = false;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -41,83 +43,88 @@ public class MoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_more);
 
-        mToolbar = findViewById(R.id.toolbar_more_activity);
+        Toolbar mToolbar = findViewById(R.id.toolbar_more_activity);
         mRecyclerView = findViewById(R.id.rv_more);
-        button = findViewById(R.id.button_click);
 
         Utilities.setupStatusBarColor(this);
-        mToolbar.setTitle("Nelle tue vicinanze");
-
-        mCurrentPosition = new GeoPoint(getIntent().getDoubleExtra("latitude", 0),
-                getIntent().getDoubleExtra("longitude", 0));
-
-        RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(layoutManager);
-
-        firstQuery(mCurrentPosition);
-
-        button.setOnClickListener(new View.OnClickListener() {
+        mToolbar.setTitle(R.string.nearby_home_page);
+        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                queryDatabase(mCurrentPosition);
+                finish();
             }
         });
 
-    }
+        GeoPoint currentPosition = new GeoPoint(getIntent().getDoubleExtra("latitude", 0),
+                getIntent().getDoubleExtra("longitude", 0));
 
-    public void firstQuery(GeoPoint currentPosition) {
-        GeoPoint[] geoPoint = Utilities.buildBoundingBox(currentPosition.getLatitude(),
+        mGeoBox = Utilities.buildBoundingBox(currentPosition.getLatitude(),
                 currentPosition.getLongitude(),
                 (double) 15000);
-        Query query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", geoPoint[0])
-                .whereLessThan("geoPoint", geoPoint[1]).orderBy("geoPoint").limit(3);
-        query.get().addOnSuccessListener(this, new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                List<Book> books = new ArrayList<>();
-                if (queryDocumentSnapshots != null) {
-                    lastVisible = queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size() -1);
-                    for (Book b : queryDocumentSnapshots.toObjects(Book.class)) {
-                        if (!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/) {
-                            books.add(b);
-                        }
-                    }
-                    mAdapter = new ReyclerMoreAdapter(books);
-                    mRecyclerView.setAdapter(mAdapter);
-                    mRecyclerView.smoothScrollToPosition(0);
 
+        mLayoutManager = new GridLayoutManager(this, 3);
+
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        setRecyclerViewScrollListener();
+
+        queryDatabase();
+
+
+    }
+
+    private void setRecyclerViewScrollListener() {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                int currentItemCount = mLayoutManager.getItemCount();
+                int lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+                if (currentItemCount == 0 || endReached) {
+                    return;
+                }
+
+                if (currentItemCount - lastVisibleItem <= LOAD_MORE_THRESHOLD) {
+                    queryDatabase();
                 }
             }
         });
     }
 
-    public void queryDatabase(GeoPoint currentPosition) {
-        GeoPoint[] geoPoint = Utilities.buildBoundingBox(currentPosition.getLatitude(),
-                currentPosition.getLongitude(),
-                (double) 15000);
-        Log.d("GNIPPO", "Buildo la query");
-        Query query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", geoPoint[0])
-                .whereLessThan("geoPoint", geoPoint[1]).orderBy("geoPoint").startAfter(lastVisible).limit(3);
-        Log.d("GNIPPO", "Lancio la query");
+    public void queryDatabase() {
+
+        final Query query;
+        if (lastVisible == null)
+            query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", mGeoBox[0])
+                    .whereLessThan("geoPoint", mGeoBox[1]).orderBy("geoPoint").limit(HITS_PER_PAGE);
+        else
+            query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", mGeoBox[0])
+                    .whereLessThan("geoPoint", mGeoBox[1]).orderBy("geoPoint").startAfter(lastVisible).limit(HITS_PER_PAGE);
+
         query.get().addOnSuccessListener(this, new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                Log.d("GNIPPO", "Onsuccess!!!");
                 List<Book> books = new ArrayList<>();
-                if (queryDocumentSnapshots != null) {
-                    lastVisible = queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size() -1);
+                if (queryDocumentSnapshots != null && queryDocumentSnapshots.size() != 0) {
+                    if (queryDocumentSnapshots.size() < HITS_PER_PAGE)
+                        endReached = true;
+                    lastVisible = queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size() - 1);
                     for (Book b : queryDocumentSnapshots.toObjects(Book.class)) {
                         if (!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/) {
                             books.add(b);
-                            Log.d("GNIPPO", "onSuccess: "+b.getTitle());
                         }
                     }
-                    mAdapter.addAll(books);
-
+                    if (mAdapter == null) {
+                        mAdapter = new ReyclerMoreAdapter(books);
+                        mRecyclerView.setAdapter(mAdapter);
+                    } else
+                        mAdapter.addAll(books);
+                } else {
+                    endReached = true;
                 }
             }
         });
     }
+
+
 }
