@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="slide_animation_duration">300</integer>
-    <integer name="position_radius_address">15000</integer>
+    <integer name="position_radius_address">15000</integer> <!-- meters -->
     <integer name="homepage_book_number">20</integer>
     <integer name="homepage_recycler_view_animation_duration">400</integer>
     <integer name="reviews_per_page">20</integer>

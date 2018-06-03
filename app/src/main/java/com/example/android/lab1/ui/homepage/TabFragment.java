@@ -7,7 +7,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -35,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
@@ -49,7 +47,6 @@ import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.BooksViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
-import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
@@ -62,30 +59,16 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -120,23 +103,23 @@ public class TabFragment extends Fragment {
     FragmentManager mFt = null;
     View fragmentContainer;
     int mFragmentType;
+    BooksViewModel booksViewModel;
     private Index books;
     private Index users;
     private Bundle savedState = null;
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
     private LiveData<List<Book>> firstLiveData;
-    BooksViewModel booksViewModel;
-    private ListenerRegistration firstListener;
-    private ListenerRegistration secondListener;
+    private int mBookLimitHomepage;
 
     //LoanFragment variables
-
     //RequestsFragment variables
     private Integer mSelectedGenre;
     private GeoPoint mCurrentPosition;
     //YourLibraryFragment variables
     private RecyclerView mYourLibraryRecyclerView;
+    private int mFirstRecyclerDistance;
+    private int mSecondRecyclerDistance;
 
     public static TabFragment newInstance(int fragmentTab) {
 
@@ -194,16 +177,18 @@ public class TabFragment extends Fragment {
         mFirstOtherTextView = view.findViewById(R.id.button_first_recycler_view);
         mSecondOtherTextView = view.findViewById(R.id.button_second_recycler_view);
 
-        Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
-        books = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
-        users = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
+        mBookLimitHomepage = getResources().getInteger(R.integer.homepage_book_number);
+        mFirstRecyclerDistance = getResources().getInteger(R.integer.position_radius_address);
+        mSecondRecyclerDistance = getResources().getInteger(R.integer.position_radius_address);
 
         mGenreFilterButton.setOnClickListener(new View.OnClickListener() {
                                                   @Override
                                                   public void onClick(View v) {
-                                                      Intent i = new Intent(getActivity(), GenreBooksActivity.class);
-                                                      i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                                      getActivity().startActivityForResult(i, Constants.PICK_GENRE);
+                                                      if (getActivity() != null) {
+                                                          Intent i = new Intent(getActivity(), GenreBooksActivity.class);
+                                                          i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                                          getActivity().startActivityForResult(i, Constants.PICK_GENRE);
+                                                      }
                                                   }
                                               }
         );
@@ -374,6 +359,13 @@ public class TabFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
+            case Constants.PICK_GENRE:
+                if (data != null
+                        && data.hasExtra(GenreBooksActivity.SELECTED_GENRE)) {
+                    int genre = data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1);
+                    setSelectedGenre(genre);
+                }
+                break;
             case Constants.PLAY_SERVICES_RESOLUTION_REQUEST:
                 if (resultCode == RESULT_OK)
                     makePositionRequest();
@@ -517,44 +509,7 @@ public class TabFragment extends Fragment {
         }
     }
 
-    private class RefreshAsyncTask extends AsyncTask<Void, Void, Void> {
-
-
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
-                    mCurrentPosition.getLongitude(),
-                    (double) 15000);
-            Query query1 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
-                    .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
-            //liveFirstRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF_1);
-            query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    if (queryDocumentSnapshots != null)
-                        updateLayoutFirstRecyclerView(queryDocumentSnapshots.toObjects(Book.class));
-                }
-            });
-            GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
-                    mCurrentPosition.getLongitude(),
-                    (double) 60000);
-            Query query2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
-                    .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
-            query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    if (queryDocumentSnapshots != null) {
-                        updateLayoutSecondRecyclerView(queryDocumentSnapshots.toObjects(Book.class));
-                    }
-                }
-            });
-            return null;
-        }
-
-    }
-
-    public void updateLayoutSecondRecyclerView(List<Book> books){
+    public void updateLayoutSecondRecyclerView(List<Book> books) {
 
         if (mSecondRecyclerBookAdapter == null) {
             mSecondRecyclerBookAdapter = new RecyclerBookAdapter(books);
@@ -562,12 +517,13 @@ public class TabFragment extends Fragment {
         } else {
             mSecondRecyclerBookAdapter.updateItems(books);
             mSecondRecyclerBookAdapter.notifyDataSetChanged();
-            if(mRefreshLayout.isRefreshing())
+            if (mRefreshLayout.isRefreshing())
                 mRefreshLayout.setRefreshing(false);
             mSecondRecyclerView.smoothScrollToPosition(0);
         }
     }
-    public void updateLayoutFirstRecyclerView(List<Book> books){
+
+    public void updateLayoutFirstRecyclerView(List<Book> books) {
         if (mFirstRecyclerBookAdapter == null) {
             mFirstRecyclerBookAdapter = new RecyclerBookAdapter(books);
             mFirstRecyclerView.setAdapter(mFirstRecyclerBookAdapter);
@@ -577,6 +533,132 @@ public class TabFragment extends Fragment {
             mFirstRecyclerBookAdapter.updateItems(books);
             mFirstRecyclerBookAdapter.notifyDataSetChanged();
         }
+    }
+
+    public void setSelectedGenre(int selectedGenre) {
+        this.mSelectedGenre = selectedGenre;
+        if (mSelectedGenre >= 0)
+            mGenreFilterButton.setText(getResources().getStringArray(R.array.genre)[mSelectedGenre]);
+        else {
+            mGenreFilterButton.setText(R.string.genre_filter_home_page);
+            mSelectedGenre = null;
+        }
+        new RefreshAsyncTask().execute();
+    }
+
+    private class RefreshAsyncTask extends AsyncTask<Void, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
+                    mCurrentPosition.getLongitude(),
+                    (double) mFirstRecyclerDistance);
+            Query query1;
+            if (mSelectedGenre == null)
+                query1 = FirebaseFirestore.getInstance()
+                        .collection("books")
+                        .whereGreaterThan("geoPoint", firstGeoPoints[0])
+                        .whereLessThan("geoPoint", firstGeoPoints[1])
+                        .whereEqualTo("lentTo", null);
+            else
+                query1 = FirebaseFirestore.getInstance()
+                        .collection("books")
+                        .whereGreaterThan("geoPoint", firstGeoPoints[0])
+                        .whereLessThan("geoPoint", firstGeoPoints[1])
+                        .whereEqualTo("lentTo", null)
+                        .whereEqualTo("genre", mSelectedGenre);
+
+            query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    if (queryDocumentSnapshots != null
+                            && !queryDocumentSnapshots.isEmpty()) {
+                        int valid = 0;
+                        List<Book> books = new ArrayList<>();
+                        String uid = FirebaseAuth.getInstance().getUid();
+                        for (Book book : queryDocumentSnapshots.toObjects(Book.class)) {
+                            if (!book.getUid().equals(uid)) {
+                                books.add(book);
+                                valid++;
+                            }
+                            if (valid > mBookLimitHomepage)
+                                break;
+                        }
+                        updateLayoutFirstRecyclerView(books);
+                    } else {
+                        // TODO empty first recycler view
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d("DEBUG", "on Failure 1");
+                }
+            });
+
+            GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
+                    mCurrentPosition.getLongitude(),
+                    (double) mSecondRecyclerDistance);
+
+            Query query2;
+            if (mSelectedGenre == null)
+                query2 = FirebaseFirestore.getInstance()
+                        .collection("books")
+                        .whereGreaterThan("geoPoint", secondGeoPoints[0])
+                        .whereLessThan("geoPoint", secondGeoPoints[1])
+                        .whereEqualTo("lentTo", null);
+            else
+                query2 = FirebaseFirestore.getInstance()
+                        .collection("books")
+                        .whereGreaterThan("geoPoint", secondGeoPoints[0])
+                        .whereLessThan("geoPoint", secondGeoPoints[1])
+                        .whereEqualTo("lentTo", null)
+                        .whereEqualTo("genre", mSelectedGenre);
+
+            query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    if (queryDocumentSnapshots != null
+                            && !queryDocumentSnapshots.isEmpty()) {
+                        int valid = 0;
+                        List<Book> books = new ArrayList<>();
+                        String uid = FirebaseAuth.getInstance().getUid();
+                        for (Book book : queryDocumentSnapshots.toObjects(Book.class)) {
+                            if (!book.getUid().equals(uid)) {
+                                books.add(book);
+                                valid++;
+                            }
+                            if (valid > mBookLimitHomepage)
+                                break;
+                        }
+                        Book temp;
+                        for (int i = 0; i < books.size() - 1; i++) {
+                            for (int i1 = 0; i1 < books.size(); i1++) {
+                                if (books.get(i).getTimeInserted().getTime() <
+                                        books.get(i1).getTimeInserted().getTime()) {
+                                    temp = books.get(i);
+                                    books.set(i, books.get(i1));
+                                    books.set(i1, temp);
+                                }
+                            }
+                        }
+                        updateLayoutSecondRecyclerView(books);
+                    } else {
+                        // TODO empty second recycler view
+                    }
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d("DEBUG", "onFailure: here");
+                }
+            });
+            return null;
+        }
+
     }
 }
 
