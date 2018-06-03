@@ -299,10 +299,11 @@ public class SignInActivity extends AppCompatActivity {
                             .createSignInIntentBuilder()
                             .setIsSmartLockEnabled(false)
                             .setTheme(R.style.LoginTheme)
-                            .setLogo(R.drawable.bookique)
                             .setAvailableProviders(providers)
                             .build(),
                     RC_SIGN_IN);
+
+            //.setLogo(R.drawable.bookique)
         }
     }
 

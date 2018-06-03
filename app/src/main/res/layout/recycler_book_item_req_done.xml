@@ -116,9 +116,11 @@
                         android:layout_height="28dp"
                         android:layout_marginBottom="8dp"
                         android:layout_marginEnd="12dp"
+                        android:layout_marginTop="8dp"
                         android:padding="4dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_city">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -139,9 +141,11 @@
                         android:layout_height="36dp"
                         android:layout_marginBottom="4dp"
                         android:layout_marginEnd="8dp"
+                        android:layout_marginTop="8dp"
                         android:scaleType="fitCenter"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/open_chat_books_lent"
+                        app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_city"
                         app:srcCompat="@drawable/ic_person_black_24dp" />
                 </android.support.constraint.ConstraintLayout>
             </LinearLayout>

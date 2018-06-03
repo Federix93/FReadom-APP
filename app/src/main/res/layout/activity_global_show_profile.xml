@@ -120,7 +120,6 @@
             android:text="@string/more_detail"
             android:textColor="@color/com_facebook_blue"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textStyle="italic"
             app:layout_constraintBottom_toTopOf="@+id/tabs_global_show_profile"
             app:layout_constraintEnd_toStartOf="@+id/guideline15"
             app:layout_constraintHorizontal_bias="0.6"

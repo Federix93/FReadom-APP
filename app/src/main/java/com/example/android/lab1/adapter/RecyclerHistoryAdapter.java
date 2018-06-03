@@ -131,8 +131,8 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
 
         void bind (final Book book) {
             mHistoryVerb.setText(R.string.you_borrowed);
-            mHistoryBookTitle.setText(book.getTitle());
-            String uri = "@drawable/ic_arrow_forward_orange_24dp";  // where myresource (without the extension) is the file
+            //mHistoryBookTitle.setText(book.getTitle());
+            String uri = "@drawable/ic_fast_forward_orange_24dp";  // where myresource (without the extension) is the file
             int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
             Drawable res = mContext.getResources().getDrawable(imageResource);
             mHistoryArrow.setImageDrawable(res);
@@ -225,8 +225,8 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
 
         void bind(final Book book) {
             mHistoryVerb.setText(R.string.you_lent);
-            mHistoryBookTitle.setText(book.getTitle());
-            String uri = "@drawable/ic_arrow_back_green_24dp";  // where myresource (without the extension) is the file
+            //mHistoryBookTitle.setText(book.getTitle());
+            String uri = "@drawable/ic_fast_rewind_green_24dp";  // where myresource (without the extension) is the file
             int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
             Drawable res = mContext.getResources().getDrawable(imageResource);
             mHistoryArrow.setImageDrawable(res);
@@ -252,8 +252,6 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
             String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
             mHistoryDateFrom.setText(String.format(mContext.getResources().getString(R.string.from_date), dateFrom));
             mHistoryDateTo.setText(String.format(mContext.getResources().getString(R.string.to_date), dateTo));
-
-            Log.d("VINCI", "LENT");
 
             Query query = firebaseFirestore.collection("users").document(book.getUid())
                     .collection("ratings").whereEqualTo("bookId", book.getBookID());

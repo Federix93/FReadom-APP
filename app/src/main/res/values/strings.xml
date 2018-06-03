@@ -159,8 +159,8 @@
     <string name="start_loan_button_info_text">Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l\'utente premi il pulsante \"Inizia prestito\"</string>
     <string name="end_loan_button_info_text">Il pulsante di fine prestito deve essere premuto una volta che il libro è stato restituito. Una volta premuto il libro tornerà disponibile per nuove richieste</string>
     <string name="end_loan">Termina prestito</string>
-    <string name="from_date">Dal %1$s</string>
-    <string name="to_date">Al %1$s</string>
+    <string name="from_date">Da: %1$s</string>
+    <string name="to_date">A: %1$s</string>
     <string name="confirm_end_title">Confermi fine prestito?</string>
     <string name="confirm_end_text">L\'utente ti ha effettivamente restituito il libro? In caso affermativo il libro tornerà disponibile e potrai ricevere nuove richieste da altri utenti</string>
 
@@ -267,8 +267,8 @@
     <string name="history">Storico</string>
     <string name="logout">Logout</string>
     <string name="open_conversations"><![CDATA[Apri\nconversazioni]]></string>
-    <string name="you_borrowed">Hai prestato:</string>
-    <string name="you_lent">Hai ricevuto:</string>
+    <string name="you_borrowed">Hai prestato a:</string>
+    <string name="you_lent">Hai ricevuto da:</string>
     <string name="to">A:</string>
     <string name="from">Da:</string>
     <string name="review_exchange">Recensisci scambio</string>

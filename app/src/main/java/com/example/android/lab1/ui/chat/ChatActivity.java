@@ -461,6 +461,8 @@ public class ChatActivity extends AppCompatActivity {
                                                 if (documentSnapshot != null && documentSnapshot.exists()) {
                                                     Book book = documentSnapshot.toObject(Book.class);
                                                     if (book != null) {
+                                                        long time= System.currentTimeMillis();
+                                                        book.setLoanEnd(time);
                                                         docHistoryRef.set(book, SetOptions.merge());
                                                         DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(book.getBookID());
                                                         book.setLoanStart(Long.valueOf(-1));
