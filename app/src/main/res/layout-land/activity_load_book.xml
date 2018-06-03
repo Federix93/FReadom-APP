@@ -165,7 +165,7 @@
                         app:layout_constraintBottom_toBottomOf="@id/load_book_publisher"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/load_book_author_list"
-                        app:srcCompat="@drawable/ic_account_balance_black_24dp" />
+                        app:srcCompat="@drawable/ic_account_balance_white_24dp" />
 
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/load_book_publisher"

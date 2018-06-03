@@ -25,6 +25,7 @@ import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -97,7 +98,7 @@ public class SignInActivity extends AppCompatActivity {
 
         Utilities.setupStatusBarColor(this);
 
-        Glide.with(this).load(R.drawable.background).into(new SimpleTarget<Drawable>() {
+        Glide.with(this).load(R.drawable.liberty_statue_background).into(new SimpleTarget<Drawable>() {
             @Override
             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                 mRootConstraintLayout.setBackground(resource);
@@ -105,7 +106,7 @@ public class SignInActivity extends AppCompatActivity {
         });
 
         Glide.with(this)
-                .load(R.drawable.bookique).apply(new RequestOptions().transforms(new CenterCrop()))
+                .load(R.drawable.logo).apply(new RequestOptions().transforms(new CircleCrop()))
                 .transition(new DrawableTransitionOptions().transition(R.anim.button_animation))
                 .into(mLogoImageView);
 

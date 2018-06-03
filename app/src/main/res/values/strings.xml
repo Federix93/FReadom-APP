@@ -282,4 +282,7 @@
     <string name="review_published">Recensione pubblicata</string>
     <string name="load_review">Caricamento della recensione...</string>
     <string name="saving">Salvataggio...</string>
+
+    <string name="start">Inizia</string>
+    <string name="next">Avanti</string>
 </resources>
