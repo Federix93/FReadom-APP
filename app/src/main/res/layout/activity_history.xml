@@ -40,6 +40,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp"
             android:gravity="center"
             android:text="Non hai ancora concluso ne ricevuto alcun libro. Qui troverai uno storico dei tuoi scambi."/>
 

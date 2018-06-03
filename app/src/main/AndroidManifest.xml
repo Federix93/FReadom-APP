@@ -138,6 +138,7 @@
         <activity android:name=".ui.BookDetailsLibraryActivity"/>
         <activity android:name=".ui.PhotoDetailActivity"/>
         <activity android:name=".ui.HistoryActivity"/>
+        <activity android:name=".ui.SignInPostponedActivity"/>
 
         <receiver
             android:name=".utils.DirectReplyReceiver"

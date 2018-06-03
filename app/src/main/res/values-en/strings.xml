@@ -200,6 +200,7 @@
     <string name="loan_to_be_closed_owner">Available again: %1$s</string>
     <string name="loan_to_be_closed">To return: %1$s</string>
     <string name="loan_started_from">Loan started: %1$s</string>
+    <string name="preview_not_available">Preview not available</string>
 
 
 </resources>

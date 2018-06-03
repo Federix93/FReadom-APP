@@ -71,7 +71,7 @@
         android:alpha="0.8"
         android:background="@color/grey"
         android:elevation="4dp"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/from_text"

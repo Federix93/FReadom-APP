@@ -16,6 +16,7 @@ import com.example.android.lab1.adapter.RecyclerFragmentRequestsDoneAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.viewmodel.RequestedDoneBooksViewModel;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -47,32 +48,34 @@ public class RequestsFragmentDoneItem extends Fragment {
 
         mRecyclerView.setAdapter(mAdapter);
 
-        RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
-        requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@Nullable List<Book> books) {
-                if(books != null) {
-                    final List<Book> listBooks = new ArrayList<>();
-                    final List<User> usersOwner = new ArrayList<>();
-                    for (final Book b : books) {
-                        FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
+            requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
+                @Override
+                public void onChanged(@Nullable List<Book> books) {
+                    if (books != null) {
+                        final List<Book> listBooks = new ArrayList<>();
+                        final List<User> usersOwner = new ArrayList<>();
+                        for (final Book b : books) {
+                            FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
                                     listBooks.add(b);
                                     usersOwner.add(dataSnapshot.getValue(User.class));
                                     mAdapter.setItems(listBooks, usersOwner);
                                     mAdapter.notifyDataSetChanged();
-                            }
+                                }
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
 
-                            }
-                        });
+                                }
+                            });
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
         return view;
     }
 }

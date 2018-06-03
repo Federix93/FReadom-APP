@@ -50,7 +50,8 @@
                         android:layout_marginTop="8dp"
                         android:gravity="start"
                         android:textSize="16sp"
-                        android:textStyle="bold"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                        android:maxLines="3"
                         app:layout_anchorGravity="right|bottom"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="@+id/guideline2"
@@ -65,8 +66,9 @@
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="8dp"
                         android:gravity="start"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:maxLines="2"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         app:layout_anchorGravity="right|center"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="@+id/guideline2"
@@ -74,16 +76,14 @@
 
                     <ImageView
                         android:id="@+id/rv_book_thumbnail"
-                        android:layout_width="80dp"
-                        android:layout_height="100dp"
+                        android:layout_width="88dp"
+                        android:layout_height="110dp"
                         android:layout_gravity="start"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="32dp"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/styled_book_thumbnail"
                         android:scaleType="centerCrop"
                         android:src="@drawable/book_thumbnail_placeholder"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.031"
+                        app:layout_constraintEnd_toStartOf="@+id/guideline2"
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <TextView
@@ -114,7 +114,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        app:layout_constraintGuide_begin="109dp" />
+                        app:layout_constraintGuide_end="237dp" />
 
                 </android.support.constraint.ConstraintLayout>
             </FrameLayout>

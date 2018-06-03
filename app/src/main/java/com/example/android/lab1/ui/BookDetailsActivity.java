@@ -181,19 +181,21 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBookButton.setEnabled(false);
         }*/
         //Verifico se la chat è aperta
-        OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
-        openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(@Nullable Boolean aBoolean) {
-                if(!aBoolean) {
-                    mBookButton.setText(getResources().getString(R.string.book_request));
-                }
-                else {
-                    mBookButton.setText(getResources().getString(R.string.open_chat));
-                }
-            }
-        });
 
+        if (mFirebaseAuth.getUid() != null) {
+            OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
+            openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
+                @Override
+                public void onChanged(@Nullable Boolean aBoolean) {
+                    if(!aBoolean) {
+                        mBookButton.setText(getResources().getString(R.string.book_request));
+                    }
+                    else {
+                        mBookButton.setText(getResources().getString(R.string.open_chat));
+                    }
+                }
+            });
+        }
 
         updateUI();
     }
@@ -348,6 +350,8 @@ public class BookDetailsActivity extends AppCompatActivity {
             });
         } else {
             mPreviewButton.setEnabled(false);
+            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
+                    R.string.preview_not_available, Snackbar.LENGTH_LONG).setDuration(3000);
         }
 
         //if (mBook.getDescription() != null) {
@@ -376,7 +380,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                     new ChatManager(mBook.getBookID(), mBook.getUid(), mBook.getTitle(), getApplicationContext());
 
                 } else {
-                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(), SignInPostponedActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                 }
             }
         });
@@ -385,7 +391,6 @@ public class BookDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), GlobalShowProfileActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
                 intent.putExtra("UserObject", mUser);
                 intent.putExtra("UserID", mBook.getUid());
                 startActivity(intent);
@@ -430,7 +435,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    Snackbar.make(v, "Devi essere loggato", Snackbar.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(), SignInPostponedActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                 }
             }
         });
@@ -441,7 +448,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         reqDocRef.set(mBook, SetOptions.merge());
 
         Snackbar mySnackbar = Snackbar.make(findViewById(R.id.book_detail_linear_layout_container),
-                R.string.book_added, Snackbar.LENGTH_LONG).setDuration(4000);
+                R.string.book_added, Snackbar.LENGTH_LONG).setDuration(3000);
         mySnackbar.setAction(R.string.go_favorite, new OnClickListener() {
             @Override
             public void onClick(View v) {

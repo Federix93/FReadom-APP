@@ -85,47 +85,53 @@ public class HistoryActivity extends AppCompatActivity {
 
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-        final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        Query query = firebaseFirestore.collection("history").whereEqualTo("uid", mFirebaseAuth.getUid());
-        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.getResult().isEmpty()){
-                    Query query1 = firebaseFirestore.collection("history").whereEqualTo("lentTo", mFirebaseAuth.getUid());
-                    query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot secondQueryDocumentSnapshots) {
-                            if (secondQueryDocumentSnapshots != null) {
-                                mBooks.addAll(secondQueryDocumentSnapshots.toObjects(Book.class));
-                                mAdapter.setItems(mBooks);
-                                mAdapter.notifyDataSetChanged();
+        if (mFirebaseAuth.getUid() != null) {
+            final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Query query = firebaseFirestore.collection("history").whereEqualTo("uid", mFirebaseAuth.getUid());
+            query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.getResult().isEmpty()) {
+                        Query query1 = firebaseFirestore.collection("history").whereEqualTo("lentTo", mFirebaseAuth.getUid());
+                        query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot secondQueryDocumentSnapshots) {
+                                if (secondQueryDocumentSnapshots != null) {
+                                    mBooks.addAll(secondQueryDocumentSnapshots.toObjects(Book.class));
+                                    mAdapter.setItems(mBooks);
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                                if (mBooks.isEmpty()) {
+                                    mNoLayout.setVisibility(View.VISIBLE);
+                                }
                             }
-                            if (mBooks.isEmpty()) {
-                                mNoLayout.setVisibility(View.VISIBLE);
+                        });
+                    } else {
+                        mBooks.addAll(task.getResult().toObjects(Book.class));
+                        mAdapter.setItems(mBooks);
+                        mAdapter.notifyDataSetChanged();
+                        Query query1 = firebaseFirestore.collection("history").whereEqualTo("lentTo", mFirebaseAuth.getUid());
+                        query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot secondQueryDocumentSnapshots) {
+                                if (secondQueryDocumentSnapshots != null) {
+                                    mBooks.addAll(secondQueryDocumentSnapshots.toObjects(Book.class));
+                                    mAdapter.setItems(mBooks);
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                                if (mBooks.isEmpty()) {
+                                    mNoLayout.setVisibility(View.VISIBLE);
+                                }
+                                if (mNoLayout.getVisibility() == View.VISIBLE)
+                                    mNoLayout.setVisibility(View.GONE);
                             }
-                        }
-                    });
-                } else {
-                    mBooks.addAll(task.getResult().toObjects(Book.class));
-                    mAdapter.setItems(mBooks);
-                    mAdapter.notifyDataSetChanged();
-                    Query query1 = firebaseFirestore.collection("history").whereEqualTo("lentTo", mFirebaseAuth.getUid());
-                    query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot secondQueryDocumentSnapshots) {
-                            if (secondQueryDocumentSnapshots != null) {
-                                mBooks.addAll(secondQueryDocumentSnapshots.toObjects(Book.class));
-                                mAdapter.setItems(mBooks);
-                                mAdapter.notifyDataSetChanged();
-                            }
-                            if (mBooks.isEmpty()) {
-                                mNoLayout.setVisibility(View.VISIBLE);
-                            }
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            mNoLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

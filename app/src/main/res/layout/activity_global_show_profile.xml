@@ -14,7 +14,7 @@
         <ImageView
             android:id="@+id/imageView2"
             android:layout_width="match_parent"
-            android:layout_height="260dp"
+            android:layout_height="220dp"
             android:alpha="0.95"
             android:background="@drawable/global_profile_background"
             app:layout_constraintEnd_toEndOf="parent"
@@ -36,12 +36,13 @@
             android:id="@+id/card_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="16dp"
             android:elevation="10dp"
             app:cardCornerRadius="45dp"
             app:layout_constraintBottom_toTopOf="@+id/global_profile_name"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/global_profile_image"
@@ -70,7 +71,7 @@
             android:id="@+id/rating_text_global_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -84,7 +85,7 @@
             android:id="@+id/global_rating_star"
             android:layout_width="12dp"
             android:layout_height="12dp"
-            android:layout_marginBottom="18dp"
+            android:layout_marginBottom="14dp"
             app:layout_constraintBottom_toTopOf="@+id/global_bio_text"
             app:layout_constraintStart_toEndOf="@+id/rating_text_global_profile"
             app:srcCompat="@drawable/ic_star_orange_24dp" />
@@ -118,8 +119,8 @@
             android:layout_marginStart="8dp"
             android:gravity="center"
             android:text="@string/more_detail"
-            android:textColor="@color/com_facebook_blue"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/com_facebook_blue"
             app:layout_constraintBottom_toTopOf="@+id/tabs_global_show_profile"
             app:layout_constraintEnd_toStartOf="@+id/guideline15"
             app:layout_constraintHorizontal_bias="0.6"
@@ -137,13 +138,6 @@
             app:tabTextColor="#000" />
 
         <android.support.constraint.Guideline
-            android:id="@+id/guideline12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="310dp" />
-
-        <android.support.constraint.Guideline
             android:id="@+id/guideline13"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -156,6 +150,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintGuide_end="102dp" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="270dp" />
 
     </android.support.constraint.ConstraintLayout>
 

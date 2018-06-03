@@ -17,6 +17,7 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerReqReceivedAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.viewmodel.RequestsReceivedBooksViewModel;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -50,17 +51,19 @@ public class RequestsFragmentReceivedItem extends Fragment {
         mAdapter = new RecyclerReqReceivedAdapter(listBooks);
         mRecyclerView.setAdapter(mAdapter);
 
-        RequestsReceivedBooksViewModel reqRecBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestsReceivedBooksViewModel.class);
-        reqRecBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@Nullable List<Book> books) {
-                if (books != null) {
-                    mAdapter = new RecyclerReqReceivedAdapter(books);
-                    mRecyclerView.setAdapter(mAdapter);
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            RequestsReceivedBooksViewModel reqRecBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestsReceivedBooksViewModel.class);
+            reqRecBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
+                @Override
+                public void onChanged(@Nullable List<Book> books) {
+                    if (books != null) {
+                        mAdapter = new RecyclerReqReceivedAdapter(books);
+                        mRecyclerView.setAdapter(mAdapter);
+                    }
                 }
-            }
 
-        });
+            });
+        }
         return view;
     }
 

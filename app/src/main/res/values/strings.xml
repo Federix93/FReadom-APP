@@ -96,6 +96,7 @@
     <string name="search_books_hint">Titolo, autore, editore, tags...</string>
 
     <string name="your_library_fragment">La tua libreria</string>
+    <string name="your_library_advice">Qui troverai i tuoi libri una volta caricati. Premi sul simbolo + in basso per aggiungere il primo libro</string>
 
     <string name="position_filter_home_page">POSIZIONE</string>
     <string name="genre_filter_home_page">GENERI</string>
@@ -265,7 +266,7 @@
     <string name="default_message">Ciao %1$s, mi piacerebbe prendere in prestito il libro %2$s</string>
 
     <string name="history">Storico</string>
-    <string name="logout">Logout</string>
+    <string name="logout">Esci</string>
     <string name="open_conversations"><![CDATA[Apri\nconversazioni]]></string>
     <string name="you_borrowed">Hai prestato a:</string>
     <string name="you_lent">Hai ricevuto da:</string>
@@ -285,4 +286,8 @@
 
     <string name="start">Inizia</string>
     <string name="next">Avanti</string>
+
+    <string name="preview_not_available">Anteprima non disponibile</string>
+
+
 </resources>
