@@ -186,7 +186,6 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
                 mGalleryLayout.setVisibility(GONE);
             }
         }
-
         mEditButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
