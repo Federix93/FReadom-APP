@@ -173,7 +173,10 @@ public class ChatActivity extends AppCompatActivity {
         mSenderUID = getIntent().getStringExtra("SenderUID");
 
         if(getIntent().getBooleanExtra("FromNotification", false))
-            NotificationUtilities.removeNotification(mChatID, this);
+        {
+            if(NotificationUtilities.notificationExist(mChatID))
+                NotificationUtilities.removeNotification(mChatID, this);
+        }
 
         if (mSenderUID != null && !mSenderUID.equals(mFirebaseAuth.getUid()))
             mChatsReference.child(mChatID).child("counter").setValue(0);

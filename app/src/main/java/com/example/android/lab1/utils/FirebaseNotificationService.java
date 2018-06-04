@@ -17,6 +17,7 @@ import android.util.Log;
 import com.example.android.lab1.R;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.example.android.lab1.ui.chat.CurrentOpenChat;
+import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.io.IOException;
@@ -56,30 +57,22 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         if(!NotificationUtilities.notificationExist(data.get("chat")))
             NotificationUtilities.addNotification(data.get("chat"));
 
-        Intent intent = new Intent(this, ChatActivity.class);
-        intent.putExtra("ChatID", data.get("chat"));
-        intent.putExtra("Username", data.get("sender"));
-        intent.putExtra("ImageURL", data.get("senderPic"));
-        intent.putExtra("BookID", data.get("book"));
-        intent.putExtra("SenderUID", data.get("senderUID"));
-        intent.putExtra("FromNotification", true);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Intent clickIntent = new Intent(this, ChatActivity.class);
+        clickIntent.putExtra("ChatID", data.get("chat"));
+        clickIntent.putExtra("Username", data.get("sender"));
+        clickIntent.putExtra("ImageURL", data.get("senderPic"));
+        clickIntent.putExtra("BookID", data.get("book"));
+        clickIntent.putExtra("SenderUID", data.get("senderUID"));
+        clickIntent.putExtra("FromNotification", true);
+        clickIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                getApplicationContext(),
-                1,
-                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("ChatID", data.get("chat")),
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-
-        PendingIntent pendingIntent;
+        PendingIntent clickPendingIntent;
         if (!LifecycleHandler.isApplicationInForeground()) {
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-            stackBuilder.addNextIntentWithParentStack(intent);
-            pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
+            stackBuilder.addNextIntentWithParentStack(clickIntent);
+            clickPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
         } else {
-            pendingIntent = PendingIntent.getActivity(this, 0, intent,
+            clickPendingIntent = PendingIntent.getActivity(this, 0, clickIntent,
                     PendingIntent.FLAG_ONE_SHOT);
         }
 
@@ -113,6 +106,13 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                1,
+                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("ChatID", data.get("chat")),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.share_icon)
@@ -120,7 +120,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
+                .setContentIntent(clickPendingIntent)
                 .addAction(action)
                 .setDeleteIntent(cancelIntent)
                 .setGroup(FREADOM_GROUP);
@@ -160,30 +160,23 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         if(!NotificationUtilities.notificationExist(data.get("chat")))
             NotificationUtilities.addNotification(data.get("chat"));
 
-        Intent intent = new Intent(this, ChatActivity.class);
-        intent.putExtra("ChatID", data.get("chat"));
-        intent.putExtra("Username", data.get("sender"));
-        intent.putExtra("ImageURL", data.get("senderPic"));
-        intent.putExtra("BookID", data.get("book"));
-        intent.putExtra("SenderUID", data.get("senderUID"));
-        intent.putExtra("FromNotification", true);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Intent clickIntent = new Intent(this, ChatActivity.class);
+        clickIntent.putExtra("ChatID", data.get("chat"));
+        clickIntent.putExtra("Username", data.get("sender"));
+        clickIntent.putExtra("ImageURL", data.get("senderPic"));
+        clickIntent.putExtra("BookID", data.get("book"));
+        clickIntent.putExtra("SenderUID", data.get("senderUID"));
+        clickIntent.putExtra("FromNotification", true);
+        clickIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                getApplicationContext(),
-                1,
-                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("ChatID", data.get("chat")),
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        PendingIntent pendingIntent;
+        PendingIntent clickPendingIntent;
 
         if (!LifecycleHandler.isApplicationInForeground()) {
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-            stackBuilder.addNextIntentWithParentStack(intent);
-            pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
+            stackBuilder.addNextIntentWithParentStack(clickIntent);
+            clickPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
         } else {
-            pendingIntent = PendingIntent.getActivity(this, 0, intent,
+            clickPendingIntent = PendingIntent.getActivity(this, 0, clickIntent,
                     PendingIntent.FLAG_ONE_SHOT);
         }
 
@@ -197,6 +190,13 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                1,
+                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("ChatID", data.get("chat")),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.share_icon)
@@ -204,7 +204,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
+                .setContentIntent(clickPendingIntent)
                 .setDeleteIntent(cancelIntent)
                 .setGroup(FREADOM_GROUP);
 
@@ -227,14 +227,22 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
     {
         NotificationCompat.Builder summary = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID);
 
-        summary.setContentTitle("SUMMARY")
-                //content text to support devices running API level < 24 (DA TESTARE)
-                .setContentText("Two new messages")
+        Intent clickIntent = new Intent(this, HomePageActivity.class);
+        clickIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent clickPendingIntent;
+        if (!LifecycleHandler.isApplicationInForeground()) {
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            stackBuilder.addNextIntentWithParentStack(clickIntent);
+            clickPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
+        } else {
+            clickPendingIntent = PendingIntent.getActivity(this, 0, clickIntent,
+                    PendingIntent.FLAG_ONE_SHOT);
+        }
+
+        summary.setContentText(getString(R.string.may_have_new_messages))
                 .setSmallIcon(R.drawable.ic_world_24dp)
-//                .setStyle(new NotificationCompat.InboxStyle()
-//                        .addLine(data.get("sender")+" "+data.get("body"))
-//                        .setBigContentTitle("Nuovi messaggi")
-//                        .setSummaryText("Nuove notifiche"))
+                .setContentIntent(clickPendingIntent)
                 .setGroup(FREADOM_GROUP)
                 .setGroupSummary(true);
 

@@ -8,8 +8,6 @@ import java.util.HashSet;
 
 public abstract class NotificationUtilities {
 
-    private static String TAG = "GNIPPO";
-
     private static int notificationCount = 0;
     private static HashSet<String> activeNotifications = new HashSet<>();
 
@@ -17,15 +15,14 @@ public abstract class NotificationUtilities {
     {
         activeNotifications.add(notificationID);
         notificationCount++;
-        Log.d(TAG, "addNotification");
-        Log.d(TAG, "COUNT= "+notificationCount);
     }
 
     public static void removeNotification(String notificationID, Context context)
     {
         activeNotifications.remove(notificationID);
         notificationCount--;
-        Log.d(TAG, "COUNT= "+notificationCount);
+        if(notificationCount < 0)
+            notificationCount = 0;
         if(!notificationsPending())
         {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);

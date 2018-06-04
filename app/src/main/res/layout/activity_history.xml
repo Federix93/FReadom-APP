@@ -38,7 +38,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textColor="@color/colorPrimaryDark"
             android:gravity="center"
-            android:text="Non hai ancora concluso ne ricevuto alcun libro. Qui troverai uno storico dei tuoi scambi"/>
+            android:text="@string/no_books_lent_or_borrowed"/>
 
     </LinearLayout>
 

@@ -103,6 +103,7 @@ public class TabFragment extends Fragment {
     private static final String CITY = "CITY";
     private static final String GENRES = "GENRES";
     private static final String GENRE_PLACE_HOLDER = "GENRE_PLACE_HOLDER";
+    private static final int HITS = 30;
 
     CustomSwipeRefresh mRefreshLayout;
     AppCompatButton mGenreFilterButton;
@@ -226,7 +227,11 @@ public class TabFragment extends Fragment {
         mFirstOtherTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Function not implemented", Toast.LENGTH_SHORT).show();
+                Intent moreIntent = new Intent(getActivity(), MoreActivity.class);
+                moreIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                moreIntent.putExtra("latitude", mCurrentPosition.getLatitude());
+                moreIntent.putExtra("longitude", mCurrentPosition.getLongitude());
+                startActivity(moreIntent);
             }
         });
 
