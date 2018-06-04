@@ -51,7 +51,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -231,7 +233,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
                     documentReference.get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if(task.getResult().exists()){
+                            if(task.isSuccessful()){
                                 final Book book = task.getResult().toObject(Book.class);
                                 if(book != null && book.getLentTo() == null){
                                     documentReference.delete();
@@ -244,12 +246,14 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
                                     collectionReference.get().addOnSuccessListener(BookDetailsLibraryActivity.this, new OnSuccessListener<QuerySnapshot>() {
                                         @Override
                                         public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            List<String> trolol = queryDocumentSnapshots.toObjects(String.class);
                                             List<DocumentReference> docSnap = queryDocumentSnapshots.toObjects(DocumentReference.class);
                                             List<DocumentSnapshot> docSnap2 = queryDocumentSnapshots.toObjects(DocumentSnapshot.class);
                                             List<DocumentChange> docSnap3 = queryDocumentSnapshots.toObjects(DocumentChange.class);
                                             List<DocumentSnapshot> docSnap4 = queryDocumentSnapshots.getDocuments();
                                             List<DocumentChange> docSnap5 = queryDocumentSnapshots.getDocumentChanges();
 
+                                            Log.d("LULLO", "A Pezzo de merda0: " + trolol.size());
                                             Log.d("LULLO", "A Pezzo de merda1: " + docSnap.size());
                                             Log.d("LULLO", "A Pezzo de merda2: " + docSnap2.size());
                                             Log.d("LULLO", "A Pezzo de merda3: " + docSnap3.size());
