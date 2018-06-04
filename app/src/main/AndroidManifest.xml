@@ -78,7 +78,20 @@
             android:name=".utils.FetchAddressIntentService"
             android:exported="false" />
 
-        <activity android:name=".ui.BookDetailsActivity" />
+        <activity android:name=".ui.BookDetailsActivity">
+            <tools:validation testUrl="http://madmad.com/book" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="http"
+                    android:host="madmad.com"
+                    android:pathPrefix="/book" />
+            </intent-filter>
+        </activity>
         <activity android:name=".ui.BookPhotoDetailActivity" />
         <activity
             android:name=".ui.SignInActivity"
@@ -142,8 +155,9 @@
             android:resource="@color/colorSecondaryAccent" />
 
         <activity android:name=".ui.ReviewActivity" />
-        <activity android:name=".ui.HelpActivity"
-            android:configChanges="orientation"/>
+        <activity
+            android:name=".ui.HelpActivity"
+            android:configChanges="orientation" />
     </application>
 
 </manifest>
