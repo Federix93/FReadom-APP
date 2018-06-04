@@ -102,17 +102,18 @@
 
         <activity
             android:name=".ui.homepage.HomePageActivity"
+            android:configChanges="orientation"
             android:label="@string/title_activity_home_page"
-            android:theme="@style/ThemeDrawer"
-            android:configChanges="orientation"/>
+            android:theme="@style/ThemeDrawer" />
         <activity android:name=".ui.GenreBooksActivity" />
         <activity android:name=".ui.searchbooks.SearchBookActivity" />
         <activity android:name=".ui.profile.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
-        <activity android:name=".ui.chat.ChatActivity"
-            android:parentActivityName=".ui.homepage.HomePageActivity"
-            android:configChanges="orientation"/>
-        <activity android:name=".ui.FavoriteBooksActivity"/>
+        <activity
+            android:name=".ui.chat.ChatActivity"
+            android:configChanges="orientation"
+            android:parentActivityName=".ui.homepage.HomePageActivity" />
+        <activity android:name=".ui.FavoriteBooksActivity" />
 
         <service
             android:name=".utils.FirebaseNotificationService"
@@ -122,16 +123,16 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".ui.chat.ConversationsActivity"/>
+        <activity android:name=".ui.chat.ConversationsActivity" />
         <activity android:name=".ui.TextDetailActivity" />
-        <activity android:name=".ui.BookDetailsLibraryActivity"/>
-        <activity android:name=".ui.PhotoDetailActivity"/>
-        <activity android:name=".ui.HistoryActivity"/>
+        <activity android:name=".ui.BookDetailsLibraryActivity" />
+        <activity android:name=".ui.PhotoDetailActivity" />
+        <activity android:name=".ui.HistoryActivity" />
 
         <receiver
             android:name=".utils.DirectReplyReceiver"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
@@ -141,6 +142,8 @@
             android:resource="@color/colorSecondaryAccent" />
 
         <activity android:name=".ui.ReviewActivity" />
+        <activity android:name=".ui.HelpActivity"
+            android:configChanges="orientation"/>
     </application>
 
 </manifest>
