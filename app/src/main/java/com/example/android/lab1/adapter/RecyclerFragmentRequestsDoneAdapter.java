@@ -255,7 +255,7 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
                         public void onClick(DialogInterface dialog, int which) {
                             final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(mContext);
                             progressDialogHolder.showLoadingDialog(R.string.end_loan_progress);
-                            
+
                             final String ownerId, bookId;
                             bookId = mBookList.get(position).getBookID();
                             ownerId = mBookList.get(position).getUid();
