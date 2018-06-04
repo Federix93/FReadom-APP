@@ -267,10 +267,16 @@ public class HomePageActivity extends AppCompatActivity
         mProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra("user", mUser);
-                startActivity(intent);
+                if (mFirebaseAuth.getUid() == null) {
+                    Intent intent = new Intent(getApplicationContext(), SignInPostponedActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("user", mUser);
+                    startActivity(intent);
+                }
             }
         });
 

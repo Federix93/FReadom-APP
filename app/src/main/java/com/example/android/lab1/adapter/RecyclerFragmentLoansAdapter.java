@@ -1,15 +1,7 @@
 package com.example.android.lab1.adapter;
 
-import android.app.Activity;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Geocoder;
-import android.location.Location;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
@@ -23,13 +15,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.example.android.lab1.AddressReciever;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
-import com.example.android.lab1.utils.FetchAddressIntentService;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,16 +28,12 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.IOException;
-import java.security.acl.Owner;
 import java.util.Date;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class RecyclerFragmentLentAdapter extends RecyclerView.Adapter<RecyclerFragmentLentAdapter.MyViewHolder> {
+public class RecyclerFragmentLoansAdapter extends RecyclerView.Adapter<RecyclerFragmentLoansAdapter.MyViewHolder> {
 
     private List<Book> mBookList;
     private List<User> mUsersOwner;
@@ -59,12 +44,12 @@ public class RecyclerFragmentLentAdapter extends RecyclerView.Adapter<RecyclerFr
 
     boolean isLent = false;
 
-    public RecyclerFragmentLentAdapter(List<Book> listBooks, List<User> users) {
+    public RecyclerFragmentLoansAdapter(List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
         mUsersOwner = users;
     }
 
-    public RecyclerFragmentLentAdapter(List<Book> listBooks, List<User> users, boolean lent) {
+    public RecyclerFragmentLoansAdapter(List<Book> listBooks, List<User> users, boolean lent) {
         mBookList = listBooks;
         mUsersOwner = users;
         this.isLent = lent;

@@ -45,7 +45,7 @@ public class RequestsFragmentDoneItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerFragmentRequestsDoneAdapter(new ArrayList<Book>(),  new ArrayList<User>());
+        mAdapter = new RecyclerFragmentRequestsDoneAdapter(getActivity(), new ArrayList<Book>(),  new ArrayList<User>());
 
         mRecyclerView.setAdapter(mAdapter);
 

@@ -11,8 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.RecyclerFragmentLentAdapter;
-import com.example.android.lab1.adapter.RecyclerFragmentRequestsDoneAdapter;
+import com.example.android.lab1.adapter.RecyclerFragmentLoansAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.viewmodel.BorrowedBooksViewModel;
@@ -27,7 +26,7 @@ import java.util.List;
 public class BorrowedFragmentItem extends Fragment {
 
     private RecyclerView mRecyclerView;
-    private RecyclerFragmentLentAdapter mAdapter;
+    private RecyclerFragmentLoansAdapter mAdapter;
     private List<User> mUserOwners;
     public BorrowedFragmentItem() {
     }
@@ -46,7 +45,7 @@ public class BorrowedFragmentItem extends Fragment {
 
         mUserOwners = new ArrayList<>();
 
-        mAdapter = new RecyclerFragmentLentAdapter(new ArrayList<Book>(), mUserOwners);
+        mAdapter = new RecyclerFragmentLoansAdapter(new ArrayList<Book>(), mUserOwners);
         mRecyclerView.setAdapter(mAdapter);
         BorrowedBooksViewModel borrowedBooksViewModel = ViewModelProviders.of(getActivity()).get(BorrowedBooksViewModel.class);
         borrowedBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {

@@ -12,8 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.RecyclerFragmentLentAdapter;
-import com.example.android.lab1.adapter.RecyclerFragmentRequestsDoneAdapter;
+import com.example.android.lab1.adapter.RecyclerFragmentLoansAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.viewmodel.LoansViewModel;
@@ -28,7 +27,7 @@ import java.util.List;
 public class LentFragmentItem extends Fragment {
 
     private RecyclerView mRecyclerView;
-    private RecyclerFragmentLentAdapter mAdapter;
+    private RecyclerFragmentLoansAdapter mAdapter;
 
     public LentFragmentItem() {
     }
@@ -45,7 +44,7 @@ public class LentFragmentItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerFragmentLentAdapter(new ArrayList<Book>(), new ArrayList<User>(), true);
+        mAdapter = new RecyclerFragmentLoansAdapter(new ArrayList<Book>(), new ArrayList<User>(), true);
         mRecyclerView.setAdapter(mAdapter);
         LoansViewModel loansViewModel = ViewModelProviders.of(getActivity()).get(LoansViewModel.class);
         loansViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
