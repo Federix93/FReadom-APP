@@ -3,6 +3,7 @@ package com.example.android.lab1.ui;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.lab1.R;
+
+import io.opencensus.trace.Link;
 
 
 public class InformationFragment extends Fragment {
@@ -50,9 +53,10 @@ public class InformationFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_information, container, false);
         mContentFragmentTextView = rootView.findViewById(R.id.fragment_text_view);
         Log.d("LULLO", mParam1);
-        if(mParam1.equals("TERMS"))
+        if(mParam1.equals("TERMS")) {
             mContentFragmentTextView.setText(Html.fromHtml(getResources().getString(R.string.terms_content)));
-
+            mContentFragmentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
         return rootView;
     }
 }
