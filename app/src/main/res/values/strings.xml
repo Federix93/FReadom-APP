@@ -291,5 +291,9 @@
 
     <string name="may_have_new_messages">Potresti avere nuovi messaggi</string>
     <string name="no_books_lent_or_borrowed">Non hai ancora prestato nè preso in prestito alcun libro. Qui troverai uno storico dei tuoi scambi</string>
-    <string name="wait_for">Attend...</string>
+    <string name="attention">Attenzione</string>
+    <string name="already_lent_to_another_user_message">Questo libro è stato già prestato ad un altro utente. Dovrebbe tornare disponibile il %1$s</string>
+
+    <string name="delete_request">Cancella richiesta</string>
+
 </resources>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -47,6 +47,16 @@
                     android:layout_height="match_parent"
                     android:layout_marginEnd="8dp">
 
+                    <ImageView
+                        android:id="@+id/three_dots_menu"
+                        android:layout_width="20dp"
+                        android:layout_height="30dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="12dp"
+                        app:srcCompat="@drawable/ic_more_vert_black_24dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
                     <TextView
                         android:id="@+id/rv_book_lent_title"
                         android:layout_width="0dp"
@@ -61,8 +71,7 @@
                         android:textSize="16sp"
                         android:textStyle="bold"
                         app:layout_anchorGravity="right|bottom"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintEnd_toStartOf="@+id/three_dots_menu"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -73,7 +82,7 @@
                         android:layout_gravity="start"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="8dp"
                         android:ellipsize="end"
                         android:gravity="start"
                         android:textSize="12sp"
@@ -81,7 +90,7 @@
                         app:layout_anchorGravity="right|center"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_title" />
+                        app:layout_constraintTop_toBottomOf="@+id/three_dots_menu" />
 
                     <TextView
                         android:id="@+id/rv_book_lent_city"

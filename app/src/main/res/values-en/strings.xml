@@ -203,6 +203,17 @@
     <string name="preview_not_available">Preview not available</string>
     <string name="may_have_new_messages">Potresti avere nuovi messaggi</string>
     <string name="no_books_lent_or_borrowed">You have not lent or borrowed any book. Here you will find your exchange history.</string>
+    <string name="attention">Warning</string>
+    <string name="start">Start</string>
+    <string name="next">Next</string>
+    <string name="saving">Saving...</string>
+    <string name="already_lent_to_another_user_message">This book is already lent to another user. It should be available again to %1$s </string>
+    <string name="insert_photo">Insert photo</string>
+    <string name="modify_book">Modify book</string>
+    <string name="photo_detail">Photo detail</string>
+    <string name="max_photos">Reached maximun number of photo</string>
+    <string name="delete_request">Delete request</string>
+    <string name="insert_position">Insert position</string>
 
 
 </resources>
