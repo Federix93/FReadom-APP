@@ -1,9 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.RecyclerView
+<LinearLayout android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/recycler_fragment_content"
-    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:clipToPadding="false"
-    android:padding="4dp"/>
+    android:orientation="vertical">
+
+    <android.support.v7.widget.RecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/recycler_fragment_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:padding="4dp"/>
+
+    <LinearLayout
+        android:id="@+id/no_loans"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:visibility="gone"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:text="Non hai prestiti in corso. Una volta che avrai raggiunto l'accordo con il proprietario del libro qui troverai tutte le informazioni per ricordarti quando restiture il libro"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/no_request_rec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:visibility="gone"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:text="Non hai ancora ricevuto richieste per i tuoi libri. Più libri caricherai e più richieste potrai ricevere!"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/no_request_done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:visibility="gone"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:text="Non hai ancora effettuato richieste. Contatta gli utenti tramite il tasto 'Richiedi' e parla con loro per ricevere il tuo primo libro"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>
+
+
+
+

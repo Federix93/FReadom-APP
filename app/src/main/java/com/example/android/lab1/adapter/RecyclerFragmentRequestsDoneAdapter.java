@@ -2,14 +2,20 @@ package com.example.android.lab1.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -25,13 +31,17 @@ import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.BookDetailsActivity;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.example.android.lab1.utils.FetchAddressIntentService;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -48,7 +58,6 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
     private List<Book> mBookList;
     private List<User> mUsersOwner;
     private List<String> mCities;
-
 
     private Context mContext;
     private Activity mContainer;
@@ -128,6 +137,7 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
         ImageView mBookThumbnail;
         LinearLayout mChatLayout;
         ImageView mUserPhoto;
+        ImageView mThreeDotsMenu;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -137,6 +147,7 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
             mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_lent);
             mChatLayout = itemView.findViewById(R.id.open_chat_books_lent);
             mUserPhoto = itemView.findViewById(R.id.book_owner_profile_picture);
+            mThreeDotsMenu = itemView.findViewById(R.id.three_dots_menu);
 
             firebaseDatabase = FirebaseDatabase.getInstance();
             userReference = firebaseDatabase.getReference().child("users");
@@ -210,6 +221,92 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
                 }
             });
 
+            mThreeDotsMenu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // inflate menu
+                    PopupMenu popup = new PopupMenu(v.getContext(),v);
+                    MenuInflater inflater = popup.getMenuInflater();
+                    inflater.inflate(R.menu.three_dot_menu, popup.getMenu());
+                    popup.setOnMenuItemClickListener(new MyMenuItemClickListener(position));
+                    popup.show();
+                }
+            });
+
+        }
+    }
+    class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
+
+        private int position;
+        public MyMenuItemClickListener(int positon) {
+            this.position=positon;
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+
+                case R.id.delete_item:
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle(mContext.getResources().getString(R.string.confirm_request_delete));
+                    builder.setMessage(mContext.getResources().getString(R.string.confirm_request_delete_message));
+                    builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(mContext);
+                            progressDialogHolder.showLoadingDialog(R.string.end_loan_progress);
+                            
+                            final String ownerId, bookId;
+                            bookId = mBookList.get(position).getBookID();
+                            ownerId = mBookList.get(position).getUid();
+                            FirebaseFirestore reqDoneRef = FirebaseFirestore.getInstance();
+                            FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+                            reqDoneRef.collection("requestsDone").document(firebaseAuth.getUid()).collection("books")
+                                    .document(bookId).delete();
+                            FirebaseFirestore reqReceivedRef = FirebaseFirestore.getInstance();
+                            reqReceivedRef.collection("requestsReceived").document(ownerId).collection("books")
+                                    .document(bookId).delete();
+                            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                            final DatabaseReference chatRef = firebaseDatabase.getReference("chats");
+                            final DatabaseReference messagesRef = firebaseDatabase.getReference("messages");
+                            final DatabaseReference conversationsRef = firebaseDatabase.getReference("conversations");
+
+                            final DatabaseReference openedChats = FirebaseDatabase.getInstance().getReference("openedChats")
+                                    .child(bookId)
+                                    .child(ownerId)
+                                    .child(firebaseAuth.getUid());
+
+                            openedChats.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    String chatId = (String) dataSnapshot.getValue();
+
+                                    messagesRef.child(chatId).getRef().removeValue();
+                                    conversationsRef.child(bookId).child(chatId).removeValue();
+                                    chatRef.child(chatId).removeValue();
+                                    openedChats.removeValue();
+
+                                    if(progressDialogHolder.isProgressDialogShowing())
+                                        progressDialogHolder.dismissDialog();
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    });
+                    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.create();
+                    builder.show();
+            }
+            return false;
         }
     }
 

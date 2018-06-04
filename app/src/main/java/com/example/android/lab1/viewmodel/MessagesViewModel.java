@@ -26,27 +26,29 @@ public class MessagesViewModel extends ViewModel {
     private final MediatorLiveData<List<Message>> messagesLiveData = new MediatorLiveData<>();
 
     public MessagesViewModel(String chatID){
-        MESSAGES = FirebaseDatabase.getInstance().getReference("messages").child(chatID);
-        liveData = new FirebaseQueryLiveDataRealtimeDB(MESSAGES);
-        messagesLiveData.addSource(liveData, new Observer<DataSnapshot>() {
-            @Override
-            public void onChanged(@Nullable final DataSnapshot dataSnapshot) {
-                if(dataSnapshot != null){
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            List<Message> messagesList = new ArrayList<>();
-                            for(DataSnapshot d : dataSnapshot.getChildren()){
-                                messagesList.add(d.getValue(Message.class));
+        if (chatID != null) {
+            MESSAGES = FirebaseDatabase.getInstance().getReference("messages").child(chatID);
+            liveData = new FirebaseQueryLiveDataRealtimeDB(MESSAGES);
+            messagesLiveData.addSource(liveData, new Observer<DataSnapshot>() {
+                @Override
+                public void onChanged(@Nullable final DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                List<Message> messagesList = new ArrayList<>();
+                                for (DataSnapshot d : dataSnapshot.getChildren()) {
+                                    messagesList.add(d.getValue(Message.class));
+                                }
+                                messagesLiveData.postValue(messagesList);
                             }
-                            messagesLiveData.postValue(messagesList);
-                        }
-                    }).start();
-                }else{
-                    messagesLiveData.setValue(null);
+                        }).start();
+                    } else {
+                        messagesLiveData.setValue(null);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
 

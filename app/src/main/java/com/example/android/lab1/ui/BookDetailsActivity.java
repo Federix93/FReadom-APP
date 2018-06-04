@@ -71,6 +71,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     ConstraintLayout mProfileConstraintLayout;
     LinearLayout mBookDescriptionLayout;
     LinearLayout mFavoriteContainer;
+    LinearLayout mShareContainer;
     RelativeLayout mGalleryLayout;
     Toolbar mToolbar;
     TextView mBookTitleTextView;
@@ -136,6 +137,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         mFavoriteText = findViewById(R.id.add_to_favorite_text);
         mBookPosition = findViewById(R.id.book_position);
         mSeparatorDescriptionView = findViewById(R.id.separator_view_description);
+        mShareContainer = findViewById(R.id.share_container);
 
         mSelf = this;
 
@@ -404,7 +406,7 @@ public class BookDetailsActivity extends AppCompatActivity {
             }
         });
 
-        mShareImageView.setOnClickListener(new OnClickListener() {
+        mShareContainer.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "Function not implemented", Toast.LENGTH_SHORT).show();

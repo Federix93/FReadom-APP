@@ -214,6 +214,9 @@
     <string name="max_photos">Reached maximun number of photo</string>
     <string name="delete_request">Delete request</string>
     <string name="insert_position">Insert position</string>
+    <string name="confirm_request_delete">Do you really want to delete?</string>
+    <string name="confirm_request_delete_message">Really want to delete the request? The associated chat will be deleted too</string>
+    <string name="cancellation_in_progress">Deletion in progress...</string>
 
 
 </resources>
