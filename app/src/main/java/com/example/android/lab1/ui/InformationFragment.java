@@ -63,7 +63,13 @@ public class InformationFragment extends Fragment {
                 mContentFragmentTextView.setMovementMethod(LinkMovementMethod.getInstance());
             }
         }else if (mParam1.equals("LICENSE")){
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mContentFragmentTextView.setText(Html.fromHtml(getResources().getString(R.string.licenses_content), Html.FROM_HTML_MODE_LEGACY));
+                mContentFragmentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            }else{
+                mContentFragmentTextView.setText(Html.fromHtml(getResources().getString(R.string.licenses_content)));
+                mContentFragmentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            }
         }
         return rootView;
     }
