@@ -36,7 +36,6 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.User;
-import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.FavoriteBooksActivity;
 import com.example.android.lab1.ui.HistoryActivity;
 import com.example.android.lab1.ui.LoadBookActivity;
@@ -49,36 +48,28 @@ import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.UserViewModel;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.GeoPoint;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class HomePageActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    AHBottomNavigation mBottomNavigation;
-    FirebaseFirestore mFirebaseFirestore;
-
-    ImageView mProfileImage;
-    TextView mUsernameTextView;
-    TextView mEmailTextView;
-    LinearLayout mSideNavLinearLayout;
-    private User mUser;
 
     private static final int HOME_FRAGMENT = 0;
     private static final int YOUR_LIBRARY_FRAGMENT = 1;
     private static final int LOANS_FRAGMENT = 2;
     private static final int REQUESTS_FRAGMENT = 3;
-
+    AHBottomNavigation mBottomNavigation;
+    FirebaseFirestore mFirebaseFirestore;
+    ImageView mProfileImage;
+    TextView mUsernameTextView;
+    TextView mEmailTextView;
+    LinearLayout mSideNavLinearLayout;
+    private User mUser;
     private FragmentAdapter mFragmentAdapter;
     private TabFragment mCurrentFragment;
     private AHBottomNavigationViewPager mBottomNavigationViewPager;
@@ -209,8 +200,7 @@ public class HomePageActivity extends AppCompatActivity
                 mCurrentFragment = mFragmentAdapter.getCurrentFragment();
                 mCurrentFragment.willBeDisplayed();
 
-                if(position == HOME_FRAGMENT)
-                {
+                if (position == HOME_FRAGMENT) {
                     mToolbar.setTitle(getString(R.string.toolbar_title_home));
                     mToolbar.getMenu().clear();
                     mToolbar.inflateMenu(R.menu.fragment_home);
@@ -233,21 +223,18 @@ public class HomePageActivity extends AppCompatActivity
                     mToolbar.setTitle(R.string.your_library_fragment);
                     mToolbar.getMenu().clear();
                     fabAppears();
-                }
-                else {
+                } else {
                     if (mFAB.getVisibility() == View.VISIBLE) {
                         fabDisappears();
                     }
                 }
 
-                if(position == LOANS_FRAGMENT)
-                {
+                if (position == LOANS_FRAGMENT) {
                     mToolbar.setTitle(R.string.title_loans);
                     mToolbar.getMenu().clear();
                 }
 
-                if(position == REQUESTS_FRAGMENT)
-                {
+                if (position == REQUESTS_FRAGMENT) {
                     mToolbar.setTitle(R.string.title_requests);
                     mToolbar.getMenu().clear();
                 }
@@ -285,8 +272,7 @@ public class HomePageActivity extends AppCompatActivity
         }
     }
 
-    private void fabAppears()
-    {
+    private void fabAppears() {
         mFAB.setVisibility(View.VISIBLE);
         mFAB.setAlpha(0f);
         mFAB.setScaleX(0f);
@@ -322,8 +308,8 @@ public class HomePageActivity extends AppCompatActivity
                 })
                 .start();
     }
-    private void fabDisappears()
-    {
+
+    private void fabDisappears() {
         mFAB.animate()
                 .alpha(0)
                 .scaleX(0)
@@ -452,38 +438,21 @@ public class HomePageActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFragmentAdapter.getCurrentFragment().getFragmentType() == YOUR_LIBRARY_FRAGMENT)
-        {
+        if (mFragmentAdapter.getCurrentFragment() != null &&
+                mFragmentAdapter.getCurrentFragment().getFragmentType() == YOUR_LIBRARY_FRAGMENT) {
             outState.putBoolean("SHOW_FAB", true);
         }
         if (mFragmentAdapter.getItem(0) != null) {
-            TabFragment item = mFragmentAdapter.getItem(0);
-            if (item.getFragmentType() == HOME_FRAGMENT) {
-                if (item.getPosition() != null) {
-                    outState.putDouble(POSITION_LAT, item.getPosition().getLatitude());
-                    outState.putDouble(POSITION_LON, item.getPosition().getLongitude());
-                }
-            }
+            mFragmentAdapter.getItem(0).onSaveInstanceState(outState);
         }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if(savedInstanceState.getBoolean("SHOW_FAB", false)) {
+        if (savedInstanceState.getBoolean("SHOW_FAB", false)) {
             mFAB.setVisibility(View.VISIBLE);
         }
-        if (mFragmentAdapter.getItem(0) != null &&
-                savedInstanceState.containsKey(POSITION_LAT) &&
-                savedInstanceState.containsKey(POSITION_LON)) {
-            mFragmentAdapter.getItem(0).setPosition(new GeoPoint(
-                    savedInstanceState.getDouble(POSITION_LAT),
-                    savedInstanceState.getDouble(POSITION_LON)
-            ));
-        }
     }
-
-    public static final String POSITION_LAT = "POSITION_LAT";
-    public static final String POSITION_LON = "POSITION_LON";
 }
 

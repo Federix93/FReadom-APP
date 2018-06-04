@@ -1,17 +1,19 @@
 package com.example.android.lab1.ui.homepage;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
+import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -24,7 +26,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,8 +36,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.algolia.search.saas.Client;
-import com.algolia.search.saas.Index;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerBookAdapter;
 import com.example.android.lab1.adapter.RecyclerYourLibraryAdapter;
@@ -45,11 +44,11 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.ui.GenreBooksActivity;
 import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.CustomSwipeRefresh;
+import com.example.android.lab1.utils.FetchAddressIntentService;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.BooksViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
-import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
@@ -62,49 +61,31 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 
 import static android.app.Activity.RESULT_OK;
 
 public class TabFragment extends Fragment {
 
+    public static final String HOME_POSITION_LAT = "HOME_POSITION_LAT";
+    public static final String HOME_POSITION_LON = "HOME_POSITION_LON";
     // HomeFragment variables
-    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
-    private final static String ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a";
-    private final static String ALGOLIA_BOOKS_INDEX_NAME = "books";
-    private final static String ALGOLIA_USERS_INDEX_NAME = "users";
-
-    private static final String LAT = "LAT";
-    private static final String LON = "LAT";
-    private static final String SELECTED_GENRE = "SG";
-    private static final String CITY = "CITY";
-    private static final String GENRES = "GENRES";
-    private static final String GENRE_PLACE_HOLDER = "GENRE_PLACE_HOLDER";
-    private static final int HITS = 30;
-
+    private static final String HOME_FIRST_BOOKS = "HOME_FIRST_BOOKS";
+    private static final String HOME_SECOND_BOOKS = "HOME_SECOND_BOOKS";
+    private static final String HOME_CURRENT_CITY = "HOME_CURRENT_CITY";
+    private static final String HOME_SELECTED_GENRE = "HOME_SELECTED_GENRE";
     CustomSwipeRefresh mRefreshLayout;
     AppCompatButton mGenreFilterButton;
     AppCompatButton mPositionFilterButton;
@@ -116,29 +97,27 @@ public class TabFragment extends Fragment {
     RecyclerYourLibraryAdapter mAdapter;
     RecyclerBookAdapter mFirstRecyclerBookAdapter;
     RecyclerBookAdapter mSecondRecyclerBookAdapter;
-    List<Book> mBookIds;
-    List<Book> mBookListHomeFragment = new ArrayList<>();
+    BooksViewModel booksViewModel;
     //General variables
     FragmentManager mFt = null;
     View fragmentContainer;
     int mFragmentType;
-    private Index books;
-    private Index users;
-    private Bundle savedState = null;
+    private TextView mTitleFirstRecyclerView;
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
     private LiveData<List<Book>> firstLiveData;
-    BooksViewModel booksViewModel;
-    private ListenerRegistration firstListener;
-    private ListenerRegistration secondListener;
-
+    private int mBookLimitHomepage;
     //LoanFragment variables
-
     //RequestsFragment variables
     private Integer mSelectedGenre;
     private GeoPoint mCurrentPosition;
     //YourLibraryFragment variables
     private RecyclerView mYourLibraryRecyclerView;
+    private int mFirstRecyclerDistance;
+    private int mSecondRecyclerDistance;
+    private View mTitleSecondRecyclerView;
+    private TextView mNoInfoPlaceholder;
+    private View mNoInfoLayout;
 
     public static TabFragment newInstance(int fragmentTab) {
 
@@ -147,6 +126,18 @@ public class TabFragment extends Fragment {
         TabFragment fragment = new TabFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public int getFirstRecyclerDistance() {
+        return mFirstRecyclerDistance;
+    }
+
+    public int getBookLimitHomepage() {
+        return mBookLimitHomepage;
+    }
+
+    public int getSecondRecyclerDistance() {
+        return mSecondRecyclerDistance;
     }
 
     @NonNull
@@ -160,7 +151,7 @@ public class TabFragment extends Fragment {
         switch (fragmentType) {
             case 0:
                 view = inflater.inflate(R.layout.fragment_home, container, false);
-                initHomeFragment(view);
+                initHomeFragment(view, savedInstanceState);
                 return view;
 
             case 1:
@@ -180,32 +171,54 @@ public class TabFragment extends Fragment {
 
             default:
                 view = inflater.inflate(R.layout.fragment_home, container, false);
-                initHomeFragment(view);
+                initHomeFragment(view, savedInstanceState);
                 return view;
         }
 
     }
 
-    private void initHomeFragment(View view) {
+    private void resolveCity() {
+        Utilities.resolveSingleLocation(new WeakReference<Activity>(getActivity()),
+                mCurrentPosition,
+                true,
+                new ResultReceiver(new Handler()) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        super.onReceiveResult(resultCode, resultData);
+                        if (resultCode == RESULT_OK) {
+                            mPositionFilterButton.setText(resultData.getString(
+                                    FetchAddressIntentService.Constants.RESULT
+                            ));
+                        }
+                    }
+                }
+        );
+    }
 
+    private void initHomeFragment(View view, final Bundle savedInstanceState) {
         mRefreshLayout = view.findViewById(R.id.homepage_refresh_layout);
+        mTitleFirstRecyclerView = view.findViewById(R.id.title_first_recycler_view);
         mFirstRecyclerView = view.findViewById(R.id.first_recycler_books);
+        mTitleSecondRecyclerView = view.findViewById(R.id.title_second_recycler_view);
         mSecondRecyclerView = view.findViewById(R.id.second_recycler_books);
         mGenreFilterButton = view.findViewById(R.id.genre_filter_button);
         mPositionFilterButton = view.findViewById(R.id.position_filter_button);
         mFirstOtherTextView = view.findViewById(R.id.button_first_recycler_view);
         mSecondOtherTextView = view.findViewById(R.id.button_second_recycler_view);
-
-        Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
-        books = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
-        users = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
+        mNoInfoPlaceholder = view.findViewById(R.id.homepage_no_info_text_view);
+        mBookLimitHomepage = getResources().getInteger(R.integer.homepage_book_number);
+        mFirstRecyclerDistance = getResources().getInteger(R.integer.position_radius_address);
+        mSecondRecyclerDistance = getResources().getInteger(R.integer.position_radius_address);
+        mNoInfoLayout = view.findViewById(R.id.no_info_layout);
 
         mGenreFilterButton.setOnClickListener(new View.OnClickListener() {
                                                   @Override
                                                   public void onClick(View v) {
-                                                      Intent i = new Intent(getActivity(), GenreBooksActivity.class);
-                                                      i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                                      getActivity().startActivityForResult(i, Constants.PICK_GENRE);
+                                                      if (getActivity() != null) {
+                                                          Intent i = new Intent(getActivity(), GenreBooksActivity.class);
+                                                          i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                                          getActivity().startActivityForResult(i, Constants.PICK_GENRE);
+                                                      }
                                                   }
                                               }
         );
@@ -255,8 +268,6 @@ public class TabFragment extends Fragment {
         secondSnapHelperStart.attachToRecyclerView(mFirstRecyclerView);
         mFirebaseFirestore = FirebaseFirestore.getInstance();
 
-        getUserPosition();
-
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -264,13 +275,14 @@ public class TabFragment extends Fragment {
                     @Override
                     public void run() {
                         //booksViewModel.refreshLayout(mCurrentPosition);
-                        new RefreshAsyncTask().execute();
+                        new RefreshAsyncTask(TabFragment.this).execute();
                     }
                 });
             }
         });
 
-        if (SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
+        if (getActivity() != null &&
+                SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
             Resources res = getResources();
             SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
             TapTargetSequence tapTargetSequence = new TapTargetSequence(getActivity());
@@ -288,16 +300,91 @@ public class TabFragment extends Fragment {
                             .targetCircleColor(R.color.background_app)
                             .transparentTarget(true)
                             .textColor(R.color.white));
+            tapTargetSequence.listener(new TapTargetSequence.Listener() {
+                @Override
+                public void onSequenceFinish() {
+                    updateUI(savedInstanceState);
+                }
+
+                @Override
+                public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
+
+                }
+
+                @Override
+                public void onSequenceCanceled(TapTarget lastTarget) {
+
+                }
+            });
             tapTargetSequence.start();
-        }
+        } else
+            updateUI(savedInstanceState);
 
     }
 
-    private void getUserPosition() {
-        if (Utilities.checkPermissionActivity(getActivity(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-            makePositionRequest();
+    private void updateUI(Bundle savedInstanceState) {
+        // method used to avoid redundancy
+
+        if (savedInstanceState == null) {
+            // fragment just created
+            mCurrentPosition = SharedPreferencesManager.getInstance(getContext()).getPosition();
+            if (mCurrentPosition == null)
+                getUserPosition(); // try to solve it
+            else if (getActivity() != null) {
+                // resolve city name
+                resolveCity();
+                queryDatabaseWithViewModel();
+            }
         } else {
+            // config change restore previous state
+            if (savedInstanceState.containsKey(HOME_POSITION_LON)
+                    && savedInstanceState.containsKey(HOME_POSITION_LON))
+                mCurrentPosition = new GeoPoint(
+                        savedInstanceState.getDouble(HOME_POSITION_LAT),
+                        savedInstanceState.getDouble(HOME_POSITION_LON));
+            mSelectedGenre = savedInstanceState.getInt(HOME_SELECTED_GENRE);
+            if (mSelectedGenre >= 0) {
+                mGenreFilterButton.setText(getResources().getStringArray(R.array.genre)[mSelectedGenre]);
+            } else
+                mGenreFilterButton.setText(R.string.genre_filter_home_page);
+
+            if (savedInstanceState.containsKey(HOME_CURRENT_CITY))
+                mPositionFilterButton.setText(savedInstanceState.getString(HOME_CURRENT_CITY));
+
+
+            // if position never has been resolved no books will be present
+            if (SharedPreferencesManager.getInstance(getContext()).getPosition() != null) {
+                if (savedInstanceState.containsKey(HOME_FIRST_BOOKS))
+                    updateLayoutFirstRecyclerView(savedInstanceState.<Book>getParcelableArrayList(HOME_FIRST_BOOKS));
+                else
+                    updateLayoutFirstRecyclerView(null);
+
+                if (savedInstanceState.containsKey(HOME_SECOND_BOOKS))
+                    updateLayoutSecondRecyclerView(savedInstanceState.<Book>getParcelableArrayList(HOME_SECOND_BOOKS));
+                else
+                    updateLayoutSecondRecyclerView(null);
+            } else {
+                mGenreFilterButton.setVisibility(View.GONE);
+                mTitleFirstRecyclerView.setVisibility(View.GONE);
+                mFirstRecyclerView.setVisibility(View.GONE);
+                mFirstOtherTextView.setVisibility(View.GONE);
+                mSecondOtherTextView.setVisibility(View.GONE);
+                mSecondRecyclerView.setVisibility(View.GONE);
+                mTitleSecondRecyclerView.setVisibility(View.GONE);
+
+                mNoInfoLayout.setVisibility(View.VISIBLE);
+                mNoInfoPlaceholder.setText(R.string.homepage_select_position);
+            }
+
+        }
+    }
+
+    private void getUserPosition() {
+        if (getActivity() != null &&
+                Utilities.checkPermissionActivity(getActivity(),
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+            makePositionRequest();
+        } else if (getActivity() != null) {
             Utilities.askPermissionActivity(getActivity(),
                     android.Manifest.permission.ACCESS_FINE_LOCATION,
                     Constants.POSITION_PERMISSION);
@@ -309,30 +396,57 @@ public class TabFragment extends Fragment {
     }
 
     public void setPosition(GeoPoint value) {
+        GeoPoint oldValue = mCurrentPosition;
         mCurrentPosition = value;
+
+        // check if there's a variation in values and update homepage
+
+        Double lat1, lat2, lon1, lon2;
+
+        if (oldValue != null) {
+            lat1 = oldValue.getLatitude();
+            lon1 = oldValue.getLongitude();
+        } else
+            lat1 = lon1 = null;
+
+        if (mCurrentPosition != null) {
+            lat2 = mCurrentPosition.getLatitude();
+            lon2 = mCurrentPosition.getLongitude();
+        } else
+            lat2 = lon2 = null;
+
+
+        if (!Objects.equals(lat1, lat2) ||
+                !Objects.equals(lon1, lon2))
+            new RefreshAsyncTask(TabFragment.this).execute();
     }
 
     @SuppressLint("MissingPermission")
     private void makePositionRequest() {
-        if (!Utilities.isLocationEnabled(getContext()))
-            Utilities.enableLoc(getActivity());
-        else {
-            LocationServices.getFusedLocationProviderClient(getActivity())
-                    .requestLocationUpdates(LocationRequest.create(),
-                            new LocationCallback() {
-                                @Override
-                                public void onLocationResult(LocationResult locationResult) {
-                                    if (locationResult == null || locationResult.getLocations().size() == 0) {
-                                        return;
+        if (getActivity() != null) {
+            if (!Utilities.isLocationEnabled(getContext()))
+                Utilities.enableLoc(getActivity());
+            else {
+                LocationServices.getFusedLocationProviderClient(getActivity())
+                        .requestLocationUpdates(LocationRequest.create(),
+                                new LocationCallback() {
+                                    @Override
+                                    public void onLocationResult(LocationResult locationResult) {
+                                        if (locationResult == null || locationResult.getLocations().size() == 0) {
+                                            return;
+                                        }
+                                        // its called only first time
+                                        final Location location = locationResult.getLocations().get(0);
+                                        mCurrentPosition = new GeoPoint(location.getLatitude(),
+                                                location.getLongitude());
+                                        SharedPreferencesManager.getInstance(getActivity()).setPosition(
+                                                mCurrentPosition);
+                                        resolveCity();
+                                        queryDatabaseWithViewModel();
+                                        //resolveLocation(location);
                                     }
-                                    final Location location = locationResult.getLocations().get(0);
-                                    mCurrentPosition = new GeoPoint(location.getLatitude(),
-                                            location.getLongitude());
-                                    mPositionFilterButton.setText(R.string.current_position);
-                                    queryDatabaseWithViewModel();
-                                    //resolveLocation(location);
-                                }
-                            }, null);
+                                }, null);
+            }
         }
     }
 
@@ -389,28 +503,41 @@ public class TabFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
+            case Constants.PICK_GENRE:
+                if (data != null
+                        && data.hasExtra(GenreBooksActivity.SELECTED_GENRE)) {
+                    int genre = data.getIntExtra(GenreBooksActivity.SELECTED_GENRE, -1);
+                    setSelectedGenre(genre);
+                }
+                break;
             case Constants.PLAY_SERVICES_RESOLUTION_REQUEST:
                 if (resultCode == RESULT_OK)
                     makePositionRequest();
                 break;
             case Constants.ADDRESS_SEARCH_BAR:
-                if (resultCode == RESULT_OK) {
+                if (resultCode == RESULT_OK && getContext() != null) {
                     Place place = PlaceAutocomplete.getPlace(getContext(), data);
-                    mCurrentPosition = new GeoPoint(place.getLatLng().latitude, place.getLatLng().longitude);
+                    SharedPreferencesManager.getInstance(getContext()).setPosition(
+                            new GeoPoint(place.getLatLng().latitude,
+                                    place.getLatLng().longitude));
+                    setPosition(new GeoPoint(place.getLatLng().latitude,
+                            place.getLatLng().longitude));
                     mPositionFilterButton.setText(place.getName());
-                    new RefreshAsyncTask().execute();
                 } else {
                     // keep asking position
                     if (mCurrentPosition == null) {
-                        try {
-                            Utilities.getGoogleAddressSearchBar(getActivity(),
-                                    mCurrentPosition != null ? new LatLng(mCurrentPosition.getLatitude(),
-                                            mCurrentPosition.getLongitude()) : null,
-                                    true,
-                                    Constants.ADDRESS_SEARCH_BAR);
-                        } catch (GooglePlayServicesNotAvailableException | GooglePlayServicesRepairableException e) {
-                            e.printStackTrace();
-                        }
+
+                        mTitleFirstRecyclerView.setVisibility(View.GONE);
+                        mFirstRecyclerView.setVisibility(View.GONE);
+                        mTitleSecondRecyclerView.setVisibility(View.GONE);
+                        mSecondRecyclerView.setVisibility(View.GONE);
+                        mGenreFilterButton.setVisibility(View.GONE);
+                        mFirstOtherTextView.setVisibility(View.GONE);
+                        mSecondOtherTextView.setVisibility(View.GONE);
+
+                        // show message
+                        mNoInfoLayout.setVisibility(View.VISIBLE);
+                        mNoInfoPlaceholder.setText(R.string.homepage_select_position);
                     }
                 }
                 break;
@@ -512,8 +639,7 @@ public class TabFragment extends Fragment {
             firstLiveData.observe(getActivity(), new Observer<List<Book>>() {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
-                    if (books != null)
-                        updateLayoutFirstRecyclerView(books);
+                    updateLayoutFirstRecyclerView(books);
                     firstLiveData.removeObserver(this);
                 }
             });
@@ -523,53 +649,36 @@ public class TabFragment extends Fragment {
             secondLiveData.observe(getActivity(), new Observer<List<Book>>() {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
-                    if (books != null) {
-                        updateLayoutSecondRecyclerView(books);
-                    }
+                    updateLayoutSecondRecyclerView(books);
                     secondLiveData.removeObserver(this);
                 }
             });
         }
     }
 
-    private class RefreshAsyncTask extends AsyncTask<Void, Void, Void> {
+    public void updateLayoutSecondRecyclerView(List<Book> books) {
+        if (books != null && !books.isEmpty()) {
+            mSecondOtherTextView.setVisibility(View.VISIBLE);
+            mSecondRecyclerView.setVisibility(View.VISIBLE);
+            mTitleSecondRecyclerView.setVisibility(View.VISIBLE);
+            mGenreFilterButton.setVisibility(View.VISIBLE);
+            mNoInfoLayout.setVisibility(View.GONE);
 
+        } else {
+            mSecondRecyclerView.setVisibility(View.GONE);
+            mTitleSecondRecyclerView.setVisibility(View.GONE);
+            mSecondOtherTextView.setVisibility(View.GONE);
+            if (mFirstRecyclerView.getVisibility() == View.GONE) {
+                // both recycler are empty
+                // show placeholder
+                mNoInfoLayout.setVisibility(View.VISIBLE);
+                mNoInfoPlaceholder.setText(R.string.homepage_no_results);
+                if (mSelectedGenre == null || mSelectedGenre < 0)
+                    mGenreFilterButton.setVisibility(View.GONE);
+            }
 
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
-                    mCurrentPosition.getLongitude(),
-                    (double) 15000);
-            Query query1 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
-                    .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
-            //liveFirstRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF_1);
-            query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    if (queryDocumentSnapshots != null)
-                        updateLayoutFirstRecyclerView(queryDocumentSnapshots.toObjects(Book.class));
-                }
-            });
-            GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
-                    mCurrentPosition.getLongitude(),
-                    (double) 60000);
-            Query query2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
-                    .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
-            query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    if (queryDocumentSnapshots != null) {
-                        updateLayoutSecondRecyclerView(queryDocumentSnapshots.toObjects(Book.class));
-                    }
-                }
-            });
-            return null;
+            books = new ArrayList<>();
         }
-
-    }
-
-    public void updateLayoutSecondRecyclerView(List<Book> books){
 
         if (mSecondRecyclerBookAdapter == null) {
             mSecondRecyclerBookAdapter = new RecyclerBookAdapter(books);
@@ -577,12 +686,35 @@ public class TabFragment extends Fragment {
         } else {
             mSecondRecyclerBookAdapter.updateItems(books);
             mSecondRecyclerBookAdapter.notifyDataSetChanged();
-            if(mRefreshLayout.isRefreshing())
-                mRefreshLayout.setRefreshing(false);
+
             mSecondRecyclerView.smoothScrollToPosition(0);
         }
+
+        if (mRefreshLayout.isRefreshing())
+            mRefreshLayout.setRefreshing(false);
     }
-    public void updateLayoutFirstRecyclerView(List<Book> books){
+
+    public void updateLayoutFirstRecyclerView(List<Book> books) {
+        if (books != null && !books.isEmpty()) {
+            mFirstOtherTextView.setVisibility(View.VISIBLE);
+            mGenreFilterButton.setVisibility(View.VISIBLE);
+            mFirstRecyclerView.setVisibility(View.VISIBLE);
+            mTitleFirstRecyclerView.setVisibility(View.VISIBLE);
+            mNoInfoLayout.setVisibility(View.GONE);
+        } else {
+            mFirstOtherTextView.setVisibility(View.GONE);
+            mFirstRecyclerView.setVisibility(View.GONE);
+            mTitleFirstRecyclerView.setVisibility(View.GONE);
+
+            if (mSecondRecyclerView.getVisibility() == View.GONE) {
+                mNoInfoLayout.setVisibility(View.VISIBLE);
+                mNoInfoPlaceholder.setText(R.string.homepage_no_results);
+                if (mSelectedGenre == null || mSelectedGenre < 0)
+                    mGenreFilterButton.setVisibility(View.GONE);
+            }
+            books = new ArrayList<>(); // to avoid having dirty recyclers view
+        }
+
         if (mFirstRecyclerBookAdapter == null) {
             mFirstRecyclerBookAdapter = new RecyclerBookAdapter(books);
             mFirstRecyclerView.setAdapter(mFirstRecyclerBookAdapter);
@@ -592,6 +724,202 @@ public class TabFragment extends Fragment {
             mFirstRecyclerBookAdapter.updateItems(books);
             mFirstRecyclerBookAdapter.notifyDataSetChanged();
         }
+    }
+
+    public Integer getSelectedGenre() {
+        return mSelectedGenre;
+    }
+
+    public void setSelectedGenre(int selectedGenre) {
+        Integer oldValue = mSelectedGenre;
+        this.mSelectedGenre = selectedGenre;
+        if (mSelectedGenre >= 0)
+            mGenreFilterButton.setText(getResources().getStringArray(R.array.genre)[mSelectedGenre]);
+        else {
+            mGenreFilterButton.setText(R.string.genre_filter_home_page);
+            mSelectedGenre = null;
+        }
+
+        if (!Objects.equals(oldValue, mSelectedGenre))
+            new RefreshAsyncTask(TabFragment.this).execute();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mCurrentPosition != null) {
+            outState.putDouble(HOME_POSITION_LAT, mCurrentPosition.getLatitude());
+            outState.putDouble(HOME_POSITION_LON, mCurrentPosition.getLongitude());
+        }
+        outState.putInt(HOME_SELECTED_GENRE, mSelectedGenre != null &&
+                mSelectedGenre >= 0 ? mSelectedGenre : -1);
+        if (mFirstRecyclerBookAdapter != null) {
+            List<Book> books = mFirstRecyclerBookAdapter.getBooks();
+            if (books != null && !books.isEmpty())
+                outState.putParcelableArrayList(HOME_FIRST_BOOKS, (ArrayList<? extends Parcelable>) books);
+        }
+        if (mSecondRecyclerBookAdapter != null) {
+            List<Book> books = mSecondRecyclerBookAdapter.getBooks();
+            if (books != null && !books.isEmpty())
+                outState.putParcelableArrayList(HOME_SECOND_BOOKS, (ArrayList<? extends Parcelable>) books);
+        }
+        if (mPositionFilterButton != null)
+            outState.putString(HOME_CURRENT_CITY, mPositionFilterButton.getText().toString());
+    }
+
+    private static class RefreshAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private final WeakReference<TabFragment> mContainerRef;
+        private final CountDownLatch countDownLatch = new CountDownLatch(2);
+        private GeoPoint mCurrentPosition;
+        private Integer mSelectedGenre;
+        private Integer mFirstDistance;
+        private Integer mSecondDistance;
+        private Integer mBookLimit;
+        private List<Book> mSecondBookList;
+        private List<Book> mFirstBookList;
+
+
+        public RefreshAsyncTask(TabFragment container) {
+            mContainerRef = new WeakReference<>(container);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            TabFragment tabFragment = mContainerRef.get();
+            if (tabFragment != null) {
+                mCurrentPosition = tabFragment.getPosition();
+                mSelectedGenre = tabFragment.getSelectedGenre();
+                mFirstDistance = tabFragment.getFirstRecyclerDistance();
+                mSecondDistance = tabFragment.getSecondRecyclerDistance();
+                mBookLimit = tabFragment.getBookLimitHomepage();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            TabFragment tabFragment = mContainerRef.get();
+            if (tabFragment != null) {
+                tabFragment.updateLayoutFirstRecyclerView(mFirstBookList);
+                tabFragment.updateLayoutSecondRecyclerView(mSecondBookList);
+                tabFragment.mRefreshLayout.setRefreshing(false);
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (mCurrentPosition != null) {
+                GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
+                        mCurrentPosition.getLongitude(),
+                        (double) mFirstDistance);
+                Query query1;
+                if (mSelectedGenre == null || mSelectedGenre < 0)
+                    query1 = FirebaseFirestore.getInstance()
+                            .collection("books")
+                            .whereGreaterThan("geoPoint", firstGeoPoints[0])
+                            .whereLessThan("geoPoint", firstGeoPoints[1])
+                            .whereEqualTo("lentTo", null);
+                else
+                    query1 = FirebaseFirestore.getInstance()
+                            .collection("books")
+                            .whereGreaterThan("geoPoint", firstGeoPoints[0])
+                            .whereLessThan("geoPoint", firstGeoPoints[1])
+                            .whereEqualTo("lentTo", null)
+                            .whereEqualTo("genre", mSelectedGenre);
+
+                query1.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots != null
+                                && !queryDocumentSnapshots.isEmpty()) {
+                            int valid = 0;
+                            mFirstBookList = new ArrayList<>();
+                            String uid = FirebaseAuth.getInstance().getUid();
+                            for (Book book : queryDocumentSnapshots.toObjects(Book.class)) {
+                                if (uid == null || !book.getUid().equals(uid)) {
+                                    mFirstBookList.add(book);
+                                    valid++;
+                                }
+                                if (valid > mBookLimit)
+                                    break;
+                            }
+                        }
+                        countDownLatch.countDown();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        countDownLatch.countDown();
+                    }
+                });
+
+                GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(mCurrentPosition.getLatitude(),
+                        mCurrentPosition.getLongitude(),
+                        (double) mSecondDistance);
+
+                Query query2;
+                if (mSelectedGenre == null || mSelectedGenre < 0)
+                    query2 = FirebaseFirestore.getInstance()
+                            .collection("books")
+                            .whereGreaterThan("geoPoint", secondGeoPoints[0])
+                            .whereLessThan("geoPoint", secondGeoPoints[1])
+                            .whereEqualTo("lentTo", null);
+                else
+                    query2 = FirebaseFirestore.getInstance()
+                            .collection("books")
+                            .whereGreaterThan("geoPoint", secondGeoPoints[0])
+                            .whereLessThan("geoPoint", secondGeoPoints[1])
+                            .whereEqualTo("lentTo", null)
+                            .whereEqualTo("genre", mSelectedGenre);
+
+                query2.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots != null
+                                && !queryDocumentSnapshots.isEmpty()) {
+                            int valid = 0;
+                            mSecondBookList = new ArrayList<>();
+                            String uid = FirebaseAuth.getInstance().getUid();
+                            for (Book book : queryDocumentSnapshots.toObjects(Book.class)) {
+                                if (uid == null || !book.getUid().equals(uid)) {
+                                    mSecondBookList.add(book);
+                                    valid++;
+                                }
+                                if (valid > mBookLimit)
+                                    break;
+                            }
+                            Book temp;
+                            for (int i = 0; i < mSecondBookList.size() - 1; i++) {
+                                for (int i1 = i + 1; i1 < mSecondBookList.size(); i1++) {
+                                    if (mSecondBookList.get(i).getTimeInserted().getTime() <
+                                            mSecondBookList.get(i1).getTimeInserted().getTime()) {
+                                        temp = mSecondBookList.get(i);
+                                        mSecondBookList.set(i, mSecondBookList.get(i1));
+                                        mSecondBookList.set(i1, temp);
+                                    }
+                                }
+                            }
+                        }
+                        countDownLatch.countDown();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        countDownLatch.countDown();
+                    }
+                });
+                try {
+                    countDownLatch.await();
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
     }
 }
 

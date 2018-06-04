@@ -6,12 +6,10 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.utils.firebaseutils.FirebaseQueryLiveDataFirestore;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -19,8 +17,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class BooksViewModel extends ViewModel {
@@ -56,7 +52,7 @@ public class BooksViewModel extends ViewModel {
         fetchBooksOnFirstRecycler();
         GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
-                (double)60000);
+                (double) 15000);
         BOOK_REF_2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
                 .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
         liveSecondRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF_2);
@@ -102,12 +98,17 @@ public class BooksViewModel extends ViewModel {
                                     books.add(b);
                                 }
                             }
-                            Collections.sort(books, new Comparator<Book>() {
-                                @Override
-                                public int compare(Book o1, Book o2) {
-                                    return o2.getTimeInserted().compareTo(o1.getTimeInserted());
+                            Book temp;
+                            for (int i = 0; i < books.size() - 1; i++) {
+                                for (int i1 = i + 1; i1 < books.size(); i1++) {
+                                    if (books.get(i).getTimeInserted().getTime() <
+                                            books.get(i1).getTimeInserted().getTime()) {
+                                        temp = books.get(i);
+                                        books.set(i, books.get(i1));
+                                        books.set(i1, temp);
+                                    }
                                 }
-                            });
+                            }
                             booksSecondRecyclerLiveData.postValue(books);
                         }
                     }).start();
