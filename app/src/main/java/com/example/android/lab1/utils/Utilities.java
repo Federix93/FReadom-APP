@@ -10,11 +10,13 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.location.Location;
 import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -56,6 +58,7 @@ import com.google.maps.android.SphericalUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -429,5 +432,23 @@ public abstract class Utilities {
         GeoPoint lesserGeoPoint = new GeoPoint(latitudeMin, longitudeMin);
         GeoPoint greaterGeoPoint = new GeoPoint(latitudeMax, longitudeMax);
         return new GeoPoint[]{lesserGeoPoint, greaterGeoPoint};
+    }
+
+
+    public static void resolveSingleLocation(@NonNull WeakReference<Activity> activityWeakReference,
+                                             @NonNull GeoPoint location,
+                                             boolean getCity,
+                                             @NonNull ResultReceiver resultReceiver) {
+        Activity activity = activityWeakReference.get();
+        if (activity != null) {
+            Intent intent = new Intent(activity, FetchAddressIntentService.class);
+            intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, resultReceiver);
+            Location location1 = new Location("default");
+            location1.setLatitude(location.getLatitude());
+            location1.setLongitude(location.getLongitude());
+            intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, location1);
+            intent.putExtra(FetchAddressIntentService.Constants.RESOLVE_CITY, getCity);
+            activity.startService(intent);
+        }
     }
 }

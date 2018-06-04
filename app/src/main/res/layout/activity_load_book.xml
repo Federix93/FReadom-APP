@@ -36,10 +36,10 @@
                 android:orientation="vertical"
                 android:animateLayoutChanges="true"
                 android:id="@+id/load_book_toolbar_isbn"
-                android:paddingStart="@dimen/activity_load_book_content_padding"
-                android:paddingEnd="@dimen/activity_load_book_content_padding"
-                android:paddingTop="@dimen/activity_load_book_content_padding"
-                android:paddingBottom="@dimen/activity_load_book_content_padding"
+                android:paddingBottom="@dimen/content_padding"
+                android:paddingEnd="@dimen/content_padding"
+                android:paddingStart="@dimen/content_padding"
+                android:paddingTop="@dimen/content_padding"
                 android:visibility="gone">
 
                 <android.support.design.widget.TextInputLayout
@@ -93,8 +93,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:paddingLeft="@dimen/activity_load_book_content_padding"
-                android:paddingRight="@dimen/activity_load_book_content_padding">
+                android:paddingLeft="@dimen/content_padding"
+                android:paddingRight="@dimen/content_padding">
 
                 <android.support.constraint.Guideline
                     android:id="@+id/guideline_left"

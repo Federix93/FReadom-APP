@@ -32,8 +32,8 @@
             android:id="@+id/image_dots"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/activity_load_book_content_padding"
-            android:layout_marginStart="@dimen/activity_load_book_content_padding"
+            android:layout_marginEnd="@dimen/content_padding"
+            android:layout_marginStart="@dimen/content_padding"
             android:orientation="horizontal" />
 
     </LinearLayout>

@@ -44,6 +44,10 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         this.books = books;
     }
 
+    public List<Book> getBooks() {
+        return this.books;
+    }
+
     @NonNull
     @Override
     public BookViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

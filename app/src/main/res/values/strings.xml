@@ -99,8 +99,6 @@
 
     <string name="position_filter_home_page">POSIZIONE</string>
     <string name="genre_filter_home_page">GENERI</string>
-
-    <string name="nearby_home_page">Nelle tue vicinanze</string>
     <string name="latest_arrivals_home_page">Nuovi arrivi</string>
     <string name="condition">Condizioni:  %1$s</string>
     <string name="reviews">Recensioni</string>
@@ -279,4 +277,8 @@
     <string name="review_published">Recensione pubblicata</string>
     <string name="load_review">Caricamento della recensione...</string>
     <string name="wait_for">Attend...</string>
+    <string name="position_shared_preference_file">USER_POSITION</string>
+    <string name="homepage_select_position">Selezionare una posizione per continuare</string>
+    <string name="homepage_no_results">Nessun libro trovato nelle vicinanze</string>
+    <string name="homepage_nearby">Nelle vicinanze</string>
 </resources>
