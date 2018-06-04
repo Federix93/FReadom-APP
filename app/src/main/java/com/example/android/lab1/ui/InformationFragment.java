@@ -1,9 +1,11 @@
 package com.example.android.lab1.ui;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,10 +54,16 @@ public class InformationFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_information, container, false);
         mContentFragmentTextView = rootView.findViewById(R.id.fragment_text_view);
-        Log.d("LULLO", mParam1);
         if(mParam1.equals("TERMS")) {
-            mContentFragmentTextView.setText(Html.fromHtml(getResources().getString(R.string.terms_content)));
-            mContentFragmentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mContentFragmentTextView.setText(Html.fromHtml(getResources().getString(R.string.terms_content), Html.FROM_HTML_MODE_LEGACY));
+                mContentFragmentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            }else{
+                mContentFragmentTextView.setText(Html.fromHtml(getResources().getString(R.string.terms_content)));
+                mContentFragmentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            }
+        }else if (mParam1.equals("LICENSE")){
+
         }
         return rootView;
     }
