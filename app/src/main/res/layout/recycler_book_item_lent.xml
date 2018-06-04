@@ -15,136 +15,138 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.4"
-                android:orientation="vertical">
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
-                    android:id="@+id/rv_book_thumbnail_lent"
-                    android:layout_width="136dp"
-                    android:layout_height="170dp"
-                    android:contentDescription="Book Thumbnail"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/book_thumbnail_placeholder" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.6"
-                android:orientation="vertical">
-
-                <android.support.constraint.ConstraintLayout
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginEnd="8dp">
-
-                    <TextView
-                        android:id="@+id/rv_book_lent_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginEnd="24dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="16dp"
-                        android:ellipsize="end"
-                        android:gravity="start"
-                        android:maxLines="2"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        app:layout_anchorGravity="right|bottom"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.0"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/rv_book_lent_author"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="start"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:ellipsize="end"
-                        android:gravity="start"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        app:layout_anchorGravity="right|center"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_title" />
-
-                    <TextView
-                        android:id="@+id/rv_book_lent_city"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="16dp"
-                        android:ellipsize="end"
-                        android:gravity="start"
-                        android:maxLines="1"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/position_lent"
-                        app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_author" />
+                    android:layout_weight="0.3"
+                    android:orientation="vertical">
 
                     <ImageView
-                        android:id="@+id/position_lent"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="14dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_author"
-                        app:srcCompat="@drawable/ic_location_on_orange_24dp" />
+                        android:id="@+id/rv_book_thumbnail_lent"
+                        android:layout_width="100dp"
+                        android:layout_height="138dp"
+                        android:contentDescription="Book Thumbnail"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/book_thumbnail_placeholder" />
+                </LinearLayout>
 
-                    <LinearLayout
-                        android:id="@+id/open_chat_books_lent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:layout_marginEnd="12dp"
-                        android:padding="4dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.70"
+                    android:orientation="vertical">
+
+                    <android.support.constraint.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="8dp">
 
                         <TextView
+                            android:id="@+id/rv_book_lent_title"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:ellipsize="end"
+                            android:gravity="start"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                            android:textSize="16sp"
+                            app:layout_anchorGravity="right|bottom"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.0"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/lent_from_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Apri Chat"
-                            android:textAllCaps="true"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                            android:textColor="@color/colorSecondaryAccent"
-                            android:textSize="14sp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                            android:textColor="@color/black"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/rv_book_lent_title" />
+
+                        <TextView
+                            android:id="@+id/lent_to_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                            android:textColor="@color/black"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/lent_from_date" />
+
+                        <View
+                            android:id="@+id/separator_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_gravity="end"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="16dp"
+                            android:background="@color/light_gray"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/lent_to_date" />
+
+                        <LinearLayout
+                            android:id="@+id/open_chat_books_lent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="27dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="14dp"
+                            android:padding="4dp"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent" />
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/separator_view">
 
-                    </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/open_chat"
+                                android:textAllCaps="true"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                                android:textColor="@color/colorSecondaryAccent"
+                                android:textSize="14sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent" />
 
-                    <ImageView
-                        android:id="@+id/book_owner_profile_picture"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_marginBottom="4dp"
-                        android:layout_marginEnd="24dp"
-                        android:scaleType="fitCenter"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/open_chat_books_lent"
-                        app:srcCompat="@drawable/ic_person_black_24dp" />
-                </android.support.constraint.ConstraintLayout>
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/book_owner_profile_picture"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="8dp"
+                            android:scaleType="fitCenter"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/open_chat_books_lent"
+                            app:layout_constraintTop_toBottomOf="@+id/separator_view"
+                            app:srcCompat="@drawable/ic_person_black_24dp" />
+                    </android.support.constraint.ConstraintLayout>
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
+        </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

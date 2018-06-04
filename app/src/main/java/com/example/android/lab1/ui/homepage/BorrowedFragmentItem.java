@@ -6,17 +6,16 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.RecyclerFragmentBooksAdapter;
+import com.example.android.lab1.adapter.RecyclerFragmentLentAdapter;
+import com.example.android.lab1.adapter.RecyclerFragmentRequestsDoneAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.viewmodel.BorrowedBooksViewModel;
-import com.example.android.lab1.viewmodel.LoansViewModel;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -28,7 +27,7 @@ import java.util.List;
 public class BorrowedFragmentItem extends Fragment {
 
     private RecyclerView mRecyclerView;
-    private RecyclerFragmentBooksAdapter mAdapter;
+    private RecyclerFragmentLentAdapter mAdapter;
     private List<User> mUserOwners;
     public BorrowedFragmentItem() {
     }
@@ -47,7 +46,7 @@ public class BorrowedFragmentItem extends Fragment {
 
         mUserOwners = new ArrayList<>();
 
-        mAdapter = new RecyclerFragmentBooksAdapter(getActivity(), new ArrayList<Book>(), mUserOwners);
+        mAdapter = new RecyclerFragmentLentAdapter(new ArrayList<Book>(), mUserOwners);
         mRecyclerView.setAdapter(mAdapter);
         BorrowedBooksViewModel borrowedBooksViewModel = ViewModelProviders.of(getActivity()).get(BorrowedBooksViewModel.class);
         borrowedBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {

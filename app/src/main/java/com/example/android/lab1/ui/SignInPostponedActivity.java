@@ -19,15 +19,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.android.lab1.R;
@@ -41,7 +36,6 @@ import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -57,28 +51,29 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.List;
 
-public class SignInActivity extends AppCompatActivity {
+public class SignInPostponedActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 10;
     private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
     private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
     private final static String ALGOLIA_USER_INDEX = "users";
     private static Index algoliaIndex;
-    ImageView mLogoImageView;
-    ConstraintLayout mRootConstraintLayout;
-    Button mLoginButton;
-    Button mWithoutLoginButton;
+
     private FirebaseAuth mFirebaseAuth;
     private FirebaseFirestore mFirebaseFirestore;
     private User mUser;
 
     private NetworkConnectionReceiver mNetworkConnectionBroadcastReceiver;
 
+    ImageView mBackArrow;
+    Button mLoginButton;
+    ConstraintLayout mRootConstraintLayout;
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_in);
+        setContentView(R.layout.activity_signin_postponed);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mNetworkConnectionBroadcastReceiver = new NetworkConnectionReceiver(this);
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -87,14 +82,10 @@ public class SignInActivity extends AppCompatActivity {
 
         createNotificationChannel();
 
-        if (user != null) {
-            openHomePageActivity();
-        }
-
-        mLogoImageView = findViewById(R.id.logo);
-        mRootConstraintLayout = findViewById(R.id.root);
         mLoginButton = findViewById(R.id.open_firebase_ui_button);
-        mWithoutLoginButton = findViewById(R.id.open_without_login_button);
+        mBackArrow = findViewById(R.id.back_arrow_postponed_signin);
+        mRootConstraintLayout = findViewById(R.id.root);
+
 
         Utilities.setupStatusBarColor(this);
 
@@ -105,11 +96,6 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        Glide.with(this)
-                .load(R.drawable.logo).apply(new RequestOptions().transforms(new CircleCrop()))
-                .transition(new DrawableTransitionOptions().transition(R.anim.button_animation))
-                .into(mLogoImageView);
-
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,157 +103,14 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        mWithoutLoginButton.setOnClickListener(new View.OnClickListener() {
+        mBackArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openHomePageActivity();
-                //Toast.makeText(getApplicationContext(), "Function not yet implemented", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
-        registerReceiver(mNetworkConnectionBroadcastReceiver, filter);
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(mNetworkConnectionBroadcastReceiver);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-            if (resultCode == RESULT_OK) {
-                final FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
-                if (firebaseUser != null) {
-                    if (firebaseUser.getEmail() != null) {
-                        final DocumentReference userDocumentReference = mFirebaseFirestore.collection("users").document(firebaseUser.getUid());
-                        FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<User>() {
-                            @Nullable
-                            @Override
-                            public User apply(@NonNull Transaction transaction) {
-                                User user = null;
-                                try {
-                                    user = transaction.get(userDocumentReference).toObject(User.class);
-                                    // set image
-                                    if (user == null)
-                                        user = new User();
-
-                                    if (user.getImage() == null)
-                                        user.setImage(firebaseUser.getPhotoUrl() != null ?
-                                                firebaseUser.getPhotoUrl().toString() : null);
-                                    if (user.getUsername() == null)
-                                        user.setUsername(firebaseUser.getDisplayName());
-                                    if (user.getPhone() == null)
-                                        user.setPhone(firebaseUser.getPhoneNumber());
-                                    if (user.getEmail() == null)
-                                        user.setEmail(firebaseUser.getEmail());
-                                    if (user.getRating() == null)
-                                        user.setRating(0f);
-                                    if (user.getNumRatings() < 0)
-                                        user.setNumRatings(0);
-
-                                    transaction.set(userDocumentReference, user);
-
-                                } catch (FirebaseFirestoreException e) {
-                                    user = null;
-                                }
 
 
-                                return user;
-                            }
-
-                        }).addOnSuccessListener(new OnSuccessListener<User>() {
-                            @Override
-                            public void onSuccess(User userResult) {
-                                mUser = userResult;
-                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-                                DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
-                                if (mFirebaseAuth != null && mFirebaseAuth.getUid() != null
-                                        && mUser != null) {
-                                    String userID = mFirebaseAuth.getUid();
-                                    setupAlgolia();
-                                    loadUserOnAlgolia(userID);
-                                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(SignInActivity.this);
-                                    progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_signing_in);
-                                    com.example.android.lab1.model.chatmodels.User user =
-                                            new com.example.android.lab1.model.chatmodels.User(mUser.getUsername(), mUser.getImage(), FirebaseInstanceId.getInstance().getToken());
-                                    usersReference.child(mFirebaseAuth.getUid()).setValue(user, new DatabaseReference.CompletionListener() {
-                                        @Override
-                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                            if (databaseError == null) {
-                                                if (progressDialogHolder.isProgressDialogShowing())
-                                                    progressDialogHolder.dismissDialog();
-
-                                                openHomePageActivity();
-
-                                            } else {
-                                                if (progressDialogHolder.isProgressDialogShowing())
-                                                    progressDialogHolder.dismissDialog();
-                                                Snackbar.make(mRootConstraintLayout, R.string.error_message, Snackbar.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        });
-
-                    }
-                }
-            } else {
-                if (response == null) {
-                    return;
-                }
-                if (response.getError() != null) {
-                }
-            }
-        }
-    }
-
-    private boolean isEmailAndPasswordProvider() {
-        for (UserInfo userInfo : mFirebaseAuth.getCurrentUser().getProviderData()) {
-            if (userInfo.getProviderId().equals("password")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void setupAlgolia() {
-        Client algoliaClient = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
-        algoliaIndex = algoliaClient.getIndex(ALGOLIA_USER_INDEX);
-    }
-
-    private void loadUserOnAlgolia(String userID) {
-        try {
-
-            JSONObject algoliaUser = new JSONObject();
-
-            if (mUser.getImage() != null)
-                algoliaUser.put("image", mUser.getImage());
-            algoliaUser.put("rating", mUser.getRating());
-
-            algoliaIndex.addObjectAsync(algoliaUser, userID,
-                    null);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void openHomePageActivity() {
-        Intent intent = new Intent(this, HomePageActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
     }
 
     private void openFirebaseUI() {
@@ -330,5 +173,139 @@ public class SignInActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(requestChannel);
             notificationManager.createNotificationChannel(messageChannel);
         }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+            if (resultCode == RESULT_OK) {
+                final FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
+                if (firebaseUser != null) {
+                    if (firebaseUser.getEmail() != null) {
+                        final DocumentReference userDocumentReference = mFirebaseFirestore.collection("users").document(firebaseUser.getUid());
+                        FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<User>() {
+                            @Nullable
+                            @Override
+                            public User apply(@NonNull Transaction transaction) {
+                                User user = null;
+                                try {
+                                    user = transaction.get(userDocumentReference).toObject(User.class);
+                                    // set image
+                                    if (user == null)
+                                        user = new User();
+
+                                    if (user.getImage() == null)
+                                        user.setImage(firebaseUser.getPhotoUrl() != null ?
+                                                firebaseUser.getPhotoUrl().toString() : null);
+                                    if (user.getUsername() == null)
+                                        user.setUsername(firebaseUser.getDisplayName());
+                                    if (user.getPhone() == null)
+                                        user.setPhone(firebaseUser.getPhoneNumber());
+                                    if (user.getEmail() == null)
+                                        user.setEmail(firebaseUser.getEmail());
+                                    if (user.getRating() == null)
+                                        user.setRating(0f);
+                                    if (user.getNumRatings() < 0)
+                                        user.setNumRatings(0);
+
+                                    transaction.set(userDocumentReference, user);
+
+                                } catch (FirebaseFirestoreException e) {
+                                    user = null;
+                                }
+
+
+                                return user;
+                            }
+
+                        }).addOnSuccessListener(new OnSuccessListener<User>() {
+                            @Override
+                            public void onSuccess(User userResult) {
+                                mUser = userResult;
+                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                DatabaseReference usersReference = firebaseDatabase.getReference().child("users");
+                                if (mFirebaseAuth != null && mFirebaseAuth.getUid() != null
+                                        && mUser != null) {
+                                    String userID = mFirebaseAuth.getUid();
+                                    setupAlgolia();
+                                    loadUserOnAlgolia(userID);
+                                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(SignInPostponedActivity.this);
+                                    progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_signing_in);
+                                    com.example.android.lab1.model.chatmodels.User user =
+                                            new com.example.android.lab1.model.chatmodels.User(mUser.getUsername(), mUser.getImage(), FirebaseInstanceId.getInstance().getToken());
+                                    usersReference.child(mFirebaseAuth.getUid()).setValue(user, new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                            if (databaseError == null) {
+                                                if (progressDialogHolder.isProgressDialogShowing())
+                                                    progressDialogHolder.dismissDialog();
+
+                                                openHomePageActivity();
+
+                                            } else {
+                                                if (progressDialogHolder.isProgressDialogShowing())
+                                                    progressDialogHolder.dismissDialog();
+                                                Snackbar.make(mRootConstraintLayout, R.string.error_message, Snackbar.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                    }
+                }
+            } else {
+                if (response == null) {
+                    return;
+                }
+                if (response.getError() != null) {
+                }
+            }
+        }
+    }
+
+    private void setupAlgolia() {
+        Client algoliaClient = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
+        algoliaIndex = algoliaClient.getIndex(ALGOLIA_USER_INDEX);
+    }
+
+    private void loadUserOnAlgolia(String userID) {
+        try {
+
+            JSONObject algoliaUser = new JSONObject();
+
+            if (mUser.getImage() != null)
+                algoliaUser.put("image", mUser.getImage());
+            algoliaUser.put("rating", mUser.getRating());
+
+            algoliaIndex.addObjectAsync(algoliaUser, userID,
+                    null);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openHomePageActivity() {
+        Intent intent = new Intent(this, HomePageActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(mNetworkConnectionBroadcastReceiver, filter);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mNetworkConnectionBroadcastReceiver);
     }
 }

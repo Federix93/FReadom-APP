@@ -42,9 +42,11 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.ChatMessageAdapter;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Message;
 import com.example.android.lab1.ui.CalendarActivity;
+import com.example.android.lab1.ui.PhotoDetailActivity;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.ui.listeners.RatingActivityOpener;
 import com.example.android.lab1.utils.Constants;
@@ -117,8 +119,11 @@ public class ChatActivity extends AppCompatActivity {
     LinearLayout mInfoEndLoanLayout;
     TextView mFromText;
     TextView mToText;
+    TextView mLoanStartedText;
+    TextView mLoanToBeEndedText;
     ConstraintLayout mStartLoanLayout;
     ConstraintLayout mEndLoanLayout;
+    ConstraintLayout mOtherPersonInfoLayout;
 
     ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
@@ -163,8 +168,11 @@ public class ChatActivity extends AppCompatActivity {
         mInfoEndLoanLayout = findViewById(R.id.info_button_layout_end);
         mFromText = findViewById(R.id.from_text);
         mToText = findViewById(R.id.to_text);
+        mLoanStartedText = findViewById(R.id.date_from);
+        mLoanToBeEndedText = findViewById(R.id.date_to);
         mStartLoanLayout = findViewById(R.id.chat_layout_container_loan_start);
         mEndLoanLayout = findViewById(R.id.chat_layout_container_loan_end);
+        mOtherPersonInfoLayout = findViewById(R.id.other_user_informations);
 
         mChatID = getIntent().getStringExtra("ChatID");
         mUsername = getIntent().getStringExtra("Username");
@@ -192,12 +200,22 @@ public class ChatActivity extends AppCompatActivity {
 
         mToolbarProfileImage = findViewById(R.id.chat_toolbar_profile_image);
         mToolbarProfileUsername = findViewById(R.id.chat_toolbar_profile_username);
-
         mToolbarProfileUsername.setText(mUsername);
 
         Glide.with(this).load(mPhotoProfileURL).apply(RequestOptions
                 .bitmapTransform(new CircleCrop()))
                 .into(mToolbarProfileImage);
+
+        mToolbarProfileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BookPhoto bookPhoto = new BookPhoto(mPhotoProfileURL, "Profile image");
+                Intent intent = new Intent(getApplicationContext(), PhotoDetailActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra(PhotoDetailActivity.BOOK_PHOTO, bookPhoto);
+                startActivity(intent);
+            }
+        });
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
@@ -246,6 +264,22 @@ public class ChatActivity extends AppCompatActivity {
                                         mEndLoanLayout.setVisibility(GONE);
                                     if (mStartLoanLayout.getVisibility() == VISIBLE)
                                         mStartLoanLayout.setVisibility(GONE);
+
+                                    mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                            if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                Book book = documentSnapshot.toObject(Book.class);
+                                                if (mOtherPersonInfoLayout.getVisibility() == GONE) {
+                                                    String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+                                                    String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                                    mLoanStartedText.setText(String.format(getResources().getString(R.string.loan_started_from), dateFrom));
+                                                    mLoanToBeEndedText.setText(String.format(getResources().getString(R.string.loan_to_be_closed), dateTo));
+                                                    mOtherPersonInfoLayout.setVisibility(VISIBLE);
+                                                }
+                                            }
+                                        }
+                                    });
                                 } else {
                                     mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
@@ -256,8 +290,8 @@ public class ChatActivity extends AppCompatActivity {
 
                                                 String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
                                                 String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
-                                                mFromText.setText(String.format(getResources().getString(R.string.from_date), dateFrom));
-                                                mToText.setText(String.format(getResources().getString(R.string.to_date), dateTo));
+                                                mFromText.setText(String.format(getResources().getString(R.string.loan_started_from), dateFrom));
+                                                mToText.setText(String.format(getResources().getString(R.string.loan_to_be_closed_owner), dateTo));
                                                 mEndLoanLayout.setVisibility(View.VISIBLE);
                                             } else {
                                                 /*mFirebaseFirestore.collection("history").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -400,6 +434,8 @@ public class ChatActivity extends AppCompatActivity {
                                                 if (documentSnapshot != null && documentSnapshot.exists()) {
                                                     Book book = documentSnapshot.toObject(Book.class);
                                                     if (book != null) {
+                                                        long time= System.currentTimeMillis();
+                                                        book.setLoanEnd(time);
                                                         docHistoryRef.set(book, SetOptions.merge());
                                                         DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(book.getBookID());
                                                         book.setLoanStart(Long.valueOf(-1));
@@ -654,7 +690,7 @@ public class ChatActivity extends AppCompatActivity {
                                                         final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBookID);
                                                         docLoanRef.set(book, SetOptions.merge());
                                                         final DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(mBookID);
-                                                        docBookRef.delete();
+                                                        docBookRef.set(book, SetOptions.merge());
                                                         DocumentReference reqDone = mFirebaseFirestore.collection("requestsDone").document(mOtherPerson).collection("books").document(mBookID);
                                                         reqDone.delete();
                                                         DocumentReference reqReceived = mFirebaseFirestore.collection("requestsReceived").document(book.getUid()).collection("books").document(mBookID);

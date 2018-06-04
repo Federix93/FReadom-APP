@@ -34,6 +34,17 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <activity
+            android:name=".ui.WelcomeActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".ui.ScanBarCodeActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -84,11 +95,11 @@
             android:name=".ui.SignInActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
         </activity>
         <activity
             android:name=".ui.LoadBookActivity"
@@ -125,9 +136,10 @@
 
         <activity android:name=".ui.chat.ConversationsActivity" />
         <activity android:name=".ui.TextDetailActivity" />
-        <activity android:name=".ui.BookDetailsLibraryActivity" />
-        <activity android:name=".ui.PhotoDetailActivity" />
-        <activity android:name=".ui.HistoryActivity" />
+        <activity android:name=".ui.BookDetailsLibraryActivity"/>
+        <activity android:name=".ui.PhotoDetailActivity"/>
+        <activity android:name=".ui.HistoryActivity"/>
+        <activity android:name=".ui.SignInPostponedActivity"/>
 
         <receiver
             android:name=".utils.DirectReplyReceiver"

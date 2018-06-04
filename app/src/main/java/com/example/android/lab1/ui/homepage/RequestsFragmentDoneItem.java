@@ -13,20 +13,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.lab1.R;
-import com.example.android.lab1.adapter.RecyclerFragmentBooksAdapter;
+import com.example.android.lab1.adapter.RecyclerFragmentRequestsDoneAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.viewmodel.RequestedDoneBooksViewModel;
-import com.example.android.lab1.viewmodel.UserRealtimeDBViewModel;
-import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +29,7 @@ import java.util.List;
 public class RequestsFragmentDoneItem extends Fragment {
 
     private RecyclerView mRecyclerView;
-    RecyclerFragmentBooksAdapter mAdapter;
+    RecyclerFragmentRequestsDoneAdapter mAdapter;
 
     public void RequestsFragmentDoneItem() {
     }
@@ -50,36 +45,38 @@ public class RequestsFragmentDoneItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerFragmentBooksAdapter(getActivity(), new ArrayList<Book>(),  new ArrayList<User>());
+        mAdapter = new RecyclerFragmentRequestsDoneAdapter(new ArrayList<Book>(),  new ArrayList<User>());
 
         mRecyclerView.setAdapter(mAdapter);
 
-        RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
-        requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@Nullable List<Book> books) {
-                if(books != null) {
-                    final List<Book> listBooks = new ArrayList<>();
-                    final List<User> usersOwner = new ArrayList<>();
-                    for (final Book b : books) {
-                        FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            RequestedDoneBooksViewModel requestedDoneBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestedDoneBooksViewModel.class);
+            requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
+                @Override
+                public void onChanged(@Nullable List<Book> books) {
+                    if (books != null) {
+                        final List<Book> listBooks = new ArrayList<>();
+                        final List<User> usersOwner = new ArrayList<>();
+                        for (final Book b : books) {
+                            FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
                                     listBooks.add(b);
                                     usersOwner.add(dataSnapshot.getValue(User.class));
                                     mAdapter.setItems(listBooks, usersOwner);
                                     mAdapter.notifyDataSetChanged();
-                            }
+                                }
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
 
-                            }
-                        });
+                                }
+                            });
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
         return view;
     }
 }

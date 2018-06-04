@@ -1,6 +1,9 @@
 package com.example.android.lab1.adapter;
 
 import android.app.Activity;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Geocoder;
@@ -9,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,55 +40,39 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
+import java.security.acl.Owner;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class RecyclerFragmentBooksAdapter extends RecyclerView.Adapter<RecyclerFragmentBooksAdapter.MyViewHolder>
-implements AddressResultReciever {
+public class RecyclerFragmentLentAdapter extends RecyclerView.Adapter<RecyclerFragmentLentAdapter.MyViewHolder> {
 
     private List<Book> mBookList;
     private List<User> mUsersOwner;
-    private List<String> mCities;
 
     private Context mContext;
-    private Activity mContainer;
     private DatabaseReference userReference;
     private FirebaseDatabase firebaseDatabase;
 
-    private GeoCodingTask mCurrentlyExecuting;
-    private Location mCurrentlyResolving;
-    private Location mResolveLater;
-    private AddressReciever mAddressReciever;
-    private boolean isLent;
+    boolean isLent = false;
 
-    public RecyclerFragmentBooksAdapter(Activity container, List<Book> listBooks, List<User> users) {
-        mContainer = container;
+    public RecyclerFragmentLentAdapter(List<Book> listBooks, List<User> users) {
         mBookList = listBooks;
         mUsersOwner = users;
-        mCities = new ArrayList<>(mBookList != null?mBookList.size() : 0);
-        for (int i = 0; i < mBookList.size(); i++) {
-            mCities.add("");
-        }
-        isLent = false;
     }
 
-    public RecyclerFragmentBooksAdapter(Activity container, List<Book> listBooks, List<User> users, boolean isLent) {
-        mContainer = container;
+    public RecyclerFragmentLentAdapter(List<Book> listBooks, List<User> users, boolean lent) {
         mBookList = listBooks;
         mUsersOwner = users;
-        mCities = new ArrayList<>(mBookList != null?mBookList.size() : 0);
-        for (int i = 0; i < mBookList.size(); i++) {
-            mCities.add("");
-        }
-        this.isLent = isLent;
+        this.isLent = lent;
     }
 
     @NonNull
     @Override
-    public RecyclerFragmentBooksAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View cardView = inflater.inflate(R.layout.recycler_book_item_lent, parent, false);
@@ -91,7 +80,7 @@ implements AddressResultReciever {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerFragmentBooksAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.bind(mBookList.get(position), position);
     }
 
@@ -103,49 +92,26 @@ implements AddressResultReciever {
     public void setItems(List<Book> listBooks, List<User> usersOwner) {
         mBookList = listBooks;
         mUsersOwner = usersOwner;
-        mCities = new ArrayList<>(mBookList != null?mBookList.size() : 0);
-        for (int i = 0; i < mBookList.size(); i++) {
-            mCities.add("");
-        }
-    }
-
-    @Override
-    public void onPositionResolved(String address, boolean isCity, int position) {
-        if (position >= 0 && position < mCities.size()) {
-            mCities.set(position, address);
-            notifyItemChanged(position);
-        }
-    }
-
-    private void resolveCityLocation(Location location, int position) {
-        // This method will change address mResultAddress var
-        Intent intent = new Intent(mContainer, FetchAddressIntentService.class);
-        if (mAddressReciever == null)
-            mAddressReciever = new AddressReciever(new Handler(), this);
-        intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mAddressReciever);
-        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, location);
-        intent.putExtra(FetchAddressIntentService.Constants.RESOLVE_CITY, true);
-        intent.putExtra(FetchAddressIntentService.Constants.ADAPTER_POSITION, position);
-        mContainer.startService(intent);
-
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView mBookTitle;
         TextView mBookAuthor;
-        TextView mBookCity;
         ImageView mBookThumbnail;
         LinearLayout mChatLayout;
         ImageView mUserPhoto;
+        TextView mLentFromDate;
+        TextView mLentToDate;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             mBookTitle = itemView.findViewById(R.id.rv_book_lent_title);
-            mBookAuthor = itemView.findViewById(R.id.rv_book_lent_author);
-            mBookCity = itemView.findViewById(R.id.rv_book_lent_city);
+            //mBookAuthor = itemView.findViewById(R.id.rv_book_lent_author);
             mBookThumbnail = itemView.findViewById(R.id.rv_book_thumbnail_lent);
             mChatLayout = itemView.findViewById(R.id.open_chat_books_lent);
             mUserPhoto = itemView.findViewById(R.id.book_owner_profile_picture);
+            mLentFromDate = itemView.findViewById(R.id.lent_from_date);
+            mLentToDate = itemView.findViewById(R.id.lent_to_date);
 
             firebaseDatabase = FirebaseDatabase.getInstance();
             userReference = firebaseDatabase.getReference().child("users");
@@ -154,20 +120,15 @@ implements AddressResultReciever {
         public void bind(final Book book, final int position) {
             mBookTitle.setText(book.getTitle());
             mBookTitle.setTextColor(mContext.getResources().getColor(R.color.black));
-            mBookAuthor.setText(book.getAuthors());
-            if (book.getGeoPoint() != null) {
-                if (mCities.get(position) != null && mCities.get(position).equals("")) {
-                    Location location = new Location("location");
-                    location.setLongitude(book.getGeoPoint().getLongitude());
-                    location.setLatitude(book.getGeoPoint().getLatitude());
-
-                    resolveCityLocation(location, getAdapterPosition());
-                }
-                else
-                    mBookCity.setText(mCities.get(position));
-
-            } else
-                mBookCity.setText(mContext.getResources().getString(R.string.position_not_available));
+            //mBookAuthor.setText(book.getAuthors());
+//            if (book.getGeoPoint() != null) {
+//                Location location = new Location("location");
+//                location.setLongitude(book.getGeoPoint().getLongitude());
+//                location.setLatitude(book.getGeoPoint().getLatitude());
+//
+//                resolveCityLocation(location);
+//            } else
+//                mBookCity.setText(mContext.getResources().getString(R.string.position_not_available));
             if (book.getWebThumbnail() != null) {
                 Glide.with(itemView.getContext()).load(book.getWebThumbnail()).into(mBookThumbnail);
             } else if (book.getUserBookPhotosStoragePath() != null && book.getUserBookPhotosStoragePath().size() > 0) {
@@ -180,7 +141,47 @@ implements AddressResultReciever {
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserPhoto);
             }
-            if (!isLent) {
+
+            String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+            String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+            mLentFromDate.setText(String.format(mContext.getResources().getString(R.string.from_date), dateFrom));
+            mLentToDate.setText(String.format(mContext.getResources().getString(R.string.to_date), dateTo));
+
+            if (isLent) {
+                mChatLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
+                                .child(book.getBookID())
+                                .child(FirebaseAuth.getInstance().getUid())
+                                .child(book.getLentTo());
+                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String chatID = (String) dataSnapshot.getValue();
+                                Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                Log.d("VINCI", "onDataChange:  username " + mUsersOwner.get(position).getUsername());
+                                Log.d("VINCI", "onDataChange:  chatid " + chatID);
+                                Log.d("VINCI", "onDataChange:  imageurl " + mUsersOwner.get(position).getPhotoURL());
+                                Log.d("VINCI", "onDataChange:  BOOKID " + mBookList.get(position).getBookID());
+
+
+                                intent.putExtra("ChatID", chatID);
+                                intent.putExtra("Username", mUsersOwner.get(position).getUsername());
+                                intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
+                                intent.putExtra("BookID", mBookList.get(position).getBookID());
+                                v.getContext().startActivity(intent);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
+            } else {
                 mChatLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
@@ -208,87 +209,8 @@ implements AddressResultReciever {
                         });
                     }
                 });
-            }else{
-                mChatLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("openedChats")
-                                .child(book.getBookID())
-                                .child(FirebaseAuth.getInstance().getUid())
-                                .child(book.getLentTo());
-                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                String chatID = (String) dataSnapshot.getValue();
-                                Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                intent.putExtra("ChatID", chatID);
-                                intent.putExtra("Username", mUsersOwner.get(position).getUsername());
-                                intent.putExtra("ImageURL", mUsersOwner.get(position).getPhotoURL());
-                                intent.putExtra("BookID", mBookList.get(position).getBookID());
-                                v.getContext().startActivity(intent);
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-                    }
-                });
             }
-
         }
 
-
-    }
-
-    private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
-
-        private TextView mTarget;
-
-        public GeoCodingTask(TextView target) {
-            this.mTarget = target;
-        }
-
-        @Override
-        protected String doInBackground(LatLng... latLngs) {
-            if (latLngs.length > 0) {
-                Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
-                List<android.location.Address> fromLocation = null;
-                try {
-                    if (!isCancelled())
-                        fromLocation = geocoder.getFromLocation(latLngs[0].latitude,
-                                latLngs[0].longitude,
-                                1);
-                    else
-                        return null;
-
-                } catch (IOException e) {
-                    return null;
-                }
-                if (fromLocation == null || fromLocation.size() == 0)
-                    return null;
-                else {
-                    return fromLocation.get(0).getLocality();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String city) {
-            if (mTarget != null && !this.isCancelled()) {
-                if (city == null) {
-                    mTarget.setText(R.string.no_address_found);
-                } else {
-                    mTarget.setText(city);
-                    mCurrentlyExecuting = null;
-                    mCurrentlyResolving = null;
-                    mResolveLater = null;
-                }
-            }
-
-        }
     }
 }

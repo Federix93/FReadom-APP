@@ -18,6 +18,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
@@ -33,12 +34,15 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Book;
+import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.CalendarActivity;
 import com.example.android.lab1.ui.FavoriteBooksActivity;
 import com.example.android.lab1.ui.HistoryActivity;
 import com.example.android.lab1.ui.LoadBookActivity;
+import com.example.android.lab1.ui.PhotoDetailActivity;
 import com.example.android.lab1.ui.SignInActivity;
+import com.example.android.lab1.ui.SignInPostponedActivity;
 import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
 import com.example.android.lab1.utils.Utilities;
@@ -99,6 +103,11 @@ public class HomePageActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        if (FirebaseAuth.getInstance().getUid() == null) {
+            Menu menuForNotLoggedPeople = navigationView.getMenu();
+            menuForNotLoggedPeople.findItem(R.id.nav_logout).setVisible(false);
+        }
 
         View header = navigationView.getHeaderView(0);
         mProfileImage = header.findViewById(R.id.global_profile_image);
@@ -162,9 +171,16 @@ public class HomePageActivity extends AppCompatActivity
         mFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomePageActivity.this, LoadBookActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
+                if (mFirebaseAuth.getUid() == null) {
+                    Intent intent = new Intent(v.getContext(), SignInPostponedActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(HomePageActivity.this, LoadBookActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                }
+
             }
         });
 
@@ -248,13 +264,19 @@ public class HomePageActivity extends AppCompatActivity
 
         mCurrentFragment = mFragmentAdapter.getCurrentFragment();
 
+        mProfileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("user", mUser);
+                startActivity(intent);
+            }
+        });
+
         if (getIntent().getBooleanExtra("LoanStart", false)) {
             mBottomNavigation.setCurrentItem(LOANS_FRAGMENT);
         }
-        if (getIntent().getBooleanExtra("LoanEnd", false)) {
-
-        }
-
     }
 
     private void fabAppears()
@@ -345,11 +367,16 @@ public class HomePageActivity extends AppCompatActivity
         if (id == R.id.nav_settings) {
             Toast.makeText(this, "Function not Implemented", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_profile) {
-            Intent intent = new Intent(this, ProfileActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            intent.putExtra("user", mUser);
-            startActivity(intent);
-
+            if (FirebaseAuth.getInstance().getUid() == null) {
+                Intent intent = new Intent(getApplicationContext(), SignInPostponedActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, ProfileActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("user", mUser);
+                startActivity(intent);
+            }
         } else if (id == R.id.nav_logout) {
             AuthUI.getInstance()
                     .signOut(this)

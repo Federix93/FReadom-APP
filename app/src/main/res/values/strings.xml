@@ -51,7 +51,7 @@
     <string name="verification_email_confirm">OK</string>
     <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
     <string name="confirm">Conferma</string>
-    <string name="loan_your_item">Libri in prestito</string>
+    <string name="loan_your_item">Libri presi in prestito</string>
     <string name="loan_other_book_item">Libri ricevuti</string>
     <string name="request_done_item">Effettuate</string>
     <string name="request_received_item">Ricevute</string>
@@ -96,6 +96,7 @@
     <string name="search_books_hint">Titolo, autore, editore, tags…</string>
 
     <string name="your_library_fragment">La tua libreria</string>
+    <string name="your_library_advice">Qui troverai i tuoi libri una volta caricati. Premi sul simbolo + in basso per aggiungere il primo libro</string>
 
     <string name="position_filter_home_page">POSIZIONE</string>
     <string name="genre_filter_home_page">GENERI</string>
@@ -159,8 +160,8 @@
     <string name="start_loan_button_info_text">Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l\'utente premi il pulsante \"Inizia prestito\"</string>
     <string name="end_loan_button_info_text">Il pulsante di fine prestito deve essere premuto una volta che il libro è stato restituito. Una volta premuto il libro tornerà disponibile per nuove richieste</string>
     <string name="end_loan">Termina prestito</string>
-    <string name="from_date">Da %1$s</string>
-    <string name="to_date">A %1$s</string>
+    <string name="from_date">Da: %1$s</string>
+    <string name="to_date">A: %1$s</string>
     <string name="confirm_end_title">Confermi fine prestito?</string>
     <string name="confirm_end_text">L\'utente ti ha effettivamente restituito il libro? In caso affermativo il libro tornerà disponibile e potrai ricevere nuove richieste da altri utenti</string>
 
@@ -265,19 +266,29 @@
     <string name="default_message">Ciao %1$s, mi piacerebbe prendere in prestito il libro %2$s</string>
 
     <string name="history">Storico</string>
-    <string name="logout">Logout</string>
+    <string name="logout">Esci</string>
     <string name="open_conversations"><![CDATA[Apri\nconversazioni]]></string>
-    <string name="you_borrowed">Hai prestato:</string>
-    <string name="you_lent">Hai ricevuto:</string>
+    <string name="you_borrowed">Hai prestato a:</string>
+    <string name="you_lent">Hai ricevuto da:</string>
     <string name="to">A:</string>
     <string name="from">Da:</string>
     <string name="review_exchange">Recensisci scambio</string>
     <string name="current_position">POSIZIONE</string>
-    <string name="start_loan_progress">Inizio del prestito in corso…</string>
-    <string name="end_loan_progress">Fine del prestito in corso…</string>
+    <string name="start_loan_progress">Inizio del prestito in corso...</string>
+    <string name="end_loan_progress">Fine del prestito in corso...</string>
+    <string name="loan_started_from">Prestito iniziato il: %1$s</string>
+    <string name="loan_to_be_closed">Devi restituirlo entro il: %1$s</string>
+    <string name="loan_to_be_closed_owner">Tornerà disponibile entro il: %1$s</string>
 
     <string name="review_published">Recensione pubblicata</string>
-    <string name="load_review">Caricamento della recensione…</string>
+    <string name="load_review">Caricamento della recensione...</string>
+    <string name="saving">Salvataggio...</string>
+
+    <string name="start">Inizia</string>
+    <string name="next">Avanti</string>
+
+    <string name="preview_not_available">Anteprima non disponibile</string>
+
     <string name="may_have_new_messages">Potresti avere nuovi messaggi</string>
     <string name="no_books_lent_or_borrowed">Non hai ancora prestato nè preso in prestito alcun libro. Qui troverai uno storico dei tuoi scambi</string>
     <string name="wait_for">Attend...</string>

@@ -176,7 +176,7 @@ public class GlobalShowProfileActivity extends AppCompatActivity{
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(mFt);
-        adapter.addFragment(new GlobalProfileBooksFragment(), getResources().getString(R.string.toolbar_title_home));
+        adapter.addFragment(new GlobalProfileBooksFragment(), getResources().getString(R.string.books));
         ReviewListFragment reviewListFragment = ReviewListFragment.Companion.newInstance(getUserId());
         adapter.addFragment(reviewListFragment, getResources().getString(R.string.profile_reviews_fragment));
         viewPager.setAdapter(adapter);

@@ -108,6 +108,7 @@ public class TabFragment extends Fragment {
     CustomSwipeRefresh mRefreshLayout;
     AppCompatButton mGenreFilterButton;
     AppCompatButton mPositionFilterButton;
+    TextView mYourLibraryAdvice;
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
@@ -361,18 +362,27 @@ public class TabFragment extends Fragment {
 
         fragmentContainer = view.findViewById(R.id.fragment_container);
         mYourLibraryRecyclerView = view.findViewById(R.id.rv_fragment_books_library);
+        mYourLibraryAdvice = view.findViewById(R.id.your_library_advice);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
-        BooksViewModel viewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(BooksViewModel.class);
-        viewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@Nullable List<Book> books) {
-                if (books != null) {
-                    updateListOfBooks(books);
+        if (mFirebaseAuth.getUid() != null) {
+            BooksViewModel booksViewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(BooksViewModel.class);
+            booksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
+                @Override
+                public void onChanged(@Nullable List<Book> books) {
+                    if (books != null) {
+                        updateListOfBooks(books);
+                        if (mYourLibraryAdvice.getVisibility() == View.VISIBLE)
+                            mYourLibraryAdvice.setVisibility(View.GONE);
+                    } else {
+                        mYourLibraryAdvice.setVisibility(View.VISIBLE);
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            mYourLibraryAdvice.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

@@ -195,6 +195,12 @@
     <string name="start_loan_progress">Beginning of the loan in progress…</string>
     <string name="end_loan_progress">End of the loan in progress…</string>
     <string name="review_published">Review published</string>
+    <string name="saving...">Saving...</string>
+    <string name="load_review">Review loading</string>
+    <string name="loan_to_be_closed_owner">Available again: %1$s</string>
+    <string name="loan_to_be_closed">To return: %1$s</string>
+    <string name="loan_started_from">Loan started: %1$s</string>
+    <string name="preview_not_available">Preview not available</string>
     <string name="may_have_new_messages">Potresti avere nuovi messaggi</string>
     <string name="no_books_lent_or_borrowed">You have not lent or borrowed any book. Here you will find your exchange history.</string>
 
