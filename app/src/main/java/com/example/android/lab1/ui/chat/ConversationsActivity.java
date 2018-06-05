@@ -3,27 +3,24 @@ package com.example.android.lab1.ui.chat;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Build;
-import android.support.annotation.NonNull;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
-import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.Chat;
+import com.example.android.lab1.model.chatmodels.Conversation;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.ConversationsViewModel;
-import com.example.android.lab1.viewmodel.UserRealtimeDBViewModel;
-import com.example.android.lab1.viewmodel.UserViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,22 +28,24 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 public class ConversationsActivity extends AppCompatActivity {
 
+    private static final String TAG = "LULLO";
     Toolbar mToolbar;
     String mBookID;
     RecyclerView mRecyclerView;
     private RecyclerConversationAdapter mAdapter;
     private ShimmerFrameLayout mShimmerViewContainer;
-    ChildEventListener childEventListener;
+    private ArrayList<Conversation> mConversations;
+    private ChildEventListener mChildEventListener;
+    private ConversationsViewModel mConversationsViewModel;
+    private Observer<DataSnapshot> mObserver;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -74,43 +73,155 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
-        mAdapter = new RecyclerConversationAdapter(mBookID);
-        mRecyclerView.setAdapter(mAdapter);
+    }
+    //mConversations = new ArrayList<>();
+    //mAdapter = new RecyclerConversationAdapter(mConversations,
+    //  mBookID);
+    //mRecyclerView.setAdapter(mAdapter);
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
         if (firebaseAuth != null) {
-
-            ConversationsViewModel conversationsViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBookID)).get(ConversationsViewModel.class);
-            conversationsViewModel.getSnapshotLiveData().observe(this, new Observer<DataSnapshot>() {
-                        @Override
-                        public void onChanged(@android.support.annotation.Nullable DataSnapshot dataSnapshot) {
-                            final List<User> userList = new ArrayList<>();
-                            final List<DataSnapshot> snapshotList = new ArrayList<>();
-                            for (final DataSnapshot d : dataSnapshot.getChildren()) {
-                                snapshotList.add(d);
-                                FirebaseDatabase.getInstance().getReference("users").child((String)d.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        User user = dataSnapshot.getValue(User.class);
-                                        userList.add(user);
-                                        mAdapter.setItems(snapshotList.get(userList.size() - 1).getKey(), user);
-                                        mAdapter.notifyDataSetChanged();
-                                        if(mShimmerViewContainer.isAnimationStarted()) {
+            mConversationsViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBookID)).get(ConversationsViewModel.class);
+            // add new conversation
+            mObserver = new Observer<DataSnapshot>() {
+                @Override
+                public void onChanged(@Nullable DataSnapshot dataSnapshot) {
+                    final ArrayList<String> userIds = new ArrayList<>();
+                    final ArrayList<String> chatIds = new ArrayList<>();
+                    final Map<String, Chat> chatsObj = new HashMap<>();
+                    mConversations = new ArrayList<>();
+                    for (final DataSnapshot d : dataSnapshot.getChildren()) {
+                        userIds.add(d.getValue().toString());
+                        chatIds.add(d.getKey());
+                    }
+                    FirebaseDatabase.getInstance()
+                            .getReference("users")
+                            .addChildEventListener(new ChildEventListener() {
+                                @Override
+                                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                                    if (userIds.contains(dataSnapshot.getKey())) {
+                                        int i = userIds.indexOf(dataSnapshot.getKey());
+                                        mConversations.add(new Conversation(
+                                                dataSnapshot.getValue(User.class),
+                                                chatIds.get(i)
+                                        ));
+                                        if (mShimmerViewContainer.isAnimationStarted()) {
                                             mShimmerViewContainer.stopShimmerAnimation();
                                             mShimmerViewContainer.setVisibility(View.GONE);
                                         }
                                     }
+                                    if (mConversations.size() >= userIds.size()) {
+                                        mAdapter = new RecyclerConversationAdapter(mConversations,
+                                                mBookID);
+                                        mRecyclerView.setAdapter(mAdapter);
 
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
+                                        mChildEventListener = FirebaseDatabase.getInstance()
+                                                .getReference("chats")
+                                                .orderByChild("timestamp")
+                                                .addChildEventListener(new ChildEventListener() {
+                                                    @Override
+                                                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                                                        if (!chatIds.contains(dataSnapshot.getKey()))
+                                                            return;
+                                                        if (chatsObj.size() < chatIds.size()) // avoid replication
+                                                            chatsObj.put(dataSnapshot.getKey(), dataSnapshot.getValue(Chat.class));
+                                                        if (chatsObj.size() >= chatIds.size()) {
+                                                            for (int i = 0; i < mConversations.size(); i++) {
+                                                                mConversations.get(i).setChat(
+                                                                        chatsObj.get(mConversations.get(i).getChatId())
+                                                                );
+                                                            }
 
+                                                            Conversation temp;
+                                                            for (int i = 0; i < mConversations.size() - 1; i++) {
+                                                                for (int i1 = i + 1; i1 < mConversations.size(); i1++) {
+                                                                    if (mConversations.get(i).getTimestamp() <
+                                                                            mConversations.get(i1).getTimestamp()) {
+                                                                        temp = mConversations.get(i);
+                                                                        mConversations.set(i, mConversations.get(i1));
+                                                                        mConversations.set(i1, temp);
+                                                                    }
+                                                                }
+                                                            }
+                                                            mAdapter.notifyDataSetChanged();
+                                                        }
+
+                                                    }
+
+                                                    @Override
+                                                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                                                        if (!chatIds.contains(dataSnapshot.getKey()))
+                                                            return;
+                                                        Chat chat = dataSnapshot.getValue(Chat.class);
+                                                        Conversation updated = null;
+                                                        for (int i = 0; i < mConversations.size(); i++) {
+                                                            if (mConversations.get(i).getChatId().equals(dataSnapshot.getKey())) {
+                                                                updated = mConversations.remove(i);
+                                                                updated.setChat(chat);
+                                                                break;
+                                                            }
+                                                        }
+                                                        if (updated != null) {
+                                                            // are sorted so
+                                                            mConversations.add(0, updated);
+                                                            mAdapter.notifyDataSetChanged();
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                                    }
+
+                                                    @Override
+                                                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(DatabaseError databaseError) {
+
+                                                    }
+                                                });
                                     }
-                                });
-                            }
-                        }
-                    });
+                                }
+
+                                @Override
+                                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                                }
+
+                                @Override
+                                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                }
+
+                                @Override
+                                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                }
+            };
+            mConversationsViewModel.getSnapshotLiveData().observe(this, mObserver);
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FirebaseDatabase.getInstance().getReference("chats").removeEventListener(mChildEventListener);
+        mConversationsViewModel.getSnapshotLiveData().removeObserver(mObserver);
     }
 
     @Override
@@ -123,5 +234,39 @@ public class ConversationsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         mShimmerViewContainer.startShimmerAnimation();
+    }
+
+    private class DiffUtilCallback extends DiffUtil.Callback {
+
+        private List<Conversation> oldList;
+        private List<Conversation> newList;
+
+        public DiffUtilCallback(List<Conversation> oldList, List<Conversation> newList) {
+            this.oldList = oldList;
+            this.newList = newList;
+        }
+
+        @Override
+        public int getOldListSize() {
+            return oldList.size();
+        }
+
+        @Override
+        public int getNewListSize() {
+            return newList.size();
+        }
+
+        @Override
+        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+            return oldList.get(oldItemPosition) == newList.get(newItemPosition);
+        }
+
+        @Override
+        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+            Conversation oldConversation = oldList.get(oldItemPosition);
+            Conversation newConversation = newList.get(newItemPosition);
+            return oldConversation.getTimestamp().equals(newConversation.getTimestamp()) &&
+                    oldConversation.getChatId().equals(newConversation.getChatId());
+        }
     }
 }

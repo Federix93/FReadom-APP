@@ -1,30 +1,60 @@
 package com.example.android.lab1.model.chatmodels;
 
 public class Conversation {
-    
-    private String userID1;
-    private String userID2;
+    User mUser;
+    String mChatId;
+    Long mTimestamp;
+    Chat mChat;
 
-    public Conversation(){}
-
-    public Conversation(String userID1, String userID2){
-        this.userID1 = userID1;
-        this.userID2 = userID2;
+    public Conversation(User mUser, String mChatId) {
+        this.mUser = mUser;
+        this.mChatId = mChatId;
+        this.mTimestamp = Long.valueOf("0");
     }
 
-    public String getUserID1() {
-        return userID1;
+    public Conversation(User mUser, String mChatId, Long mTimestamp) {
+        this.mUser = mUser;
+        this.mChatId = mChatId;
+        this.mTimestamp = mTimestamp;
     }
 
-    public void setUserID1(String userID1) {
-        this.userID1 = userID1;
+    public Chat getChat() {
+        return mChat;
     }
 
-    public String getUserID2() {
-        return userID2;
+    public void setChat(Chat chat) {
+        this.mChat = chat;
+        this.mTimestamp = chat.getTimestamp();
     }
 
-    public void setUserID2(String userID2) {
-        this.userID2 = userID2;
+    @Override
+    public boolean equals(Object obj) {
+        Conversation other = (Conversation) obj;
+        return mChatId.equals(other.getChatId()) &&
+                mTimestamp.equals(other.getTimestamp());
+    }
+
+    public User getUser() {
+        return mUser;
+    }
+
+    public void setUser(User mUser) {
+        this.mUser = mUser;
+    }
+
+    public String getChatId() {
+        return mChatId;
+    }
+
+    public void setChatId(String mChatId) {
+        this.mChatId = mChatId;
+    }
+
+    public Long getTimestamp() {
+        return mTimestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.mTimestamp = mTimestamp;
     }
 }

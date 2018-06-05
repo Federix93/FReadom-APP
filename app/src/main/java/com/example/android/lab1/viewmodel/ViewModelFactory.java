@@ -4,12 +4,13 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.example.android.lab1.model.Book;
-import com.example.android.lab1.model.User;
 import com.google.firebase.firestore.GeoPoint;
 
 public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
+    private final int firstDistance;
+    private final int secondDistance;
+    private final int homePageLimit;
     /**
      * @params[0] --> bookID
      * @params[1] --> ownerUID
@@ -20,9 +21,20 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
     public ViewModelFactory(String...  params) {
         this.params = params;
+        firstDistance = 0;
+        secondDistance = 0;
+        homePageLimit = 0;
     }
 
-    public ViewModelFactory(GeoPoint geoPoint) { this.geoPoint = geoPoint; }
+    public ViewModelFactory(GeoPoint geoPoint,
+                            int firstDistance,
+                            int secondDistance,
+                            int homePageLimit) {
+        this.geoPoint = geoPoint;
+        this.firstDistance = firstDistance;
+        this.secondDistance = secondDistance;
+        this.homePageLimit = homePageLimit;
+    }
 
     @NonNull
     @Override
@@ -40,11 +52,14 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
         }
         else if(modelClass == BooksViewModel.class){
             if(geoPoint != null)
-                return (T) new BooksViewModel(geoPoint);
-            if(params.length > 0)
-                return (T) new BooksViewModel(params[0]);
+                return (T) new BooksViewModel(geoPoint,
+                        firstDistance,
+                        secondDistance,
+                        homePageLimit);
             else
-                return (T) new BooksViewModel();
+                return super.create(modelClass);
+        } else if (modelClass == YourLibraryViewModel.class) {
+            return (T) new YourLibraryViewModel(params[0]); // params[0] --> uid
         }
         else if(modelClass == UserViewModel.class){
             if(params.length > 0)

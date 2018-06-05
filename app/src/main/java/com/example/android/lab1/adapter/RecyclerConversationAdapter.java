@@ -13,40 +13,36 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.chatmodels.Chat;
+import com.example.android.lab1.model.chatmodels.Conversation;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerConversationAdapter.ConversationViewHolder> {
 
-    private Map<String, User> mMap;
+    private List<Conversation> mConversations;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mChatsReference;
     private String mBookID;
     private String mSenderUID;
 
-    public RecyclerConversationAdapter(String bookID){
-        mMap = new HashMap<>();
+
+    public RecyclerConversationAdapter(ArrayList<Conversation> conversations, String bookID) {
+        this.mConversations = conversations;
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mChatsReference = mFirebaseDatabase.getReference().child("chats");
         mBookID = bookID;
-    }
-
-    public void setItems(String chatID, User user){
-        mMap.put(chatID, user);
     }
 
 
@@ -60,16 +56,32 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
-        Object[] keys = mMap.keySet().toArray();
-        holder.bind(mMap.get(keys[position]), (String) keys[position]);
+        holder.bind(mConversations.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return mMap.size();
+        return mConversations.size();
     }
 
-    class ConversationViewHolder extends RecyclerView.ViewHolder{
+   /* private void sortConversations()
+    {
+        AdapterConversation temp;
+        for (int i = 0; i < mConversations.size() - 1; i++) {
+            for (int i1 = i + 1; i1 < mConversations.size(); i1++) {
+                if (mConversations.get(i).getTimestamp() <
+                        mConversations.get(i1).getTimestamp())
+                {
+                    temp = mConversations.get(i);
+                    mConversations.set(i, mConversations.get(i1));
+                    mConversations.set(i1, temp);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }*/
+
+    class ConversationViewHolder extends RecyclerView.ViewHolder {
 
         TextView mUserNameTextView;
         ImageView mUserProfileImageView;
@@ -87,7 +99,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mMessageCounterTextView = itemView.findViewById(R.id.message_counter_text_view);
         }
 
-        void bind(final User user, final String chatID){
+        void bind(final Conversation conversation) {
+            final User user = conversation.getUser();
             mUserNameTextView.setText(user.getUsername());
             if (user.getPhotoURL() == null) {
                 Glide.with(itemView.getContext()).load(R.mipmap.profile_picture)
@@ -98,35 +111,41 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
             }
-            mValueEventListener = new ValueEventListener(){
+
+            if (conversation.getChat() != null) {
+                Chat chat = conversation.getChat();
+                if (chat != null) {
+                    Calendar cal1 = Calendar.getInstance();
+                    cal1.setTimeInMillis(chat.getTimestamp() * 1000);
+
+
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                    mTimetampTextView.setText(dateFormat.format(cal1.getTime()));
+                    if (chat.getIsText().equals("true"))
+                        mLastMessageTextView.setText(chat.getLastMessage());
+                    else
+                        mLastMessageTextView.setText(R.string.photo_message_chat);
+                    if (chat.getSenderUID() != null && !chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())) {
+                        mSenderUID = chat.getSenderUID();
+                        if (chat.getCounter() == 0) {
+                            mMessageCounterTextView.setVisibility(View.GONE);
+                        } else {
+                            if (mMessageCounterTextView.getVisibility() == View.GONE) {
+                                mMessageCounterTextView.setVisibility(View.VISIBLE);
+                            }
+                            mMessageCounterTextView.setText(String.valueOf(chat.getCounter()));
+                            mMessageCounterTextView.setBackground(itemView.getResources().getDrawable(R.drawable.rounded_textview));
+                        }
+                    } else {
+                        mMessageCounterTextView.setVisibility(View.GONE);
+                    }
+                }
+            }
+           /* mValueEventListener = new ValueEventListener() {
 
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Chat chat = dataSnapshot.getValue(Chat.class);
-                    if(chat != null) {
-                        Calendar cal1 = Calendar.getInstance();
-                        cal1.setTimeInMillis(chat.getTimestamp() * 1000);
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-                        mTimetampTextView.setText(dateFormat.format(cal1.getTime()));
-                        if(chat.getIsText().equals("true"))
-                            mLastMessageTextView.setText(chat.getLastMessage());
-                        else
-                            mLastMessageTextView.setText(R.string.photo_message_chat);
-                        if (chat.getSenderUID() != null && !chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())) {
-                            mSenderUID = chat.getSenderUID();
-                            if (chat.getCounter() == 0) {
-                                mMessageCounterTextView.setVisibility(View.GONE);
-                            } else {
-                                if (mMessageCounterTextView.getVisibility() == View.GONE) {
-                                    mMessageCounterTextView.setVisibility(View.VISIBLE);
-                                }
-                                mMessageCounterTextView.setText(String.valueOf(chat.getCounter()));
-                                mMessageCounterTextView.setBackground(itemView.getResources().getDrawable(R.drawable.rounded_textview));
-                            }
-                        }else{
-                            mMessageCounterTextView.setVisibility(View.GONE);
-                        }
-                    }
+
                 }
 
                 @Override
@@ -135,14 +154,14 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                 }
             };
 
-            mChatsReference.child(chatID).addValueEventListener(mValueEventListener);
+            mChatsReference.child(conversation.getChatId()).addValueEventListener(mValueEventListener);*/
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ChatActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("ChatID", chatID);
+                    intent.putExtra("ChatID", conversation.getChatId());
                     intent.putExtra("Username", user.getUsername());
                     intent.putExtra("ImageURL", user.getPhotoURL());
                     intent.putExtra("BookID", mBookID);
