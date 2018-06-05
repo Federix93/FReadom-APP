@@ -294,4 +294,12 @@
     <string name="homepage_select_position">Selezionare una posizione per continuare</string>
     <string name="homepage_no_results">Nessun libro trovato nelle vicinanze</string>
     <string name="homepage_nearby">Nelle vicinanze</string>
+    <string name="attention">Attenzione</string>
+    <string name="already_lent_to_another_user_message">Questo libro è stato già prestato ad un altro utente. Dovrebbe tornare disponibile il %1$s</string>
+
+    <string name="delete_request">Cancella richiesta</string>
+    <string name="confirm_request_delete">Vuoi davvero cancellare?</string>
+    <string name="confirm_request_delete_message">Confermi di voler cancellare la richiesta? Anche la chat associata sarà cancellata</string>
+    <string name="cancellation_in_progress">Eliminazione in corso...</string>
+
 </resources>

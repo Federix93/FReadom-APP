@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerFragmentLoansAdapter;
@@ -24,10 +25,15 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.view.View.GONE;
+
 public class LentFragmentItem extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecyclerFragmentLoansAdapter mAdapter;
+    LinearLayout mNoLoansLayout;
+    LinearLayout mNoRequestRecLayout;
+    LinearLayout mNoRequestDoneLayout;
 
     public LentFragmentItem() {
     }
@@ -37,6 +43,9 @@ public class LentFragmentItem extends Fragment {
         View view = inflater.inflate(R.layout.recycler_fragments_content, container, false);
 
         mRecyclerView = view.findViewById(R.id.recycler_fragment_content);
+        mNoLoansLayout = view.findViewById(R.id.no_loans);
+        mNoRequestRecLayout = view.findViewById(R.id.no_request_rec);
+        mNoRequestDoneLayout = view.findViewById(R.id.no_request_done);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
 
@@ -51,6 +60,10 @@ public class LentFragmentItem extends Fragment {
             @Override
             public void onChanged(@Nullable List<Book> books) {
                 if(books != null) {
+                    mNoLoansLayout.setVisibility(GONE);
+                    mNoRequestRecLayout.setVisibility(View.GONE);
+                    mNoRequestDoneLayout.setVisibility(GONE);
+
                     final List<Book> listBooks = new ArrayList<>();
                     final List<User> otherUsers = new ArrayList<>();
                     for (final Book b : books) {
@@ -60,7 +73,8 @@ public class LentFragmentItem extends Fragment {
                                 listBooks.add(b);
                                 otherUsers.add(dataSnapshot.getValue(User.class));
                                 mAdapter.setItems(listBooks, otherUsers);
-                                mAdapter.notifyDataSetChanged();                            }
+                                mAdapter.notifyDataSetChanged();
+                            }
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
@@ -71,6 +85,12 @@ public class LentFragmentItem extends Fragment {
                 }
             }
         });
+        if (mAdapter.getItemCount() == 0)
+        {
+            mNoLoansLayout.setVisibility(View.VISIBLE);
+            mNoRequestRecLayout.setVisibility(GONE);
+            mNoRequestDoneLayout.setVisibility(GONE);
+        }
         return view;
     }
 
