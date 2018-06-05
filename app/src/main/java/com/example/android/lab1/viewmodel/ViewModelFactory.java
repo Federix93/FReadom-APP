@@ -3,7 +3,10 @@ package com.example.android.lab1.viewmodel;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
+import com.example.android.lab1.model.Book;
+import com.example.android.lab1.model.User;
 import com.google.firebase.firestore.GeoPoint;
 
 public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
