@@ -21,6 +21,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -49,6 +50,7 @@ import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.BooksViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
+import com.example.android.lab1.viewmodel.YourLibraryViewModel;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
@@ -75,6 +77,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 public class TabFragment extends Fragment {
@@ -105,7 +108,7 @@ public class TabFragment extends Fragment {
     private TextView mTitleFirstRecyclerView;
     private RecyclerView mFirstRecyclerView;
     private RecyclerView mSecondRecyclerView;
-    private LiveData<List<Book>> firstLiveData;
+    private LiveData<List<Book>> mFirstLiveData;
     private int mBookLimitHomepage;
     //LoanFragment variables
     //RequestsFragment variables
@@ -118,6 +121,7 @@ public class TabFragment extends Fragment {
     private View mTitleSecondRecyclerView;
     private TextView mNoInfoPlaceholder;
     private View mNoInfoLayout;
+    private LiveData<List<Book>> mSecondLiveData;
 
     public static TabFragment newInstance(int fragmentTab) {
 
@@ -481,19 +485,21 @@ public class TabFragment extends Fragment {
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
         if (mFirebaseAuth.getUid() != null) {
-            BooksViewModel booksViewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(BooksViewModel.class);
-            booksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
-                @Override
-                public void onChanged(@Nullable List<Book> books) {
-                    if (books != null) {
-                        updateListOfBooks(books);
-                        if (mYourLibraryAdvice.getVisibility() == View.VISIBLE)
-                            mYourLibraryAdvice.setVisibility(View.GONE);
-                    } else {
-                        mYourLibraryAdvice.setVisibility(View.VISIBLE);
-                    }
-                }
-            });
+            YourLibraryViewModel yourLibraryViewModel = ViewModelProviders.of(this,
+                    new ViewModelFactory(mFirebaseAuth.getUid())).get(YourLibraryViewModel.class);
+            yourLibraryViewModel.getSnapshotLiveData()
+                    .observe(this, new Observer<List<Book>>() {
+                        @Override
+                        public void onChanged(@Nullable List<Book> books) {
+                            if (books != null) {
+                                updateListOfBooks(books);
+                                if (mYourLibraryAdvice.getVisibility() == View.VISIBLE)
+                                    mYourLibraryAdvice.setVisibility(View.GONE);
+                            } else {
+                                mYourLibraryAdvice.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    });
         } else {
             mYourLibraryAdvice.setVisibility(View.VISIBLE);
         }
@@ -513,6 +519,8 @@ public class TabFragment extends Fragment {
             case Constants.PLAY_SERVICES_RESOLUTION_REQUEST:
                 if (resultCode == RESULT_OK)
                     makePositionRequest();
+                else if (resultCode == RESULT_CANCELED)
+                    Utilities.enableLoc(getActivity());
                 break;
             case Constants.ADDRESS_SEARCH_BAR:
                 if (resultCode == RESULT_OK && getContext() != null) {
@@ -633,24 +641,27 @@ public class TabFragment extends Fragment {
 
     private void queryDatabaseWithViewModel() {
         if (getActivity() != null) {
-            booksViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(mCurrentPosition)).get(BooksViewModel.class);
-            firstLiveData = booksViewModel.getBooksFirstRecycler();
+            booksViewModel = ViewModelProviders.of(getActivity(), new ViewModelFactory(mCurrentPosition,
+                    mFirstRecyclerDistance,
+                    mSecondRecyclerDistance,
+                    mBookLimitHomepage)).get(BooksViewModel.class);
+            mFirstLiveData = booksViewModel.getBooksFirstRecycler();
 
-            firstLiveData.observe(getActivity(), new Observer<List<Book>>() {
+            mFirstLiveData.observe(this, new Observer<List<Book>>() {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
                     updateLayoutFirstRecyclerView(books);
-                    firstLiveData.removeObserver(this);
+                    mFirstLiveData.removeObserver(this);
                 }
             });
 
-            final LiveData<List<Book>> secondLiveData = booksViewModel.getBooksSecondRecycler();
+            mSecondLiveData = booksViewModel.getBooksSecondRecycler();
 
-            secondLiveData.observe(getActivity(), new Observer<List<Book>>() {
+            mSecondLiveData.observe(this, new Observer<List<Book>>() {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
                     updateLayoutSecondRecyclerView(books);
-                    secondLiveData.removeObserver(this);
+                    mSecondLiveData.removeObserver(this);
                 }
             });
         }
@@ -658,12 +669,11 @@ public class TabFragment extends Fragment {
 
     public void updateLayoutSecondRecyclerView(List<Book> books) {
         if (books != null && !books.isEmpty()) {
-            mSecondOtherTextView.setVisibility(View.VISIBLE);
-            mSecondRecyclerView.setVisibility(View.VISIBLE);
-            mTitleSecondRecyclerView.setVisibility(View.VISIBLE);
             mGenreFilterButton.setVisibility(View.VISIBLE);
+            mSecondOtherTextView.setVisibility(View.VISIBLE);
+            mTitleSecondRecyclerView.setVisibility(View.VISIBLE);
+            mSecondRecyclerView.setVisibility(View.VISIBLE);
             mNoInfoLayout.setVisibility(View.GONE);
-
         } else {
             mSecondRecyclerView.setVisibility(View.GONE);
             mTitleSecondRecyclerView.setVisibility(View.GONE);
@@ -684,8 +694,11 @@ public class TabFragment extends Fragment {
             mSecondRecyclerBookAdapter = new RecyclerBookAdapter(books);
             mSecondRecyclerView.setAdapter(mSecondRecyclerBookAdapter);
         } else {
+            final List<Book> old = mSecondRecyclerBookAdapter.getBooks();
+            final List<Book> finalBooks = books;
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallback(old, finalBooks));
             mSecondRecyclerBookAdapter.updateItems(books);
-            mSecondRecyclerBookAdapter.notifyDataSetChanged();
+            diffResult.dispatchUpdatesTo(mSecondRecyclerBookAdapter);
 
             mSecondRecyclerView.smoothScrollToPosition(0);
         }
@@ -920,6 +933,40 @@ public class TabFragment extends Fragment {
             return null;
         }
 
+    }
+
+    private class DiffCallback extends DiffUtil.Callback {
+        private List<Book> old;
+        private List<Book> finalBooks;
+
+        public DiffCallback(List<Book> old, List<Book> finalBooks) {
+            this.old = old;
+            this.finalBooks = finalBooks;
+        }
+
+        @Override
+        public int getOldListSize() {
+            return old.size();
+        }
+
+        @Override
+        public int getNewListSize() {
+            return finalBooks.size();
+        }
+
+        @Override
+        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+            return old.get(oldItemPosition) == finalBooks.get(newItemPosition);
+        }
+
+        @Override
+        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+            Book oldBook = old.get(oldItemPosition);
+            Book newBook = finalBooks.get(newItemPosition);
+            return oldBook.getTitle().equals(newBook.getTitle()) &&
+                    oldBook.getAuthors().equals(newBook.getAuthors()) &&
+                    oldBook.getUid().equals(newBook.getUid());
+        }
     }
 }
 

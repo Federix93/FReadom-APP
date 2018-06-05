@@ -21,42 +21,34 @@ import java.util.List;
 
 public class BooksViewModel extends ViewModel {
 
-    private Query BOOK_REF_1;
-    private Query BOOK_REF_2;
-    private Query BOOK_REF_3;
-
-    private FirebaseQueryLiveDataFirestore liveData;
     private FirebaseQueryLiveDataFirestore liveFirstRecyclerView;
     private FirebaseQueryLiveDataFirestore liveSecondRecyclerView;
-    private final MediatorLiveData<List<Book>> bookLiveData = new MediatorLiveData<>();
     private final MediatorLiveData<List<Book>> booksFirstRecyclerLiveData = new MediatorLiveData<>();
     private final MediatorLiveData<List<Book>> booksSecondRecyclerLiveData = new MediatorLiveData<>();
 
-    public BooksViewModel(String uid){
-        BOOK_REF_3 = FirebaseFirestore.getInstance().collection("books").whereEqualTo("uid", uid);
-        liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF_3);
-        fetchData();
-    }
+    private int mLimit;
 
-    public BooksViewModel(){
-
-    }
-
-    public BooksViewModel(GeoPoint geoPoint){
-
+    public BooksViewModel(GeoPoint geoPoint, int firstDistance, int secondDistance, int limit) {
+        mLimit = limit;
         GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
-                (double)15000);
-        BOOK_REF_1 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", firstGeoPoints[0])
-                .whereLessThan("geoPoint", firstGeoPoints[1]).limit(30);
-        liveFirstRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF_1);
+                (double) firstDistance);
+        Query query1 = FirebaseFirestore.getInstance()
+                .collection("books")
+                .whereGreaterThan("geoPoint", firstGeoPoints[0])
+                .whereLessThan("geoPoint", firstGeoPoints[1])
+                .whereEqualTo("lentTo", null);
+        liveFirstRecyclerView = new FirebaseQueryLiveDataFirestore(query1);
         fetchBooksOnFirstRecycler();
         GeoPoint[] secondGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
-                (double) 15000);
-        BOOK_REF_2 = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", secondGeoPoints[0])
-                .whereLessThan("geoPoint", secondGeoPoints[1]).limit(30);
-        liveSecondRecyclerView = new FirebaseQueryLiveDataFirestore(BOOK_REF_2);
+                (double) secondDistance);
+        Query query2 = FirebaseFirestore.getInstance()
+                .collection("books")
+                .whereGreaterThan("geoPoint", secondGeoPoints[0])
+                .whereLessThan("geoPoint", secondGeoPoints[1])
+                .whereEqualTo("lentTo", null);
+        liveSecondRecyclerView = new FirebaseQueryLiveDataFirestore(query2);
         fetchBooksOnSecondRecycler();
     }
 
@@ -70,9 +62,15 @@ public class BooksViewModel extends ViewModel {
                         @Override
                         public void run() {
                             List<Book> books = new ArrayList<>();
+                            int valid = 0;
+                            String uid = FirebaseAuth.getInstance().getUid();
                             for(Book b : queryDocumentSnapshots.toObjects(Book.class)){
-                                if(!b.getUid().equals(FirebaseAuth.getInstance().getUid()) && b.getLentTo() == null){
+                                if (uid == null || !b.getUid().equals(uid)) {
                                     books.add(b);
+                                    valid++;
+                                }
+                                if (valid > mLimit) {
+                                    break;
                                 }
                             }
                             booksFirstRecyclerLiveData.postValue(books);
@@ -94,19 +92,25 @@ public class BooksViewModel extends ViewModel {
                         @Override
                         public void run() {
                             List<Book> books = new ArrayList<>();
+                            int valid = 0;
+                            String uid = FirebaseAuth.getInstance().getUid();
                             for(Book b : queryDocumentSnapshots.toObjects(Book.class)){
-                                if(!b.getUid().equals(FirebaseAuth.getInstance().getUid()) && b.getLentTo() == null){
+                                if (uid == null || !b.getUid().equals(uid)) {
                                     books.add(b);
+                                    valid++;
+                                }
+                                if (valid > mLimit) {
+                                    break;
                                 }
                             }
                             Book temp;
                             for (int i = 0; i < books.size() - 1; i++) {
-                                for (int j = i + 1; j < books.size(); j++) {
+                                for (int i1 = i + 1; i1 < books.size(); i1++) {
                                     if (books.get(i).getTimeInserted().getTime() <
-                                            books.get(j).getTimeInserted().getTime()) {
+                                            books.get(i1).getTimeInserted().getTime()) {
                                         temp = books.get(i);
-                                        books.set(i, books.get(j));
-                                        books.set(j, temp);
+                                        books.set(i, books.get(i1));
+                                        books.set(i1, temp);
                                     }
                                 }
                             }
@@ -121,34 +125,11 @@ public class BooksViewModel extends ViewModel {
     }
 
     @NonNull
-    public LiveData<List<Book>> getSnapshotLiveData(){
-        return bookLiveData;
-    }
-    @NonNull
     public LiveData<List<Book>> getBooksFirstRecycler(){
         return booksFirstRecyclerLiveData;
     }
     @NonNull
     public LiveData<List<Book>> getBooksSecondRecycler(){
         return booksSecondRecyclerLiveData;
-    }
-
-
-    private void fetchData(){
-        bookLiveData.addSource(liveData, new Observer<QuerySnapshot>() {
-            @Override
-            public void onChanged(@Nullable final QuerySnapshot queryDocumentSnapshots) {
-                if(queryDocumentSnapshots != null){
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            bookLiveData.postValue(queryDocumentSnapshots.toObjects(Book.class));
-                        }
-                    }).start();
-                }else{
-                    bookLiveData.setValue(null);
-                }
-            }
-        });
     }
 }
