@@ -361,7 +361,6 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     android:textColor="@color/black"
                     android:textSize="18sp"
-                    android:text="Vincenzo Savarese"
                     android:fontFamily="sans-serif"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"

@@ -114,6 +114,8 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openFirebaseUI();
+                mLoginButton.setVisibility(View.GONE);
+                mWithoutLoginButton.setVisibility(View.GONE);
             }
         });
 
@@ -149,6 +151,8 @@ public class SignInActivity extends AppCompatActivity {
                 final FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
                     if (firebaseUser.getEmail() != null) {
+                        final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(SignInActivity.this);
+                        progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_signing_in);
                         final DocumentReference userDocumentReference = mFirebaseFirestore.collection("users").document(firebaseUser.getUid());
                         FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<User>() {
                             @Nullable
@@ -160,7 +164,6 @@ public class SignInActivity extends AppCompatActivity {
                                     // set image
                                     if (user == null)
                                         user = new User();
-
                                     if (user.getImage() == null)
                                         user.setImage(firebaseUser.getPhotoUrl() != null ?
                                                 firebaseUser.getPhotoUrl().toString() : null);
@@ -180,8 +183,6 @@ public class SignInActivity extends AppCompatActivity {
                                 } catch (FirebaseFirestoreException e) {
                                     user = null;
                                 }
-
-
                                 return user;
                             }
 
@@ -196,19 +197,15 @@ public class SignInActivity extends AppCompatActivity {
                                     String userID = mFirebaseAuth.getUid();
                                     setupAlgolia();
                                     loadUserOnAlgolia(userID);
-                                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(SignInActivity.this);
-                                    progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_signing_in);
                                     com.example.android.lab1.model.chatmodels.User user =
                                             new com.example.android.lab1.model.chatmodels.User(mUser.getUsername(), mUser.getImage(), FirebaseInstanceId.getInstance().getToken());
                                     usersReference.child(mFirebaseAuth.getUid()).setValue(user, new DatabaseReference.CompletionListener() {
                                         @Override
                                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                                             if (databaseError == null) {
+                                                openHomePageActivity();
                                                 if (progressDialogHolder.isProgressDialogShowing())
                                                     progressDialogHolder.dismissDialog();
-
-                                                openHomePageActivity();
-
                                             } else {
                                                 if (progressDialogHolder.isProgressDialogShowing())
                                                     progressDialogHolder.dismissDialog();
@@ -227,18 +224,13 @@ public class SignInActivity extends AppCompatActivity {
                     return;
                 }
                 if (response.getError() != null) {
+                    mLoginButton.setVisibility(View.VISIBLE);
+                    mWithoutLoginButton.setVisibility(View.VISIBLE);
                 }
+                mLoginButton.setVisibility(View.VISIBLE);
+                mWithoutLoginButton.setVisibility(View.VISIBLE);
             }
         }
-    }
-
-    private boolean isEmailAndPasswordProvider() {
-        for (UserInfo userInfo : mFirebaseAuth.getCurrentUser().getProviderData()) {
-            if (userInfo.getProviderId().equals("password")) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void setupAlgolia() {

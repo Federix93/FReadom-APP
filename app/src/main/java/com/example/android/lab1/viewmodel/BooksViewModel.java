@@ -21,8 +21,9 @@ import java.util.List;
 
 public class BooksViewModel extends ViewModel {
 
-    private static Query BOOK_REF_1;
-    private static Query BOOK_REF_2;
+    private Query BOOK_REF_1;
+    private Query BOOK_REF_2;
+    private Query BOOK_REF_3;
 
     private FirebaseQueryLiveDataFirestore liveData;
     private FirebaseQueryLiveDataFirestore liveFirstRecyclerView;
@@ -32,8 +33,8 @@ public class BooksViewModel extends ViewModel {
     private final MediatorLiveData<List<Book>> booksSecondRecyclerLiveData = new MediatorLiveData<>();
 
     public BooksViewModel(String uid){
-        BOOK_REF_1 = FirebaseFirestore.getInstance().collection("books").whereEqualTo("uid", uid);
-        liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF_1);
+        BOOK_REF_3 = FirebaseFirestore.getInstance().collection("books").whereEqualTo("uid", uid);
+        liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF_3);
         fetchData();
     }
 
@@ -100,12 +101,12 @@ public class BooksViewModel extends ViewModel {
                             }
                             Book temp;
                             for (int i = 0; i < books.size() - 1; i++) {
-                                for (int i1 = i + 1; i1 < books.size(); i1++) {
+                                for (int j = i + 1; j < books.size(); j++) {
                                     if (books.get(i).getTimeInserted().getTime() <
-                                            books.get(i1).getTimeInserted().getTime()) {
+                                            books.get(j).getTimeInserted().getTime()) {
                                         temp = books.get(i);
-                                        books.set(i, books.get(i1));
-                                        books.set(i1, temp);
+                                        books.set(i, books.get(j));
+                                        books.set(j, temp);
                                     }
                                 }
                             }

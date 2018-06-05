@@ -17,11 +17,14 @@
 
 
     <style name="LoginTheme" parent="FirebaseUI">
+
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@drawable/liberty_statue_background</item>
         <item name="colorControlNormal">@color/colorAccent</item>
         <item name="colorControlActivated">@color/colorAccent</item>
