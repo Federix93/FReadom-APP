@@ -134,7 +134,7 @@ class ReviewActivity : AppCompatActivity() {
                                 timestamp = null)
                         transaction[newRatingReference] = newReview
                         val currentRating = user.rating ?: 0.0f
-                        var numRatings = user.numRatings
+                        val numRatings = user.numRatings
                         newRating = (currentRating * numRatings + newReview.fiveStarRating) /
                                 (numRatings + 1)
                         user.rating = newRating
@@ -150,8 +150,8 @@ class ReviewActivity : AppCompatActivity() {
                     val newRatingJSON = JSONObject()
                             .put("rating", "%.1f".format(newRating))
                     val userIndex = client.getIndex(this.ALGOLIA_USERS_INDEX_NAME)
-                    userIndex.saveObjectAsync(newRatingJSON, mReviewedId, { jsonObject: JSONObject,
-                                                                            algoliaException: AlgoliaException ->
+                    userIndex.saveObjectAsync(newRatingJSON, mReviewedId, { _: JSONObject,
+                                                                            _: AlgoliaException ->
 
                     })
                     setResult(RESULT_OK)
