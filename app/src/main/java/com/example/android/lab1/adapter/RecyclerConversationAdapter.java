@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     private DatabaseReference mChatsReference;
     private String mBookID;
     private String mSenderUID;
+    private List<String> mUserIDs;
     private int positionsChecked;
     RecyclerView mRecyclerView;
     Toolbar mToolbar;
@@ -52,14 +55,36 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         mBookID = bookID;
         positionsChecked = -1;
         mToolbar = toolbar;
+        mUserIDs = new ArrayList<>();
     }
 
-    public void setItems(String chatID, User user) {
+    public void setItems(String chatID, User user, String userIDs) {
+        deselectItem();
         mMap.put(chatID, user);
+        mUserIDs.add(userIDs);
     }
 
     public void setPositionsChecked(int position){
         positionsChecked = position;
+    }
+
+    public void deleteChat(RecyclerView.OnItemTouchListener listener) {
+        Object[] keys = mMap.keySet().toArray();
+        String chatID = (String) keys[positionsChecked];
+        String otherUserID = mUserIDs.get(positionsChecked);
+        if (chatID != null && otherUserID != null) {
+            positionsChecked = -1;
+            mToolbar.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            mToolbar.setTitle(R.string.conversations_title);
+            mMap.remove(chatID);
+            notifyItemRemoved(positionsChecked);
+            mRecyclerView.removeOnItemTouchListener(listener);
+            FirebaseDatabase.getInstance().getReference("chats").child(chatID).removeValue();
+            FirebaseDatabase.getInstance().getReference("conversations").child(mBookID).child(chatID).removeValue();
+            FirebaseDatabase.getInstance().getReference("openedChats").child(mBookID).child(FirebaseAuth.getInstance().getUid()).child(otherUserID).removeValue();
+            FirebaseFirestore.getInstance().collection("requestsDone").document(otherUserID).collection("books").document(mBookID).delete();
+
+        }
     }
 
     public void deselectItem(){
@@ -68,6 +93,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             viewSelected.setBackgroundColor(Color.parseColor("#FFFFFF"));
             mToolbar.setBackgroundColor(Color.parseColor("#FFFFFF"));
             mToolbar.setTitle(R.string.conversations_title);
+            mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+            mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(false);
             positionsChecked = -1;
         }
     }
@@ -173,8 +200,10 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         View viewSelected = mRecyclerView.getChildAt(positionsChecked);
                         viewSelected.setBackgroundColor(Color.parseColor("#FFFFFF"));
                         mToolbar.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
                         mToolbar.setTitle(R.string.conversations_title);
                         positionsChecked = -1;
+                        mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(false);
                         return;
                     }
                     Intent intent = new Intent(v.getContext(), ChatActivity.class);
@@ -198,6 +227,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     itemView.setBackgroundColor(Color.parseColor("#bdbdbd"));
                     mToolbar.setTitle("Elimina");
                     mToolbar.setBackgroundColor(Color.parseColor("#808080"));
+                    mToolbar.setNavigationIcon(R.drawable.ic_close_black_24dp);
+                    mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(true);
                     return true;
                     }
             });

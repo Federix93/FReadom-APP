@@ -14,9 +14,13 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
@@ -49,7 +53,7 @@ public class ConversationsActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     private RecyclerConversationAdapter mAdapter;
     private ShimmerFrameLayout mShimmerViewContainer;
-    ChildEventListener childEventListener;
+    RecyclerView.OnItemTouchListener listener;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -62,11 +66,22 @@ public class ConversationsActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.toolbar_conversations_activity);
         mToolbar.setTitle(R.string.conversations_title);
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+            }
+        });
+        mToolbar.inflateMenu(R.menu.conversations_menu);
+        mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(false);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (mAdapter != null) {
+                    if (listener != null)
+                        mAdapter.deleteChat(listener);
+                }
+                return true;
             }
         });
         mShimmerViewContainer = findViewById(R.id.shimmer_view_container);
@@ -79,7 +94,7 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.setNestedScrollingEnabled(true);
         mAdapter = new RecyclerConversationAdapter(mBookID, mToolbar);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+        listener = new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent motionEvent) {
                 if (motionEvent.getAction() != MotionEvent.ACTION_UP) {
@@ -101,7 +116,9 @@ public class ConversationsActivity extends AppCompatActivity {
             public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
 
             }
-        });
+        };
+
+        mRecyclerView.addOnItemTouchListener(listener);
 
         final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
@@ -109,34 +126,36 @@ public class ConversationsActivity extends AppCompatActivity {
 
             ConversationsViewModel conversationsViewModel = ViewModelProviders.of(this, new ViewModelFactory(mBookID)).get(ConversationsViewModel.class);
             conversationsViewModel.getSnapshotLiveData().observe(this, new Observer<DataSnapshot>() {
-                        @Override
-                        public void onChanged(@android.support.annotation.Nullable DataSnapshot dataSnapshot) {
-                            final List<User> userList = new ArrayList<>();
-                            final List<DataSnapshot> snapshotList = new ArrayList<>();
-                            for (final DataSnapshot d : dataSnapshot.getChildren()) {
-                                snapshotList.add(d);
-                                FirebaseDatabase.getInstance().getReference("users").child((String)d.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        User user = dataSnapshot.getValue(User.class);
-                                        userList.add(user);
-                                        mAdapter.deselectItem();
-                                        mAdapter.setItems(snapshotList.get(userList.size() - 1).getKey(), user);
-                                        mAdapter.notifyDataSetChanged();
-                                        if(mShimmerViewContainer.isAnimationStarted()) {
-                                            mShimmerViewContainer.stopShimmerAnimation();
-                                            mShimmerViewContainer.setVisibility(View.GONE);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
+                @Override
+                public void onChanged(@android.support.annotation.Nullable DataSnapshot dataSnapshot) {
+                    final List<User> userList = new ArrayList<>();
+                    final List<DataSnapshot> snapshotList = new ArrayList<>();
+                    final List<String> userIDs = new ArrayList<>();
+                    for (final DataSnapshot d : dataSnapshot.getChildren()) {
+                        snapshotList.add(d);
+                        userIDs.add((String) d.getValue());
+                        FirebaseDatabase.getInstance().getReference("users").child((String) d.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                User user = dataSnapshot.getValue(User.class);
+                                userList.add(user);
+                                mAdapter.deselectItem();
+                                mAdapter.setItems(snapshotList.get(userList.size() - 1).getKey(), user, userIDs.get(userList.size() - 1));
+                                mAdapter.notifyDataSetChanged();
+                                if (mShimmerViewContainer.isAnimationStarted()) {
+                                    mShimmerViewContainer.stopShimmerAnimation();
+                                    mShimmerViewContainer.setVisibility(View.GONE);
+                                }
                             }
-                        }
-                    });
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
 
@@ -154,12 +173,27 @@ public class ConversationsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(mAdapter != null){
-            if(mAdapter.isSomeItemSelected()){
+        if (mAdapter != null) {
+            if (mAdapter.isSomeItemSelected()) {
                 mAdapter.deselectItem();
                 return;
             }
         }
         super.onBackPressed();
     }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.conversations_menu, menu);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        if (item.getItemId() == R.id.delete_chat) {
+//            Log.d("LULLO", "Clicked");
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 }
