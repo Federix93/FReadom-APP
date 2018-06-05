@@ -14,20 +14,19 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="@string/terms_and_conditions"
         android:id="@+id/terms_textView"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="32dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:layout_marginTop="24dp"/>
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="@string/license_open_source"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="32dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:id="@+id/license_textView"
-        android:layout_marginTop="24dp"/>
+        android:id="@+id/license_textView"/>
 
 </LinearLayout>
