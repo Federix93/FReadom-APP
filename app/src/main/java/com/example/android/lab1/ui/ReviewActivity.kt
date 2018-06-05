@@ -8,11 +8,12 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import android.support.v7.widget.Toolbar
-import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.algolia.search.saas.AlgoliaException
+import com.algolia.search.saas.Client
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.android.lab1.R
@@ -22,9 +23,16 @@ import com.example.android.lab1.utils.Utilities
 import com.firebase.ui.auth.ui.ProgressDialogHolder
 import com.google.firebase.firestore.FirebaseFirestore
 import io.techery.properratingbar.ProperRatingBar
+import org.json.JSONObject
 
 
 class ReviewActivity : AppCompatActivity() {
+
+    private val ALGOLIA_APP_ID = "2TZTD61TRP"
+    private val ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a"
+    private val ALGOLIA_BOOKS_INDEX_NAME = "books"
+    private val ALGOLIA_USERS_INDEX_NAME = "users"
+
     private lateinit var mRatingBar: ProperRatingBar
     private lateinit var mCommentEditText: EditText
     private lateinit var mConfirmButton: AppCompatButton
@@ -114,6 +122,7 @@ class ReviewActivity : AppCompatActivity() {
                 val newRatingReference = userReference.collection("ratings")
                         .document()
 
+                var newRating = 0f
                 firebaseFirestore.runTransaction { transaction ->
                     val user = transaction[userReference].toObject(User::class.java)
                     //val batch = firebaseFirestore.batch()
@@ -126,7 +135,7 @@ class ReviewActivity : AppCompatActivity() {
                         transaction[newRatingReference] = newReview
                         val currentRating = user.rating ?: 0.0f
                         var numRatings = user.numRatings
-                        val newRating = (currentRating * numRatings + newReview.fiveStarRating) /
+                        newRating = (currentRating * numRatings + newReview.fiveStarRating) /
                                 (numRatings + 1)
                         user.rating = newRating
                         user.numRatings++
@@ -137,6 +146,14 @@ class ReviewActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext,
                             "Recensione pubblicata!",
                             Toast.LENGTH_SHORT).show()
+                    val client = Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY)
+                    val newRatingJSON = JSONObject()
+                            .put("rating", "%.1f".format(newRating))
+                    val userIndex = client.getIndex(this.ALGOLIA_USERS_INDEX_NAME)
+                    userIndex.saveObjectAsync(newRatingJSON, mReviewedId, { jsonObject: JSONObject,
+                                                                            algoliaException: AlgoliaException ->
+
+                    })
                     setResult(RESULT_OK)
                     finish()
                 }.addOnFailureListener(failureFunction)
