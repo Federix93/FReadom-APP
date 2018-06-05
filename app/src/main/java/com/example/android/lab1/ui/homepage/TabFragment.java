@@ -7,7 +7,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,7 +23,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +48,6 @@ import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.BooksViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
-import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
@@ -64,30 +62,17 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
+import static android.view.View.GONE;
 
 public class TabFragment extends Fragment {
 
@@ -108,7 +93,7 @@ public class TabFragment extends Fragment {
     CustomSwipeRefresh mRefreshLayout;
     AppCompatButton mGenreFilterButton;
     AppCompatButton mPositionFilterButton;
-    TextView mYourLibraryAdvice;
+    LinearLayout mYourLibraryAdviceLayout;
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
@@ -362,7 +347,7 @@ public class TabFragment extends Fragment {
 
         fragmentContainer = view.findViewById(R.id.fragment_container);
         mYourLibraryRecyclerView = view.findViewById(R.id.rv_fragment_books_library);
-        mYourLibraryAdvice = view.findViewById(R.id.your_library_advice);
+        mYourLibraryAdviceLayout = view.findViewById(R.id.no_library);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
@@ -372,16 +357,13 @@ public class TabFragment extends Fragment {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
                     if (books != null) {
+                        if (books.size() > 1) {
+                            mYourLibraryAdviceLayout.setVisibility(GONE);
+                        }
                         updateListOfBooks(books);
-                        if (mYourLibraryAdvice.getVisibility() == View.VISIBLE)
-                            mYourLibraryAdvice.setVisibility(View.GONE);
-                    } else {
-                        mYourLibraryAdvice.setVisibility(View.VISIBLE);
                     }
                 }
             });
-        } else {
-            mYourLibraryAdvice.setVisibility(View.VISIBLE);
         }
     }
 

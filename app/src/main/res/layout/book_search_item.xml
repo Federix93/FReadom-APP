@@ -90,26 +90,25 @@
                         android:id="@+id/search_book_user_rating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="30dp"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginBottom="32dp"
+                        android:layout_marginStart="8dp"
                         android:fontFamily="sans-serif-light"
                         android:textSize="16sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.01"
-                        app:layout_constraintStart_toEndOf="@+id/search_book_user_picture" />
+                        card_view:layout_constraintBottom_toBottomOf="parent"
+                        card_view:layout_constraintStart_toEndOf="@+id/search_book_user_picture" />
 
                     <ImageView
                         android:id="@+id/imageView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="32dp"
+                        android:layout_marginBottom="36dp"
                         android:layout_marginStart="4dp"
-                        app:srcCompat="@drawable/ic_star_full_16dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/search_book_user_rating"/>
+                        app:layout_constraintStart_toEndOf="@+id/search_book_user_rating"
+                        app:srcCompat="@drawable/ic_star_full_16dp" />
 
                     <TextView
+                        android:id="@+id/textView2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="40dp"
@@ -125,11 +124,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="24dp"
-                        android:layout_marginStart="76dp"
+                        android:layout_marginEnd="4dp"
                         android:fontFamily="sans-serif-light"
                         android:textSize="12sp"
                         card_view:layout_constraintBottom_toBottomOf="parent"
-                        card_view:layout_constraintStart_toEndOf="@+id/imageView" />
+                        card_view:layout_constraintEnd_toStartOf="@+id/search_book_conditions_image"
+                        card_view:layout_constraintTop_toBottomOf="@+id/textView2" />
 
                     <ImageView
                         android:id="@+id/search_book_conditions_image"

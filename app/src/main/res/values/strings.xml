@@ -51,7 +51,7 @@
     <string name="verification_email_confirm">OK</string>
     <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
     <string name="confirm">Conferma</string>
-    <string name="loan_your_item">Libri presi in prestito</string>
+    <string name="loan_your_item">Libri dati in prestito</string>
     <string name="loan_other_book_item">Libri ricevuti</string>
     <string name="request_done_item">Effettuate</string>
     <string name="request_received_item">Ricevute</string>
@@ -158,7 +158,7 @@
     <string name="confirm_loan_text">Una volta confermato le altre chat aperte saranno cancellate. Questo libro non sarà più disponibile da altri utenti finché non terminerai il tuo prestito.</string>
     <string name="loan_button_info_title">Info</string>
     <string name="start_loan_button_info_text">Il pulsante inizia prestito serve per segnalare a tutti gli altri utenti che il libro è stato già prestato. Quando avrai raggiunto un accordo con l\'utente premi il pulsante \"Inizia prestito\"</string>
-    <string name="end_loan_button_info_text">Il pulsante di fine prestito deve essere premuto una volta che il libro è stato restituito. Una volta premuto il libro tornerà disponibile per nuove richieste</string>
+    <string name="end_loan_button_info_text">Il pulsante di fine prestito deve essere premuto una volta che il libro è stato restituito. Una volta premuto, il libro tornerà disponibile per nuove richieste</string>
     <string name="end_loan">Termina prestito</string>
     <string name="from_date">Da: %1$s</string>
     <string name="to_date">A: %1$s</string>
@@ -284,8 +284,9 @@
     <string name="load_review">Caricamento della recensione...</string>
     <string name="saving">Salvataggio...</string>
 
-    <string name="start">Inizia</string>
-    <string name="next">Avanti</string>
+    <string name="start">INIZIA</string>
+    <string name="next">AVANTI</string>
+    <string name="skip">SALTA</string>
 
     <string name="preview_not_available">Anteprima non disponibile</string>
 
@@ -298,5 +299,9 @@
     <string name="confirm_request_delete">Vuoi davvero cancellare?</string>
     <string name="confirm_request_delete_message">Confermi di voler cancellare la richiesta? Anche la chat associata sarà cancellata</string>
     <string name="cancellation_in_progress">Eliminazione in corso...</string>
+
+    <string name="no_loan_message">Non hai prestiti in corso. Una volta che avrai raggiunto l\'accordo con il proprietario del libro qui troverai tutte le informazioni per ricordarti quando restiture il libro</string>
+    <string name="no_req_rec_message">Non hai ancora ricevuto richieste per i tuoi libri. Più libri caricherai e più richieste potrai ricevere!</string>
+    <string name="no_req_done_message">Non hai ancora effettuato richieste. Contatta gli utenti tramite il tasto \'Richiedi\' e parla con loro per ricevere il tuo primo libro</string>
 
 </resources>
