@@ -293,7 +293,7 @@
     <string name="position_shared_preference_file">USER_POSITION</string>
     <string name="homepage_select_position">Selezionare una posizione per continuare</string>
     <string name="homepage_no_results">Nessun libro trovato nelle vicinanze</string>
-    <string name="homepage_nearby">Nelle vicinanze</string>
+    <string name="nearby_home_page">Nelle vicinanze</string>
     <string name="attention">Attenzione</string>
     <string name="already_lent_to_another_user_message">Questo libro è stato già prestato ad un altro utente. Dovrebbe tornare disponibile il %1$s</string>
 
