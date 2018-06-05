@@ -2,6 +2,7 @@ package com.example.android.lab1.ui.chat;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -12,6 +13,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -63,7 +66,7 @@ public class ConversationsActivity extends AppCompatActivity {
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                onBackPressed();
             }
         });
         mShimmerViewContainer = findViewById(R.id.shimmer_view_container);
@@ -74,8 +77,31 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
-        mAdapter = new RecyclerConversationAdapter(mBookID);
+        mAdapter = new RecyclerConversationAdapter(mBookID, mToolbar);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent motionEvent) {
+                if (motionEvent.getAction() != MotionEvent.ACTION_UP) {
+                    return false;
+                }
+                View child = mRecyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+                if (child == null) {
+                    mAdapter.deselectItem();
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
 
         final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
@@ -94,6 +120,7 @@ public class ConversationsActivity extends AppCompatActivity {
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         User user = dataSnapshot.getValue(User.class);
                                         userList.add(user);
+                                        mAdapter.deselectItem();
                                         mAdapter.setItems(snapshotList.get(userList.size() - 1).getKey(), user);
                                         mAdapter.notifyDataSetChanged();
                                         if(mShimmerViewContainer.isAnimationStarted()) {
@@ -123,5 +150,16 @@ public class ConversationsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         mShimmerViewContainer.startShimmerAnimation();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mAdapter != null){
+            if(mAdapter.isSomeItemSelected()){
+                mAdapter.deselectItem();
+                return;
+            }
+        }
+        super.onBackPressed();
     }
 }

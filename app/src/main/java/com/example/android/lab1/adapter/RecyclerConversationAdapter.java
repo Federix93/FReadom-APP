@@ -1,8 +1,10 @@
 package com.example.android.lab1.adapter;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +25,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -37,31 +41,55 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     private DatabaseReference mChatsReference;
     private String mBookID;
     private String mSenderUID;
+    private int positionsChecked;
+    RecyclerView mRecyclerView;
+    Toolbar mToolbar;
 
-    public RecyclerConversationAdapter(String bookID){
+    public RecyclerConversationAdapter(String bookID, Toolbar toolbar) {
         mMap = new HashMap<>();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mChatsReference = mFirebaseDatabase.getReference().child("chats");
         mBookID = bookID;
+        positionsChecked = -1;
+        mToolbar = toolbar;
     }
 
-    public void setItems(String chatID, User user){
+    public void setItems(String chatID, User user) {
         mMap.put(chatID, user);
     }
 
+    public void setPositionsChecked(int position){
+        positionsChecked = position;
+    }
+
+    public void deselectItem(){
+        if(positionsChecked != -1){
+            View viewSelected = mRecyclerView.getChildAt(positionsChecked);
+            viewSelected.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            mToolbar.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            mToolbar.setTitle(R.string.conversations_title);
+            positionsChecked = -1;
+        }
+    }
+    public boolean isSomeItemSelected(){
+        if(positionsChecked == -1)
+            return false;
+        return true;
+    }
 
     @NonNull
     @Override
     public ConversationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.recycler_conversation_item, parent, false);
+        mRecyclerView = (RecyclerView) parent;
         return new ConversationViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
         Object[] keys = mMap.keySet().toArray();
-        holder.bind(mMap.get(keys[position]), (String) keys[position]);
+        holder.bind(mMap.get(keys[position]), (String) keys[position], position);
     }
 
     @Override
@@ -69,7 +97,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         return mMap.size();
     }
 
-    class ConversationViewHolder extends RecyclerView.ViewHolder{
+
+    class ConversationViewHolder extends RecyclerView.ViewHolder {
 
         TextView mUserNameTextView;
         ImageView mUserProfileImageView;
@@ -87,7 +116,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mMessageCounterTextView = itemView.findViewById(R.id.message_counter_text_view);
         }
 
-        void bind(final User user, final String chatID){
+        void bind(final User user, final String chatID, final int position) {
             mUserNameTextView.setText(user.getUsername());
             if (user.getPhotoURL() == null) {
                 Glide.with(itemView.getContext()).load(R.mipmap.profile_picture)
@@ -98,17 +127,17 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         .apply(bitmapTransform(new CircleCrop()))
                         .into(mUserProfileImageView);
             }
-            mValueEventListener = new ValueEventListener(){
+            mValueEventListener = new ValueEventListener() {
 
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Chat chat = dataSnapshot.getValue(Chat.class);
-                    if(chat != null) {
+                    if (chat != null) {
                         Calendar cal1 = Calendar.getInstance();
                         cal1.setTimeInMillis(chat.getTimestamp() * 1000);
                         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
                         mTimetampTextView.setText(dateFormat.format(cal1.getTime()));
-                        if(chat.getIsText().equals("true"))
+                        if (chat.getIsText().equals("true"))
                             mLastMessageTextView.setText(chat.getLastMessage());
                         else
                             mLastMessageTextView.setText(R.string.photo_message_chat);
@@ -123,7 +152,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                                 mMessageCounterTextView.setText(String.valueOf(chat.getCounter()));
                                 mMessageCounterTextView.setBackground(itemView.getResources().getDrawable(R.drawable.rounded_textview));
                             }
-                        }else{
+                        } else {
                             mMessageCounterTextView.setVisibility(View.GONE);
                         }
                     }
@@ -140,6 +169,14 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if(positionsChecked != -1){
+                        View viewSelected = mRecyclerView.getChildAt(positionsChecked);
+                        viewSelected.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                        mToolbar.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                        mToolbar.setTitle(R.string.conversations_title);
+                        positionsChecked = -1;
+                        return;
+                    }
                     Intent intent = new Intent(v.getContext(), ChatActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.putExtra("ChatID", chatID);
@@ -149,6 +186,20 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     intent.putExtra("SenderUID", mSenderUID);
                     v.getContext().startActivity(intent);
                 }
+            });
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if(positionsChecked != -1) {
+                        return false;
+                    }
+                    positionsChecked = position;
+                    itemView.setBackgroundColor(Color.parseColor("#bdbdbd"));
+                    mToolbar.setTitle("Elimina");
+                    mToolbar.setBackgroundColor(Color.parseColor("#808080"));
+                    return true;
+                    }
             });
         }
     }
