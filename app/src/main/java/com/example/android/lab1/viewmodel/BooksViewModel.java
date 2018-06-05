@@ -6,6 +6,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.utils.Utilities;
@@ -33,6 +34,7 @@ public class BooksViewModel extends ViewModel {
     private final MediatorLiveData<List<Book>> booksSecondRecyclerLiveData = new MediatorLiveData<>();
 
     public BooksViewModel(String uid){
+        Log.d("LULLO", "YOUR LIBRARY RECYLCER VIEW");
         BOOK_REF_3 = FirebaseFirestore.getInstance().collection("books").whereEqualTo("uid", uid);
         liveData = new FirebaseQueryLiveDataFirestore(BOOK_REF_3);
         fetchData();
@@ -43,7 +45,7 @@ public class BooksViewModel extends ViewModel {
     }
 
     public BooksViewModel(GeoPoint geoPoint){
-
+        Log.d("LULLO", "FIRST RECYCLER VIEW");
         GeoPoint[] firstGeoPoints = Utilities.buildBoundingBox(geoPoint.getLatitude(),
                 geoPoint.getLongitude(),
                 (double)15000);
@@ -69,6 +71,7 @@ public class BooksViewModel extends ViewModel {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d("LULLO", "FETCH FIRST RECYCLER VIEW");
                             List<Book> books = new ArrayList<>();
                             for(Book b : queryDocumentSnapshots.toObjects(Book.class)){
                                 if(!b.getUid().equals(FirebaseAuth.getInstance().getUid()) && b.getLentTo() == null){
@@ -142,6 +145,7 @@ public class BooksViewModel extends ViewModel {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d("LULLO", "FETCH YOUR LIB RECYCLER VIEW");
                             bookLiveData.postValue(queryDocumentSnapshots.toObjects(Book.class));
                         }
                     }).start();

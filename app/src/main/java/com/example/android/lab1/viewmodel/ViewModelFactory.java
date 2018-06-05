@@ -3,6 +3,7 @@ package com.example.android.lab1.viewmodel;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.User;
@@ -39,11 +40,13 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
             return (T) new MessagesViewModel(params[0]);
         }
         else if(modelClass == BooksViewModel.class){
-            if(geoPoint != null)
+            if(geoPoint != null) {
+                Log.d("LULLO", "MODEL WITH GEO POINT CONSTRUCTOR");
                 return (T) new BooksViewModel(geoPoint);
-            if(params.length > 0)
+            }if(params.length > 0) {
+                Log.d("LULLO", "MODEL WITH PARAM CONSTRUCTOR");
                 return (T) new BooksViewModel(params[0]);
-            else
+            }else
                 return (T) new BooksViewModel();
         }
         else if(modelClass == UserViewModel.class){
