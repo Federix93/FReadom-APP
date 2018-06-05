@@ -54,7 +54,7 @@ public class RecyclerFragmentLoansAdapter extends RecyclerView.Adapter<RecyclerF
         mUsersOwner = users;
         this.isLent = lent;
     }
-
+//BACKUP
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
