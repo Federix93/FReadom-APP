@@ -6,21 +6,19 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -29,6 +27,7 @@ import android.widget.TextView;
 import com.example.android.lab1.NetworkReceiver;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Address;
+import com.example.android.lab1.utils.FetchAddressIntentService;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -46,11 +45,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.GeoPoint;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.lang.ref.WeakReference;
 
 public class PositionActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -59,14 +56,12 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     public static final String LON_KEY = "LONGITUDE";
 
     public static final String INTERNET_AVAILABLE_BROAD_KEY = "BROADCAST_INTERNET";
-
-    private static final int ADDRESS_SEARCH_BAR_REQUEST = 11;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 10;
-    private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 11;
     public static final String SEARCH_CITY_EXTRA = "SEARCH_CITIES_EXTRA";
     public static final String START_SEARCH = "START_SEARCH";
-
+    private static final int ADDRESS_SEARCH_BAR_REQUEST = 11;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 11;
     private Toolbar mToolbar;
     private GoogleMap mMap;
     private TextView mCurrentPositionTextView;
@@ -78,11 +73,9 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private Activity mSelf;
     private Address mResultAddress;
     private LocationManager manager;
-    private boolean mLocationSettingWasEnabled;
 
     private BroadcastReceiver mNetworkAvailable;
     private NetworkReceiver mNetworkReceiver;
-    private GeoCodingTask mCurrentlyExecuting;
     private Location mCurrentlyResolving;
     private Location mResolveLater;
 
@@ -150,23 +143,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         mSelf = this;
 
         // network listener setup
-        mNetworkAvailable = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // called on network updates
-                if (intent.hasExtra(NetworkReceiver.NETWORK_AVAILABILITY_RESULT) &&
-                        intent.getBooleanExtra(NetworkReceiver.NETWORK_AVAILABILITY_RESULT, false) == true) {
-                    // theres connection
-                    if (mResolveLater != null)
-                        resolveLocation(mResolveLater);
-                } else {
-                    if (mCurrentlyExecuting != null) {
-                        mCurrentlyExecuting.cancel(true);
-                        mResolveLater = mCurrentlyResolving;
-                    }
-                }
-            }
-        };
 
         mNetworkReceiver = new NetworkReceiver();
 
@@ -174,7 +150,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                mLocationSettingWasEnabled = true;
                 Utilities.enableLoc(PositionActivity.this);
             }
         } else {
@@ -190,15 +165,11 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mNetworkAvailable, new IntentFilter(INTERNET_AVAILABLE_BROAD_KEY));
-        registerReceiver(mNetworkReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mNetworkAvailable);
-        unregisterReceiver(mNetworkReceiver);
     }
 
     @Override
@@ -251,7 +222,6 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
             }
         }
     }
-
 
 
     @SuppressLint("MissingPermission")
@@ -384,82 +354,51 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     private void resolveLocation(Location loc) {
         // This method will change address mResultAddress var
         mCurrentlyResolving = loc;
-        mCurrentlyExecuting = new GeoCodingTask(mCurrentPositionTextView);
-        mCurrentlyExecuting.execute(new LatLng(loc.getLatitude(),
-                loc.getLongitude()));
+        mResultAddress = new Address("",
+                loc.getLatitude(),
+                loc.getLongitude());
+
+        Utilities.resolveSingleLocation(
+                new WeakReference<Activity>(PositionActivity.this),
+                new GeoPoint(loc.getLatitude(),
+                        loc.getLongitude()),
+                false,
+                new ResultReceiver(new Handler()) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        super.onReceiveResult(resultCode, resultData);
+                        if (resultCode == RESULT_OK) {
+                            if (mCurrentPositionTextView != null) {
+                                mCurrentPositionTextView.setText(
+                                        resultData.getString(FetchAddressIntentService.Constants.RESULT)
+                                );
+                                mResultAddress.setAddress(
+                                        resultData.getString(FetchAddressIntentService.Constants.RESULT)
+                                );
+                                if (mMap != null)
+                                    setMarker(new LatLng(
+                                            mResultAddress.getLat(),
+                                            mResultAddress.getLon()
+                                    ));
+                            }
+                        }
+                    }
+                }
+        );
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent i = new Intent(this, FetchAddressIntentService.class);
     }
 
     private void resolveLatLng(LatLng latLng) {
-        mCurrentlyExecuting = new GeoCodingTask(mCurrentPositionTextView);
-        mCurrentlyExecuting.execute(latLng);
+        Location location = new Location("fused");
+        location.setLatitude(latLng.latitude);
+        location.setLongitude(latLng.longitude);
+        resolveLocation(location);
     }
 
-    private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
-
-        private TextView mTarget;
-        private LatLng mParam;
-
-        public GeoCodingTask(TextView target) {
-            this.mTarget = target;
-        }
-
-        @Override
-        protected String doInBackground(LatLng... latLngs) {
-            if (latLngs.length > 0) {
-                mParam = latLngs[0];
-                Geocoder geocoder = new Geocoder(mSelf, Locale.getDefault());
-                List<android.location.Address> fromLocation = null;
-                try {
-                    if (!isCancelled())
-                        fromLocation = geocoder.getFromLocation(latLngs[0].latitude,
-                                latLngs[0].longitude,
-                                1);
-                    else
-                        return null;
-
-                } catch (IOException e) {
-                    return null;
-                }
-                if (fromLocation == null || fromLocation.size() == 0)
-                    return null;
-                else {
-                    if (mSearchCities) {
-                        return fromLocation.get(0).getLocality();
-                    } else {
-                        android.location.Address address = fromLocation.get(0);
-                        ArrayList<String> addressFragments = new ArrayList<String>();
-
-                        // Fetch the address lines using getAddressLine,
-                        // join them, and send them to the thread.
-                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
-                            addressFragments.add(address.getAddressLine(i));
-                        }
-                        return TextUtils.join(System.getProperty("line.separator"),
-                                addressFragments);
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            if (mTarget != null && !this.isCancelled()) {
-                if (s == null) {
-                    mTarget.setText(R.string.no_address_found);
-                } else {
-                    mTarget.setText(s);
-                    mCurrentlyExecuting = null;
-                    mCurrentlyResolving = null;
-                    mResolveLater = null;
-                    mResultAddress = new Address(s,
-                            mParam.latitude,
-                            mParam.longitude);
-                    setMarker(mParam);
-                }
-            }
-
-        }
-    }
 
 }

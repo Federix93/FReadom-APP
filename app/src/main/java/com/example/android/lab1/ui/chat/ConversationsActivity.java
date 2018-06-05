@@ -2,7 +2,6 @@ package com.example.android.lab1.ui.chat;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,15 +12,9 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerConversationAdapter;
@@ -93,13 +86,6 @@ public class ConversationsActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
-    }
-    //mConversations = new ArrayList<>();
-    //mAdapter = new RecyclerConversationAdapter(mConversations,
-    //  mBookID);
-    //mRecyclerView.setAdapter(mAdapter);
-        //mAdapter = new RecyclerConversationAdapter(mBookID, mToolbar);
-        //mRecyclerView.setAdapter(mAdapter);
         listener = new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent motionEvent) {
@@ -107,7 +93,7 @@ public class ConversationsActivity extends AppCompatActivity {
                     return false;
                 }
                 View child = mRecyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
-                if (child == null) {
+                if (child == null && mAdapter != null) {
                     mAdapter.deselectItem();
                     return true;
                 }
@@ -125,7 +111,7 @@ public class ConversationsActivity extends AppCompatActivity {
         };
 
         mRecyclerView.addOnItemTouchListener(listener);
-
+    }
 
     @Override
     protected void onStart() {
@@ -153,10 +139,11 @@ public class ConversationsActivity extends AppCompatActivity {
                                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                     if (userIds.contains(dataSnapshot.getKey())) {
                                         int i = userIds.indexOf(dataSnapshot.getKey());
-                                        mConversations.add(new Conversation(
+                                        Conversation conversation = new Conversation(
                                                 dataSnapshot.getValue(User.class),
-                                                chatIds.get(i)
-                                        ));
+                                                chatIds.get(i));
+                                        conversation.setUserId(userIds.get(i));
+                                        mConversations.add(conversation);
                                         if (mShimmerViewContainer.isAnimationStarted()) {
                                             mShimmerViewContainer.stopShimmerAnimation();
                                             mShimmerViewContainer.setVisibility(View.GONE);
@@ -164,7 +151,8 @@ public class ConversationsActivity extends AppCompatActivity {
                                     }
                                     if (mConversations.size() >= userIds.size()) {
                                         mAdapter = new RecyclerConversationAdapter(mConversations,
-                                                mBookID);
+                                                mBookID,
+                                                mToolbar);
                                         mRecyclerView.setAdapter(mAdapter);
 
                                         mChildEventListener = FirebaseDatabase.getInstance()

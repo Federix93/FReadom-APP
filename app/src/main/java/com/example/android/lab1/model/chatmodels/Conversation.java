@@ -5,6 +5,7 @@ public class Conversation {
     String mChatId;
     Long mTimestamp;
     Chat mChat;
+    String mUserId;
 
     public Conversation(User mUser, String mChatId) {
         this.mUser = mUser;
@@ -16,6 +17,14 @@ public class Conversation {
         this.mUser = mUser;
         this.mChatId = mChatId;
         this.mTimestamp = mTimestamp;
+    }
+
+    public String getUserId() {
+        return mUserId;
+    }
+
+    public void setUserId(String mUserId) {
+        this.mUserId = mUserId;
     }
 
     public Chat getChat() {
