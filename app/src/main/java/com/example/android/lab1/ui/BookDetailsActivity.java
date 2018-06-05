@@ -65,8 +65,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static android.view.View.GONE;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -413,7 +415,10 @@ public class BookDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if (task.isSuccessful()) {
-                                final DocumentReference reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+                                Map<String, Object> data = new HashMap<>();
+                                data.put("FieldFilled", true);
+                                mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).set(data);
+                                DocumentReference  reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
                                 reqDocRef.set(mBook, SetOptions.merge());
                                 final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
                                 reqReceivedDocRef.set(mBook, SetOptions.merge());
