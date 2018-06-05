@@ -217,6 +217,10 @@
     <string name="confirm_request_delete">Do you really want to delete?</string>
     <string name="confirm_request_delete_message">Really want to delete the request? The associated chat will be deleted too</string>
     <string name="cancellation_in_progress">Deletion in progress...</string>
+    <string name="help">Help</string>
+    <string name="terms_and_conditions">Terms e conditions</string>
+    <string name="license_open_source">Open source license</string>
+    <string name="informations">Informations</string>
 
 
 </resources>

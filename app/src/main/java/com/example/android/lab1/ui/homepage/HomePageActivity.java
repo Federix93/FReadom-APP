@@ -37,6 +37,7 @@ import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.BookPhoto;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.FavoriteBooksActivity;
+import com.example.android.lab1.ui.HelpActivity;
 import com.example.android.lab1.ui.HistoryActivity;
 import com.example.android.lab1.ui.LoadBookActivity;
 import com.example.android.lab1.ui.PhotoDetailActivity;
@@ -356,8 +357,10 @@ public class HomePageActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_settings) {
-            Toast.makeText(this, "Function not Implemented", Toast.LENGTH_SHORT).show();
+        if (id == R.id.nav_help) {
+            Intent intent = new Intent(this, HelpActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
         } else if (id == R.id.nav_profile) {
             if (FirebaseAuth.getInstance().getUid() == null) {
                 Intent intent = new Intent(getApplicationContext(), SignInPostponedActivity.class);

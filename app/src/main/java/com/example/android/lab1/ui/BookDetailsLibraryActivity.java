@@ -8,12 +8,15 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,15 +34,38 @@ import com.example.android.lab1.model.Condition;
 import com.example.android.lab1.ui.listeners.OnPhotoClickListener;
 import com.example.android.lab1.ui.listeners.OnPhotoClickListenerDefaultImpl;
 import com.example.android.lab1.utils.Utilities;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCanceledListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import static android.view.View.GONE;
 
-public class BookDetailsLibraryActivity extends AppCompatActivity{
+public class BookDetailsLibraryActivity extends AppCompatActivity {
 
     private Book mBook;
 
@@ -78,9 +104,9 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail_library);
 
-        if(getIntent().getExtras() != null) {
+        if (getIntent().getExtras() != null) {
             mBook = getIntent().getExtras().getParcelable("BookSelected");
-        }else{
+        } else {
             Toast.makeText(this, "Si è verificato un errore sconosciuto", Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -147,14 +173,14 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
         else {
             mSeparatorDescriptionView.setVisibility(GONE);
             mBookDescriptionLayout.setVisibility(GONE);
-        }if (mBook.getGeoPoint() != null) {
+        }
+        if (mBook.getGeoPoint() != null) {
             Location location = new Location("location");
             location.setLongitude(mBook.getGeoPoint().getLongitude());
             location.setLatitude(mBook.getGeoPoint().getLatitude());
 
             resolveCityLocation(location);
-        }
-        else
+        } else
             mBookPosition.setText(getResources().getString(R.string.position_not_available));
         if (!String.valueOf(mBook.getCondition()).isEmpty()) {
             mBookDetailCondition.setText(String.format(getResources().getString(R.string.condition), Condition.getCondition(getApplicationContext(), mBook.getCondition())));
@@ -197,6 +223,13 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
             }
         });
 
+        mDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                deleteBookFromDBs(v);
+            }
+        });
+
         mBookDescriptionLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -210,6 +243,72 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
 
     }
 
+    private void deleteBookFromDBs(final View v){
+        if (FirebaseAuth.getInstance() != null) {
+            final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
+            progressDialogHolder.showLoadingDialog(R.string.deleting_book_dialog);
+            final DocumentReference documentReference = FirebaseFirestore.getInstance().collection("books").document(mBook.getBookID());
+            documentReference.get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        final Book book = task.getResult().toObject(Book.class);
+                        if (book != null) {
+                            if (book.getLentTo() == null) {
+                                documentReference.delete();
+                                DocumentReference reqReceived = FirebaseFirestore.getInstance().collection("requestsReceived")
+                                        .document(FirebaseAuth.getInstance().getUid())
+                                        .collection("books")
+                                        .document(book.getBookID());
+                                reqReceived.delete();
+                                CollectionReference collectionReference = FirebaseFirestore.getInstance().collection("requestsDone");
+                                collectionReference.get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            for (DocumentSnapshot d : task.getResult().getDocuments()) {
+                                                d.getReference().collection("books").document(book.getBookID()).delete();
+                                            }
+                                        }
+                                    }
+                                });
+                                FirebaseDatabase.getInstance().getReference("conversations").child(book.getBookID()).removeValue();
+                                DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID())
+                                        .child(FirebaseAuth.getInstance().getUid());
+                                final List<String> chatIDs = new ArrayList<>();
+                                dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot d : dataSnapshot.getChildren()) {
+                                            chatIDs.add((String) d.getValue());
+                                        }
+                                        for (String s : chatIDs) {
+                                            FirebaseDatabase.getInstance().getReference("chats").child(s).removeValue();
+                                        }
+                                        if (progressDialogHolder.isProgressDialogShowing())
+                                            progressDialogHolder.dismissDialog();
+                                        FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID()).removeValue();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            } else {
+                                Snackbar.make(v, "Il libro è attualmente in prestito. Impossibile eliminare il libro", Snackbar.LENGTH_SHORT).show();
+                            }
+                        }
+                    } else {
+                        if (progressDialogHolder.isProgressDialogShowing())
+                            progressDialogHolder.dismissDialog();
+                        Toast.makeText(getApplicationContext(), "Qualcosa è andato storto", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+
     private void resolveCityLocation(Location location) {
         // This method will change address mResultAddress var
         mCurrentlyResolving = location;
@@ -217,6 +316,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity{
         mCurrentlyExecuting.execute(new LatLng(location.getLatitude(),
                 location.getLongitude()));
     }
+
     private class GeoCodingTask extends AsyncTask<LatLng, String, String> {
 
         private TextView mTarget;
