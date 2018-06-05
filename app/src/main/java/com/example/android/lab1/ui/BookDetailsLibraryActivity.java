@@ -226,69 +226,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                if (FirebaseAuth.getInstance() != null) {
-                    final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
-                    progressDialogHolder.showLoadingDialog(R.string.deleting_book_dialog);
-                    final DocumentReference documentReference = FirebaseFirestore.getInstance().collection("books").document(mBook.getBookID());
-                    documentReference.get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                final Book book = task.getResult().toObject(Book.class);
-                                if (book != null) {
-                                    if (book.getLentTo() == null) {
-                                        documentReference.delete();
-                                        DocumentReference reqReceived = FirebaseFirestore.getInstance().collection("requestsReceived")
-                                                .document(FirebaseAuth.getInstance().getUid())
-                                                .collection("books")
-                                                .document(book.getBookID());
-                                        reqReceived.delete();
-                                        CollectionReference collectionReference = FirebaseFirestore.getInstance().collection("requestsDone");
-                                        collectionReference.get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                if (task.isSuccessful()) {
-                                                    for (DocumentSnapshot d : task.getResult().getDocuments()) {
-                                                        d.getReference().collection("books").document(book.getBookID()).delete();
-                                                    }
-                                                }
-                                            }
-                                        });
-                                        FirebaseDatabase.getInstance().getReference("conversations").child(book.getBookID()).removeValue();
-                                        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID())
-                                                .child(FirebaseAuth.getInstance().getUid());
-                                        final List<String> chatIDs = new ArrayList<>();
-                                        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                for (DataSnapshot d : dataSnapshot.getChildren()) {
-                                                    chatIDs.add((String) d.getValue());
-                                                }
-                                                for (String s : chatIDs) {
-                                                    FirebaseDatabase.getInstance().getReference("chats").child(s).removeValue();
-                                                }
-                                                if (progressDialogHolder.isProgressDialogShowing())
-                                                    progressDialogHolder.dismissDialog();
-                                                FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID()).removeValue();
-                                            }
-
-                                            @Override
-                                            public void onCancelled(DatabaseError databaseError) {
-
-                                            }
-                                        });
-                                    } else {
-                                        Snackbar.make(v, "Il libro è attualmente in prestito. Impossibile eliminare il libro", Snackbar.LENGTH_SHORT).show();
-                                    }
-                                }
-                            } else {
-                                if (progressDialogHolder.isProgressDialogShowing())
-                                    progressDialogHolder.dismissDialog();
-                                Toast.makeText(getApplicationContext(), "Qualcosa è andato storto", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-                }
+                deleteBookFromDBs(v);
             }
         });
 
@@ -303,6 +241,72 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void deleteBookFromDBs(final View v){
+        if (FirebaseAuth.getInstance() != null) {
+            final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
+            progressDialogHolder.showLoadingDialog(R.string.deleting_book_dialog);
+            final DocumentReference documentReference = FirebaseFirestore.getInstance().collection("books").document(mBook.getBookID());
+            documentReference.get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        final Book book = task.getResult().toObject(Book.class);
+                        if (book != null) {
+                            if (book.getLentTo() == null) {
+                                documentReference.delete();
+                                DocumentReference reqReceived = FirebaseFirestore.getInstance().collection("requestsReceived")
+                                        .document(FirebaseAuth.getInstance().getUid())
+                                        .collection("books")
+                                        .document(book.getBookID());
+                                reqReceived.delete();
+                                CollectionReference collectionReference = FirebaseFirestore.getInstance().collection("requestsDone");
+                                collectionReference.get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            for (DocumentSnapshot d : task.getResult().getDocuments()) {
+                                                d.getReference().collection("books").document(book.getBookID()).delete();
+                                            }
+                                        }
+                                    }
+                                });
+                                FirebaseDatabase.getInstance().getReference("conversations").child(book.getBookID()).removeValue();
+                                DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID())
+                                        .child(FirebaseAuth.getInstance().getUid());
+                                final List<String> chatIDs = new ArrayList<>();
+                                dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot d : dataSnapshot.getChildren()) {
+                                            chatIDs.add((String) d.getValue());
+                                        }
+                                        for (String s : chatIDs) {
+                                            FirebaseDatabase.getInstance().getReference("chats").child(s).removeValue();
+                                        }
+                                        if (progressDialogHolder.isProgressDialogShowing())
+                                            progressDialogHolder.dismissDialog();
+                                        FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID()).removeValue();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            } else {
+                                Snackbar.make(v, "Il libro è attualmente in prestito. Impossibile eliminare il libro", Snackbar.LENGTH_SHORT).show();
+                            }
+                        }
+                    } else {
+                        if (progressDialogHolder.isProgressDialogShowing())
+                            progressDialogHolder.dismissDialog();
+                        Toast.makeText(getApplicationContext(), "Qualcosa è andato storto", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
     }
 
     private void resolveCityLocation(Location location) {
