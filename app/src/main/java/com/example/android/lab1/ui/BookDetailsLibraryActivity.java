@@ -262,15 +262,14 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
                                                 for (DataSnapshot d : dataSnapshot.getChildren()) {
-                                                    Log.d("LULLO", "ChatID: " + d.getValue());
                                                     chatIDs.add((String) d.getValue());
                                                 }
                                                 for (String s : chatIDs) {
                                                     FirebaseDatabase.getInstance().getReference("chats").child(s).removeValue();
-                                                    Log.d("LULLO", "ChatID: " + s);
                                                 }
                                                 if (progressDialogHolder.isProgressDialogShowing())
                                                     progressDialogHolder.dismissDialog();
+                                                FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID()).removeValue();
                                             }
 
                                             @Override
