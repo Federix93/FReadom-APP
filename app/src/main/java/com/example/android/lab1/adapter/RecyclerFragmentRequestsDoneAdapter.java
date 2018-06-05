@@ -263,9 +263,12 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
                             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
                             reqDoneRef.collection("requestsDone").document(firebaseAuth.getUid()).collection("books")
                                     .document(bookId).delete();
+
+                            //DA FARE LA CANCELLAZIONE DALLE RICHIESTE RICEVUTE SOLO SE
+                            //HA AVUTO UNA SOLA RICHIESTA PER QUEL LIBRO
                             FirebaseFirestore reqReceivedRef = FirebaseFirestore.getInstance();
-                            reqReceivedRef.collection("requestsReceived").document(ownerId).collection("books")
-                                    .document(bookId).delete();
+                            /*reqReceivedRef.collection("requestsReceived").document(ownerId).collection("books")
+                                    .document(bookId).delete();*/
                             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                             final DatabaseReference chatRef = firebaseDatabase.getReference("chats");
                             final DatabaseReference messagesRef = firebaseDatabase.getReference("messages");
