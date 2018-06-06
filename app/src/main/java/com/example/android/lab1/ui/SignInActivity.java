@@ -133,6 +133,8 @@ public class SignInActivity extends AppCompatActivity {
         super.onResume();
         IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
         registerReceiver(mNetworkConnectionBroadcastReceiver, filter);
+        mLoginButton.setVisibility(View.VISIBLE);
+        mWithoutLoginButton.setVisibility(View.VISIBLE);
 
     }
 
@@ -140,6 +142,8 @@ public class SignInActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mNetworkConnectionBroadcastReceiver);
+        mLoginButton.setVisibility(View.GONE);
+        mWithoutLoginButton.setVisibility(View.GONE);
     }
 
     @Override
@@ -290,12 +294,11 @@ public class SignInActivity extends AppCompatActivity {
                     AuthUI.getInstance()
                             .createSignInIntentBuilder()
                             .setIsSmartLockEnabled(false)
+                            .setLogo(R.drawable.freadom_app_name_white)
                             .setTheme(R.style.LoginTheme)
                             .setAvailableProviders(providers)
                             .build(),
                     RC_SIGN_IN);
-
-            //.setLogo(R.drawable.bookique)
         }
     }
 
