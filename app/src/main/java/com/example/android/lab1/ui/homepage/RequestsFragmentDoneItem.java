@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +55,16 @@ public class RequestsFragmentDoneItem extends Fragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerFragmentRequestsDoneAdapter(getActivity(), new ArrayList<Book>(),  new ArrayList<User>());
+        mAdapter = new RecyclerFragmentRequestsDoneAdapter(getActivity(), new ArrayList<Book>(), new ArrayList<User>(),
+                new RecyclerFragmentRequestsDoneAdapter.OnRemovedCallBack() {
+                    @Override
+                    public void positionRemoved(int position) {
+                        if (mAdapter.getItemCount() == 0) {
+                            mRecyclerView.setVisibility(GONE);
+                            mNoRequestDoneLayout.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
 
         mRecyclerView.setAdapter(mAdapter);
 
@@ -65,10 +73,11 @@ public class RequestsFragmentDoneItem extends Fragment {
             requestedDoneBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
-                    if (books != null) {
+                    if (books != null && !books.isEmpty()) {
                         mNoLoansLayout.setVisibility(GONE);
                         mNoRequestRecLayout.setVisibility(View.GONE);
                         mNoRequestDoneLayout.setVisibility(GONE);
+                        mRecyclerView.setVisibility(View.VISIBLE);
 
                         final List<Book> listBooks = new ArrayList<>();
                         final List<User> usersOwner = new ArrayList<>();
@@ -88,15 +97,13 @@ public class RequestsFragmentDoneItem extends Fragment {
                                 }
                             });
                         }
+                    } else {
+                        mNoLoansLayout.setVisibility(View.GONE);
+                        mNoRequestRecLayout.setVisibility(GONE);
+                        mNoRequestDoneLayout.setVisibility(View.VISIBLE);
                     }
                 }
             });
-        }
-        if (mAdapter.getItemCount() == 0)
-        {
-            mNoLoansLayout.setVisibility(View.GONE);
-            mNoRequestRecLayout.setVisibility(GONE);
-            mNoRequestDoneLayout.setVisibility(View.VISIBLE);
         }
         return view;
     }
