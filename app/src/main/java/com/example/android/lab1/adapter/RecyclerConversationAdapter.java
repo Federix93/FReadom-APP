@@ -81,6 +81,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             FirebaseDatabase.getInstance().getReference("chats").child(chatId).removeValue();
             FirebaseDatabase.getInstance().getReference("conversations").child(mBookID).child(chatId).removeValue();
             FirebaseDatabase.getInstance().getReference("openedChats").child(mBookID).child(FirebaseAuth.getInstance().getUid()).child(otherUserID).removeValue();
+            FirebaseDatabase.getInstance().getReference("messages").child(chatId).removeValue();
             FirebaseFirestore.getInstance().collection("requestsDone").document(otherUserID).collection("books").document(mBookID).delete();
             FirebaseFirestore.getInstance().collection("requestsDone").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override

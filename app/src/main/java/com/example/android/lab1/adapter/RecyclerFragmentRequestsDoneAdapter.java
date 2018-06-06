@@ -315,12 +315,12 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     String chatId = (String) dataSnapshot.getValue();
-
-                                    messagesRef.child(chatId).getRef().removeValue();
-                                    conversationsRef.child(bookId).child(chatId).removeValue();
-                                    chatRef.child(chatId).removeValue();
-                                    openedChats.removeValue();
-
+                                    if(chatId != null) {
+                                        messagesRef.child(chatId).removeValue();
+                                        conversationsRef.child(bookId).child(chatId).removeValue();
+                                        chatRef.child(chatId).removeValue();
+                                        openedChats.removeValue();
+                                    }
                                     if(progressDialogHolder.isProgressDialogShowing())
                                         progressDialogHolder.dismissDialog();
                                 }
