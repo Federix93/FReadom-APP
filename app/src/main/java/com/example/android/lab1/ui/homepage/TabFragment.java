@@ -27,6 +27,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -290,7 +291,6 @@ public class TabFragment extends Fragment {
         if (getActivity() != null &&
                 SharedPreferencesManager.getInstance(getActivity()).isFirstRun()) {
             Resources res = getResources();
-            SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
             TapTargetSequence tapTargetSequence = new TapTargetSequence(getActivity());
             tapTargetSequence.continueOnCancel(true);
             tapTargetSequence.targets(
@@ -309,6 +309,7 @@ public class TabFragment extends Fragment {
             tapTargetSequence.listener(new TapTargetSequence.Listener() {
                 @Override
                 public void onSequenceFinish() {
+                    SharedPreferencesManager.getInstance(getActivity()).putFirstRun(false);
                     updateUI(savedInstanceState);
                 }
 
@@ -341,6 +342,7 @@ public class TabFragment extends Fragment {
                 resolveCity();
                 queryDatabaseWithViewModel();
             }
+
         } else {
             // config change restore previous state
             if (savedInstanceState.containsKey(HOME_POSITION_LON)
@@ -448,7 +450,7 @@ public class TabFragment extends Fragment {
                                         SharedPreferencesManager.getInstance(getActivity()).setPosition(
                                                 mCurrentPosition);
                                         resolveCity();
-                                        queryDatabaseWithViewModel();
+                                        new RefreshAsyncTask(TabFragment.this).execute();
                                         //resolveLocation(location);
                                     }
                                 }, null);
