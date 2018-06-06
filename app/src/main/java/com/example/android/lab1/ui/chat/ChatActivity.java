@@ -365,6 +365,16 @@ public class ChatActivity extends AppCompatActivity {
             if(NotificationUtilities.notificationExist(mChatID))
                 NotificationUtilities.removeNotification(mChatID, this, false);
         }
+        else if(getIntent().getBooleanExtra("FromNotificationRequest", false))
+        {
+            if(NotificationUtilities.notificationExist(mBookID+mChatID))
+                NotificationUtilities.removeNotification(mBookID+mChatID, this, false);
+        }
+        else if(getIntent().getBooleanExtra("ReminderAlarm", false))
+        {
+            if(NotificationUtilities.notificationExist(mChatID+mBookID+mSenderUID))
+                NotificationUtilities.removeNotification(mChatID+mBookID+mSenderUID, this, false);
+        }
         else
         {
             if(NotificationUtilities.notificationExist(mChatID))

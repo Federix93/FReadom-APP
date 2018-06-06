@@ -74,7 +74,6 @@ public class FiltersFragment extends DialogFragment {
         getDialog().getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -231,7 +230,6 @@ public class FiltersFragment extends DialogFragment {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setFilters() {
 
         mTitleCheckbox.setChecked(searchByFilters[FiltersValues.SEARCH_BY_TITLE]);

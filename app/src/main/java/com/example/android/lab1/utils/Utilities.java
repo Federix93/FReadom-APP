@@ -68,12 +68,6 @@ import static com.example.android.lab1.utils.Constants.SCAN_REQUEST_TAG;
 
 public abstract class Utilities {
 
-    public final static String BOOK_REQUEST_CHANNEL_ID = "requestChannel";
-    public final static String NEW_MESSAGE_CHANNEL_ID = "messageChannel";
-    public final static String LOAN_CHANNEL_ID = "loanChannel";
-    public final static String NEW_LOAN_KEY = "newLoan";
-    public final static String FINISHED_LOAN_KEY = "finishedLoan";
-
     public static boolean checkPermissionActivity(Activity activity, String permission) {
 
         return ContextCompat.checkSelfPermission(activity.getApplicationContext(), permission) == PackageManager.PERMISSION_GRANTED;

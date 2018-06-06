@@ -140,8 +140,9 @@ public class HomePageActivity extends AppCompatActivity
                     case R.id.action_search:
                         if(SharedPreferencesManager.getInstance(HomePageActivity.this).getPosition() != null)
                         {
-                            Intent intent = new Intent(HomePageActivity.this, SearchBookActivity.class);
-                            startActivity(intent);
+//                            Intent intent = new Intent(HomePageActivity.this, SearchBookActivity.class);
+//                            startActivity(intent);
+                            NotificationUtilities.scheduleNotification(HomePageActivity.this, 5000, "we", "yo", "no", "bi");
                         }
                         else
                         {
