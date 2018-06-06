@@ -487,8 +487,8 @@ public class TabFragment extends Fragment {
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
         if (mFirebaseAuth.getUid() != null) {
-            BooksViewModel booksViewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(BooksViewModel.class);
-            booksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
+            YourLibraryViewModel yourLibraryViewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(YourLibraryViewModel.class);
+            yourLibraryViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
                     if (books != null) {
