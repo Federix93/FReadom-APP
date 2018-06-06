@@ -60,7 +60,6 @@ import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -167,7 +166,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Message chatMessage = new Message(mFirebaseAuth.getUid(), mMessageEditText.getText().toString(),
-                        null, null);
+                        System.currentTimeMillis() / 1000, null);
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);
 
                 final String messageWritten = mMessageEditText.getText().toString();
