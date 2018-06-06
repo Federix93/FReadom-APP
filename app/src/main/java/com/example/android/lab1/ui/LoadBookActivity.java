@@ -257,6 +257,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                             }
                         } else {
                             errorDownloadApi(true);
+                            return;
                         }
                         // book with no title not accepted
                         mResultBook.setTitle(book.optString("title"));
