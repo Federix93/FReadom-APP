@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +19,16 @@ import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Conversation;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.ui.chat.ChatActivity;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,6 +47,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     private int positionsChecked;
     RecyclerView mRecyclerView;
     Toolbar mToolbar;
+    private boolean bookIsPresent;
+    private int counterSize;
 
 
     public RecyclerConversationAdapter(ArrayList<Conversation> conversations,
@@ -48,6 +58,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         mBookID = bookID;
         positionsChecked = -1;
         mToolbar = toolbar;
+        bookIsPresent = false;
+        counterSize = 0;
     }
 
 
@@ -57,6 +69,11 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         if (chatId != null && otherUserID != null) {
             mToolbar.setBackgroundColor(Color.parseColor("#FFFFFF"));
             mToolbar.setTitle(R.string.conversations_title);
+            mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+            mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(false);
+            mToolbar.setTitle(R.string.conversations_title);
+            final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(mRecyclerView.getContext());
+            progressDialogHolder.showLoadingDialog(R.string.cancellation_in_progress);
             mConversations.remove(positionsChecked);
             notifyItemRemoved(positionsChecked);
             mRecyclerView.removeOnItemTouchListener(listener);
@@ -65,6 +82,41 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             FirebaseDatabase.getInstance().getReference("conversations").child(mBookID).child(chatId).removeValue();
             FirebaseDatabase.getInstance().getReference("openedChats").child(mBookID).child(FirebaseAuth.getInstance().getUid()).child(otherUserID).removeValue();
             FirebaseFirestore.getInstance().collection("requestsDone").document(otherUserID).collection("books").document(mBookID).delete();
+            FirebaseFirestore.getInstance().collection("requestsDone").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    final List<DocumentSnapshot> snapshotList = queryDocumentSnapshots.getDocuments();
+                     bookIsPresent = false;
+                    for(DocumentSnapshot d : snapshotList){
+                        if(bookIsPresent) {
+                            counterSize = 0;
+                            bookIsPresent = false;
+                            if(progressDialogHolder.isProgressDialogShowing())
+                                progressDialogHolder.dismissDialog();
+                            break;
+                        }
+                        d.getReference().collection("books").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot snapshot) {
+                                counterSize++;
+                                if (snapshot.exists()) {
+                                    bookIsPresent = true;
+                                }
+                                if(counterSize == snapshotList.size()){
+                                    if(!bookIsPresent){
+                                        FirebaseFirestore.getInstance().collection("requestsReceived")
+                                                .document(FirebaseAuth.getInstance().getUid())
+                                                .collection("books").document(mBookID).delete();
+                                    }
+                                    if(progressDialogHolder.isProgressDialogShowing())
+                                        progressDialogHolder.dismissDialog();
+                                }
+                            }
+                        });
+
+                    }
+                }
+            });
         }
     }
 
@@ -97,7 +149,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
-        holder.bind(mConversations.get(position), position);
+        holder.bind(mConversations.get(position));
     }
 
     @Override
@@ -122,7 +174,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mMessageCounterTextView = itemView.findViewById(R.id.message_counter_text_view);
         }
 
-        void bind(final Conversation conversation, final int position) {
+        void bind(final Conversation conversation) {
             final User user = conversation.getUser();
             mUserNameTextView.setText(user.getUsername());
             if (user.getPhotoURL() == null) {
@@ -196,9 +248,9 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         return false;
                     }
                     positionsChecked = getAdapterPosition();
-                    itemView.setBackgroundColor(Color.parseColor("#bdbdbd"));
+                    itemView.setBackgroundColor(Color.parseColor("#ededed"));
                     mToolbar.setTitle("Elimina");
-                    mToolbar.setBackgroundColor(Color.parseColor("#808080"));
+                    mToolbar.setBackgroundColor(Color.parseColor("#bdbdbd"));
                     mToolbar.setNavigationIcon(R.drawable.ic_close_black_24dp);
                     mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(true);
                     return true;
