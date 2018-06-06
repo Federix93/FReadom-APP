@@ -21,6 +21,7 @@ import com.example.android.lab1.adapter.RecyclerConversationAdapter;
 import com.example.android.lab1.model.chatmodels.Chat;
 import com.example.android.lab1.model.chatmodels.Conversation;
 import com.example.android.lab1.model.chatmodels.User;
+import com.example.android.lab1.utils.NotificationUtilities;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.ConversationsViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
@@ -181,10 +182,18 @@ public class ConversationsActivity extends AppCompatActivity {
                                                             mAdapter = new RecyclerConversationAdapter(mConversations,
                                                                     mBookID,
                                                                     mToolbar,
-                                                                    new RecyclerConversationAdapter.OnEmptyConversation() {
+                                                                    new RecyclerConversationAdapter.ActivityCallBack() {
                                                                         @Override
                                                                         public void doClose() {
                                                                             finish();
+                                                                        }
+
+                                                                        @Override
+                                                                        public void removeWithContext(String chatId) {
+                                                                            if (NotificationUtilities.notificationExist(chatId))
+                                                                                NotificationUtilities.removeNotification(chatId,
+                                                                                        ConversationsActivity.this,
+                                                                                        true);
                                                                         }
                                                                     });
                                                             mRecyclerView.setAdapter(mAdapter);

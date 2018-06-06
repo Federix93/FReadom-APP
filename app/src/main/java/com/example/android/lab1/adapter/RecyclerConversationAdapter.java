@@ -37,7 +37,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerConversationAdapter.ConversationViewHolder> {
 
-    private OnEmptyConversation mCallback;
+    private ActivityCallBack mCallback;
 
 
     private List<Conversation> mConversations;
@@ -52,7 +52,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     public RecyclerConversationAdapter(ArrayList<Conversation> conversations,
                                        String bookID,
                                        Toolbar toolbar,
-                                       OnEmptyConversation callback) {
+                                       ActivityCallBack callback) {
         this.mConversations = conversations;
         mBookID = bookID;
         positionsChecked = -1;
@@ -73,7 +73,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mToolbar.setTitle(R.string.conversations_title);
             final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(mRecyclerView.getContext());
             progressDialogHolder.showLoadingDialog(R.string.cancellation_in_progress);
-            mConversations.remove(positionsChecked);
+            Conversation removed = mConversations.remove(positionsChecked);
             notifyItemRemoved(positionsChecked);
             mRecyclerView.removeOnItemTouchListener(listener);
             positionsChecked = -1;
@@ -117,6 +117,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     }
                 }
             });
+            mCallback.removeWithContext(removed.getChatId());
+
             if (mConversations.size() == 0) {
                 mCallback.doClose();
             }
@@ -124,8 +126,10 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     }
 
 
-    public interface OnEmptyConversation {
+    public interface ActivityCallBack {
         void doClose();
+
+        void removeWithContext(String chatId);
     }
 
     public void deselectItem() {
