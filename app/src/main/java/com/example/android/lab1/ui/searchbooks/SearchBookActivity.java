@@ -76,7 +76,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
     boolean[] searchByFilters = {true, true, true, true};
     int[] seekBarsFilters = {0, FiltersValues.MAX_POSITION};
-    boolean[] orderFilters = {true, false, false, false};
 
     private FloatingSearchView mSearchView;
 
@@ -141,7 +140,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             FilterObject filterObject = filterGson.fromJson(filterJson, FilterObject.class);
             searchByFilters = filterObject.getSearchByFilters().clone();
             seekBarsFilters = filterObject.getSeekBarFilters().clone();
-            orderFilters = filterObject.getOrderByFilters().clone();
         }
 
         mLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -521,7 +519,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         Bundle filterData = new Bundle();
         filterData.putBooleanArray(FiltersValues.SEARCH_BY, searchByFilters);
         filterData.putIntArray(FiltersValues.SEEK_BARS, seekBarsFilters);
-        filterData.putBooleanArray(FiltersValues.ORDER_BY, orderFilters);
 
         FragmentManager fm = getSupportFragmentManager();
         FiltersFragment filtersFragment = FiltersFragment.newInstance(filterData);
@@ -532,9 +529,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     public void filterDataPass(Bundle bundle) {
         searchByFilters = bundle.getBooleanArray(FiltersValues.SEARCH_BY).clone();
         seekBarsFilters = bundle.getIntArray(FiltersValues.SEEK_BARS).clone();
-        orderFilters = bundle.getBooleanArray(FiltersValues.ORDER_BY).clone();
 
-        FilterObject filterObject = new FilterObject(searchByFilters, seekBarsFilters, orderFilters);
+        FilterObject filterObject = new FilterObject(searchByFilters, seekBarsFilters);
 
         SharedPreferences.Editor prefsEditor = mSharedPref.edit();
         Gson filtersGson = new Gson();

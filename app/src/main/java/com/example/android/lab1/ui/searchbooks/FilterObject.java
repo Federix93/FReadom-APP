@@ -4,13 +4,11 @@ public class FilterObject {
 
     private boolean searchByFilters[];
     private int seekBarFilters[];
-    private boolean orderByFilters[];
 
-    public FilterObject(boolean searchBy[], int seekBars[], boolean orderBy[])
+    public FilterObject(boolean searchBy[], int seekBars[])
     {
         searchByFilters = searchBy.clone();
         seekBarFilters = seekBars.clone();
-        orderByFilters = orderBy.clone();
     }
 
     public boolean[] getSearchByFilters() {
@@ -21,7 +19,4 @@ public class FilterObject {
         return seekBarFilters;
     }
 
-    public boolean[] getOrderByFilters() {
-        return orderByFilters;
-    }
 }

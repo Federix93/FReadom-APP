@@ -38,10 +38,6 @@ public class FiltersFragment extends DialogFragment {
     private TextView mUserRatingTextView;
     private SeekBar mPositionSeekBar;
     private TextView mPositionTextView;
-    private AppCompatButton mPublishDateButton;
-    private AppCompatButton mRatingButton;
-    private AppCompatButton mConditionsButton;
-    private AppCompatButton mPositionButton;
     private AppCompatButton mApplyButton;
     private AppCompatButton mUndoButton;
     private AppCompatButton mResetButton;
@@ -49,7 +45,6 @@ public class FiltersFragment extends DialogFragment {
     FilterDataPass dataPasser;
     boolean[] searchByFilters;
     int[] seekBarsFilters;
-    boolean[] orderFilters;
 
     public FiltersFragment() {
     }
@@ -92,10 +87,6 @@ public class FiltersFragment extends DialogFragment {
         mUserRatingTextView = view.findViewById(R.id.selected_rating_text_view);
         mPositionSeekBar = view.findViewById(R.id.position_seek_bar);
         mPositionTextView = view.findViewById(R.id.selected_position_text_view);
-        mPublishDateButton = view.findViewById(R.id.button_publish_date);
-        mRatingButton = view.findViewById(R.id.button_user_rating);
-        mConditionsButton = view.findViewById(R.id.button_condition);
-        mPositionButton = view.findViewById(R.id.button_position);
         mApplyButton = view.findViewById(R.id.apply_filter_button);
         mUndoButton = view.findViewById(R.id.undo_filter_button);
         mResetButton = view.findViewById(R.id.reset_filters_button);
@@ -104,11 +95,9 @@ public class FiltersFragment extends DialogFragment {
 
         searchByFilters = data.getBooleanArray(FiltersValues.SEARCH_BY).clone();
         seekBarsFilters = data.getIntArray(FiltersValues.SEEK_BARS).clone();
-        orderFilters = data.getBooleanArray(FiltersValues.ORDER_BY).clone();
 
         setupSearchByListeners();
         setupSeekBarsListeners();
-        setupOrderingButtonListeners();
         setFilters();
 
         mApplyButton.setOnClickListener(new View.OnClickListener() {
@@ -117,7 +106,6 @@ public class FiltersFragment extends DialogFragment {
                 Bundle b = new Bundle();
                 b.putBooleanArray(FiltersValues.SEARCH_BY, searchByFilters);
                 b.putIntArray(FiltersValues.SEEK_BARS, seekBarsFilters);
-                b.putBooleanArray(FiltersValues.ORDER_BY, orderFilters);
                 dataPasser.filterDataPass(b);
                 dismiss();
             }
@@ -139,11 +127,6 @@ public class FiltersFragment extends DialogFragment {
                 searchByFilters[FiltersValues.SEARCH_BY_TAGS] = true;
                 seekBarsFilters[FiltersValues.RATING_FILTER] = 0;
                 seekBarsFilters[FiltersValues.POSITION_FILTER] = FiltersValues.MAX_POSITION;
-                resetOrderButtons();
-                orderFilters[FiltersValues.ORDER_BY_DATE] = true;
-                orderFilters[FiltersValues.ORDER_BY_RATING] = false;
-                orderFilters[FiltersValues.ORDER_BY_CONDITION] = false;
-                orderFilters[FiltersValues.ORDER_BY_POSITION] = false;
                 setFilters();
             }
         });
@@ -260,15 +243,6 @@ public class FiltersFragment extends DialogFragment {
         setRatingFilterText(seekBarsFilters[FiltersValues.RATING_FILTER]);
         mPositionSeekBar.setProgress(seekBarsFilters[FiltersValues.POSITION_FILTER]);
         setPositionFilterText(seekBarsFilters[FiltersValues.POSITION_FILTER]);
-
-        if(orderFilters[FiltersValues.ORDER_BY_DATE])
-            mPublishDateButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
-        else if(orderFilters[FiltersValues.ORDER_BY_RATING])
-            mRatingButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
-        else if(orderFilters[FiltersValues.ORDER_BY_CONDITION])
-            mConditionsButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
-        else if(orderFilters[FiltersValues.ORDER_BY_POSITION])
-            mPositionButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
     }
 
     private void setupSeekBarsListeners() {
@@ -324,71 +298,5 @@ public class FiltersFragment extends DialogFragment {
         mPositionTextView.setText(String.format(getResources().getString(R.string.position_filter), ((float)(value+10)/10)));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void setupOrderingButtonListeners()
-    {
-        mPublishDateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!orderFilters[FiltersValues.ORDER_BY_DATE])
-                {
-                    resetOrderButtons();
-                    v.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
-                    orderFilters[FiltersValues.ORDER_BY_DATE] = true;
-                }
-            }
-        });
-
-        mRatingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!orderFilters[FiltersValues.ORDER_BY_RATING])
-                {
-                    resetOrderButtons();
-                    v.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
-                    orderFilters[FiltersValues.ORDER_BY_RATING] = true;
-                }
-            }
-        });
-
-        mConditionsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!orderFilters[FiltersValues.ORDER_BY_CONDITION])
-                {
-                    resetOrderButtons();
-                    v.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
-                    orderFilters[FiltersValues.ORDER_BY_CONDITION] = true;
-                }
-            }
-        });
-
-        mPositionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!orderFilters[FiltersValues.ORDER_BY_POSITION])
-                {
-                    resetOrderButtons();
-                    v.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorSecondaryAccent)));
-                    orderFilters[FiltersValues.ORDER_BY_POSITION] = true;
-                }
-
-            }
-        });
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void resetOrderButtons()
-    {
-
-        for(int i=0; i<4; i++){
-            orderFilters[i] = false;
-        }
-
-        mPublishDateButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.grayed_button)));
-        mRatingButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.grayed_button)));
-        mConditionsButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.grayed_button)));
-        mPositionButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.grayed_button)));
-    }
 
 }
