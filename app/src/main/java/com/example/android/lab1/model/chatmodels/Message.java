@@ -1,9 +1,5 @@
 package com.example.android.lab1.model.chatmodels;
 
-import android.net.Uri;
-
-import java.util.Date;
-
 public class Message {
 
     private String mTextMessage;
@@ -13,7 +9,7 @@ public class Message {
 
     public Message(){}
 
-    public Message(String senderId, String pTextMessage, long pTimestamp, String pPhotoURL){
+    public Message(String senderId, String pTextMessage, long pTimestamp, String pPhotoURL) {
         mSenderId = senderId;
         mTextMessage = pTextMessage;
         mTimestamp = pTimestamp;
@@ -31,6 +27,7 @@ public class Message {
     public long getTimestamp() {
         return mTimestamp;
     }
+
 
     public void setTimestamp(long pTimestamp) { this.mTimestamp = pTimestamp; }
 

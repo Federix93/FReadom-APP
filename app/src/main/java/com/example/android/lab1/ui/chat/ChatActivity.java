@@ -60,11 +60,12 @@ import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -89,26 +90,28 @@ import static android.view.View.VISIBLE;
 
 public class ChatActivity extends AppCompatActivity {
 
+    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
+    private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
+    private final static String ALGOLIA_BOOK_INDEX = "books";
+    private final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
+    private final int RESULT_LOAD_IMAGE = 1;
+    private final int CAPTURE_IMAGE = 0;
     Toolbar mToolbar;
     FirebaseDatabase mFirebaseDatabase;
-
     MessagesViewModel messagesViewModel = null;
     DatabaseReference mChatsReference;
     DatabaseReference mMessagesReference;
     DatabaseReference mConversationsReference;
-
     FirebaseAuth mFirebaseAuth;
     FirebaseStorage mFirebaseStorage;
     FirebaseFirestore mFirebaseFirestore;
     StorageReference mChatPhotosStorageReference;
-
     String mChatID;
     String mUsername;
     String mPhotoProfileURL;
     String mBookID;
     String mOtherPerson;
     String mSenderUID;
-
     RecyclerView mMessagesRecyclerView;
     EditText mMessageEditText;
     Button mSendButton;
@@ -118,7 +121,6 @@ public class ChatActivity extends AppCompatActivity {
     TextView mNoMessagesOwnerTextView;
     TextView mNoMessagesReceiverTextView;
     LinearLayout mInputTextLinearLayout;
-
     AppCompatButton mStartLoanButton;
     AppCompatButton mEndLoanButton;
     AppCompatButton mConfirmStartLoanButton;
@@ -141,22 +143,12 @@ public class ChatActivity extends AppCompatActivity {
     ConstraintLayout mConfirmStartLoanLayout;
     ConstraintLayout mConfirmEndLoanLayout;
 
-    ChildEventListener mChildEventListener;
     private ChatMessageAdapter mChatArrayAdapter;
 
     String dataTitle, dataMessage;
-    private final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
-
-    private final int RESULT_LOAD_IMAGE = 1;
-    private final int CAPTURE_IMAGE = 0;
-
+    String mPhotoPath;
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
-    String mPhotoPath;
-    private boolean isObservable = true;
-
-    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
-
 
     private void setInputLinearLayout() {
 
@@ -190,36 +182,41 @@ public class ChatActivity extends AppCompatActivity {
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);
 
                 final String messageWritten = mMessageEditText.getText().toString();
-                mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                mChatsReference.child(mChatID).runTransaction(new Transaction.Handler() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            Chat chat = dataSnapshot.getValue(Chat.class);
-                            if (chat != null) {
-                                chat.setTimestamp(System.currentTimeMillis() / 1000);
-                                chat.setLastMessage(messageWritten);
-                                chat.setIsText("true");
-                                if (chat.getSenderUID() == null) {
-                                    chat.setSenderUID(mFirebaseAuth.getUid());
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        Chat chat = mutableData.getValue(Chat.class);
+                        if (chat != null) {
+                            chat.setTimestamp(System.currentTimeMillis() / 1000);
+                            chat.setLastMessage(messageWritten);
+                            chat.setIsText("true");
+                            if (chat.getSenderUID() == null) {
+                                Log.d("LULLO", "111Send Button is clicked and SenderUID is: " + chat.getSenderUID());
+                                chat.setSenderUID(mFirebaseAuth.getUid());
+                                chat.setCounter(chat.getCounter() + 1);
+                                Log.d("LULLO", "111after send Button counter is: " + chat.getCounter());
+                            } else {
+                                if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
                                     chat.setCounter(chat.getCounter() + 1);
+                                    Log.d("LULLO", "222Send Button is clicked and SenderUID is: " + chat.getSenderUID());
                                 } else {
-                                    if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
-                                        chat.setCounter(chat.getCounter() + 1);
-                                    } else {
-                                        chat.setReceiverUID(chat.getSenderUID());
-                                        chat.setSenderUID(mFirebaseAuth.getUid());
-                                        chat.setCounter(1);
-                                    }
+                                    chat.setReceiverUID(chat.getSenderUID());
                                     chat.setSenderUID(mFirebaseAuth.getUid());
+                                    chat.setCounter(1);
+                                    Log.d("LULLO", "222after send Button counter is: " + chat.getCounter());
                                 }
+                                chat.setSenderUID(mFirebaseAuth.getUid());
                             }
-                            mChatsReference.child(mChatID).setValue(chat);
                         }
+                        mutableData.setValue(chat);
+                        return Transaction.success(mutableData);
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                        if(databaseError != null){
+                            Log.d("LULLO", "Error: " + databaseError);
+                        }
                     }
                 });
                 // Clear input box
@@ -281,7 +278,6 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-
     public File saveThumbnail() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -311,9 +307,6 @@ public class ChatActivity extends AppCompatActivity {
             startActivityForResult(cameraIntent, CAPTURE_IMAGE);
         }
     }
-
-    private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
-    private final static String ALGOLIA_BOOK_INDEX = "books";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -420,14 +413,16 @@ public class ChatActivity extends AppCompatActivity {
 
         final Observer<List<Message>> messageObserver = new Observer<List<Message>>() {
             @Override
-            public void onChanged(@Nullable List<Message> messages) {
+            public void onChanged(@Nullable final List<Message> messages) {
                 if (mChatArrayAdapter == null) {
                     mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
                     mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
-                }
-                else{
+                } else {
                     mChatArrayAdapter.setItems(messages);
                     mChatArrayAdapter.notifyDataSetChanged();
+                }
+                if (!messages.get(messages.size() - 1).getSenderId().equals(FirebaseAuth.getInstance().getUid())) {
+                    mChatsReference.child(mChatID).child("counter").setValue(0);
                 }
                 mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
 
@@ -435,7 +430,7 @@ public class ChatActivity extends AppCompatActivity {
         };
         messagesViewModel.getSnapshotLiveData().observe(this, messageObserver);
 
-        if(mChatID != null) {
+        if (mChatID != null) {
             final DatabaseReference dbRef = mMessagesReference.child(mChatID);
             ValueEventListener valueEventListener = new ValueEventListener() {
                 @Override
@@ -609,24 +604,24 @@ public class ChatActivity extends AppCompatActivity {
                                         }
                                     });
 
+                                    }
                                 }
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
+                            }
+                        });
 
-                    setInputLinearLayout();
-                    dbRef.removeEventListener(this);
+                        setInputLinearLayout();
+                        dbRef.removeEventListener(this);
 
-                } else {
-                    mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            mOtherPerson = (String) dataSnapshot.getValue();
+                    } else {
+                        mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                mOtherPerson = (String) dataSnapshot.getValue();
 
                             if (mFirebaseAuth.getUid().equals(mOtherPerson)) {
                                 mFirebaseFirestore.collection("loanInitialization").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -1278,7 +1273,38 @@ public class ChatActivity extends AppCompatActivity {
                             downloadUrl.toString());
 
                     mMessagesReference.child(mChatID).push().setValue(chatMessage);
-                    mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    mChatsReference.child(mChatID).runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            Chat chat = mutableData.getValue(Chat.class);
+                            if (chat != null) {
+                                chat.setTimestamp(System.currentTimeMillis() / 1000);
+                                chat.setLastMessage(downloadUrl.toString());
+                                chat.setIsText("false");
+                                if (chat.getSenderUID() == null) {
+                                    chat.setSenderUID(mFirebaseAuth.getUid());
+                                    chat.setCounter(chat.getCounter() + 1);
+                                } else {
+                                    if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
+                                        chat.setCounter(chat.getCounter() + 1);
+                                    } else {
+                                        chat.setReceiverUID(chat.getSenderUID());
+                                        chat.setSenderUID(mFirebaseAuth.getUid());
+                                        chat.setCounter(1);
+                                    }
+                                    chat.setSenderUID(mFirebaseAuth.getUid());
+                                }
+                            }
+                            mutableData.setValue(chat);
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                            Log.d("LULLO", databaseError.getMessage());
+                        }
+                    });
+                    /*mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
@@ -1309,7 +1335,7 @@ public class ChatActivity extends AppCompatActivity {
                         public void onCancelled(DatabaseError databaseError) {
 
                         }
-                    });
+                    });*/
                 }
             });
         }
