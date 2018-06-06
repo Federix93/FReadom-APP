@@ -175,7 +175,7 @@
     <string name="start_loan">Start loan</string>
     <string name="confirm_date">Confirm date</string>
     <string name="default_message">Hi %1$s, I would like to borrow book %2$s</string>
-    <string name="loan_successfully_done">Loan successfully started</string>
+    <string name="loan_successfully_sent">Loan successfully started</string>
     <string name="confirm_loan_title">Confirm loan start?</string>
     <string name="confirm_loan_text">"Once confirmed, other opened chats will be deleted. This book won't be available from other users until the loan is ended. "</string>
     <string name="loan_button_info_title">Info</string>
@@ -222,6 +222,8 @@
     <string name="terms_and_conditions">Terms e conditions</string>
     <string name="license_open_source">Open source license</string>
     <string name="informations">Informations</string>
+    <string name="confirm_init">Confirm loan</string>
+
 
 
 </resources>

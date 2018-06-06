@@ -271,6 +271,9 @@ public class HomePageActivity extends AppCompatActivity
         if (getIntent().getBooleanExtra("LoanStart", false)) {
             mBottomNavigation.setCurrentItem(LOANS_FRAGMENT);
         }
+        if (getIntent().getBooleanExtra("LoanInit", false)) {
+            Toast.makeText(getApplicationContext(),"Tutto bene", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void fabAppears() {
