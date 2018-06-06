@@ -314,15 +314,14 @@ public class ChatActivity extends AppCompatActivity {
                                                 if (book != null && book.getLentTo() != null) {
                                                     if (book.getLentTo().equals(mOtherPerson)) {
                                                         mStartLoanLayout.setVisibility(GONE);
+                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
+                                                        mOtherPersonInfoLayout.setVisibility(GONE);
+
                                                         String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
                                                         String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
                                                         mFromText.setText(String.format(getResources().getString(R.string.loan_started_from), dateFrom));
                                                         mToText.setText(String.format(getResources().getString(R.string.loan_to_be_closed_owner), dateTo));
                                                         mEndLoanLayout.setVisibility(View.VISIBLE);
-                                                        if (mOtherPersonAlreadyLentLayout.getVisibility() == VISIBLE)
-                                                            mOtherPersonAlreadyLentLayout.setVisibility(GONE);
-                                                        if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
-                                                            mOtherPersonInfoLayout.setVisibility(GONE);
                                                     } else {
                                                         mStartLoanLayout.setVisibility(GONE);
                                                         mEndLoanLayout.setVisibility(GONE);
@@ -429,18 +428,14 @@ public class ChatActivity extends AppCompatActivity {
                                                     //SONO IL PROPRIETARIO E HO APERTO UNA CONVERSAZIONE CON LA PERSONA
                                                     //ALLA QUALE HO PRESTATO IL LIBRO
                                                     mStartLoanLayout.setVisibility(GONE);
+                                                    mOtherPersonInfoLayout.setVisibility(GONE);
+                                                    mOtherPersonAlreadyLentLayout.setVisibility(GONE);
 
                                                     String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
                                                     String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
-                                                    mFromText.setText(String.format(getResources().getString(R.string.from_date), dateFrom));
-                                                    mToText.setText(String.format(getResources().getString(R.string.to_date), dateTo));
-
+                                                    mFromText.setText(String.format(getResources().getString(R.string.loan_started_from), dateFrom));
+                                                    mToText.setText(String.format(getResources().getString(R.string.loan_to_be_closed_owner), dateTo));
                                                     mEndLoanLayout.setVisibility(View.VISIBLE);
-
-                                                    if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
-                                                        mOtherPersonInfoLayout.setVisibility(GONE);
-                                                    if (mOtherPersonAlreadyLentLayout.getVisibility() == VISIBLE)
-                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                 } else {
                                                     //SONO IL PROPRIETARIO E HO APERTO UNA CONVERSAZIONE CON UN'ALTRA PERSONA DIVERSA DA
                                                     // QUELLA ALLA QUALE HO PRESTATO IL LIBRO
