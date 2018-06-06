@@ -269,6 +269,16 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
                                         }
                                     }
                                 });
+                                FirebaseFirestore.getInstance().collection("favorites").get().addOnCompleteListener(BookDetailsLibraryActivity.this, new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if(task.isSuccessful()) {
+                                            for (DocumentSnapshot d : task.getResult().getDocuments()) {
+                                                d.getReference().collection("books").document(book.getBookID()).delete();
+                                            }
+                                        }
+                                    }
+                                });
                                 FirebaseDatabase.getInstance().getReference("conversations").child(book.getBookID()).removeValue();
                                 DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID())
                                         .child(FirebaseAuth.getInstance().getUid());
@@ -283,9 +293,9 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
                                             FirebaseDatabase.getInstance().getReference("chats").child(s).removeValue();
                                             FirebaseDatabase.getInstance().getReference("messages").child(s).removeValue();
                                         }
+                                        FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID()).removeValue();
                                         if (progressDialogHolder.isProgressDialogShowing())
                                             progressDialogHolder.dismissDialog();
-                                        FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID()).removeValue();
                                         deleteBookAlgolia(book.getBookID());
                                         finish();
                                     }

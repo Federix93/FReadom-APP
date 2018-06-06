@@ -514,9 +514,15 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     });
                                     mySnackbar.show();
                                 } else {
+                                    Map<String, Object> data = new HashMap<>();
+                                    data.put("FieldFilled", true);
+                                    mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).set(data);
                                     addBookToFavorite();
                                 }
                             } else {
+                                Map<String, Object> data = new HashMap<>();
+                                data.put("FieldFilled", true);
+                                mFirebaseFirestore.collection("favorites").document(mFirebaseAuth.getUid()).set(data);
                                 addBookToFavorite();
                             }
                         }

@@ -421,7 +421,7 @@ public class ChatActivity extends AppCompatActivity {
                     mChatArrayAdapter.setItems(messages);
                     mChatArrayAdapter.notifyDataSetChanged();
                 }
-                if (!messages.get(messages.size() - 1).getSenderId().equals(FirebaseAuth.getInstance().getUid())) {
+                if (messages != null && !messages.get(messages.size() - 1).getSenderId().equals(FirebaseAuth.getInstance().getUid())) {
                     mChatsReference.child(mChatID).child("counter").setValue(0);
                 }
                 mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
