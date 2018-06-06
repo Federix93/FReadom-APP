@@ -30,7 +30,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
     private double mCurrentLat, mCurrentLong;
 
     public RecyclerSearchAdapter(ArrayList<BookSearchItem> bookDataSet, double currentLat, double currentLong) {
-        if(bookDataSet != null)
+        if (bookDataSet != null)
             mBookDataSet = new ArrayList<>(bookDataSet);
         else
             mBookDataSet = new ArrayList<>();
@@ -38,13 +38,11 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
         mCurrentLong = currentLong;
     }
 
-    public void addAll(Collection<BookSearchItem> items)
-    {
+    public void addAll(Collection<BookSearchItem> items) {
         mBookDataSet.addAll(items);
     }
 
-    public void clear()
-    {
+    public void clear() {
         mBookDataSet.clear();
     }
 
@@ -103,16 +101,19 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             else {
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_person_black_24dp)).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
             }
-            mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", book.getUserRating()));
+            if(book.getUserRating() == 0)
+                mRating.setText("");
+            else
+                mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", book.getUserRating()));
 
-            if (mCurrentLat != 0 && mCurrentLong != 0) {
-                double distance = Utilities.distanceBetweenGeoPoints(book.getGeoPoint().getLatitude(), book.getGeoPoint().getLongitude(),
-                        mCurrentLat, mCurrentLong, 'K');
+
+            double distance = Utilities.distanceBetweenGeoPoints(book.getGeoPoint().getLatitude(), book.getGeoPoint().getLongitude(),
+                    mCurrentLat, mCurrentLong, 'K');
+            if(distance >= 1)
                 mBookDistance.setText(String.format(itemView.getResources().getString(R.string.search_book_distance), distance));
+            else
+                mBookDistance.setText(R.string.less_than_one_km);
 
-            } else {
-                mBookDistance.setVisibility(View.GONE);
-            }
 
             int condition = book.getCondition();
             mConditionsText.setText(Condition.getCondition(itemView.getContext(), condition));
@@ -137,7 +138,6 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
 
         }
     }
-
 
 
 }

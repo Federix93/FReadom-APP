@@ -17,15 +17,19 @@ public abstract class NotificationUtilities {
         notificationCount++;
     }
 
-    public static void removeNotification(String notificationID, Context context)
+    public static void removeNotification(String notificationID, Context context, boolean deleteFromStack)
     {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         activeNotifications.remove(notificationID);
         notificationCount--;
         if(notificationCount < 0)
             notificationCount = 0;
+        if(deleteFromStack)
+        {
+            notificationManager.cancel(notificationID.hashCode());
+        }
         if(!notificationsPending())
         {
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.cancel(FirebaseNotificationService.SUMMARY_KEY);
         }
     }
@@ -37,7 +41,11 @@ public abstract class NotificationUtilities {
 
     public static boolean notificationsPending()
     {
-        return (notificationCount > 1);
+        return (notificationCount > 0);
     }
 
+    public static void deleteAll() {
+        notificationCount = 0;
+        activeNotifications.clear();
+    }
 }

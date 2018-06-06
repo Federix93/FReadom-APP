@@ -20,4 +20,5 @@ class RatingActivityOpener(private val mCurrentActivity: Activity,
                 mCurrentActivity.startActivityForResult(intent, Constants.RATING_REQUEST)
         }
     }
+
 }

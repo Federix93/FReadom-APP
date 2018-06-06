@@ -187,7 +187,12 @@ public class ChatActivity extends AppCompatActivity {
         if(getIntent().getBooleanExtra("FromNotification", false))
         {
             if(NotificationUtilities.notificationExist(mChatID))
-                NotificationUtilities.removeNotification(mChatID, this);
+                NotificationUtilities.removeNotification(mChatID, this, false);
+        }
+        else
+        {
+            if(NotificationUtilities.notificationExist(mChatID))
+                NotificationUtilities.removeNotification(mChatID, this, true);
         }
 
         if (mSenderUID != null && !mSenderUID.equals(mFirebaseAuth.getUid()))

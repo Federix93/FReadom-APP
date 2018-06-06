@@ -26,8 +26,16 @@ public class DirectReplyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if(NotificationUtilities.notificationExist(intent.getStringExtra("ChatID")))
-            NotificationUtilities.removeNotification(intent.getStringExtra("ChatID"), context);
+        if(intent.hasExtra("notificationID"))
+        {
+            if(NotificationUtilities.notificationExist(intent.getStringExtra("notificationID")))
+                NotificationUtilities.removeNotification(intent.getStringExtra("notificationID"), context, false);
+        }
+
+        if(intent.hasExtra("summaryID"))
+        {
+            NotificationUtilities.deleteAll();
+        }
 
         Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 
@@ -41,7 +49,7 @@ public class DirectReplyReceiver extends BroadcastReceiver {
 
             CharSequence newMessage = remoteInput.getCharSequence(FirebaseNotificationService.MESSAGE_REPLY_KEY);
             final String messageWritten = newMessage.toString();
-            final String chatID = intent.getStringExtra("ChatID");
+            final String chatID = intent.getStringExtra("notificationID");
 
 
             Message chatMessage = new Message(firebaseAuth.getUid(), newMessage.toString(),
