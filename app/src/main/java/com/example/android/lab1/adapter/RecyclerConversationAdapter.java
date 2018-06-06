@@ -149,7 +149,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
 
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
-        holder.bind(mConversations.get(position), position);
+        holder.bind(mConversations.get(position));
     }
 
     @Override
@@ -174,7 +174,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mMessageCounterTextView = itemView.findViewById(R.id.message_counter_text_view);
         }
 
-        void bind(final Conversation conversation, final int position) {
+        void bind(final Conversation conversation) {
             final User user = conversation.getUser();
             mUserNameTextView.setText(user.getUsername());
             if (user.getPhotoURL() == null) {
