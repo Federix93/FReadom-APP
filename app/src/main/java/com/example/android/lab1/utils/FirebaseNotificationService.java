@@ -37,22 +37,30 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
         switch (remoteMessage.getData().get("type")) {
-            case Utilities.NEW_MESSAGE_CHANNEL_ID:
+            case NotificationUtilities.NEW_MESSAGE_CHANNEL_ID:
                 String currentOpenChat = CurrentOpenChat.getOpenChatID();
                 if (!(currentOpenChat != null && currentOpenChat.equals(remoteMessage.getData().get("chat")))) {
                     sendNewMessageNotification(remoteMessage.getData());
                 }
                 break;
 
-            case Utilities.BOOK_REQUEST_CHANNEL_ID:
+            case NotificationUtilities.BOOK_REQUEST_CHANNEL_ID:
                 sendNewBookRequestNotification(remoteMessage.getData());
                 break;
 
-            case Utilities.NEW_LOAN_KEY:
+            case NotificationUtilities.LOAN_REQUEST_KEY:
+                sendLoanRequestNotification(remoteMessage.getData());
+                break;
+
+            case NotificationUtilities.NEW_LOAN_KEY:
                 sendNewLoanNotification(remoteMessage.getData());
                 break;
 
-            case Utilities.FINISHED_LOAN_KEY:
+            case NotificationUtilities.LOAN_END_KEY:
+                sendLoanEndNotification(remoteMessage.getData());
+                break;
+
+            case NotificationUtilities.FINISHED_LOAN_KEY:
                 sendFinishedLoanNotification(remoteMessage.getData());
                 break;
 
@@ -123,7 +131,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         );
 
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NotificationUtilities.NEW_MESSAGE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setColor(getResources().getColor(R.color.colorSecondaryAccent))
                 .setLargeIcon(userImage)
@@ -207,7 +215,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         );
 
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NotificationUtilities.NEW_MESSAGE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setColor(getResources().getColor(R.color.colorSecondaryAccent))
                 .setLargeIcon(bookThumbnail)
@@ -232,6 +240,75 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         if(NotificationUtilities.notificationsPending())
             notificationSummary();
     }
+
+    private void sendLoanRequestNotification(Map<String, String> data)
+    {
+        if(!NotificationUtilities.notificationExist(data.get("book")+data.get("chat")))
+            NotificationUtilities.addNotification(data.get("book")+data.get("chat"));
+
+        Intent clickIntent = new Intent(this, ChatActivity.class);
+        clickIntent.putExtra("ChatID", data.get("chat"));
+        clickIntent.putExtra("Username", data.get("sender"));
+        clickIntent.putExtra("ImageURL", data.get("senderPic"));
+        clickIntent.putExtra("BookID", data.get("book"));
+        clickIntent.putExtra("SenderUID", data.get("senderUID"));
+        clickIntent.putExtra("FromNotificationRequest", true);
+
+        PendingIntent clickPendingIntent;
+
+        if (!LifecycleHandler.isApplicationInForeground()) {
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            stackBuilder.addNextIntentWithParentStack(clickIntent);
+            clickPendingIntent = stackBuilder.getPendingIntent((data.get("book")+data.get("chat")).hashCode(), PendingIntent.FLAG_ONE_SHOT);
+        } else {
+            clickPendingIntent = PendingIntent.getActivity(this, (data.get("book")+data.get("chat")).hashCode(), clickIntent,
+                    PendingIntent.FLAG_ONE_SHOT);
+        }
+
+        Bitmap bookThumbnail = null;
+
+        try {
+            bookThumbnail = BitmapFactory.decodeStream(new URL(data.get("bookThumbnail")).openConnection().getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                (data.get("chat")+data.get("book")).hashCode(),
+                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("notificationID", data.get("book")+data.get("chat")),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NotificationUtilities.LOAN_CHANNEL_ID)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setColor(getResources().getColor(R.color.colorSecondaryAccent))
+                .setLargeIcon(bookThumbnail)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(clickPendingIntent)
+                .setDeleteIntent(cancelIntent)
+                .setGroup(FREADOM_GROUP);
+
+        String contentText = String.format(getResources().getString(R.string.loan_request_notification_content), data.get("sender"), data.get("bookTitle"));
+
+        notificationBuilder
+                .setContentTitle(getResources().getString(R.string.loan_request_notification_title))
+                .setContentText(contentText)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(contentText));
+
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify((data.get("book")+data.get("chat")).hashCode(), notificationBuilder.build());
+        if(NotificationUtilities.notificationsPending())
+            notificationSummary();
+    }
+
 
     private void sendNewLoanNotification(Map<String, String> data) {
 
@@ -271,7 +348,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         );
 
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.LOAN_CHANNEL_ID)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NotificationUtilities.LOAN_CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setColor(getResources().getColor(R.color.colorSecondaryAccent))
                 .setLargeIcon(bookThumbnail)
@@ -297,6 +374,74 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
             notificationSummary();
     }
 
+    private void sendLoanEndNotification(Map<String, String> data)
+    {
+        if(!NotificationUtilities.notificationExist(data.get("book")+data.get("chat")))
+            NotificationUtilities.addNotification(data.get("book")+data.get("chat"));
+
+        Intent clickIntent = new Intent(this, ChatActivity.class);
+        clickIntent.putExtra("ChatID", data.get("chat"));
+        clickIntent.putExtra("Username", data.get("sender"));
+        clickIntent.putExtra("ImageURL", data.get("senderPic"));
+        clickIntent.putExtra("BookID", data.get("book"));
+        clickIntent.putExtra("SenderUID", data.get("senderUID"));
+        clickIntent.putExtra("FromNotificationRequest", true);
+
+        PendingIntent clickPendingIntent;
+
+        if (!LifecycleHandler.isApplicationInForeground()) {
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            stackBuilder.addNextIntentWithParentStack(clickIntent);
+            clickPendingIntent = stackBuilder.getPendingIntent((data.get("book")+data.get("chat")).hashCode(), PendingIntent.FLAG_ONE_SHOT);
+        } else {
+            clickPendingIntent = PendingIntent.getActivity(this, (data.get("book")+data.get("chat")).hashCode(), clickIntent,
+                    PendingIntent.FLAG_ONE_SHOT);
+        }
+
+        Bitmap bookThumbnail = null;
+
+        try {
+            bookThumbnail = BitmapFactory.decodeStream(new URL(data.get("bookThumbnail")).openConnection().getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                (data.get("chat")+data.get("book")).hashCode(),
+                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("notificationID", data.get("book")+data.get("chat")),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NotificationUtilities.LOAN_CHANNEL_ID)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setColor(getResources().getColor(R.color.colorSecondaryAccent))
+                .setLargeIcon(bookThumbnail)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(clickPendingIntent)
+                .setDeleteIntent(cancelIntent)
+                .setGroup(FREADOM_GROUP);
+
+        String contentText = String.format(getResources().getString(R.string.loan_end_notification_content), data.get("sender"), data.get("bookTitle"));
+
+        notificationBuilder
+                .setContentTitle(getResources().getString(R.string.loan_end_notification_title))
+                .setContentText(contentText)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(contentText));
+
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify((data.get("book")+data.get("chat")).hashCode(), notificationBuilder.build());
+        if(NotificationUtilities.notificationsPending())
+            notificationSummary();
+    }
+
     private void sendFinishedLoanNotification(Map<String, String> data) {
 
         if(!NotificationUtilities.notificationExist(data.get("book")))
@@ -304,8 +449,8 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         Intent clickIntent = new Intent(this, ReviewActivity.class);
         clickIntent.putExtra(ReviewActivity.Keys.BOOK_ID, data.get("book"));
-        clickIntent.putExtra(ReviewActivity.Keys.REVIEWER_ID, data.get("borrowerUID"));
-        clickIntent.putExtra(ReviewActivity.Keys.REVIEWED_ID, data.get("lenderUID"));
+        clickIntent.putExtra(ReviewActivity.Keys.REVIEWER_ID, data.get("lenderUID"));
+        clickIntent.putExtra(ReviewActivity.Keys.REVIEWED_ID, data.get("reviewerUID"));
         clickIntent.putExtra(ReviewActivity.Keys.NOTIFICATION_CMD, true);
 
         PendingIntent clickPendingIntent;
@@ -337,7 +482,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         );
 
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.LOAN_CHANNEL_ID)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NotificationUtilities.LOAN_CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setColor(getResources().getColor(R.color.colorSecondaryAccent))
                 .setLargeIcon(bookThumbnail)
@@ -365,7 +510,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
     private void notificationSummary()
     {
-        NotificationCompat.Builder summary = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID);
+        NotificationCompat.Builder summary = new NotificationCompat.Builder(this, NotificationUtilities.NEW_MESSAGE_CHANNEL_ID);
 
         Intent clickIntent = new Intent(this, HomePageActivity.class);
         clickIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -397,59 +542,6 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(SUMMARY_KEY, summary.build());
 
-    }
-
-    public void scheduleNotification(String bookID, long endDate)
-    {
-/*
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                getApplicationContext(),
-                (bookID).hashCode()+(int)endDate,
-                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("notificationID", bookID),
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.LOAN_CHANNEL_ID)
-                .setSmallIcon(R.drawable.share_icon)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setSound(defaultSoundUri)
-                .setDeleteIntent(cancelIntent)
-                .setGroup(FREADOM_GROUP)
-                .setContentTitle(getResources().getString(R.string.new_request_notification_title))
-                .setContentText(contentText)
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(contentText));
-
-        Notification reminderNotification = notificationBuilder.build();
-
-        Intent reminderIntent = new Intent(this, DirectReplyReceiver.class);
-        reminderIntent.putExtra("reminderID", bookID.hashCode());
-        reminderIntent.putExtra("reminderNotification", reminderNotification);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, bookID.hashCode(), reminderIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        long futureInMillis = SystemClock.elapsedRealtime() + 10000;
-        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
-
-
-
-
-
-
-        notificationBuilder
-                .setContentTitle(getResources().getString(R.string.new_request_notification_title))
-                .setContentText(contentText)
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(contentText));
-
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
-        if(NotificationUtilities.notificationsPending())
-            notificationSummary();
-*/
     }
 
 }

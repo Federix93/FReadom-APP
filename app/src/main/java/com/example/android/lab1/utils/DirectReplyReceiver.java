@@ -1,5 +1,6 @@
 package com.example.android.lab1.utils;
 
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,18 @@ public class DirectReplyReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        if(intent.hasExtra("alarmID"))
+        {
+            if(!NotificationUtilities.notificationExist(intent.getStringExtra("ChatID")+
+                                                                    intent.getStringExtra("BookID")+
+                                                                    intent.getStringExtra("SenderUID")))
+                NotificationUtilities.addNotification(intent.getStringExtra("ChatID")+
+                                                                intent.getStringExtra("BookID")+
+                                                                intent.getStringExtra("SenderUID"));
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+            notificationManager.notify(intent.getIntExtra("alarmID", 0), (Notification)intent.getParcelableExtra("alarmNotification"));
+        }
 
         if(intent.hasExtra("notificationID"))
         {
