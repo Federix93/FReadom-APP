@@ -346,12 +346,23 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             mActivityState = savedInstanceState.getInt(ACTIVITY_STATE);
             mPhotosPath = savedInstanceState.getStringArrayList(PHOTOS_KEY);
         }
+        // if book is lent return back
+
+
         // check if edit mode
         if (getIntent() != null &&
                 getIntent().hasExtra(BOOK) &&
                 mActivityState == null) {
             // edit book
             mBeforeEditBook = getIntent().getParcelableExtra(BOOK);
+            if (mBeforeEditBook.getLentTo() != null &&
+                    mBeforeEditBook.getLentTo().length() > 0) {
+                Toast.makeText(getApplicationContext(),
+                        R.string.load_book_cant_edit,
+                        Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
             mResultBook = new Book(mBeforeEditBook);
             mActivityState = EDIT_BOOK;
             if (mResultBook.getUserBookPhotosStoragePath() != null)

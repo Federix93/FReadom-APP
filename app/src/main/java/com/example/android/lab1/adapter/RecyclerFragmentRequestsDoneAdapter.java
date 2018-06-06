@@ -12,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -56,6 +55,8 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<RecyclerFragmentRequestsDoneAdapter.MyViewHolder>
         implements AddressResultReciever {
 
+    private OnRemovedCallBack mCallBack;
+
     private List<Book> mBookList;
     private List<User> mUsersOwner;
     private List<String> mCities;
@@ -73,7 +74,8 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
     private boolean bookIsPresent;
     private int counterSize;
 
-    public RecyclerFragmentRequestsDoneAdapter(Activity container, List<Book> listBooks, List<User> users) {
+    public RecyclerFragmentRequestsDoneAdapter(Activity container, List<Book> listBooks, List<User> users,
+                                               @NonNull OnRemovedCallBack removedCallBack) {
         mContainer = container;
         mBookList = listBooks;
         mUsersOwner = users;
@@ -83,7 +85,12 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
         }
         isLent = false;
         bookIsPresent = false;
+        mCallBack = removedCallBack;
         counterSize = 0;
+    }
+
+    public interface OnRemovedCallBack {
+        void positionRemoved(int position);
     }
 
     @NonNull
@@ -240,6 +247,7 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
 
         }
     }
+
     class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
 
         private int position;
@@ -266,6 +274,11 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
                             ownerId = mBookList.get(position).getUid();
                             FirebaseFirestore reqDoneRef = FirebaseFirestore.getInstance();
                             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+                            if (mBookList.size() <= 1) {
+                                mBookList.remove(position);
+                                notifyItemRemoved(position);
+                                mCallBack.positionRemoved(position);
+                            }
                             reqDoneRef.collection("requestsDone").document(firebaseAuth.getUid()).collection("books")
                                     .document(bookId).delete();
 

@@ -17,21 +17,21 @@
         android:id="@+id/no_loans"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:layout_marginTop="48dp"
-        android:layout_marginStart="32dp"
+        android:layout_gravity="center"
         android:layout_marginEnd="32dp"
-        android:visibility="gone"
-        android:layout_gravity="center">
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="48dp"
+        android:padding="16dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/no_loan_message"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:text="@string/no_loan_message"/>
+            android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout
