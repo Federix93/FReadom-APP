@@ -401,7 +401,7 @@ public class ChatActivity extends AppCompatActivity {
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         Chat chat = mutableData.getValue(Chat.class);
                         if (chat != null) {
-                            if (!messages.get(messages.size() - 1).getSenderId().equals(FirebaseAuth.getInstance().getUid())) {
+                            if (!chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())) {
                                 mChatsReference.child(mChatID).child("counter").setValue(0);
                             }
                         }
