@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +80,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
+import static android.view.View.GONE;
 
 public class TabFragment extends Fragment {
 
@@ -92,7 +94,7 @@ public class TabFragment extends Fragment {
     CustomSwipeRefresh mRefreshLayout;
     AppCompatButton mGenreFilterButton;
     AppCompatButton mPositionFilterButton;
-    TextView mYourLibraryAdvice;
+    LinearLayout mYourLibraryAdviceLayout;
     TextView mFirstOtherTextView;
     TextView mSecondOtherTextView;
     ImageView mSearchImageView;
@@ -480,28 +482,23 @@ public class TabFragment extends Fragment {
 
         fragmentContainer = view.findViewById(R.id.fragment_container);
         mYourLibraryRecyclerView = view.findViewById(R.id.rv_fragment_books_library);
-        mYourLibraryAdvice = view.findViewById(R.id.your_library_advice);
+        mYourLibraryAdviceLayout = view.findViewById(R.id.no_library);
 
         final FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
         if (mFirebaseAuth.getUid() != null) {
-            YourLibraryViewModel yourLibraryViewModel = ViewModelProviders.of(this,
-                    new ViewModelFactory(mFirebaseAuth.getUid())).get(YourLibraryViewModel.class);
-            yourLibraryViewModel.getSnapshotLiveData()
-                    .observe(this, new Observer<List<Book>>() {
-                        @Override
-                        public void onChanged(@Nullable List<Book> books) {
-                            if (books != null) {
-                                updateListOfBooks(books);
-                                if (mYourLibraryAdvice.getVisibility() == View.VISIBLE)
-                                    mYourLibraryAdvice.setVisibility(View.GONE);
-                            } else {
-                                mYourLibraryAdvice.setVisibility(View.VISIBLE);
-                            }
+            BooksViewModel booksViewModel = ViewModelProviders.of(this, new ViewModelFactory(mFirebaseAuth.getUid())).get(BooksViewModel.class);
+            booksViewModel.getSnapshotLiveData().observe(this, new Observer<List<Book>>() {
+                @Override
+                public void onChanged(@Nullable List<Book> books) {
+                    if (books != null) {
+                        if (books.size() > 1) {
+                            mYourLibraryAdviceLayout.setVisibility(GONE);
                         }
-                    });
-        } else {
-            mYourLibraryAdvice.setVisibility(View.VISIBLE);
+                        updateListOfBooks(books);
+                    }
+                }
+            });
         }
     }
 

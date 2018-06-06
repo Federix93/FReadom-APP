@@ -16,6 +16,7 @@ import com.example.android.lab1.adapter.RecyclerFragmentLoansAdapter;
 import com.example.android.lab1.model.Book;
 import com.example.android.lab1.model.chatmodels.User;
 import com.example.android.lab1.viewmodel.BorrowedBooksViewModel;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -57,34 +58,39 @@ public class BorrowedFragmentItem extends Fragment {
 
         mAdapter = new RecyclerFragmentLoansAdapter(new ArrayList<Book>(), mUserOwners);
         mRecyclerView.setAdapter(mAdapter);
-        BorrowedBooksViewModel borrowedBooksViewModel = ViewModelProviders.of(getActivity()).get(BorrowedBooksViewModel.class);
-        borrowedBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
-            @Override
-            public void onChanged(@android.support.annotation.Nullable List<Book> books) {
-                if(books != null) {
-                    mNoLoansLayout.setVisibility(GONE);
-                    mNoRequestRecLayout.setVisibility(View.GONE);
-                    mNoRequestDoneLayout.setVisibility(GONE);
 
-                    final List<Book> listBooks = new ArrayList<>();
-                    for (final Book b : books) {
-                        FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                listBooks.add(b);
-                                mUserOwners.add(dataSnapshot.getValue(User.class));
-                                mAdapter.setItems(listBooks, mUserOwners);
-                                mAdapter.notifyDataSetChanged();                            }
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            if (getActivity() != null) {
+                BorrowedBooksViewModel borrowedBooksViewModel = ViewModelProviders.of(getActivity()).get(BorrowedBooksViewModel.class);
+                borrowedBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
+                    @Override
+                    public void onChanged(@android.support.annotation.Nullable List<Book> books) {
+                        if(books != null) {
+                            mNoLoansLayout.setVisibility(GONE);
+                            mNoRequestRecLayout.setVisibility(View.GONE);
+                            mNoRequestDoneLayout.setVisibility(GONE);
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                            final List<Book> listBooks = new ArrayList<>();
+                            for (final Book b : books) {
+                                FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        listBooks.add(b);
+                                        mUserOwners.add(dataSnapshot.getValue(User.class));
+                                        mAdapter.setItems(listBooks, mUserOwners);
+                                        mAdapter.notifyDataSetChanged();                            }
 
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
                             }
-                        });
+                        }
                     }
-                }
+                });
             }
-        });
+        }
         if (mAdapter.getItemCount() == 0) {
             mNoLoansLayout.setVisibility(View.VISIBLE);
             mNoRequestRecLayout.setVisibility(View.GONE);

@@ -31,8 +31,7 @@
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
             android:gravity="center"
-            android:text="Non hai prestiti in corso. Una volta che avrai raggiunto l'accordo con il proprietario del libro qui troverai tutte le informazioni per ricordarti quando restiture il libro"/>
-
+            android:text="@string/no_loan_message"/>
     </LinearLayout>
 
     <LinearLayout
@@ -53,8 +52,7 @@
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
             android:gravity="center"
-            android:text="Non hai ancora ricevuto richieste per i tuoi libri. Più libri caricherai e più richieste potrai ricevere!"/>
-
+            android:text="@string/no_req_rec_message"/>
     </LinearLayout>
 
     <LinearLayout
@@ -75,8 +73,7 @@
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
             android:gravity="center"
-            android:text="Non hai ancora effettuato richieste. Contatta gli utenti tramite il tasto 'Richiedi' e parla con loro per ricevere il tuo primo libro"/>
-
+            android:text="@string/no_req_done_message"/>
     </LinearLayout>
 
 

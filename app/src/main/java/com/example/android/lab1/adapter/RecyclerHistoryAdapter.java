@@ -136,10 +136,12 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
             int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
             Drawable res = mContext.getResources().getDrawable(imageResource);
             mHistoryArrow.setImageDrawable(res);
-            if (book.getWebThumbnail() != null)
-                Glide.with(mContext).load(book.getWebThumbnail())
-                        .apply(new RequestOptions().centerCrop())
-                        .into(mHistoryBookThumbnail);
+            if (book.getWebThumbnail() != null) {
+                if (!((Activity)mContext).isFinishing())
+                    Glide.with(mContext).load(book.getWebThumbnail())
+                            .apply(new RequestOptions().centerCrop())
+                            .into(mHistoryBookThumbnail);
+            }
 
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
             firebaseFirestore.collection("users").document(book.getLentTo()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -148,10 +150,12 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
                     if (documentSnapshot != null && documentSnapshot.exists()) {
                         User user = documentSnapshot.toObject(User.class);
                         mHistoryUser.setText(user.getUsername());
-                        if (user.getImage() != null)
-                            Glide.with(mContext).load(user.getImage())
-                                    .apply(bitmapTransform(new CircleCrop()))
-                                    .into(mHistoryUserImage);
+                        if (user.getImage() != null) {
+                            if (!((Activity)mContext).isFinishing())
+                                Glide.with(mContext).load(user.getImage())
+                                        .apply(bitmapTransform(new CircleCrop()))
+                                        .into(mHistoryUserImage);
+                        }
                     }
                 }
             });
@@ -193,8 +197,6 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
                     }
                 }
             });
-
-
         }
     }
 
@@ -230,10 +232,13 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
             int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
             Drawable res = mContext.getResources().getDrawable(imageResource);
             mHistoryArrow.setImageDrawable(res);
-            if (book.getWebThumbnail() != null)
-                Glide.with(mContext).load(book.getWebThumbnail())
-                        .apply(new RequestOptions().centerCrop())
-                        .into(mHistoryBookThumbnail);
+            if (book.getWebThumbnail() != null) {
+                if (!((Activity)mContext).isFinishing())
+                    Glide.with(mContext).load(book.getWebThumbnail())
+                            .apply(new RequestOptions().centerCrop())
+                            .into(mHistoryBookThumbnail);
+            }
+
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
             firebaseFirestore.collection("users").document(book.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
@@ -241,10 +246,12 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
                     if (documentSnapshot != null && documentSnapshot.exists()) {
                         User user = documentSnapshot.toObject(User.class);
                         mHistoryUser.setText(user.getUsername());
-                        if (user.getImage() != null)
-                            Glide.with(mContext).load(user.getImage())
-                                    .apply(bitmapTransform(new CircleCrop()))
-                                    .into(mHistoryUserImage);
+                        if (user.getImage() != null) {
+                            if (!((Activity)mContext).isFinishing())
+                                Glide.with(mContext).load(user.getImage())
+                                        .apply(bitmapTransform(new CircleCrop()))
+                                        .into(mHistoryUserImage);
+                        }
                     }
                 }
             });
@@ -263,6 +270,7 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
                         for (Review r : reviews) {
                             if (r.getReviewerId().equals(FirebaseAuth.getInstance().getUid())) {
                                 mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_published));
+                                mHistoryLeaveRating.setOnClickListener(null);
                             } else {
                                 mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_exchange));
                                 mHistoryLeaveRating.setOnClickListener(new View.OnClickListener() {

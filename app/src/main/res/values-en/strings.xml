@@ -204,8 +204,9 @@
     <string name="may_have_new_messages">Potresti avere nuovi messaggi</string>
     <string name="no_books_lent_or_borrowed">You have not lent or borrowed any book. Here you will find your exchange history.</string>
     <string name="attention">Warning</string>
-    <string name="start">Start</string>
-    <string name="next">Next</string>
+    <string name="start">START</string>
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
     <string name="saving">Saving...</string>
     <string name="already_lent_to_another_user_message">This book is already lent to another user. It should be available again to %1$s </string>
     <string name="insert_photo">Insert photo</string>
