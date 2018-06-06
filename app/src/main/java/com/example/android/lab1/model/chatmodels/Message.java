@@ -1,19 +1,18 @@
 package com.example.android.lab1.model.chatmodels;
 
-import android.net.Uri;
-
-import java.util.Date;
+import com.google.firebase.firestore.ServerTimestamp;
 
 public class Message {
 
     private String mTextMessage;
     private String mPhotoURL;
     private String mSenderId;
-    private long mTimestamp;
+    @ServerTimestamp
+    private Long mTimestamp;
 
     public Message(){}
 
-    public Message(String senderId, String pTextMessage, long pTimestamp, String pPhotoURL){
+    public Message(String senderId, String pTextMessage, Long pTimestamp, String pPhotoURL) {
         mSenderId = senderId;
         mTextMessage = pTextMessage;
         mTimestamp = pTimestamp;
@@ -28,9 +27,11 @@ public class Message {
         mPhotoURL = photoURL;
     }
 
+    @ServerTimestamp
     public long getTimestamp() {
         return mTimestamp;
     }
+
 
     public void setTimestamp(long pTimestamp) { this.mTimestamp = pTimestamp; }
 

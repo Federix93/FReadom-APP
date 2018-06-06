@@ -16,7 +16,6 @@ import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -27,6 +26,7 @@ import android.widget.TextView;
 import com.example.android.lab1.NetworkReceiver;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.Address;
+import com.example.android.lab1.utils.Constants;
 import com.example.android.lab1.utils.FetchAddressIntentService;
 import com.example.android.lab1.utils.Utilities;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -147,7 +147,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         mNetworkReceiver = new NetworkReceiver();
 
         manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 Utilities.enableLoc(PositionActivity.this);
@@ -155,7 +155,7 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
         } else {
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
+        }*/
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -200,9 +200,11 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PLAY_SERVICES_RESOLUTION_REQUEST) {
+        if (requestCode == Constants.PLAY_SERVICES_RESOLUTION_REQUEST) {
             if (resultCode == RESULT_OK)
                 getCurrentLocation();
+            else
+                Utilities.enableLoc(PositionActivity.this);
         } else if (requestCode == ADDRESS_SEARCH_BAR_REQUEST) {
             if (resultCode == RESULT_OK) {
                 if (!mSearchCities) {
@@ -280,7 +282,8 @@ public class PositionActivity extends AppCompatActivity implements OnMapReadyCal
 
     @SuppressLint("MissingPermission")
     private void getCurrentLocation() {
-        if (Utilities.checkPermissionActivity(mSelf, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (Utilities.checkPermissionActivity(PositionActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION)) {
             if (!Utilities.isLocationEnabled(getApplicationContext()))
                 Utilities.enableLoc(PositionActivity.this);
             else

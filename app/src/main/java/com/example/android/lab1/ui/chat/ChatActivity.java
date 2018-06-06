@@ -88,26 +88,28 @@ import static android.view.View.VISIBLE;
 
 public class ChatActivity extends AppCompatActivity {
 
+    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
+    private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
+    private final static String ALGOLIA_BOOK_INDEX = "books";
+    private final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
+    private final int RESULT_LOAD_IMAGE = 1;
+    private final int CAPTURE_IMAGE = 0;
     Toolbar mToolbar;
     FirebaseDatabase mFirebaseDatabase;
-
     MessagesViewModel messagesViewModel = null;
     DatabaseReference mChatsReference;
     DatabaseReference mMessagesReference;
     DatabaseReference mConversationsReference;
-
     FirebaseAuth mFirebaseAuth;
     FirebaseStorage mFirebaseStorage;
     FirebaseFirestore mFirebaseFirestore;
     StorageReference mChatPhotosStorageReference;
-
     String mChatID;
     String mUsername;
     String mPhotoProfileURL;
     String mBookID;
     String mOtherPerson;
     String mSenderUID;
-
     RecyclerView mMessagesRecyclerView;
     EditText mMessageEditText;
     Button mSendButton;
@@ -117,7 +119,6 @@ public class ChatActivity extends AppCompatActivity {
     TextView mNoMessagesOwnerTextView;
     TextView mNoMessagesReceiverTextView;
     LinearLayout mInputTextLinearLayout;
-
     AppCompatButton mStartLoanButton;
     AppCompatButton mEndLoanButton;
     LinearLayout mInfoStartLoanLayout;
@@ -131,23 +132,13 @@ public class ChatActivity extends AppCompatActivity {
     ConstraintLayout mEndLoanLayout;
     ConstraintLayout mOtherPersonInfoLayout;
     ConstraintLayout mOtherPersonAlreadyLentLayout;
-
     ChildEventListener mChildEventListener;
-    private ChatMessageAdapter mChatArrayAdapter;
-
     String dataTitle, dataMessage;
-    private final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
-
-    private final int RESULT_LOAD_IMAGE = 1;
-    private final int CAPTURE_IMAGE = 0;
-
+    String mPhotoPath;
+    private ChatMessageAdapter mChatArrayAdapter;
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
-    String mPhotoPath;
     private boolean isObservable = true;
-
-    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
-
 
     private void setInputLinearLayout() {
 
@@ -177,7 +168,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Message chatMessage = new Message(mFirebaseAuth.getUid(), mMessageEditText.getText().toString(),
-                        System.currentTimeMillis() / 1000, null);
+                        null, null);
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);
 
                 final String messageWritten = mMessageEditText.getText().toString();
@@ -272,7 +263,6 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-
     public File saveThumbnail() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -302,9 +292,6 @@ public class ChatActivity extends AppCompatActivity {
             startActivityForResult(cameraIntent, CAPTURE_IMAGE);
         }
     }
-
-    private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
-    private final static String ALGOLIA_BOOK_INDEX = "books";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -349,9 +336,8 @@ public class ChatActivity extends AppCompatActivity {
         mBookID = getIntent().getStringExtra("BookID");
         mSenderUID = getIntent().getStringExtra("SenderUID");
 
-        if(getIntent().getBooleanExtra("FromNotification", false))
-        {
-            if(NotificationUtilities.notificationExist(mChatID))
+        if (getIntent().getBooleanExtra("FromNotification", false)) {
+            if (NotificationUtilities.notificationExist(mChatID))
                 NotificationUtilities.removeNotification(mChatID, this);
         }
 
@@ -401,8 +387,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (mChatArrayAdapter == null) {
                     mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
                     mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
-                }
-                else{
+                } else {
                     mChatArrayAdapter.setItems(messages);
                     mChatArrayAdapter.notifyDataSetChanged();
                 }
@@ -412,7 +397,7 @@ public class ChatActivity extends AppCompatActivity {
         };
         messagesViewModel.getSnapshotLiveData().observe(this, messageObserver);
 
-        if(mChatID != null) {
+        if (mChatID != null) {
             final DatabaseReference dbRef = mMessagesReference.child(mChatID);
             ValueEventListener valueEventListener = new ValueEventListener() {
                 @Override
@@ -441,6 +426,92 @@ public class ChatActivity extends AppCompatActivity {
                                         if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
                                             mOtherPersonInfoLayout.setVisibility(GONE);
 
+                                        mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                    Book book = documentSnapshot.toObject(Book.class);
+                                                    if (book != null && book.getLentTo() != null) {
+                                                        if (book.getLentTo().equals(mFirebaseAuth.getUid())) {
+                                                            //SONO LA PERSONA RICHIEDENTE CHE HA RICEVUTO IL LIBRO
+                                                            if (mOtherPersonInfoLayout.getVisibility() == GONE) {
+                                                                String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+                                                                String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                                                mLoanStartedText.setText(String.format(getResources().getString(R.string.loan_started_from), dateFrom));
+                                                                mLoanToBeEndedText.setText(String.format(getResources().getString(R.string.loan_to_be_closed), dateTo));
+                                                                mOtherPersonInfoLayout.setVisibility(VISIBLE);
+                                                            }
+                                                        } else {
+                                                            //SONO UN RICHIEDENTE AL QUALE IL LIBRO NON E' STATO DATO
+                                                            mOtherPersonInfoLayout.setVisibility(GONE);
+                                                            mEndLoanLayout.setVisibility(GONE);
+                                                            mStartLoanLayout.setVisibility(GONE);
+                                                            String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                                            mAlreadyLentMessage.setText(String.format(getResources().getString(R.string.already_lent_to_another_user_message), dateTo));
+                                                            mOtherPersonAlreadyLentLayout.setVisibility(VISIBLE);
+                                                            mInputTextLinearLayout.setVisibility(View.VISIBLE);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        //SONO IL BOOK OWNER
+                                        mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                    Book book = documentSnapshot.toObject(Book.class);
+                                                    if (book != null && book.getLentTo() != null) {
+                                                        if (book.getLentTo().equals(mOtherPerson)) {
+                                                            mStartLoanLayout.setVisibility(GONE);
+                                                            mOtherPersonAlreadyLentLayout.setVisibility(GONE);
+                                                            mOtherPersonInfoLayout.setVisibility(GONE);
+
+                                                            String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
+                                                            String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                                            mFromText.setText(String.format(getResources().getString(R.string.loan_started_from), dateFrom));
+                                                            mToText.setText(String.format(getResources().getString(R.string.loan_to_be_closed_owner), dateTo));
+                                                            mEndLoanLayout.setVisibility(View.VISIBLE);
+                                                        } else {
+                                                            mStartLoanLayout.setVisibility(GONE);
+                                                            mEndLoanLayout.setVisibility(GONE);
+                                                            mOtherPersonAlreadyLentLayout.setVisibility(GONE);
+                                                            mOtherPersonInfoLayout.setVisibility(GONE);
+                                                        }
+                                                    }
+                                                } else {
+                                                    mStartLoanLayout.setVisibility(View.VISIBLE);
+                                                    if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                        mEndLoanLayout.setVisibility(GONE);
+                                                    if (mOtherPersonAlreadyLentLayout.getVisibility() == VISIBLE)
+                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
+                                                    if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
+                                                        mOtherPersonInfoLayout.setVisibility(GONE);
+                                                }
+                                            }
+                                        });
+
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
+                        setInputLinearLayout();
+                        dbRef.removeEventListener(this);
+
+                    } else {
+                        mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                mOtherPerson = (String) dataSnapshot.getValue();
+
+                                if (mFirebaseAuth.getUid().equals(mOtherPerson)) {
                                     mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
                                         public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -448,7 +519,6 @@ public class ChatActivity extends AppCompatActivity {
                                                 Book book = documentSnapshot.toObject(Book.class);
                                                 if (book != null && book.getLentTo() != null) {
                                                     if (book.getLentTo().equals(mFirebaseAuth.getUid())) {
-                                                        //SONO LA PERSONA RICHIEDENTE CHE HA RICEVUTO IL LIBRO
                                                         if (mOtherPersonInfoLayout.getVisibility() == GONE) {
                                                             String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
                                                             String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
@@ -456,22 +526,49 @@ public class ChatActivity extends AppCompatActivity {
                                                             mLoanToBeEndedText.setText(String.format(getResources().getString(R.string.loan_to_be_closed), dateTo));
                                                             mOtherPersonInfoLayout.setVisibility(VISIBLE);
                                                         }
+
+                                                        if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                            mEndLoanLayout.setVisibility(GONE);
+                                                        if (mStartLoanLayout.getVisibility() == VISIBLE)
+                                                            mStartLoanLayout.setVisibility(GONE);
+                                                        if (mOtherPersonAlreadyLentLayout.getVisibility() == VISIBLE)
+                                                            mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                     } else {
-                                                        //SONO UN RICHIEDENTE AL QUALE IL LIBRO NON E' STATO DATO
-                                                        mOtherPersonInfoLayout.setVisibility(GONE);
-                                                        mEndLoanLayout.setVisibility(GONE);
-                                                        mStartLoanLayout.setVisibility(GONE);
-                                                        String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
-                                                        mAlreadyLentMessage.setText(String.format(getResources().getString(R.string.already_lent_to_another_user_message), dateTo));
-                                                        mOtherPersonAlreadyLentLayout.setVisibility(VISIBLE);
-                                                        mInputTextLinearLayout.setVisibility(View.VISIBLE);
+                                                        if (mOtherPersonAlreadyLentLayout.getVisibility() == GONE) {
+                                                            String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
+                                                            mAlreadyLentMessage.setText(String.format(getResources().getString(R.string.already_lent_to_another_user_message), dateTo));
+                                                            mOtherPersonAlreadyLentLayout.setVisibility(VISIBLE);
+                                                            mInputTextLinearLayout.setVisibility(View.GONE);
+                                                        }
+
+                                                        if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                                            mEndLoanLayout.setVisibility(GONE);
+                                                        if (mStartLoanLayout.getVisibility() == VISIBLE)
+                                                            mStartLoanLayout.setVisibility(GONE);
+                                                        if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
+                                                            mOtherPersonInfoLayout.setVisibility(GONE);
                                                     }
                                                 }
                                             }
                                         }
                                     });
+                                /*if (mEndLoanLayout.getVisibility() == VISIBLE)
+                                    mEndLoanLayout.setVisibility(GONE);
+                                if (mStartLoanLayout.getVisibility() == VISIBLE)
+                                    mStartLoanLayout.setVisibility(GONE);
+                                if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
+                                    mOtherPersonInfoLayout.setVisibility(GONE);
+                                if (mOtherPersonAlreadyLentLayout.getVisibility() == VISIBLE)
+                                    mOtherPersonAlreadyLentLayout.setVisibility(GONE);*/
+
+                                    mInputTextLinearLayout.setVisibility(GONE);
+                                    mNoMessagesReceiverTextView.setVisibility(View.VISIBLE);
                                 } else {
-                                    //SONO IL BOOK OWNER
+                                    if (mInputTextLinearLayout.getVisibility() == GONE) {
+                                        mInputTextLinearLayout.setVisibility(View.VISIBLE);
+                                    }
+                                    mNoMessagesOwnerTextView.setVisibility(View.VISIBLE);
+
                                     mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
                                         public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -479,9 +576,11 @@ public class ChatActivity extends AppCompatActivity {
                                                 Book book = documentSnapshot.toObject(Book.class);
                                                 if (book != null && book.getLentTo() != null) {
                                                     if (book.getLentTo().equals(mOtherPerson)) {
+                                                        //SONO IL PROPRIETARIO E HO APERTO UNA CONVERSAZIONE CON LA PERSONA
+                                                        //ALLA QUALE HO PRESTATO IL LIBRO
                                                         mStartLoanLayout.setVisibility(GONE);
-                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                         mOtherPersonInfoLayout.setVisibility(GONE);
+                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
 
                                                         String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
                                                         String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
@@ -489,12 +588,15 @@ public class ChatActivity extends AppCompatActivity {
                                                         mToText.setText(String.format(getResources().getString(R.string.loan_to_be_closed_owner), dateTo));
                                                         mEndLoanLayout.setVisibility(View.VISIBLE);
                                                     } else {
+                                                        //SONO IL PROPRIETARIO E HO APERTO UNA CONVERSAZIONE CON UN'ALTRA PERSONA DIVERSA DA
+                                                        // QUELLA ALLA QUALE HO PRESTATO IL LIBRO
                                                         mStartLoanLayout.setVisibility(GONE);
                                                         mEndLoanLayout.setVisibility(GONE);
-                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                         mOtherPersonInfoLayout.setVisibility(GONE);
+                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                     }
                                                 }
+
                                             } else {
                                                 mStartLoanLayout.setVisibility(View.VISIBLE);
                                                 if (mEndLoanLayout.getVisibility() == VISIBLE)
@@ -506,137 +608,20 @@ public class ChatActivity extends AppCompatActivity {
                                             }
                                         }
                                     });
-
+                                    setInputLinearLayout();
                                 }
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
-
-                    setInputLinearLayout();
-                    dbRef.removeEventListener(this);
-
-                } else {
-                    mConversationsReference.child(mBookID).child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            mOtherPerson = (String) dataSnapshot.getValue();
-
-                            if (mFirebaseAuth.getUid().equals(mOtherPerson)) {
-                                mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                        if (documentSnapshot != null && documentSnapshot.exists()){
-                                            Book book = documentSnapshot.toObject(Book.class);
-                                            if (book != null && book.getLentTo() != null) {
-                                                if (book.getLentTo().equals(mFirebaseAuth.getUid())) {
-                                                    if (mOtherPersonInfoLayout.getVisibility() == GONE) {
-                                                        String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
-                                                        String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
-                                                        mLoanStartedText.setText(String.format(getResources().getString(R.string.loan_started_from), dateFrom));
-                                                        mLoanToBeEndedText.setText(String.format(getResources().getString(R.string.loan_to_be_closed), dateTo));
-                                                        mOtherPersonInfoLayout.setVisibility(VISIBLE);
-                                                    }
-
-                                                    if (mEndLoanLayout.getVisibility() == VISIBLE)
-                                                        mEndLoanLayout.setVisibility(GONE);
-                                                    if (mStartLoanLayout.getVisibility() == VISIBLE)
-                                                        mStartLoanLayout.setVisibility(GONE);
-                                                    if (mOtherPersonAlreadyLentLayout.getVisibility() == VISIBLE)
-                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
-                                                } else {
-                                                    if (mOtherPersonAlreadyLentLayout.getVisibility() == GONE) {
-                                                        String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
-                                                        mAlreadyLentMessage.setText(String.format(getResources().getString(R.string.already_lent_to_another_user_message), dateTo));
-                                                        mOtherPersonAlreadyLentLayout.setVisibility(VISIBLE);
-                                                        mInputTextLinearLayout.setVisibility(View.GONE);
-                                                    }
-
-                                                    if (mEndLoanLayout.getVisibility() == VISIBLE)
-                                                        mEndLoanLayout.setVisibility(GONE);
-                                                    if (mStartLoanLayout.getVisibility() == VISIBLE)
-                                                        mStartLoanLayout.setVisibility(GONE);
-                                                    if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
-                                                        mOtherPersonInfoLayout.setVisibility(GONE);
-                                                }
-                                            }
-                                        }
-                                    }
-                                });
-                                /*if (mEndLoanLayout.getVisibility() == VISIBLE)
-                                    mEndLoanLayout.setVisibility(GONE);
-                                if (mStartLoanLayout.getVisibility() == VISIBLE)
-                                    mStartLoanLayout.setVisibility(GONE);
-                                if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
-                                    mOtherPersonInfoLayout.setVisibility(GONE);
-                                if (mOtherPersonAlreadyLentLayout.getVisibility() == VISIBLE)
-                                    mOtherPersonAlreadyLentLayout.setVisibility(GONE);*/
-
-                                mInputTextLinearLayout.setVisibility(GONE);
-                                mNoMessagesReceiverTextView.setVisibility(View.VISIBLE);
-                            } else {
-                                if (mInputTextLinearLayout.getVisibility() == GONE) {
-                                    mInputTextLinearLayout.setVisibility(View.VISIBLE);
-                                }
-                                mNoMessagesOwnerTextView.setVisibility(View.VISIBLE);
-
-                                mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                        if (documentSnapshot != null && documentSnapshot.exists()) {
-                                            Book book = documentSnapshot.toObject(Book.class);
-                                            if (book != null && book.getLentTo() != null) {
-                                                if (book.getLentTo().equals(mOtherPerson)){
-                                                    //SONO IL PROPRIETARIO E HO APERTO UNA CONVERSAZIONE CON LA PERSONA
-                                                    //ALLA QUALE HO PRESTATO IL LIBRO
-                                                    mStartLoanLayout.setVisibility(GONE);
-                                                    mOtherPersonInfoLayout.setVisibility(GONE);
-                                                    mOtherPersonAlreadyLentLayout.setVisibility(GONE);
-
-                                                    String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
-                                                    String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
-                                                    mFromText.setText(String.format(getResources().getString(R.string.loan_started_from), dateFrom));
-                                                    mToText.setText(String.format(getResources().getString(R.string.loan_to_be_closed_owner), dateTo));
-                                                    mEndLoanLayout.setVisibility(View.VISIBLE);
-                                                } else {
-                                                    //SONO IL PROPRIETARIO E HO APERTO UNA CONVERSAZIONE CON UN'ALTRA PERSONA DIVERSA DA
-                                                    // QUELLA ALLA QUALE HO PRESTATO IL LIBRO
-                                                    mStartLoanLayout.setVisibility(GONE);
-                                                    mEndLoanLayout.setVisibility(GONE);
-                                                    mOtherPersonInfoLayout.setVisibility(GONE);
-                                                    mOtherPersonAlreadyLentLayout.setVisibility(GONE);
-                                                }
-                                            }
-
-                                        } else {
-                                            mStartLoanLayout.setVisibility(View.VISIBLE);
-                                            if (mEndLoanLayout.getVisibility() == VISIBLE)
-                                                mEndLoanLayout.setVisibility(GONE);
-                                            if (mOtherPersonAlreadyLentLayout.getVisibility() == VISIBLE)
-                                                mOtherPersonAlreadyLentLayout.setVisibility(GONE);
-                                            if (mOtherPersonInfoLayout.getVisibility() == VISIBLE)
-                                                mOtherPersonInfoLayout.setVisibility(GONE);
-                                        }
-                                    }
-                                });
-                                setInputLinearLayout();
                             }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
+                        });
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
                 }
             };
@@ -686,14 +671,14 @@ public class ChatActivity extends AppCompatActivity {
                                         final DocumentReference docHistoryRef = mFirebaseFirestore.collection("history").document();
                                         final String id = docHistoryRef.getId();
 
-                                        final DocumentReference docLoansRef =  mFirebaseFirestore.collection("loans").document(mBookID);
+                                        final DocumentReference docLoansRef = mFirebaseFirestore.collection("loans").document(mBookID);
                                         mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                             @Override
                                             public void onSuccess(DocumentSnapshot documentSnapshot) {
                                                 if (documentSnapshot != null && documentSnapshot.exists()) {
                                                     Book book = documentSnapshot.toObject(Book.class);
                                                     if (book != null) {
-                                                        long time= System.currentTimeMillis();
+                                                        long time = System.currentTimeMillis();
                                                         book.setLoanEnd(time);
                                                         docHistoryRef.set(book, SetOptions.merge());
                                                         DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(book.getBookID());
@@ -703,7 +688,7 @@ public class ChatActivity extends AppCompatActivity {
                                                         setBookLoanAlgolia(null);
                                                         docBookRef.set(book, SetOptions.merge());
                                                         docLoansRef.delete();
-                                                        if(progressDialogHolder.isProgressDialogShowing())
+                                                        if (progressDialogHolder.isProgressDialogShowing())
                                                             progressDialogHolder.dismissDialog();
                                                         RatingActivityOpener ratingActivityOpener = new RatingActivityOpener(ChatActivity.this, mFirebaseAuth.getUid(), mOtherPerson, book.getBookID());
                                                         ratingActivityOpener.onClick(v);
@@ -802,7 +787,7 @@ public class ChatActivity extends AppCompatActivity {
                                                         reqReceived.delete();
                                                         Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                                                         boolean startLoan = true;
-                                                        if(progressDialogHolder.isProgressDialogShowing())
+                                                        if (progressDialogHolder.isProgressDialogShowing())
                                                             progressDialogHolder.dismissDialog();
                                                         intent.putExtra("LoanStart", startLoan);
                                                         startActivity(intent);
@@ -829,7 +814,7 @@ public class ChatActivity extends AppCompatActivity {
                     intent.putExtra("LoanEnd", loanEnd);
                     startActivity(intent);
                     this.finish();
-                } else if (resultCode == RESULT_CANCELED){
+                } else if (resultCode == RESULT_CANCELED) {
                     Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
                     startActivity(intent);
                     this.finish();
