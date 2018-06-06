@@ -461,7 +461,7 @@ public class BookDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, Uri.parse("http://madmad.com/book/" + mBook.getBookID()).toString());
+                sendIntent.putExtra(Intent.EXTRA_TEXT, Uri.parse("http://freadom.com/book/" + mBook.getBookID()).toString());
                 sendIntent.setType("text/plain");
                 startActivity(sendIntent);
             }
