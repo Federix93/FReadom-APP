@@ -887,7 +887,7 @@ public class ChatActivity extends AppCompatActivity {
 
                         @Override
                         public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
+                            Log.d("LULLO", databaseError.getMessage());
                         }
                     });
                     /*mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
