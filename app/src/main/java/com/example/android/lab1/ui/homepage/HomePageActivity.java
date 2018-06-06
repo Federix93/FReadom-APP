@@ -291,9 +291,6 @@ public class HomePageActivity extends AppCompatActivity
                     NotificationUtilities.removeNotification(getIntent().getStringExtra("bookLent"), this, false);
             }
         }
-        if (getIntent().getBooleanExtra("LoanInit", false)) {
-            Toast.makeText(getApplicationContext(),"Tutto bene", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void fabAppears() {
