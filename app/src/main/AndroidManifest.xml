@@ -165,13 +165,6 @@
             android:enabled="true"
             android:exported="false" />
 
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_star_full_24dp" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorSecondaryAccent" />
-
         <activity android:name=".ui.ReviewActivity" />
         <activity android:name=".ui.homepage.MoreActivity" />
         <activity

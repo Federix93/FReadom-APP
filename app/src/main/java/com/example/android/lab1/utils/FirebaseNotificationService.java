@@ -1,11 +1,15 @@
 package com.example.android.lab1.utils;
 
+import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.RemoteInput;
@@ -94,7 +98,7 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
                 .build();
 
         NotificationCompat.Action action =
-                new NotificationCompat.Action.Builder(R.drawable.share_icon,
+                new NotificationCompat.Action.Builder(R.drawable.notification_icon,
                         getResources().getString(R.string.reply), replyPendingIntent)
                         .addRemoteInput(remoteInput)
                         .build();
@@ -120,7 +124,8 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID)
-                .setSmallIcon(R.drawable.share_icon)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setColor(getResources().getColor(R.color.colorSecondaryAccent))
                 .setLargeIcon(userImage)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
@@ -203,7 +208,8 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID)
-                .setSmallIcon(R.drawable.share_icon)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setColor(getResources().getColor(R.color.colorSecondaryAccent))
                 .setLargeIcon(bookThumbnail)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
@@ -225,42 +231,6 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
         if(NotificationUtilities.notificationsPending())
             notificationSummary();
-    }
-
-    private void notificationSummary()
-    {
-        NotificationCompat.Builder summary = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID);
-
-        Intent clickIntent = new Intent(this, HomePageActivity.class);
-        clickIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        PendingIntent clickPendingIntent;
-        if (!LifecycleHandler.isApplicationInForeground()) {
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-            stackBuilder.addNextIntentWithParentStack(clickIntent);
-            clickPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
-        } else {
-            clickPendingIntent = PendingIntent.getActivity(this, 0, clickIntent,
-                    PendingIntent.FLAG_ONE_SHOT);
-        }
-
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                getApplicationContext(),
-                (SUMMARY_KEY+"x").hashCode(),
-                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("summaryID", SUMMARY_KEY),
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        summary.setContentText(getString(R.string.may_have_new_messages))
-                .setSmallIcon(R.drawable.ic_world_24dp)
-                .setContentIntent(clickPendingIntent)
-                .setGroup(FREADOM_GROUP)
-                .setContentIntent(cancelIntent)
-                .setGroupSummary(true);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(SUMMARY_KEY, summary.build());
-
     }
 
     private void sendNewLoanNotification(Map<String, String> data) {
@@ -302,7 +272,8 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.LOAN_CHANNEL_ID)
-                .setSmallIcon(R.drawable.share_icon)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setColor(getResources().getColor(R.color.colorSecondaryAccent))
                 .setLargeIcon(bookThumbnail)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
@@ -367,7 +338,8 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.LOAN_CHANNEL_ID)
-                .setSmallIcon(R.drawable.share_icon)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setColor(getResources().getColor(R.color.colorSecondaryAccent))
                 .setLargeIcon(bookThumbnail)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
@@ -389,6 +361,95 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
         notificationManager.notify(data.get("book").hashCode(), notificationBuilder.build());
         if(NotificationUtilities.notificationsPending())
             notificationSummary();
+    }
+
+    private void notificationSummary()
+    {
+        NotificationCompat.Builder summary = new NotificationCompat.Builder(this, Utilities.NEW_MESSAGE_CHANNEL_ID);
+
+        Intent clickIntent = new Intent(this, HomePageActivity.class);
+        clickIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent clickPendingIntent;
+        if (!LifecycleHandler.isApplicationInForeground()) {
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            stackBuilder.addNextIntentWithParentStack(clickIntent);
+            clickPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
+        } else {
+            clickPendingIntent = PendingIntent.getActivity(this, 0, clickIntent,
+                    PendingIntent.FLAG_ONE_SHOT);
+        }
+
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                (SUMMARY_KEY+"x").hashCode(),
+                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("summaryID", SUMMARY_KEY),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        summary.setContentText(getString(R.string.may_have_new_messages))
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentIntent(clickPendingIntent)
+                .setGroup(FREADOM_GROUP)
+                .setContentIntent(cancelIntent)
+                .setGroupSummary(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(SUMMARY_KEY, summary.build());
+
+    }
+
+    public void scheduleNotification(String bookID, long endDate)
+    {
+/*
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                (bookID).hashCode()+(int)endDate,
+                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("notificationID", bookID),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Utilities.LOAN_CHANNEL_ID)
+                .setSmallIcon(R.drawable.share_icon)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setSound(defaultSoundUri)
+                .setDeleteIntent(cancelIntent)
+                .setGroup(FREADOM_GROUP)
+                .setContentTitle(getResources().getString(R.string.new_request_notification_title))
+                .setContentText(contentText)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(contentText));
+
+        Notification reminderNotification = notificationBuilder.build();
+
+        Intent reminderIntent = new Intent(this, DirectReplyReceiver.class);
+        reminderIntent.putExtra("reminderID", bookID.hashCode());
+        reminderIntent.putExtra("reminderNotification", reminderNotification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, bookID.hashCode(), reminderIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + 10000;
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+
+
+
+
+
+
+        notificationBuilder
+                .setContentTitle(getResources().getString(R.string.new_request_notification_title))
+                .setContentText(contentText)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(contentText));
+
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(data.get("chat").hashCode(), notificationBuilder.build());
+        if(NotificationUtilities.notificationsPending())
+            notificationSummary();
+*/
     }
 
 }
