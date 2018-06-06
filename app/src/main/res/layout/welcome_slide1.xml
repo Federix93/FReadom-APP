@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sei un topo di biblioteca?"
+            android:text="@string/welcome_title1"
             android:textColor="@android:color/white"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textSize="@dimen/slide_title"
@@ -35,7 +35,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="@dimen/desc_padding"
             android:paddingRight="@dimen/desc_padding"
-            android:text="Freadom diventerà il tuo migliore amico!"
+            android:text="@string/welcome_message1"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="@dimen/slide_desc" />

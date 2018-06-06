@@ -119,9 +119,7 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
             super(itemView);
             mHistoryVerb = itemView.findViewById(R.id.history_verb);
             mHistoryArrow = itemView.findViewById(R.id.history_arrow);
-            mHistoryBookTitle = itemView.findViewById(R.id.history_title);
             mHistoryBookThumbnail = itemView.findViewById(R.id.history_thumbnail);
-            mHistoryToUser = itemView.findViewById(R.id.history_to_user);
             mHistoryUser = itemView.findViewById(R.id.history_username);
             mHistoryUserImage = itemView.findViewById(R.id.history_user_image);
             mHistoryLeaveRating = itemView.findViewById(R.id.history_leave_rating);
@@ -132,7 +130,7 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
         void bind (final Book book) {
             mHistoryVerb.setText(R.string.you_borrowed);
             //mHistoryBookTitle.setText(book.getTitle());
-            String uri = "@drawable/ic_fast_forward_orange_24dp";  // where myresource (without the extension) is the file
+            String uri = "@drawable/ic_arrow_forward_orange_24dp";  // where myresource (without the extension) is the file
             int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
             Drawable res = mContext.getResources().getDrawable(imageResource);
             mHistoryArrow.setImageDrawable(res);
@@ -203,21 +201,18 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
     private class LentViewHolder extends RecyclerView.ViewHolder {
         TextView mHistoryVerb;
         ImageView mHistoryArrow;
-        TextView mHistoryBookTitle;
         ImageView mHistoryBookThumbnail;
-        TextView mHistoryToUser;
         TextView mHistoryUser;
         ImageView mHistoryUserImage;
         TextView mHistoryLeaveRating;
         TextView mHistoryDateFrom;
         TextView mHistoryDateTo;
+
         private LentViewHolder(View itemView) {
             super(itemView);
             mHistoryVerb = itemView.findViewById(R.id.history_verb);
             mHistoryArrow = itemView.findViewById(R.id.history_arrow);
-            mHistoryBookTitle = itemView.findViewById(R.id.history_title);
             mHistoryBookThumbnail = itemView.findViewById(R.id.history_thumbnail);
-            mHistoryToUser = itemView.findViewById(R.id.history_to_user);
             mHistoryUser = itemView.findViewById(R.id.history_username);
             mHistoryUserImage = itemView.findViewById(R.id.history_user_image);
             mHistoryLeaveRating = itemView.findViewById(R.id.history_leave_rating);
@@ -228,7 +223,7 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
         void bind(final Book book) {
             mHistoryVerb.setText(R.string.you_lent);
             //mHistoryBookTitle.setText(book.getTitle());
-            String uri = "@drawable/ic_fast_rewind_green_24dp";  // where myresource (without the extension) is the file
+            String uri = "@drawable/ic_arrow_back_green_24dp";  // where myresource (without the extension) is the file
             int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
             Drawable res = mContext.getResources().getDrawable(imageResource);
             mHistoryArrow.setImageDrawable(res);

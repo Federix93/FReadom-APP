@@ -507,7 +507,7 @@ public class TabFragment extends Fragment {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
                     if (books != null) {
-                        if (books.size() > 1) {
+                        if (books.size() > 0) {
                             mYourLibraryAdviceLayout.setVisibility(GONE);
                         }
                         updateListOfBooks(books);

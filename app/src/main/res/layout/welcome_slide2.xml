@@ -21,24 +21,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Divori più libri di quanto le tue tasche possano sostenere?"
+            android:text="@string/welcome_title2"
             android:textColor="@android:color/white"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textSize="@dimen/slide_title"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
             android:gravity="center" />
-
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginTop="20dp"-->
-            <!--android:paddingLeft="@dimen/desc_padding"-->
-            <!--android:paddingRight="@dimen/desc_padding"-->
-            <!--android:text="Un altra descrizione bellissima e accattivante"-->
-            <!--android:textAlignment="center"-->
-            <!--android:textColor="@android:color/white"-->
-            <!--android:textSize="@dimen/slide_desc" />-->
 
     </LinearLayout>
 
