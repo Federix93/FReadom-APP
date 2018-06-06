@@ -396,24 +396,9 @@ public class ChatActivity extends AppCompatActivity {
                     mChatArrayAdapter.setItems(messages);
                     mChatArrayAdapter.notifyDataSetChanged();
                 }
-
-                mChatsReference.child(mChatID).runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-                        Chat chat = mutableData.getValue(Chat.class);
-                        if (chat != null) {
-                            if (!chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())) {
-                                mChatsReference.child(mChatID).child("counter").setValue(0);
-                            }
-                        }
-                        mutableData.setValue(chat);
-                        return Transaction.success(mutableData);
-                    }
-
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                    }
-                });
+                if (!messages.get(messages.size() - 1).getSenderId().equals(FirebaseAuth.getInstance().getUid())) {
+                    mChatsReference.child(mChatID).child("counter").setValue(0);
+                }
                 mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
 
             }
