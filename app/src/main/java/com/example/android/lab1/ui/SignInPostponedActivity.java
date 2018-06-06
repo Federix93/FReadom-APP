@@ -29,6 +29,7 @@ import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.NetworkConnectionReceiver;
+import com.example.android.lab1.utils.NotificationUtilities;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -162,16 +163,24 @@ public class SignInPostponedActivity extends AppCompatActivity {
             String messageDescription = getString(R.string.new_message_channel_description);
             int messageImportance = NotificationManager.IMPORTANCE_DEFAULT;
 
-            NotificationChannel requestChannel = new NotificationChannel(Utilities.BOOK_REQUEST_CHANNEL_ID, requestName, requestImportance);
+            CharSequence loanName = getString(R.string.loan_channel_title);
+            String loanDescription = getString(R.string.loan_channel_description);
+            int loanImportance = NotificationManager.IMPORTANCE_DEFAULT;
+
+            NotificationChannel requestChannel = new NotificationChannel(NotificationUtilities.BOOK_REQUEST_CHANNEL_ID, requestName, requestImportance);
             requestChannel.setDescription(requestDescription);
 
-            NotificationChannel messageChannel = new NotificationChannel(Utilities.NEW_MESSAGE_CHANNEL_ID, messageName, messageImportance);
+            NotificationChannel messageChannel = new NotificationChannel(NotificationUtilities.NEW_MESSAGE_CHANNEL_ID, messageName, messageImportance);
             messageChannel.setDescription(messageDescription);
+
+            NotificationChannel loanChannel = new NotificationChannel(NotificationUtilities.LOAN_CHANNEL_ID, loanName, loanImportance);
+            messageChannel.setDescription(loanDescription);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(requestChannel);
             notificationManager.createNotificationChannel(messageChannel);
+            notificationManager.createNotificationChannel(loanChannel);
         }
     }
     @Override

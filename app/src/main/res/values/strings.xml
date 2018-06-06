@@ -324,13 +324,20 @@
     <string name="terms_and_conditions">Termini e condizioni</string>
     <string name="license_open_source">Licenze open source</string>
     <string name="informations">Informazioni</string>
-    <string name="new_loan_notification_content">%1$s ti ha prestato %2$s</string>
-    <string name="new_loan_notification_title">Nuovo prestito</string>
+    <string name="new_loan_notification_content">%1$s ha accettato il prestito di %2$s</string>
+    <string name="new_loan_notification_title">Inizio prestito</string>
     <string name="loan_channel_title">Prestiti</string>
     <string name="loan_channel_description">Notifiche per inizio e terminazione prestiti</string>
     <string name="finished_loan_notification_content">Lascia una recensione a %1$s per %2$s</string>
     <string name="finished_loan_notification_title">Prestito terminato</string>
     <string name="already_lent">Libro già prestato</string>
+
+    <string name="loan_request_notification_title">Richiesta inizio prestito</string>
+    <string name="loan_request_notification_content">%1$s vuole iniziare il prestito di %2$s</string>
+    <string name="loan_end_notification_title">Richiesta fine prestito</string>
+    <string name="loan_end_notification_content">%1$s vuole terminare il prestito di %2$s</string>
+
+
 
 
     <string name="licenses_content"><![CDATA[<pre><code>Copyright 2017 Francois Ganard
@@ -414,4 +421,6 @@ limitations under the License.<br/><br/><br/><p>Google - Gson (https://github.co
     <string name="less_than_one_km">A meno di 1 km da te</string>
     <string name="select_position_to_continue">Seleziona una posizione prima di continuare</string>
     <string name="load_book_cant_edit">Non è possibile modificare il libro perchè in prestito</string>
+    <string name="reminder_notification_title">Scadenza prestito</string>
+    <string name="reminder_notification_content">Oggi devi restiture il libro a %1$s</string>
 </resources>

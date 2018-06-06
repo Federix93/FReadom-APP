@@ -225,14 +225,21 @@
     <string name="confirm_init">Confirm loan</string>
     <string name="already_lent">Book already lent</string>
 
-    <string name="new_loan_notification_content">%1$s lent you %2$s</string>
-    <string name="new_loan_notification_title">New loan</string>
+    <string name="new_loan_notification_content">%1$s accepted the loan of %2$s</string>
+    <string name="new_loan_notification_title">Loan start</string>
     <string name="loan_channel_title">Loans</string>
     <string name="loan_channel_description">Receive notifications for loans start and end</string>
     <string name="finished_loan_notification_content">Review %1$s for %2$s</string>
     <string name="finished_loan_notification_title">Loan finished</string>
     <string name="less_than_one_km">Less than 1 km away from you</string>
     <string name="select_position_to_continue">Select a position before continuing</string>
+
+    <string name="loan_request_notification_title">Loan start request</string>
+    <string name="loan_request_notification_content">%1$s wants to lend you %2$s</string>
+    <string name="loan_end_notification_title">Loan end request</string>
+    <string name="loan_end_notification_content">%1$s wants to end the loan of %2$s</string>
+    <string name="reminder_notification_title">Loan expiration</string>
+    <string name="reminder_notification_content">Today you have to hand the book back to %1$s</string>
 
 
 </resources>
