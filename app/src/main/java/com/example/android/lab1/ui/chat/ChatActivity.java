@@ -172,40 +172,41 @@ public class ChatActivity extends AppCompatActivity {
                 mMessagesReference.child(mChatID).push().setValue(chatMessage);
 
                 final String messageWritten = mMessageEditText.getText().toString();
-                mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                mChatsReference.child(mChatID).runTransaction(new Transaction.Handler() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            Chat chat = dataSnapshot.getValue(Chat.class);
-                            if (chat != null) {
-                                chat.setTimestamp(System.currentTimeMillis() / 1000);
-                                chat.setLastMessage(messageWritten);
-                                chat.setIsText("true");
-                                if (chat.getSenderUID() == null) {
-                                    Log.d("LULLO", "111Send Button is clicked and SenderUID is: " + chat.getSenderUID());
-                                    chat.setSenderUID(mFirebaseAuth.getUid());
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        Chat chat = mutableData.getValue(Chat.class);
+                        if (chat != null) {
+                            chat.setTimestamp(System.currentTimeMillis() / 1000);
+                            chat.setLastMessage(messageWritten);
+                            chat.setIsText("true");
+                            if (chat.getSenderUID() == null) {
+                                Log.d("LULLO", "111Send Button is clicked and SenderUID is: " + chat.getSenderUID());
+                                chat.setSenderUID(mFirebaseAuth.getUid());
+                                chat.setCounter(chat.getCounter() + 1);
+                                Log.d("LULLO", "111after send Button counter is: " + chat.getCounter());
+                            } else {
+                                if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
                                     chat.setCounter(chat.getCounter() + 1);
-                                    Log.d("LULLO", "111after send Button counter is: " + chat.getCounter());
+                                    Log.d("LULLO", "222Send Button is clicked and SenderUID is: " + chat.getSenderUID());
                                 } else {
-                                    if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
-                                        chat.setCounter(chat.getCounter() + 1);
-                                        Log.d("LULLO", "222Send Button is clicked and SenderUID is: " + chat.getSenderUID());
-                                    } else {
-                                        chat.setReceiverUID(chat.getSenderUID());
-                                        chat.setSenderUID(mFirebaseAuth.getUid());
-                                        chat.setCounter(1);
-                                        Log.d("LULLO", "222after send Button counter is: " + chat.getCounter());
-                                    }
+                                    chat.setReceiverUID(chat.getSenderUID());
                                     chat.setSenderUID(mFirebaseAuth.getUid());
+                                    chat.setCounter(1);
+                                    Log.d("LULLO", "222after send Button counter is: " + chat.getCounter());
                                 }
+                                chat.setSenderUID(mFirebaseAuth.getUid());
                             }
-                            mChatsReference.child(mChatID).setValue(chat);
                         }
+                        mutableData.setValue(chat);
+                        return Transaction.success(mutableData);
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                        if(databaseError != null){
+                            Log.d("LULLO", "Error: " + databaseError);
+                        }
                     }
                 });
                 // Clear input box
