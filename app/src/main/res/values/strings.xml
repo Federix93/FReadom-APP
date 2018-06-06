@@ -330,7 +330,7 @@
     <string name="loan_channel_description">Notifiche per inizio e terminazione prestiti</string>
     <string name="finished_loan_notification_content">Lascia una recensione a %1$s per %2$s</string>
     <string name="finished_loan_notification_title">Prestito terminato</string>
-
+    <string name="already_lent">Libro già prestato</string>
 
 
     <string name="licenses_content"><![CDATA[<pre><code>Copyright 2017 Francois Ganard

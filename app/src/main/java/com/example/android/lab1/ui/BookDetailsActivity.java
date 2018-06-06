@@ -429,25 +429,34 @@ public class BookDetailsActivity extends AppCompatActivity {
                 if (mFirebaseAuth.getUid() != null) {
                     final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
                     progressDialogHolder.showLoadingDialog(R.string.fui_progress_dialog_loading);
-                    DocumentReference documentReference = mFirebaseFirestore.collection("books").document(mBook.getUid());
+                    DocumentReference documentReference = mFirebaseFirestore.collection("books").document(mBook.getBookID());
                     documentReference.get().addOnCompleteListener(BookDetailsActivity.this, new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if (task.isSuccessful()) {
-                                Map<String, Object> data = new HashMap<>();
-                                data.put("FieldFilled", true);
-                                mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).set(data);
-                                DocumentReference reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
-                                reqDocRef.set(mBook, SetOptions.merge());
-                                final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
-                                reqReceivedDocRef.set(mBook, SetOptions.merge());
-                                new ChatManager(mBook.getBookID(), mBook.getUid(), mBook.getTitle(), getApplicationContext());
+                                mBook = task.getResult().toObject(Book.class);
+                                if(mBook != null) {
+                                    if (mBook.getLentTo() == null) {
+                                        Map<String, Object> data = new HashMap<>();
+                                        data.put("FieldFilled", true);
+                                        mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).set(data);
+                                        DocumentReference reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+                                        reqDocRef.set(mBook, SetOptions.merge());
+                                        final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
+                                        reqReceivedDocRef.set(mBook, SetOptions.merge());
+                                        new ChatManager(mBook.getBookID(), mBook.getUid(), mBook.getTitle(), getApplicationContext());
+                                    } else {
+                                        if (progressDialogHolder.isProgressDialogShowing())
+                                            progressDialogHolder.dismissDialog();
+                                        Snackbar.make(v, getResources().getString(R.string.already_lent), Snackbar.LENGTH_SHORT).show();
+                                    }
+                                }
                                 if (progressDialogHolder.isProgressDialogShowing())
                                     progressDialogHolder.dismissDialog();
                             } else {
                                 if (progressDialogHolder.isProgressDialogShowing())
                                     progressDialogHolder.dismissDialog();
-                                Snackbar.make(v, "Libro non più disponibile", Snackbar.LENGTH_SHORT).show();
+                                Snackbar.make(v, "Error", Snackbar.LENGTH_SHORT).show();
                             }
                         }
                     });

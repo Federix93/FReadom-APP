@@ -223,7 +223,7 @@
     <string name="license_open_source">Open source license</string>
     <string name="informations">Informations</string>
     <string name="confirm_init">Confirm loan</string>
-
+    <string name="already_lent">Book already lent</string>
 
     <string name="new_loan_notification_content">%1$s lent you %2$s</string>
     <string name="new_loan_notification_title">New loan</string>
