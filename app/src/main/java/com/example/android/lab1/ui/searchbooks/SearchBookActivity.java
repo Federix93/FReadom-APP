@@ -1,21 +1,10 @@
 package com.example.android.lab1.ui.searchbooks;
 
-import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.transition.ChangeBounds;
-import android.support.transition.Fade;
-import android.support.transition.TransitionManager;
-import android.support.transition.TransitionSet;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -28,7 +17,6 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.algolia.search.saas.AbstractQuery;
@@ -41,10 +29,8 @@ import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.example.android.lab1.R;
 import com.example.android.lab1.adapter.RecyclerSearchAdapter;
+import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.GeoPoint;
@@ -86,16 +72,11 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private final static int RESULTS_VIEW = 3;
     private final static int UNKNOWN_ERROR_VIEW = 4;
 
-    private final static int POSITION_FINE_PERMISSION = 10;
-
     private boolean[] currentView = {true, false, false, false, false};
 
     boolean[] searchByFilters = {true, true, true, true};
     int[] seekBarsFilters = {0, FiltersValues.MAX_POSITION};
     boolean[] orderFilters = {true, false, false, false};
-
-    private double currentLat;
-    private double currentLong;
 
     private FloatingSearchView mSearchView;
 
@@ -114,7 +95,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private RecyclerSearchAdapter mAdapter;
-    private FusedLocationProviderClient mFusedLocationClient;
 
     private Query booksQuery = new Query();
     private Query usersQuery = new Query();
@@ -124,8 +104,8 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private ArrayList<BookSearchItem> backupDataSet;
 
     private SharedPreferences mSharedPref;
+    private GeoPoint mCurrentPosition;
 
-    @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,14 +148,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        if (!Utilities.checkPermissionActivity(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            Utilities.askPermissionActivity(this, Manifest.permission.ACCESS_FINE_LOCATION, POSITION_FINE_PERMISSION);
-        } else {
-            setCurrentLocation();
-        }
-
         Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
         booksIndex = client.getIndex(ALGOLIA_BOOKS_INDEX_NAME);
         usersIndex = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
@@ -191,8 +163,14 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         setupQueryChangeListener();
         setupLeftItemListener();
         setupNoConnectionButtonClickListener();
-        mAdapter = new RecyclerSearchAdapter(null, 0, 0);
+
+        mCurrentPosition = SharedPreferencesManager.getInstance(this).getPosition();
+
+        mAdapter = new RecyclerSearchAdapter(null, mCurrentPosition.getLatitude(), mCurrentPosition.getLongitude());
         mRecyclerView.setAdapter(mAdapter);
+
+        booksQuery.setAroundLatLng(new AbstractQuery.LatLng(mCurrentPosition.getLatitude(), mCurrentPosition.getLongitude()));
+        booksQuery.setFilters("lentTo:\"none\"");
 
         applyFilters();
         setRecyclerViewScrollListener();
@@ -430,6 +408,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private void loadMore() {
         Query loadMoreQuery = new Query(booksQuery);
         loadMoreQuery.setPage(++lastRequestedPage);
+        booksQuery.setFilters("lentTo:\"none\"");
         final int currentSearchSeqNo = lastSearchedSeqNo;
 
         mSearchView.showProgress();
@@ -534,7 +513,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
                     manageSearchError();
                 }
 
-
             }
         });
     }
@@ -584,9 +562,10 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             searchFields.add("tags");
         }
 
+//        searchFields.add("lentTo");
+
         booksQuery.setRestrictSearchableAttributes(searchFields.toArray(new String[searchFields.size()]));
-        if (currentLat != 0 && currentLong != 0)
-            booksQuery.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
+        booksQuery.setAroundRadius((seekBarsFilters[FiltersValues.POSITION_FILTER] + 10) * 100);
     }
 
     private void manageSearchError() {
@@ -704,15 +683,15 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     private void fadeOutViews(View vOut1, View vOut2, View vOut3, View vIn1, View vIn2, View vIn3) {
 
         fadeOutAnimation(vOut1);
-        if(vOut2 != null)
+        if (vOut2 != null)
             fadeOutAnimation(vOut2);
-        if(vOut3 != null)
+        if (vOut3 != null)
             fadeOutAnimation(vOut3);
 
         fadeInAnimation(vIn1);
-        if(vIn2 != null)
+        if (vIn2 != null)
             fadeInAnimation(vIn2);
-        if(vIn3 != null)
+        if (vIn3 != null)
             fadeInAnimation(vIn3);
     }
 
@@ -725,10 +704,12 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             @Override
             public void onAnimationStart(Animation animation) {
             }
+
             @Override
             public void onAnimationEnd(Animation animation) {
                 view.setVisibility(View.GONE);
             }
+
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
@@ -740,51 +721,24 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
     public void fadeInAnimation(final View view) {
         Animation fadeIn = new AlphaAnimation(0, 1);
         fadeIn.setInterpolator(new DecelerateInterpolator());
-        fadeIn.setStartOffset(mShortAnimationDuration/2);
+        fadeIn.setStartOffset(mShortAnimationDuration / 2);
         fadeIn.setDuration(mShortAnimationDuration);
         fadeIn.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
             }
+
             @Override
             public void onAnimationEnd(Animation animation) {
                 view.setVisibility(View.VISIBLE);
             }
+
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
         });
 
         view.startAnimation(fadeIn);
-    }
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case POSITION_FINE_PERMISSION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    setCurrentLocation();
-                }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private void setCurrentLocation() {
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            currentLat = location.getLatitude();
-                            currentLong = location.getLongitude();
-                            booksQuery.setAroundLatLng(new AbstractQuery.LatLng(currentLat, currentLong));
-                        } else {
-                            currentLat = 0;
-                            currentLong = 0;
-                        }
-                    }
-                });
     }
 
     @Override
@@ -805,8 +759,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
             outState.putInt("CURRENT_VIEW", currentViewIndex);
             outState.putSerializable("DATA_SET", backupDataSet);
-            outState.putDouble("CURRENT_LAT", currentLat);
-            outState.putDouble("CURRENT_LONG", currentLong);
 
             outState.putInt("LAST_SEARCHED_SEQ_NO", lastSearchedSeqNo);
             outState.putInt("LAST_DISPLAYED_SEQ_NO", lastDisplayedSeqNo);
@@ -828,9 +780,6 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
         Arrays.fill(currentView, false);
         currentView[currentViewIndex] = true;
 
-        currentLat = savedInstanceState.getDouble("CURRENT_LAT");
-        currentLong = savedInstanceState.getDouble("CURRENT_LONG");
-
         if (currentView[OFFLINE_VIEW])
             showOfflineView();
         else if (currentView[NO_RESULTS_VIEW]) {
@@ -839,7 +788,7 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
             booksQuery.setQuery(mSearchView.getQuery());
         } else if (currentView[RESULTS_VIEW]) {
             backupDataSet = (ArrayList<BookSearchItem>) savedInstanceState.getSerializable("DATA_SET");
-            mAdapter = new RecyclerSearchAdapter(backupDataSet, currentLat, currentLong);
+            mAdapter = new RecyclerSearchAdapter(backupDataSet, mCurrentPosition.getLatitude(), mCurrentPosition.getLongitude());
             mRecyclerView.setAdapter(mAdapter);
             showResultsView();
         } else if (currentView[UNKNOWN_ERROR_VIEW])

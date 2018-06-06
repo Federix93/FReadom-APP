@@ -18,6 +18,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.android.lab1.R
 import com.example.android.lab1.model.Review
 import com.example.android.lab1.model.User
+import com.example.android.lab1.utils.NotificationUtilities
 import com.example.android.lab1.utils.Utilities
 import com.firebase.ui.auth.ui.ProgressDialogHolder
 import com.google.firebase.firestore.FirebaseFirestore
@@ -64,6 +65,7 @@ class ReviewActivity : AppCompatActivity() {
         const val REVIEWED_ID = "REVIED"
         const val BOOK_ID = "BID"
         const val NUM_STARS = "NUMSTARS"
+        const val NOTIFICATION_CMD = "NOTIFICATION_CMD"
         const val COMMENT_TEXT = "COMMENT"
         const val UPLOADING = "UPLOADING"
         const val USER_IMAGE = "USER_IMAGE"
@@ -82,6 +84,11 @@ class ReviewActivity : AppCompatActivity() {
             mReviewerId = intent.getStringExtra(Keys.REVIEWER_ID)
             mReviewedId = intent.getStringExtra(Keys.REVIEWED_ID)
             mBookId = intent.getStringExtra(Keys.BOOK_ID)
+            if (intent.hasExtra(Keys.NOTIFICATION_CMD))
+            {
+                if (NotificationUtilities.notificationExist(intent.getStringExtra(Keys.BOOK_ID)))
+                    NotificationUtilities.removeNotification(intent.getStringExtra(Keys.BOOK_ID), this, false)
+            }
         } else {
             setResult(Activity.RESULT_CANCELED)
             finish()

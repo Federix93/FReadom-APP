@@ -34,8 +34,10 @@ public class MoreActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private ReyclerMoreAdapter mAdapter;
     private GeoPoint[] mGeoBox;
+    private int mSelectedGenre;
     private DocumentSnapshot lastVisible = null;
     private boolean endReached = false;
+    private boolean mLatestArrivals;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -47,7 +49,14 @@ public class MoreActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.rv_more);
 
         Utilities.setupStatusBarColor(this);
-        mToolbar.setTitle(R.string.nearby_home_page);
+
+        mLatestArrivals = getIntent().getBooleanExtra("latestArrivals", false);
+
+        if(mLatestArrivals)
+            mToolbar.setTitle(R.string.latest_arrivals_home_page);
+        else
+            mToolbar.setTitle(R.string.nearby_home_page);
+
         mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +67,9 @@ public class MoreActivity extends AppCompatActivity {
 
         GeoPoint currentPosition = new GeoPoint(getIntent().getDoubleExtra("latitude", 0),
                 getIntent().getDoubleExtra("longitude", 0));
+
+
+        mSelectedGenre = getIntent().getIntExtra("selectedGenre", -1);
 
         mGeoBox = Utilities.buildBoundingBox(currentPosition.getLatitude(),
                 currentPosition.getLongitude(),
@@ -93,13 +105,24 @@ public class MoreActivity extends AppCompatActivity {
 
     public void queryDatabase() {
 
-        final Query query;
-        if (lastVisible == null)
-            query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", mGeoBox[0])
-                    .whereLessThan("geoPoint", mGeoBox[1]).orderBy("geoPoint").limit(HITS_PER_PAGE);
-        else
-            query = FirebaseFirestore.getInstance().collection("books").whereGreaterThan("geoPoint", mGeoBox[0])
-                    .whereLessThan("geoPoint", mGeoBox[1]).orderBy("geoPoint").startAfter(lastVisible).limit(HITS_PER_PAGE);
+        Query query;
+        query = FirebaseFirestore.getInstance().collection("books")
+                .orderBy("geoPoint")
+                .whereGreaterThan("geoPoint", mGeoBox[0])
+                .whereLessThan("geoPoint", mGeoBox[1])
+                .whereEqualTo("lentTo", null);
+
+        if (mSelectedGenre >= 0) {
+            query = query.whereEqualTo("genre", mSelectedGenre);
+        }
+
+        if (lastVisible != null) {
+
+            query = query.startAfter(lastVisible);
+        }
+
+        query = query.limit(HITS_PER_PAGE);
+
 
         query.get().addOnSuccessListener(this, new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -109,11 +132,28 @@ public class MoreActivity extends AppCompatActivity {
                     if (queryDocumentSnapshots.size() < HITS_PER_PAGE)
                         endReached = true;
                     lastVisible = queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size() - 1);
+                    String uid = FirebaseAuth.getInstance().getUid();
                     for (Book b : queryDocumentSnapshots.toObjects(Book.class)) {
-                        if (!b.getUid().equals(FirebaseAuth.getInstance().getUid()) /*&& b.getLoanStart() != -1*/) {
+                        if (uid == null || !b.getUid().equals(uid) /*&& b.getLoanStart() != -1*/) {
                             books.add(b);
                         }
                     }
+
+                    if(mLatestArrivals)
+                    {
+                        Book temp;
+                        for (int i = 0; i < books.size() - 1; i++) {
+                            for (int i1 = i + 1; i1 < books.size(); i1++) {
+                                if (books.get(i).getTimeInserted().getTime() <
+                                        books.get(i1).getTimeInserted().getTime()) {
+                                    temp = books.get(i);
+                                    books.set(i, books.get(i1));
+                                    books.set(i1, temp);
+                                }
+                            }
+                        }
+                    }
+
                     if (mAdapter == null) {
                         mAdapter = new ReyclerMoreAdapter(books);
                         mRecyclerView.setAdapter(mAdapter);

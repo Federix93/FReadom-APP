@@ -18,6 +18,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +42,8 @@ import com.example.android.lab1.ui.SignInActivity;
 import com.example.android.lab1.ui.SignInPostponedActivity;
 import com.example.android.lab1.ui.profile.ProfileActivity;
 import com.example.android.lab1.ui.searchbooks.SearchBookActivity;
+import com.example.android.lab1.utils.NotificationUtilities;
+import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.UserViewModel;
 import com.firebase.ui.auth.AuthUI;
@@ -134,9 +137,17 @@ public class HomePageActivity extends AppCompatActivity
                 int clickedId = item.getItemId();
                 switch (clickedId) {
                     case R.id.action_search:
-                        Intent intent = new Intent(HomePageActivity.this, SearchBookActivity.class);
-                        startActivity(intent);
+                        if(SharedPreferencesManager.getInstance(HomePageActivity.this).getPosition() != null)
+                        {
+                            Intent intent = new Intent(HomePageActivity.this, SearchBookActivity.class);
+                            startActivity(intent);
+                        }
+                        else
+                        {
+                            Toast.makeText(HomePageActivity.this, R.string.select_position_to_continue, Toast.LENGTH_SHORT).show();
+                        }
                         break;
+
                 }
                 return true;
             }
@@ -207,8 +218,15 @@ public class HomePageActivity extends AppCompatActivity
                             int clickedId = item.getItemId();
                             switch (clickedId) {
                                 case R.id.action_search:
-                                    Intent intent = new Intent(HomePageActivity.this, SearchBookActivity.class);
-                                    startActivity(intent);
+                                    if(SharedPreferencesManager.getInstance(HomePageActivity.this).getPosition() != null)
+                                    {
+                                        Intent intent = new Intent(HomePageActivity.this, SearchBookActivity.class);
+                                        startActivity(intent);
+                                    }
+                                    else
+                                    {
+                                        Toast.makeText(HomePageActivity.this, R.string.select_position_to_continue, Toast.LENGTH_SHORT).show();
+                                    }
                                     break;
                             }
                             return true;
@@ -266,6 +284,11 @@ public class HomePageActivity extends AppCompatActivity
 
         if (getIntent().getBooleanExtra("LoanStart", false)) {
             mBottomNavigation.setCurrentItem(LOANS_FRAGMENT);
+            if(getIntent().hasExtra("bookLent"))
+            {
+                if(NotificationUtilities.notificationExist(getIntent().getStringExtra("bookLent")))
+                    NotificationUtilities.removeNotification(getIntent().getStringExtra("bookLent"), this, false);
+            }
         }
     }
 
