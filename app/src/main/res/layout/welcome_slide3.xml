@@ -34,7 +34,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="@dimen/desc_padding"
             android:paddingRight="@dimen/desc_padding"
-            android:text="Libera i tuoi libri, libera le tue passioni, libera il tuo sapere"
+            android:text="Free your books, free your passion, free your knowledge"
             android:textAlignment="center"
             android:textStyle="italic"
             android:textColor="@android:color/white"

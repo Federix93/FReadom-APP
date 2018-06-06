@@ -51,38 +51,40 @@ public class RequestsFragmentReceivedItem extends Fragment {
         mNoRequestRecLayout = view.findViewById(R.id.no_request_rec);
         mNoRequestDoneLayout = view.findViewById(R.id.no_request_done);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        listBooks = new ArrayList<>();
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setNestedScrollingEnabled(true);
+        if (getActivity() != null) {
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+            mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+            listBooks = new ArrayList<>();
+            mRecyclerView.setHasFixedSize(true);
+            mRecyclerView.setLayoutManager(layoutManager);
+            mRecyclerView.setNestedScrollingEnabled(true);
 
-        mAdapter = new RecyclerReqReceivedAdapter(listBooks);
-        mRecyclerView.setAdapter(mAdapter);
+            mAdapter = new RecyclerReqReceivedAdapter(listBooks);
+            mRecyclerView.setAdapter(mAdapter);
 
-        if (FirebaseAuth.getInstance().getUid() != null) {
-            RequestsReceivedBooksViewModel reqRecBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestsReceivedBooksViewModel.class);
-            reqRecBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
-                @Override
-                public void onChanged(@Nullable List<Book> books) {
-                    if (books != null) {
-                        mNoRequestRecLayout.setVisibility(View.GONE);
-                        mNoLoansLayout.setVisibility(View.GONE);
-                        mNoRequestDoneLayout.setVisibility(GONE);
-
-                        mAdapter = new RecyclerReqReceivedAdapter(books);
-                        mRecyclerView.setAdapter(mAdapter);
+            if (FirebaseAuth.getInstance().getUid() != null) {
+                RequestsReceivedBooksViewModel reqRecBooksViewModel = ViewModelProviders.of(getActivity()).get(RequestsReceivedBooksViewModel.class);
+                reqRecBooksViewModel.getSnapshotLiveData().observe(getActivity(), new Observer<List<Book>>() {
+                    @Override
+                    public void onChanged(@Nullable List<Book> books) {
+                        if (books != null) {
+                            if (books.size() > 0) {
+                                mNoRequestRecLayout.setVisibility(View.GONE);
+                                mNoLoansLayout.setVisibility(View.GONE);
+                                mNoRequestDoneLayout.setVisibility(GONE);
+                            }
+                            mAdapter = new RecyclerReqReceivedAdapter(books);
+                            mRecyclerView.setAdapter(mAdapter);
+                        }
                     }
-                }
+                });
+            } else {
+                mNoRequestRecLayout.setVisibility(View.VISIBLE);
+                mNoLoansLayout.setVisibility(View.GONE);
+                mNoRequestDoneLayout.setVisibility(GONE);
+            }
+        }
 
-            });
-        }
-        if (mAdapter.getItemCount() == 0) {
-            mNoRequestRecLayout.setVisibility(View.VISIBLE);
-            mNoLoansLayout.setVisibility(View.GONE);
-            mNoRequestDoneLayout.setVisibility(GONE);
-        }
         return view;
     }
 

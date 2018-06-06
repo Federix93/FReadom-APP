@@ -302,13 +302,20 @@
 
     <string name="may_have_new_messages">Potresti avere nuovi messaggi</string>
     <string name="no_books_lent_or_borrowed">Non hai ancora prestato nè preso in prestito alcun libro. Qui troverai uno storico dei tuoi scambi</string>
-    <string name="wait_for">Attend...</string>
+    <string name="wait_for">Attendi...</string>
     <string name="position_shared_preference_file">USER_POSITION</string>
     <string name="homepage_select_position">Selezionare una posizione per continuare</string>
     <string name="homepage_no_results">Nessun libro trovato nelle vicinanze</string>
     <string name="nearby_home_page">Nelle vicinanze</string>
     <string name="attention">Attenzione</string>
     <string name="already_lent_to_another_user_message">Questo libro è stato già prestato ad un altro utente. Dovrebbe tornare disponibile il %1$s</string>
+
+    <string name="owner_start_sent">Richiesta di inizio prestito inviata. Chiedi all\'altro utente di accettarla</string>
+    <string name="owner_end_sent">Richiesta di fine prestito inviata. Chiedi all\'altro utente di accettarla </string>
+
+    <string name="welcome_title2">Divori più libri di quanto le tue tasche possano sostenere?</string>
+    <string name="welcome_title1">Sei un appassionato di libri?</string>
+    <string name="welcome_message1">Freadom diventerà il tuo migliore amico!</string>
 
     <string name="delete_request">Cancella richiesta</string>
     <string name="confirm_request_delete">Vuoi davvero cancellare?</string>

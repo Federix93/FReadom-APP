@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static android.view.View.GONE;
+
 public class FavoriteBooksActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
@@ -89,13 +91,10 @@ public class FavoriteBooksActivity extends AppCompatActivity {
                 public void onChanged(@Nullable List<Book> bookList) {
                     mAdapter.setItems(bookList);
                     mAdapter.notifyDataSetChanged();
+                    if (bookList.size() > 0)
+                        mTextAdviceLayout.setVisibility(GONE);
                 }
             });
-            if (mAdapter.getItemCount() == 0) {
-                mTextAdviceLayout.setVisibility(View.VISIBLE);
-            }
-            if (mTextAdviceLayout.getVisibility() == View.VISIBLE)
-                mTextAdviceLayout.setVisibility(View.GONE);
         } else {
             mTextAdviceLayout.setVisibility(View.VISIBLE);
         }

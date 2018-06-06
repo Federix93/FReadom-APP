@@ -142,6 +142,8 @@ public class ChatActivity extends AppCompatActivity {
     ConstraintLayout mOtherPersonAlreadyLentLayout;
     ConstraintLayout mConfirmStartLoanLayout;
     ConstraintLayout mConfirmEndLoanLayout;
+    ConstraintLayout mOwnerStartSentLayout;
+    ConstraintLayout mOwnerEndSentLayout;
 
     private ChatMessageAdapter mChatArrayAdapter;
 
@@ -352,7 +354,8 @@ public class ChatActivity extends AppCompatActivity {
         mConfirmEndLoanLayout = findViewById(R.id.confirm_loan_end_layout);
         mConfirmEndLoanButton = findViewById(R.id.confirm_end);
         mRejectEndLoanButton = findViewById(R.id.cancel_end);
-
+        mOwnerStartSentLayout = findViewById(R.id.owner_start_sent);
+        mOwnerEndSentLayout = findViewById(R.id.owner_end_sent);
 
         mChatID = getIntent().getStringExtra("ChatID");
         mUsername = getIntent().getStringExtra("Username");
@@ -457,6 +460,8 @@ public class ChatActivity extends AppCompatActivity {
                                         mOtherPersonInfoLayout.setVisibility(GONE);
                                         mConfirmStartLoanLayout.setVisibility(GONE);
                                         mConfirmEndLoanLayout.setVisibility(GONE);
+                                        mOwnerStartSentLayout.setVisibility(GONE);
+                                        mOwnerEndSentLayout.setVisibility(GONE);
 
                                         mFirebaseFirestore.collection("loanInitialization").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                             @Override
@@ -478,6 +483,8 @@ public class ChatActivity extends AppCompatActivity {
                                                             mStartLoanLayout.setVisibility(GONE);
                                                             mConfirmStartLoanLayout.setVisibility(GONE);
                                                             mOtherPersonInfoLayout.setVisibility(GONE);
+                                                            mOwnerStartSentLayout.setVisibility(GONE);
+                                                            mOwnerEndSentLayout.setVisibility(GONE);
                                                         }
                                                     }
                                                 }
@@ -515,6 +522,9 @@ public class ChatActivity extends AppCompatActivity {
                                                             mStartLoanLayout.setVisibility(GONE);
                                                             mConfirmEndLoanLayout.setVisibility(GONE);
                                                             mConfirmStartLoanLayout.setVisibility(GONE);
+                                                            mOwnerStartSentLayout.setVisibility(GONE);
+                                                            mOwnerEndSentLayout.setVisibility(GONE);
+
                                                             String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
                                                             mAlreadyLentMessage.setText(String.format(getResources().getString(R.string.already_lent_to_another_user_message), dateTo));
                                                             mOtherPersonAlreadyLentLayout.setVisibility(VISIBLE);
@@ -532,6 +542,8 @@ public class ChatActivity extends AppCompatActivity {
                                     mOtherPersonInfoLayout.setVisibility(GONE);
                                     mConfirmStartLoanLayout.setVisibility(GONE);
                                     mConfirmEndLoanLayout.setVisibility(GONE);
+                                    mOwnerStartSentLayout.setVisibility(GONE);
+                                    mOwnerEndSentLayout.setVisibility(GONE);
 
                                     mFirebaseFirestore.collection("loans").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
@@ -549,6 +561,8 @@ public class ChatActivity extends AppCompatActivity {
                                                             mOtherPersonInfoLayout.setVisibility(GONE);
                                                             mConfirmStartLoanLayout.setVisibility(GONE);
                                                             mConfirmEndLoanLayout.setVisibility(GONE);
+                                                            mOwnerStartSentLayout.setVisibility(GONE);
+                                                            mOwnerEndSentLayout.setVisibility(VISIBLE);
                                                         } else {
                                                             //TERMINATION NOT STARTED
                                                             if (book != null && book.getLentTo() != null) {
@@ -558,6 +572,8 @@ public class ChatActivity extends AppCompatActivity {
                                                                     mOtherPersonInfoLayout.setVisibility(GONE);
                                                                     mConfirmStartLoanLayout.setVisibility(GONE);
                                                                     mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                    mOwnerStartSentLayout.setVisibility(GONE);
+                                                                    mOwnerEndSentLayout.setVisibility(GONE);
 
                                                                     String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
                                                                     String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
@@ -571,6 +587,8 @@ public class ChatActivity extends AppCompatActivity {
                                                                     mOtherPersonInfoLayout.setVisibility(GONE);
                                                                     mConfirmStartLoanLayout.setVisibility(GONE);
                                                                     mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                    mOwnerStartSentLayout.setVisibility(GONE);
+                                                                    mOwnerEndSentLayout.setVisibility(GONE);
                                                                 }
                                                             }
                                                         }
@@ -582,13 +600,31 @@ public class ChatActivity extends AppCompatActivity {
                                                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                                                         if (documentSnapshot != null && documentSnapshot.exists()) {
                                                             //THE BOOK IS IN THE INTERMEDIATE STATE, WAITING CONFIRMATION
-                                                            mStartLoanLayout.setVisibility(GONE);
-                                                            mEndLoanLayout.setVisibility(GONE);
-                                                            mConfirmStartLoanLayout.setVisibility(GONE);
-                                                            mOtherPersonAlreadyLentLayout.setVisibility(GONE);
-                                                            mOtherPersonInfoLayout.setVisibility(GONE);
-                                                            mConfirmStartLoanLayout.setVisibility(GONE);
-                                                            mConfirmEndLoanLayout.setVisibility(GONE);
+                                                            Book book = documentSnapshot.toObject(Book.class);
+                                                            if (book != null && book.getLentTo() != null) {
+                                                                if (book.getLentTo().equals(mOtherPerson)) {
+                                                                    mStartLoanLayout.setVisibility(GONE);
+                                                                    mEndLoanLayout.setVisibility(GONE);
+                                                                    mConfirmStartLoanLayout.setVisibility(GONE);
+                                                                    mOtherPersonAlreadyLentLayout.setVisibility(GONE);
+                                                                    mOtherPersonInfoLayout.setVisibility(GONE);
+                                                                    mConfirmStartLoanLayout.setVisibility(GONE);
+                                                                    mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                    mOwnerEndSentLayout.setVisibility(GONE);
+                                                                    mOwnerStartSentLayout.setVisibility(VISIBLE);
+                                                                } else {
+                                                                    mStartLoanLayout.setVisibility(GONE);
+                                                                    mEndLoanLayout.setVisibility(GONE);
+                                                                    mConfirmStartLoanLayout.setVisibility(GONE);
+                                                                    mOtherPersonAlreadyLentLayout.setVisibility(GONE);
+                                                                    mOtherPersonInfoLayout.setVisibility(GONE);
+                                                                    mConfirmStartLoanLayout.setVisibility(GONE);
+                                                                    mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                    mOwnerEndSentLayout.setVisibility(GONE);
+                                                                    mOwnerStartSentLayout.setVisibility(GONE);
+                                                                }
+                                                            }
+
                                                         } else {
                                                             mStartLoanLayout.setVisibility(View.VISIBLE);
                                                             mEndLoanLayout.setVisibility(GONE);
@@ -597,6 +633,8 @@ public class ChatActivity extends AppCompatActivity {
                                                             mOtherPersonInfoLayout.setVisibility(GONE);
                                                             mConfirmStartLoanLayout.setVisibility(GONE);
                                                             mConfirmEndLoanLayout.setVisibility(GONE);
+                                                            mOwnerStartSentLayout.setVisibility(GONE);
+                                                            mOwnerEndSentLayout.setVisibility(GONE);
                                                         }
                                                     }
                                                 });
@@ -636,7 +674,6 @@ public class ChatActivity extends AppCompatActivity {
                                                     String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
                                                     mConfirmMessage.setText(String.format(getResources().getString(R.string.confirm_init_message), dateFrom, dateTo));
                                                     mConfirmStartLoanLayout.setVisibility(VISIBLE);
-
                                                 } else {
                                                     mOtherPersonInfoLayout.setVisibility(GONE);
                                                     mEndLoanLayout.setVisibility(GONE);
@@ -644,6 +681,8 @@ public class ChatActivity extends AppCompatActivity {
                                                     mConfirmStartLoanLayout.setVisibility(GONE);
                                                     mOtherPersonInfoLayout.setVisibility(GONE);
                                                     mConfirmEndLoanLayout.setVisibility(GONE);
+                                                    mOwnerStartSentLayout.setVisibility(GONE);
+                                                    mOwnerEndSentLayout.setVisibility(GONE);
                                                 }
                                             }
                                         }
@@ -676,6 +715,8 @@ public class ChatActivity extends AppCompatActivity {
                                                                 mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                                 mConfirmStartLoanLayout.setVisibility(GONE);
                                                                 mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                mOwnerStartSentLayout.setVisibility(GONE);
+                                                                mOwnerEndSentLayout.setVisibility(GONE);
                                                             }
                                                         }
                                                     });
@@ -691,6 +732,8 @@ public class ChatActivity extends AppCompatActivity {
                                                     mOtherPersonInfoLayout.setVisibility(GONE);
                                                     mConfirmStartLoanLayout.setVisibility(GONE);
                                                     mConfirmEndLoanLayout.setVisibility(GONE);
+                                                    mOwnerStartSentLayout.setVisibility(GONE);
+                                                    mOwnerEndSentLayout.setVisibility(GONE);
                                                 }
                                             }
                                         }
@@ -707,6 +750,8 @@ public class ChatActivity extends AppCompatActivity {
                                 mOtherPersonInfoLayout.setVisibility(GONE);
                                 mConfirmStartLoanLayout.setVisibility(GONE);
                                 mConfirmEndLoanLayout.setVisibility(GONE);
+                                mOwnerStartSentLayout.setVisibility(GONE);
+                                mOwnerEndSentLayout.setVisibility(GONE);
 
                                 if (mInputTextLinearLayout.getVisibility() == GONE) {
                                     mInputTextLinearLayout.setVisibility(View.VISIBLE);
@@ -723,7 +768,16 @@ public class ChatActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                                     if (documentSnapshot != null && documentSnapshot.exists()) {
-                                                        mConfirmEndLoanLayout.setVisibility(GONE);
+                                                        Book book = documentSnapshot.toObject(Book.class);
+                                                        if (book != null && book.getLentTo() != null) {
+                                                            if (book.getLentTo().equals(mOtherPerson)) {
+                                                                mOwnerEndSentLayout.setVisibility(VISIBLE);
+                                                                mConfirmEndLoanLayout.setVisibility(GONE);
+                                                            } else {
+                                                                mOwnerEndSentLayout.setVisibility(GONE);
+                                                                mConfirmEndLoanLayout.setVisibility(GONE);
+                                                            }
+                                                        }
                                                     } else {
                                                         if (book != null && book.getLentTo() != null) {
                                                             if (book.getLentTo().equals(mOtherPerson)){
@@ -734,6 +788,8 @@ public class ChatActivity extends AppCompatActivity {
                                                                 mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                                 mConfirmStartLoanLayout.setVisibility(GONE);
                                                                 mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                mOwnerStartSentLayout.setVisibility(GONE);
+                                                                mOwnerEndSentLayout.setVisibility(GONE);
 
                                                                 String dateFrom = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanStart())).toString();
                                                                 String dateTo = DateFormat.format("dd/MM/yyyy", new Date(book.getLoanEnd())).toString();
@@ -749,6 +805,8 @@ public class ChatActivity extends AppCompatActivity {
                                                                 mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                                 mConfirmStartLoanLayout.setVisibility(GONE);
                                                                 mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                mOwnerStartSentLayout.setVisibility(GONE);
+                                                                mOwnerEndSentLayout.setVisibility(GONE);
                                                             }
                                                         }
                                                     }
@@ -761,12 +819,28 @@ public class ChatActivity extends AppCompatActivity {
                                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                                     if (documentSnapshot != null && documentSnapshot.exists()) {
                                                         //THE BOOK IS IN THE INTERMEDIATE STATE, WAITING CONFIRMATION
-                                                        mStartLoanLayout.setVisibility(GONE);
-                                                        mEndLoanLayout.setVisibility(GONE);
-                                                        mConfirmStartLoanLayout.setVisibility(GONE);
-                                                        mOtherPersonAlreadyLentLayout.setVisibility(GONE);
-                                                        mOtherPersonInfoLayout.setVisibility(GONE);
-                                                        mConfirmEndLoanLayout.setVisibility(GONE);
+                                                        Book book = documentSnapshot.toObject(Book.class);
+                                                        if (book != null && book.getLentTo() != null) {
+                                                            if (book.getLentTo().equals(mOtherPerson)) {
+                                                                mStartLoanLayout.setVisibility(GONE);
+                                                                mEndLoanLayout.setVisibility(GONE);
+                                                                mConfirmStartLoanLayout.setVisibility(GONE);
+                                                                mOtherPersonAlreadyLentLayout.setVisibility(GONE);
+                                                                mOtherPersonInfoLayout.setVisibility(GONE);
+                                                                mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                mOwnerEndSentLayout.setVisibility(GONE);
+                                                                mOwnerStartSentLayout.setVisibility(VISIBLE);
+                                                            } else {
+                                                                mStartLoanLayout.setVisibility(GONE);
+                                                                mEndLoanLayout.setVisibility(GONE);
+                                                                mConfirmStartLoanLayout.setVisibility(GONE);
+                                                                mOtherPersonAlreadyLentLayout.setVisibility(GONE);
+                                                                mOtherPersonInfoLayout.setVisibility(GONE);
+                                                                mConfirmEndLoanLayout.setVisibility(GONE);
+                                                                mOwnerEndSentLayout.setVisibility(GONE);
+                                                                mOwnerStartSentLayout.setVisibility(GONE);
+                                                            }
+                                                        }
                                                     } else {
                                                         mStartLoanLayout.setVisibility(View.VISIBLE);
                                                         mEndLoanLayout.setVisibility(GONE);
@@ -774,6 +848,8 @@ public class ChatActivity extends AppCompatActivity {
                                                         mOtherPersonAlreadyLentLayout.setVisibility(GONE);
                                                         mOtherPersonInfoLayout.setVisibility(GONE);
                                                         mConfirmEndLoanLayout.setVisibility(GONE);
+                                                        mOwnerStartSentLayout.setVisibility(GONE);
+                                                        mOwnerEndSentLayout.setVisibility(GONE);
                                                     }
                                                 }
                                             });
@@ -840,6 +916,7 @@ public class ChatActivity extends AppCompatActivity {
                                         DocumentReference docRef = mFirebaseFirestore.collection("loanTermination").document(mBookID);
                                         docRef.set(book, SetOptions.merge());
                                         mEndLoanLayout.setVisibility(GONE);
+                                        mOwnerEndSentLayout.setVisibility(VISIBLE);
                                     }
                                 }
 
@@ -1208,9 +1285,10 @@ public class ChatActivity extends AppCompatActivity {
                                                         final DocumentReference docLoanInit = mFirebaseFirestore.collection("loanInitialization").document(mBookID);
                                                         docLoanInit.set(book, SetOptions.merge());
 
-                                                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                                        intent.putExtra("LoanInit", true);
-                                                        startActivity(intent);
+                                                        if(progressDialogHolder.isProgressDialogShowing())
+                                                            progressDialogHolder.dismissDialog();
+
+                                                        mOwnerStartSentLayout.setVisibility(VISIBLE);
 
 //                                                        final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBookID);
 //                                                        docLoanRef.set(book, SetOptions.merge());
@@ -1226,7 +1304,6 @@ public class ChatActivity extends AppCompatActivity {
 //                                                            progressDialogHolder.dismissDialog();
 //                                                        intent.putExtra("LoanStart", startLoan);
 //                                                        startActivity(intent);
-                                                        finish();
                                                     }
                                                 }
                                             }

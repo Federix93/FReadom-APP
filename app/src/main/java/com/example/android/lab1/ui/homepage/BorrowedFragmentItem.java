@@ -66,10 +66,11 @@ public class BorrowedFragmentItem extends Fragment {
                     @Override
                     public void onChanged(@android.support.annotation.Nullable List<Book> books) {
                         if(books != null) {
-                            mNoLoansLayout.setVisibility(GONE);
-                            mNoRequestRecLayout.setVisibility(View.GONE);
-                            mNoRequestDoneLayout.setVisibility(GONE);
-
+                            if (books.size() > 0) {
+                                mNoLoansLayout.setVisibility(GONE);
+                                mNoRequestRecLayout.setVisibility(View.GONE);
+                                mNoRequestDoneLayout.setVisibility(GONE);
+                            }
                             final List<Book> listBooks = new ArrayList<>();
                             for (final Book b : books) {
                                 FirebaseDatabase.getInstance().getReference("users").child(b.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -90,12 +91,12 @@ public class BorrowedFragmentItem extends Fragment {
                     }
                 });
             }
-        }
-        if (mAdapter.getItemCount() == 0) {
+        } else {
             mNoLoansLayout.setVisibility(View.VISIBLE);
             mNoRequestRecLayout.setVisibility(View.GONE);
             mNoRequestDoneLayout.setVisibility(GONE);
         }
+
         return view;
     }
 }

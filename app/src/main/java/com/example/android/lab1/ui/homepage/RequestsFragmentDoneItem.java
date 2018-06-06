@@ -66,10 +66,6 @@ public class RequestsFragmentDoneItem extends Fragment {
                 @Override
                 public void onChanged(@Nullable List<Book> books) {
                     if (books != null) {
-                        mNoLoansLayout.setVisibility(GONE);
-                        mNoRequestRecLayout.setVisibility(View.GONE);
-                        mNoRequestDoneLayout.setVisibility(GONE);
-
                         final List<Book> listBooks = new ArrayList<>();
                         final List<User> usersOwner = new ArrayList<>();
                         for (final Book b : books) {
@@ -80,6 +76,12 @@ public class RequestsFragmentDoneItem extends Fragment {
                                     usersOwner.add(dataSnapshot.getValue(User.class));
                                     mAdapter.setItems(listBooks, usersOwner);
                                     mAdapter.notifyDataSetChanged();
+
+                                    if (listBooks.size() > 0) {
+                                        mNoLoansLayout.setVisibility(View.GONE);
+                                        mNoRequestRecLayout.setVisibility(GONE);
+                                        mNoRequestDoneLayout.setVisibility(View.GONE);
+                                    }
                                 }
 
                                 @Override
@@ -91,9 +93,7 @@ public class RequestsFragmentDoneItem extends Fragment {
                     }
                 }
             });
-        }
-        if (mAdapter.getItemCount() == 0)
-        {
+        } else {
             mNoLoansLayout.setVisibility(View.GONE);
             mNoRequestRecLayout.setVisibility(GONE);
             mNoRequestDoneLayout.setVisibility(View.VISIBLE);
