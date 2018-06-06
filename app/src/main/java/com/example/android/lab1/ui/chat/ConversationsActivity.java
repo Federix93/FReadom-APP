@@ -41,9 +41,9 @@ public class ConversationsActivity extends AppCompatActivity {
     Toolbar mToolbar;
     String mBookID;
     RecyclerView mRecyclerView;
+    RecyclerView.OnItemTouchListener listener;
     private RecyclerConversationAdapter mAdapter;
     private ShimmerFrameLayout mShimmerViewContainer;
-    RecyclerView.OnItemTouchListener listener;
     private ArrayList<Conversation> mConversations;
     private ChildEventListener mChildEventListener;
     private ConversationsViewModel mConversationsViewModel;
@@ -150,11 +150,6 @@ public class ConversationsActivity extends AppCompatActivity {
                                         }
                                     }
                                     if (mConversations.size() >= userIds.size()) {
-                                        mAdapter = new RecyclerConversationAdapter(mConversations,
-                                                mBookID,
-                                                mToolbar);
-                                        mRecyclerView.setAdapter(mAdapter);
-
                                         mChildEventListener = FirebaseDatabase.getInstance()
                                                 .getReference("chats")
                                                 .orderByChild("timestamp")
@@ -183,7 +178,10 @@ public class ConversationsActivity extends AppCompatActivity {
                                                                     }
                                                                 }
                                                             }
-                                                            mAdapter.notifyDataSetChanged();
+                                                            mAdapter = new RecyclerConversationAdapter(mConversations,
+                                                                    mBookID,
+                                                                    mToolbar);
+                                                            mRecyclerView.setAdapter(mAdapter);
                                                         }
 
                                                     }
@@ -255,8 +253,10 @@ public class ConversationsActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        FirebaseDatabase.getInstance().getReference("chats").removeEventListener(mChildEventListener);
-        mConversationsViewModel.getSnapshotLiveData().removeObserver(mObserver);
+        if (mChildEventListener != null)
+            FirebaseDatabase.getInstance().getReference("chats").removeEventListener(mChildEventListener);
+        if (mObserver != null)
+            mConversationsViewModel.getSnapshotLiveData().removeObserver(mObserver);
     }
 
     @Override

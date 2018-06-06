@@ -12,7 +12,6 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import com.algolia.search.saas.AlgoliaException
 import com.algolia.search.saas.Client
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -29,8 +28,7 @@ import org.json.JSONObject
 class ReviewActivity : AppCompatActivity() {
 
     private val ALGOLIA_APP_ID = "2TZTD61TRP"
-    private val ALGOLIA_SEARCH_API_KEY = "e78db865fd37a6880ec1c3f6ccef046a"
-    private val ALGOLIA_BOOKS_INDEX_NAME = "books"
+    private val ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1"
     private val ALGOLIA_USERS_INDEX_NAME = "users"
 
     private lateinit var mRatingBar: ProperRatingBar
@@ -146,14 +144,12 @@ class ReviewActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext,
                             "Recensione pubblicata!",
                             Toast.LENGTH_SHORT).show()
-                    val client = Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY)
+                    val client = Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY)
+                    val userIndex = client.getIndex(this.ALGOLIA_USERS_INDEX_NAME)
                     val newRatingJSON = JSONObject()
                             .put("rating", "%.1f".format(newRating))
-                    val userIndex = client.getIndex(this.ALGOLIA_USERS_INDEX_NAME)
-                    userIndex.saveObjectAsync(newRatingJSON, mReviewedId, { _: JSONObject,
-                                                                            _: AlgoliaException ->
-
-                    })
+                    userIndex.partialUpdateObjectAsync(newRatingJSON, mReviewedId, null)
+                    mUploading = false
                     setResult(RESULT_OK)
                     finish()
                 }.addOnFailureListener(failureFunction)

@@ -21,13 +21,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.algolia.search.saas.Client;
+import com.algolia.search.saas.Index;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.android.lab1.R;
 import com.example.android.lab1.model.User;
 import com.example.android.lab1.ui.SignInActivity;
-import com.example.android.lab1.ui.chat.ChatActivity;
-import com.example.android.lab1.ui.homepage.HomePageActivity;
 import com.example.android.lab1.utils.SharedPreferencesManager;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
@@ -50,6 +50,9 @@ import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,6 +90,11 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
     Bundle mSavedInstanceState;
 
     private boolean mChangedPicture;
+
+    private final String ALGOLIA_APP_ID = "2TZTD61TRP";
+    private final String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
+    private final String ALGOLIA_BOOKS_INDEX_NAME = "books";
+    private final String ALGOLIA_USERS_INDEX_NAME = "users";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -205,7 +213,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                                 .build();
                         db.setFirestoreSettings(settings);
                         final DocumentReference docRef = db.collection("users").document(mFirebaseAuth.getCurrentUser().getUid());
-                        db.collection("users").whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
+                        db.collection("users")
+                                .whereEqualTo(mFirebaseAuth.getCurrentUser().getUid(), docRef)
                                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                     @Override
                                     public void onEvent(@Nullable QuerySnapshot querySnapshot,
@@ -225,7 +234,9 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
                                         Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
                                         intent.putExtra("user", mUser);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        updateAlgolia();
                                         startActivity(intent);
+                                        finish();
                                     }
                                 });
                     }
@@ -294,6 +305,23 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnFoc
         resetFocus();
         mChangedPicture = false;
         clearFocusOnViews();
+    }
+
+    private void updateAlgolia() {
+        try {
+            JSONObject toLoad = new JSONObject()
+                    .put("image", mUser.getImage())
+                    .put("rating", mUser.getRating());
+            Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
+            Index index = client.getIndex(ALGOLIA_USERS_INDEX_NAME);
+            index.saveObjectAsync(toLoad,
+                    FirebaseAuth.getInstance().getUid(),
+                    null);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 //    private void openPositionActivity(boolean skipCheck) {

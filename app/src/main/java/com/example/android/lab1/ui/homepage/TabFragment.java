@@ -692,8 +692,7 @@ public class TabFragment extends Fragment {
             mSecondRecyclerView.setAdapter(mSecondRecyclerBookAdapter);
         } else {
             final List<Book> old = mSecondRecyclerBookAdapter.getBooks();
-            final List<Book> finalBooks = books;
-            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallback(old, finalBooks));
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallback(old, books));
             mSecondRecyclerBookAdapter.updateItems(books);
             diffResult.dispatchUpdatesTo(mSecondRecyclerBookAdapter);
 
@@ -731,7 +730,10 @@ public class TabFragment extends Fragment {
             mFirstRecyclerView.smoothScrollToPosition(0);
 
         } else {
+            final List<Book> old = mFirstRecyclerBookAdapter.getBooks();
+            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffCallback(old, books));
             mFirstRecyclerBookAdapter.updateItems(books);
+            result.dispatchUpdatesTo(mFirstRecyclerBookAdapter);
             mFirstRecyclerBookAdapter.notifyDataSetChanged();
         }
     }
