@@ -396,7 +396,7 @@ public class ChatActivity extends AppCompatActivity {
                     mChatArrayAdapter.notifyDataSetChanged();
                 }
 
-                mChatsReference.runTransaction(new Transaction.Handler() {
+                mChatsReference.child(mChatID).runTransaction(new Transaction.Handler() {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         Chat chat = mutableData.getValue(Chat.class);
