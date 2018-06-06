@@ -288,6 +288,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
                                         if (progressDialogHolder.isProgressDialogShowing())
                                             progressDialogHolder.dismissDialog();
                                         FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID()).removeValue();
+                                        finish();
                                     }
 
                                     @Override
