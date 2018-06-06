@@ -270,6 +270,7 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter {
                         for (Review r : reviews) {
                             if (r.getReviewerId().equals(FirebaseAuth.getInstance().getUid())) {
                                 mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_published));
+                                mHistoryLeaveRating.setOnClickListener(null);
                             } else {
                                 mHistoryLeaveRating.setText(mContext.getResources().getString(R.string.review_exchange));
                                 mHistoryLeaveRating.setOnClickListener(new View.OnClickListener() {

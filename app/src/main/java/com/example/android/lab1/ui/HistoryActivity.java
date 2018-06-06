@@ -140,7 +140,6 @@ public class HistoryActivity extends AppCompatActivity {
         if (requestCode == Constants.RATING_REQUEST) {
             if (resultCode == RESULT_OK) {
                 mAdapter.notifyDataSetChanged();
-                mHistoryLeaveRating.setOnClickListener(null);
             }
         }
     }
