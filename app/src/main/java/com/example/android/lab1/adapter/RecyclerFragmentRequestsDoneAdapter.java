@@ -42,6 +42,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -69,6 +70,8 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
     private Location mResolveLater;
     private AddressReciever mAddressReciever;
     private boolean isLent;
+    private boolean bookIsPresent;
+    private int counterSize;
 
     public RecyclerFragmentRequestsDoneAdapter(Activity container, List<Book> listBooks, List<User> users) {
         mContainer = container;
@@ -79,6 +82,8 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
             mCities.add("");
         }
         isLent = false;
+        bookIsPresent = false;
+        counterSize = 0;
     }
 
     @NonNull
@@ -264,11 +269,38 @@ public class RecyclerFragmentRequestsDoneAdapter extends RecyclerView.Adapter<Re
                             reqDoneRef.collection("requestsDone").document(firebaseAuth.getUid()).collection("books")
                                     .document(bookId).delete();
 
-                            //DA FARE LA CANCELLAZIONE DALLE RICHIESTE RICEVUTE SOLO SE
-                            //HA AVUTO UNA SOLA RICHIESTA PER QUEL LIBRO
-                            FirebaseFirestore reqReceivedRef = FirebaseFirestore.getInstance();
-                            /*reqReceivedRef.collection("requestsReceived").document(ownerId).collection("books")
-                                    .document(bookId).delete();*/
+                            FirebaseFirestore.getInstance().collection("requestsDone").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    final List<DocumentSnapshot> snapshotList = queryDocumentSnapshots.getDocuments();
+                                    bookIsPresent = false;
+                                    for(DocumentSnapshot d : snapshotList){
+                                        if(bookIsPresent) {
+                                            counterSize = 0;
+                                            bookIsPresent = false;
+                                            break;
+                                        }
+                                        d.getReference().collection("books").document(bookId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onSuccess(DocumentSnapshot snapshot) {
+                                                counterSize++;
+                                                if (snapshot.exists()) {
+                                                    bookIsPresent = true;
+                                                }
+                                                if(counterSize == snapshotList.size()){
+                                                    if(!bookIsPresent){
+                                                        FirebaseFirestore.getInstance().collection("requestsReceived")
+                                                                .document(FirebaseAuth.getInstance().getUid())
+                                                                .collection("books").document(bookId).delete();
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                    }
+                                }
+                            });
+
                             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                             final DatabaseReference chatRef = firebaseDatabase.getReference("chats");
                             final DatabaseReference messagesRef = firebaseDatabase.getReference("messages");
