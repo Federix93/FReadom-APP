@@ -60,7 +60,6 @@ public class RequestsFragmentDoneItem extends Fragment {
                     @Override
                     public void positionRemoved(int position) {
                         if (mAdapter.getItemCount() == 0) {
-                            mRecyclerView.setVisibility(GONE);
                             mNoRequestDoneLayout.setVisibility(View.VISIBLE);
                         }
                     }
@@ -98,6 +97,8 @@ public class RequestsFragmentDoneItem extends Fragment {
                             });
                         }
                     } else {
+                        mAdapter.setItems(new ArrayList<Book>(), new ArrayList<User>());
+                        mAdapter.notifyItemRemoved(0);
                         mNoLoansLayout.setVisibility(View.GONE);
                         mNoRequestRecLayout.setVisibility(GONE);
                         mNoRequestDoneLayout.setVisibility(View.VISIBLE);
