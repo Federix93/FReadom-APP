@@ -117,40 +117,5 @@ public abstract class NotificationUtilities {
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, endDate, pendingIntent);
-
-
-        /*
-                Uri defaultSoundUri =
-
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                getApplicationContext(),
-                (data.get("chat")+data.get("sender")).hashCode(),
-                new Intent(getApplicationContext(), DirectReplyReceiver.class).putExtra("notificationID", data.get("chat")),
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NotificationUtilities.NEW_MESSAGE_CHANNEL_ID)
-                .setSmallIcon(R.drawable.notification_icon)
-                .setColor(getResources().getColor(R.color.colorSecondaryAccent))
-                .setLargeIcon(bookThumbnail)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(clickPendingIntent)
-                .setDeleteIntent(cancelIntent)
-                .setGroup(FREADOM_GROUP);
-                .setContentTitle(getResources().getString(R.string.new_request_notification_title))
-                .setContentText(contentText)
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(contentText));
-        String contentText = String.format(getResources().getString(R.string.new_request_notification_content), data.get("sender"), data.get("bookTitle"));
-
-        notificationBuilder
-                .setContentTitle(getResources().getString(R.string.new_request_notification_title))
-                .setContentText(contentText)
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(contentText));
-         */
     }
 }

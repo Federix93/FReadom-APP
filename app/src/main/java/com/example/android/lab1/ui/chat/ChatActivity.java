@@ -956,6 +956,7 @@ public class ChatActivity extends AppCompatActivity {
                                                                 if (documentSnapshot != null && documentSnapshot.exists()) {
                                                                     Book book = documentSnapshot.toObject(Book.class);
                                                                     if (book != null && book.getLentTo() != null) {
+                                                                        NotificationUtilities.scheduleNotification(ChatActivity.this, book.getLoanEnd(), mBookID, mChatID, mSenderUID, mUsername, mPhotoProfileURL);
                                                                         final DocumentReference docLoanInit = mFirebaseFirestore.collection("loanInitialization").document(mBookID);
                                                                         docLoanInit.delete();
                                                                         final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBookID);
