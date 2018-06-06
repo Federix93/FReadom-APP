@@ -180,7 +180,13 @@ public class ConversationsActivity extends AppCompatActivity {
                                                             }
                                                             mAdapter = new RecyclerConversationAdapter(mConversations,
                                                                     mBookID,
-                                                                    mToolbar);
+                                                                    mToolbar,
+                                                                    new RecyclerConversationAdapter.OnEmptyConversation() {
+                                                                        @Override
+                                                                        public void doClose() {
+                                                                            finish();
+                                                                        }
+                                                                    });
                                                             mRecyclerView.setAdapter(mAdapter);
                                                         }
 

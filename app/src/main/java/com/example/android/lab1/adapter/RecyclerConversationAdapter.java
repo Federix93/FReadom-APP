@@ -22,12 +22,9 @@ import com.example.android.lab1.ui.chat.ChatActivity;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
@@ -40,6 +37,9 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerConversationAdapter.ConversationViewHolder> {
 
+    private OnEmptyConversation mCallback;
+
+
     private List<Conversation> mConversations;
     private String mBookID;
     private String mSenderUID;
@@ -49,19 +49,18 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     Toolbar mToolbar;
     private boolean bookIsPresent;
     private int counterSize;
-
-
     public RecyclerConversationAdapter(ArrayList<Conversation> conversations,
                                        String bookID,
-                                       Toolbar toolbar) {
+                                       Toolbar toolbar,
+                                       OnEmptyConversation callback) {
         this.mConversations = conversations;
         mBookID = bookID;
         positionsChecked = -1;
         mToolbar = toolbar;
         bookIsPresent = false;
         counterSize = 0;
+        mCallback = callback;
     }
-
 
     public void deleteChat(RecyclerView.OnItemTouchListener listener) {
         String chatId = mConversations.get(positionsChecked).getChatId();
@@ -118,7 +117,15 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     }
                 }
             });
+            if (mConversations.size() == 0) {
+                mCallback.doClose();
+            }
         }
+    }
+
+
+    public interface OnEmptyConversation {
+        void doClose();
     }
 
     public void deselectItem() {
