@@ -64,6 +64,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -385,7 +387,7 @@ public class ChatActivity extends AppCompatActivity {
 
         final Observer<List<Message>> messageObserver = new Observer<List<Message>>() {
             @Override
-            public void onChanged(@Nullable List<Message> messages) {
+            public void onChanged(@Nullable final List<Message> messages) {
                 if (mChatArrayAdapter == null) {
                     mChatArrayAdapter = new ChatMessageAdapter(getApplicationContext(), messages);
                     mMessagesRecyclerView.setAdapter(mChatArrayAdapter);
@@ -393,9 +395,24 @@ public class ChatActivity extends AppCompatActivity {
                     mChatArrayAdapter.setItems(messages);
                     mChatArrayAdapter.notifyDataSetChanged();
                 }
-                if(!messages.get(messages.size() -1).getSenderId().equals(FirebaseAuth.getInstance().getUid())){
-                    mChatsReference.child(mChatID).child("counter").setValue(0);
-                }
+
+                mChatsReference.runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        Chat chat = mutableData.getValue(Chat.class);
+                        if (chat != null) {
+                            if (!messages.get(messages.size() - 1).getSenderId().equals(FirebaseAuth.getInstance().getUid())) {
+                                mChatsReference.child(mChatID).child("counter").setValue(0);
+                            }
+                        }
+                        mutableData.setValue(chat);
+                        return Transaction.success(mutableData);
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                    }
+                });
                 mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
 
             }
@@ -842,7 +859,38 @@ public class ChatActivity extends AppCompatActivity {
                             downloadUrl.toString());
 
                     mMessagesReference.child(mChatID).push().setValue(chatMessage);
-                    mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    mChatsReference.child(mChatID).runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            Chat chat = mutableData.getValue(Chat.class);
+                            if (chat != null) {
+                                chat.setTimestamp(System.currentTimeMillis() / 1000);
+                                chat.setLastMessage(downloadUrl.toString());
+                                chat.setIsText("false");
+                                if (chat.getSenderUID() == null) {
+                                    chat.setSenderUID(mFirebaseAuth.getUid());
+                                    chat.setCounter(chat.getCounter() + 1);
+                                } else {
+                                    if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
+                                        chat.setCounter(chat.getCounter() + 1);
+                                    } else {
+                                        chat.setReceiverUID(chat.getSenderUID());
+                                        chat.setSenderUID(mFirebaseAuth.getUid());
+                                        chat.setCounter(1);
+                                    }
+                                    chat.setSenderUID(mFirebaseAuth.getUid());
+                                }
+                            }
+                            mutableData.setValue(chat);
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                        }
+                    });
+                    /*mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
@@ -873,7 +921,7 @@ public class ChatActivity extends AppCompatActivity {
                         public void onCancelled(DatabaseError databaseError) {
 
                         }
-                    });
+                    });*/
                 }
             });
         }
