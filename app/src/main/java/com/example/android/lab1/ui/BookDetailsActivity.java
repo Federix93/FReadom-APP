@@ -63,6 +63,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.internal.InternalTokenProvider;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -187,12 +188,26 @@ public class BookDetailsActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(DocumentSnapshot snapshot) {
                     mBook = snapshot.toObject(Book.class);
-                    updateFavoriteButton();
-                    if (mBook.getLentTo() != null) {
-                        mBookButton.setText(getResources().getString(R.string.book_not_available));
-                        mBookButton.setEnabled(false);
-                    } else {
-                        checkIfChatExists();
+                    if (mBook != null) {
+                        if (!mBook.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                            updateFavoriteButton();
+                            if (mBook.getLentTo() != null) {
+                                mBookButton.setText(getResources().getString(R.string.book_not_available));
+                                mBookButton.setEnabled(false);
+                            } else {
+                                checkIfChatExists();
+                            }
+                        }else{
+                            Intent intent = new Intent(BookDetailsActivity.this, BookDetailsLibraryActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            intent.putExtra("BookSelected", mBook);
+                            startActivity(intent);
+                            finish();
+                            return;
+                        }
+                    }else{
+                        Toast.makeText(getApplicationContext(), "Si è verificato un errore sconosciuto", Toast.LENGTH_SHORT).show();
+                        finish();
                     }
                 }
             });
@@ -422,7 +437,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                                 Map<String, Object> data = new HashMap<>();
                                 data.put("FieldFilled", true);
                                 mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).set(data);
-                                DocumentReference  reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
+                                DocumentReference reqDocRef = mFirebaseFirestore.collection("requestsDone").document(mFirebaseAuth.getUid()).collection("books").document(mBook.getBookID());
                                 reqDocRef.set(mBook, SetOptions.merge());
                                 final DocumentReference reqReceivedDocRef = mFirebaseFirestore.collection("requestsReceived").document(mBook.getUid()).collection("books").document(mBook.getBookID());
                                 reqReceivedDocRef.set(mBook, SetOptions.merge());
