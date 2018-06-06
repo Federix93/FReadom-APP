@@ -11,7 +11,6 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        multiDexEnabled true
     }
     buildTypes {
 
@@ -74,7 +73,6 @@ dependencies {
     implementation "com.github.techery:properratingbar:0.0.5"
     implementation 'com.android.support:palette-v7:27.1.1'
     implementation 'com.facebook.shimmer:shimmer:0.1.0@aar'
-    implementation 'com.android.support:multidex:1.0.3'
 }
 
 apply plugin: 'com.google.gms.google-services'
