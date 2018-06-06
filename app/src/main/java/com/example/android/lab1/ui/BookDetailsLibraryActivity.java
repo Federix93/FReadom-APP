@@ -16,7 +16,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,6 +23,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.algolia.search.saas.Client;
+import com.algolia.search.saas.Index;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.android.lab1.R;
@@ -36,10 +37,7 @@ import com.example.android.lab1.ui.listeners.OnPhotoClickListenerDefaultImpl;
 import com.example.android.lab1.utils.Utilities;
 import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -48,14 +46,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
@@ -243,6 +236,10 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
 
     }
 
+    private final static String ALGOLIA_BOOK_INDEX = "books";
+    private final String ALGOLIA_APP_ID = "2TZTD61TRP";
+    private final String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
+
     private void deleteBookFromDBs(final View v){
         if (FirebaseAuth.getInstance() != null) {
             final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(v.getContext());
@@ -288,6 +285,7 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
                                         if (progressDialogHolder.isProgressDialogShowing())
                                             progressDialogHolder.dismissDialog();
                                         FirebaseDatabase.getInstance().getReference("openedChats").child(book.getBookID()).removeValue();
+                                        deleteBookAlgolia(book.getBookID());
                                         finish();
                                     }
 
@@ -297,6 +295,8 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
                                     }
                                 });
                             } else {
+                                if (progressDialogHolder.isProgressDialogShowing())
+                                    progressDialogHolder.dismissDialog();
                                 Snackbar.make(v, "Il libro è attualmente in prestito. Impossibile eliminare il libro", Snackbar.LENGTH_SHORT).show();
                             }
                         }
@@ -308,6 +308,12 @@ public class BookDetailsLibraryActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void deleteBookAlgolia(String bookID) {
+        Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
+        Index book = client.getIndex(ALGOLIA_BOOK_INDEX);
+        book.deleteObjectAsync(bookID, null);
     }
 
     private void resolveCityLocation(Location location) {

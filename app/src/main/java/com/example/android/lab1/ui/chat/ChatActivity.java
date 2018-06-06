@@ -896,7 +896,7 @@ public class ChatActivity extends AppCompatActivity {
             Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
             Index books = client.getIndex(ALGOLIA_BOOK_INDEX);
             JSONObject toLoad = new JSONObject()
-                    .put("lentTo", lentTo != null ? lentTo : "");
+                    .put("lentTo", lentTo != null ? lentTo : "none");
             books.partialUpdateObjectAsync(toLoad, mBookID, null);
         } catch (JSONException e) {
             e.printStackTrace();

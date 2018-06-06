@@ -1348,7 +1348,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             book.put("uid", bookToLoad.getUid());
             book.put("genre", bookToLoad.getGenre());
             book.put("lentTo", bookToLoad.getLentTo() != null ?
-                    bookToLoad.getLentTo() : "");
+                    bookToLoad.getLentTo() : "none");
 
             JSONObject coordinates = new JSONObject();
             coordinates.put("lat", bookToLoad.getGeoPoint().getLatitude());
