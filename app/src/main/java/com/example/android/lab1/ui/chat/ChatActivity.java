@@ -27,6 +27,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -132,13 +133,11 @@ public class ChatActivity extends AppCompatActivity {
     ConstraintLayout mEndLoanLayout;
     ConstraintLayout mOtherPersonInfoLayout;
     ConstraintLayout mOtherPersonAlreadyLentLayout;
-    ChildEventListener mChildEventListener;
     String dataTitle, dataMessage;
     String mPhotoPath;
     private ChatMessageAdapter mChatArrayAdapter;
     private AlertDialog.Builder mAlertDialogBuilder = null;
     private File mPhotoFile = null;
-    private boolean isObservable = true;
 
     private void setInputLinearLayout() {
 
@@ -182,15 +181,19 @@ public class ChatActivity extends AppCompatActivity {
                                 chat.setLastMessage(messageWritten);
                                 chat.setIsText("true");
                                 if (chat.getSenderUID() == null) {
+                                    Log.d("LULLO", "111Send Button is clicked and SenderUID is: " + chat.getSenderUID());
                                     chat.setSenderUID(mFirebaseAuth.getUid());
                                     chat.setCounter(chat.getCounter() + 1);
+                                    Log.d("LULLO", "111after send Button counter is: " + chat.getCounter());
                                 } else {
                                     if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
                                         chat.setCounter(chat.getCounter() + 1);
+                                        Log.d("LULLO", "222Send Button is clicked and SenderUID is: " + chat.getSenderUID());
                                     } else {
                                         chat.setReceiverUID(chat.getSenderUID());
                                         chat.setSenderUID(mFirebaseAuth.getUid());
                                         chat.setCounter(1);
+                                        Log.d("LULLO", "222after send Button counter is: " + chat.getCounter());
                                     }
                                     chat.setSenderUID(mFirebaseAuth.getUid());
                                 }
@@ -391,6 +394,7 @@ public class ChatActivity extends AppCompatActivity {
                     mChatArrayAdapter.setItems(messages);
                     mChatArrayAdapter.notifyDataSetChanged();
                 }
+                Log.d("LULLO", "I'm observing");
                 mMessagesRecyclerView.smoothScrollToPosition(mChatArrayAdapter.getItemCount());
 
             }
@@ -786,10 +790,9 @@ public class ChatActivity extends AppCompatActivity {
                                                         DocumentReference reqReceived = mFirebaseFirestore.collection("requestsReceived").document(book.getUid()).collection("books").document(mBookID);
                                                         reqReceived.delete();
                                                         Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                                                        boolean startLoan = true;
                                                         if (progressDialogHolder.isProgressDialogShowing())
                                                             progressDialogHolder.dismissDialog();
-                                                        intent.putExtra("LoanStart", startLoan);
+                                                        intent.putExtra("LoanStart", true);
                                                         startActivity(intent);
                                                         finish();
                                                     }
@@ -810,8 +813,7 @@ public class ChatActivity extends AppCompatActivity {
             case Constants.RATING_REQUEST:
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                    boolean loanEnd = true;
-                    intent.putExtra("LoanEnd", loanEnd);
+                    intent.putExtra("LoanEnd", true);
                     startActivity(intent);
                     this.finish();
                 } else if (resultCode == RESULT_CANCELED) {

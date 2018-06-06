@@ -193,7 +193,6 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     Calendar cal1 = Calendar.getInstance();
                     cal1.setTimeInMillis(chat.getTimestamp() * 1000);
 
-
                     SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
                     mTimetampTextView.setText(dateFormat.format(cal1.getTime()));
                     if (chat.getIsText().equals("true"))
@@ -202,6 +201,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         mLastMessageTextView.setText(R.string.photo_message_chat);
                     if (chat.getSenderUID() != null && !chat.getSenderUID().equals(FirebaseAuth.getInstance().getUid())) {
                         mSenderUID = chat.getSenderUID();
+                        Log.d("LULLO", "STO RESETTANDO IL COUNTER ---> ConvAdapter counter: " + chat.getCounter());
                         if (chat.getCounter() == 0) {
                             mMessageCounterTextView.setVisibility(View.GONE);
                         } else {
@@ -236,7 +236,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     intent.putExtra("Username", user.getUsername());
                     intent.putExtra("ImageURL", user.getPhotoURL());
                     intent.putExtra("BookID", mBookID);
-                    intent.putExtra("SenderUID", mSenderUID);
+                    Log.d("LULLO", "Conversation Adapter: " + mSenderUID);
                     v.getContext().startActivity(intent);
                 }
             });
