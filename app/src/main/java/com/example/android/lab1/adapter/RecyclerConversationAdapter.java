@@ -69,6 +69,9 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         if (chatId != null && otherUserID != null) {
             mToolbar.setBackgroundColor(Color.parseColor("#FFFFFF"));
             mToolbar.setTitle(R.string.conversations_title);
+            mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+            mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(false);
+            mToolbar.setTitle(R.string.conversations_title);
             final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(mRecyclerView.getContext());
             progressDialogHolder.showLoadingDialog(R.string.cancellation_in_progress);
             mConversations.remove(positionsChecked);
@@ -104,9 +107,9 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                                         FirebaseFirestore.getInstance().collection("requestsReceived")
                                                 .document(FirebaseAuth.getInstance().getUid())
                                                 .collection("books").document(mBookID).delete();
-                                        if(progressDialogHolder.isProgressDialogShowing())
-                                            progressDialogHolder.dismissDialog();
                                     }
+                                    if(progressDialogHolder.isProgressDialogShowing())
+                                        progressDialogHolder.dismissDialog();
                                 }
                             }
                         });
@@ -245,9 +248,9 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         return false;
                     }
                     positionsChecked = getAdapterPosition();
-                    itemView.setBackgroundColor(Color.parseColor("#bdbdbd"));
+                    itemView.setBackgroundColor(Color.parseColor("#ededed"));
                     mToolbar.setTitle("Elimina");
-                    mToolbar.setBackgroundColor(Color.parseColor("#808080"));
+                    mToolbar.setBackgroundColor(Color.parseColor("#bdbdbd"));
                     mToolbar.setNavigationIcon(R.drawable.ic_close_black_24dp);
                     mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(true);
                     return true;
