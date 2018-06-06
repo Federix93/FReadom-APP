@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -18,7 +19,6 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,6 +36,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.algolia.search.saas.Client;
+import com.algolia.search.saas.Index;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
@@ -71,6 +73,9 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -140,6 +145,166 @@ public class ChatActivity extends AppCompatActivity {
     private File mPhotoFile = null;
     String mPhotoPath;
     private boolean isObservable = true;
+
+    private final static String ALGOLIA_APP_ID = "2TZTD61TRP";
+
+
+    private void setInputLinearLayout() {
+
+        // Enable Send button when there's text to send
+        mMessageEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.toString().trim().length() > 0) {
+                    mSendButton.setEnabled(true);
+                } else {
+                    mSendButton.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
+
+        // Send button sends a message and clears the EditText
+        mSendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Message chatMessage = new Message(mFirebaseAuth.getUid(), mMessageEditText.getText().toString(),
+                        System.currentTimeMillis() / 1000, null);
+                mMessagesReference.child(mChatID).push().setValue(chatMessage);
+
+                final String messageWritten = mMessageEditText.getText().toString();
+                mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            Chat chat = dataSnapshot.getValue(Chat.class);
+                            if (chat != null) {
+                                chat.setTimestamp(System.currentTimeMillis() / 1000);
+                                chat.setLastMessage(messageWritten);
+                                chat.setIsText("true");
+                                if (chat.getSenderUID() == null) {
+                                    chat.setSenderUID(mFirebaseAuth.getUid());
+                                    chat.setCounter(chat.getCounter() + 1);
+                                } else {
+                                    if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
+                                        chat.setCounter(chat.getCounter() + 1);
+                                    } else {
+                                        chat.setReceiverUID(chat.getSenderUID());
+                                        chat.setSenderUID(mFirebaseAuth.getUid());
+                                        chat.setCounter(1);
+                                    }
+                                    chat.setSenderUID(mFirebaseAuth.getUid());
+                                }
+                            }
+                            mChatsReference.child(mChatID).setValue(chat);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                // Clear input box
+                mMessageEditText.setText("");
+            }
+        });
+
+        mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
+                mAlertDialogBuilder = new AlertDialog.Builder(view.getContext());
+                mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+                mAlertDialogBuilder.setTitle(R.string.upload_photo).setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case CAPTURE_IMAGE:
+                                if (!Utilities.checkPermissionActivity(ChatActivity.this,
+                                        Manifest.permission.CAMERA)) {
+                                    Utilities.askPermissionActivity(ChatActivity.this,
+                                            Manifest.permission.CAMERA, CAPTURE_IMAGE);
+                                } else {
+                                    takePicture();
+                                }
+                                break;
+                            case RESULT_LOAD_IMAGE:
+                                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                galleryIntent.setType("image/*");
+                                startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
+                                break;
+                            default:
+                                dialogInterface.cancel();
+                        }
+                    }
+                }).show();
+            }
+        });
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case CAPTURE_IMAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    takePicture();
+                }
+        }
+    }
+
+
+    public File saveThumbnail() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        return File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+    }
+
+    private void takePicture() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            try {
+                mPhotoFile = saveThumbnail();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (mPhotoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                        "com.example.android.fileprovider",
+                        mPhotoFile);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            }
+            startActivityForResult(cameraIntent, CAPTURE_IMAGE);
+        }
+    }
+
+    private final static String ALGOLIA_API_KEY = "36664d38d1ffa619b47a8b56069835d1";
+    private final static String ALGOLIA_BOOK_INDEX = "books";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -535,6 +700,7 @@ public class ChatActivity extends AppCompatActivity {
                                                         book.setLoanStart(Long.valueOf(-1));
                                                         book.setLoanEnd(Long.valueOf(-1));
                                                         book.setLentTo(null);
+                                                        setBookLoanAlgolia(null);
                                                         docBookRef.set(book, SetOptions.merge());
                                                         docLoansRef.delete();
                                                         if(progressDialogHolder.isProgressDialogShowing())
@@ -583,162 +749,6 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-
-
-    private void setInputLinearLayout() {
-
-        // Enable Send button when there's text to send
-        mMessageEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.toString().trim().length() > 0) {
-                    mSendButton.setEnabled(true);
-                } else {
-                    mSendButton.setEnabled(false);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
-        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
-
-        // Send button sends a message and clears the EditText
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Message chatMessage = new Message(mFirebaseAuth.getUid(), mMessageEditText.getText().toString(),
-                        System.currentTimeMillis() / 1000, null);
-                mMessagesReference.child(mChatID).push().setValue(chatMessage);
-
-                final String messageWritten = mMessageEditText.getText().toString();
-                mChatsReference.child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            Chat chat = dataSnapshot.getValue(Chat.class);
-                            if (chat != null) {
-                                chat.setTimestamp(System.currentTimeMillis() / 1000);
-                                chat.setLastMessage(messageWritten);
-                                chat.setIsText("true");
-                                if (chat.getSenderUID() == null) {
-                                    chat.setSenderUID(mFirebaseAuth.getUid());
-                                    chat.setCounter(chat.getCounter() + 1);
-                                } else {
-                                    if (chat.getSenderUID().equals(mFirebaseAuth.getUid())) {
-                                        chat.setCounter(chat.getCounter() + 1);
-                                    } else {
-                                        chat.setReceiverUID(chat.getSenderUID());
-                                        chat.setSenderUID(mFirebaseAuth.getUid());
-                                        chat.setCounter(1);
-                                    }
-                                    chat.setSenderUID(mFirebaseAuth.getUid());
-                                }
-                            }
-                            mChatsReference.child(mChatID).setValue(chat);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-                // Clear input box
-                mMessageEditText.setText("");
-            }
-        });
-
-        mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final CharSequence[] items = {getString(R.string.camera_option_dialog), getString(R.string.gallery_option_dialog)};
-                mAlertDialogBuilder = new AlertDialog.Builder(view.getContext());
-                mAlertDialogBuilder.setNegativeButton(R.string.negative_button_dialog, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                });
-                mAlertDialogBuilder.setTitle(R.string.upload_photo).setItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        switch (i) {
-                            case CAPTURE_IMAGE:
-                                if (!Utilities.checkPermissionActivity(ChatActivity.this,
-                                        Manifest.permission.CAMERA)) {
-                                    Utilities.askPermissionActivity(ChatActivity.this,
-                                            Manifest.permission.CAMERA, CAPTURE_IMAGE);
-                                } else {
-                                    takePicture();
-                                }
-                                break;
-                            case RESULT_LOAD_IMAGE:
-                                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                galleryIntent.setType("image/*");
-                                startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
-                                break;
-                            default:
-                                dialogInterface.cancel();
-                        }
-                    }
-                }).show();
-            }
-        });
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case CAPTURE_IMAGE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    takePicture();
-                }
-        }
-    }
-
-
-    public File saveThumbnail() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-        return File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-    }
-
-    private void takePicture() {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-            try {
-                mPhotoFile = saveThumbnail();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (mPhotoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
-                        "com.example.android.fileprovider",
-                        mPhotoFile);
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-            }
-            startActivityForResult(cameraIntent, CAPTURE_IMAGE);
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -781,6 +791,7 @@ public class ChatActivity extends AppCompatActivity {
                                                         book.setLoanStart(firstDate);
                                                         book.setLoanEnd(lastDate);
                                                         book.setLentTo(mOtherPerson);
+                                                        setBookLoanAlgolia(book.getLentTo());
                                                         final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBookID);
                                                         docLoanRef.set(book, SetOptions.merge());
                                                         final DocumentReference docBookRef = mFirebaseFirestore.collection("books").document(mBookID);
@@ -877,6 +888,18 @@ public class ChatActivity extends AppCompatActivity {
                     });
                 }
             });
+        }
+    }
+
+    private void setBookLoanAlgolia(String lentTo) {
+        try {
+            Client client = new Client(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
+            Index books = client.getIndex(ALGOLIA_BOOK_INDEX);
+            JSONObject toLoad = new JSONObject()
+                    .put("lentTo", lentTo != null ? lentTo : "");
+            books.partialUpdateObjectAsync(toLoad, mBookID, null);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
