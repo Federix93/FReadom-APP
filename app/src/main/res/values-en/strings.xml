@@ -64,6 +64,14 @@
         <item>Biography</item>
         <item>Economy</item>
         <item>Fantasy</item>
+        <item>Philosophy</item>
+        <item>Gastronomy</item>
+        <item>Literature</item>
+        <item>Storytelling</item>
+        <item>Science</item>
+        <item>Sport</item>
+        <item>History</item>
+        <item>Tecnology</item>
     </string-array>
 
     <string name="nearby_home_page">Nearby</string>
