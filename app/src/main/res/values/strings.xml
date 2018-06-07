@@ -160,7 +160,7 @@
     <string name="confirm_reject_message">Se rifiuti il prestito il proprietario sarà informato che non hai più intenzione di voler ricevere il suo libro</string>
     <string name="confirm_loan_init_message">Il proprietario ha deciso di prestarti il suo libro. Clicca sul tasto conferma se sei d\'accordo. Se c\'è qualcosa di sbagliato (ad esempio la data) puoi rifiutare l\'inizio del prestito. Il proprietario potrà comunque iniziarti il prestito in un secondo momento. </string>
     <string name="loan_button_info_title">Info</string>
-    <string name="start_loan_button_info_text">Il pulsante \"Inizia prestito\" serve per segnalare all\' altro utente che hai intenzione di prestergli il libro, per un determinato periodo. Se l\'altro utente confermerà, il prestito diventerà attivo ed il libro non sarà disponibile per altri utente</string>
+    <string name="start_loan_button_info_text">Il pulsante \"Inizia prestito\" serve per segnalare all\' altro utente che hai intenzione di prestergli il libro, per un determinato periodo. Se l\'altro utente confermerà, il prestito diventerà attivo ed il libro non sarà disponibile per altri utenti</string>
     <string name="end_loan_button_info_text">Il pulsante di fine prestito deve essere premuto una volta che il libro è stato restituito o sta per essere restituito. Una volta premuto, l\'utente che ha ricevuto il libro dovrà confermare la fine. Accertati che lo faccia! </string>
     <string name="end_loan">Termina prestito</string>
     <string name="confirm_init">Conferma prestito</string>
