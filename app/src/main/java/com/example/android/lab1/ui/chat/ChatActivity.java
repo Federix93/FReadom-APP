@@ -1302,6 +1302,7 @@ public class ChatActivity extends AppCompatActivity {
                                                             progressDialogHolder.dismissDialog();
 
                                                         mOwnerStartSentLayout.setVisibility(VISIBLE);
+                                                        mStartLoanLayout.setVisibility(GONE);
 
 //                                                        final DocumentReference docLoanRef = mFirebaseFirestore.collection("loans").document(mBookID);
 //                                                        docLoanRef.set(book, SetOptions.merge());

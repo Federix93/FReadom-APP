@@ -242,18 +242,23 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     private void checkIfChatExists() {
 
-        OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
-        openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(@Nullable Boolean aBoolean) {
-                if (!aBoolean) {
-                    mBookButton.setText(getResources().getString(R.string.book_request));
-                } else {
-                    mBookButton.setText(getResources().getString(R.string.open_chat));
+        if(FirebaseAuth.getInstance().getUid() != null) {
+            OpenedChatViewModel openedChatViewModel = ViewModelProviders.of(BookDetailsActivity.this, new ViewModelFactory(mBook.getBookID(), mBook.getUid())).get(OpenedChatViewModel.class);
+            openedChatViewModel.getSnapshotLiveData().observe(BookDetailsActivity.this, new Observer<Boolean>() {
+                @Override
+                public void onChanged(@Nullable Boolean aBoolean) {
+                    if (!aBoolean) {
+                        mBookButton.setText(getResources().getString(R.string.book_request));
+                    } else {
+                        mBookButton.setText(getResources().getString(R.string.open_chat));
+                    }
+                    updateUI();
                 }
-                updateUI();
-            }
-        });
+            });
+        }
+        else{
+            updateUI();
+        }
     }
 
     private void updateFavoriteButton() {
