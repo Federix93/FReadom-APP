@@ -110,7 +110,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
                 mRatingStar.setVisibility(View.VISIBLE);
                 mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", book.getUserRating()));
             }
-            
+
             double distance = Utilities.distanceBetweenGeoPoints(book.getGeoPoint().getLatitude(), book.getGeoPoint().getLongitude(),
                     mCurrentLat, mCurrentLong, 'K');
             if(distance >= 1)

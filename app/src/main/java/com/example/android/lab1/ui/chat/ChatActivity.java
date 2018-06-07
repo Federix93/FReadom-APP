@@ -1019,6 +1019,7 @@ public class ChatActivity extends AppCompatActivity {
                                                                 if (documentSnapshot != null && documentSnapshot.exists()) {
                                                                     Book book = documentSnapshot.toObject(Book.class);
                                                                     if (book != null && book.getLentTo() != null) {
+                                                                        setBookLoanAlgolia(book.getLentTo());
                                                                         NotificationUtilities.scheduleNotification(ChatActivity.this, book.getLoanEnd(), mBookID, mChatID, mSenderUID, mUsername, mPhotoProfileURL);
                                                                         final DocumentReference docLoanInit = mFirebaseFirestore.collection("loanInitialization").document(mBookID);
                                                                         docLoanInit.delete();
@@ -1154,6 +1155,7 @@ public class ChatActivity extends AppCompatActivity {
                                                                 if (documentSnapshot != null && documentSnapshot.exists()) {
                                                                     Book book = documentSnapshot.toObject(Book.class);
                                                                     if (book != null) {
+                                                                        setBookLoanAlgolia(null);
                                                                         long time = System.currentTimeMillis();
                                                                         book.setLoanEnd(time);
                                                                         docHistoryRef.set(book, SetOptions.merge());
@@ -1279,7 +1281,6 @@ public class ChatActivity extends AppCompatActivity {
                                                         book.setLoanStart(firstDate);
                                                         book.setLoanEnd(lastDate);
                                                         book.setLentTo(mOtherPerson);
-                                                        setBookLoanAlgolia(book.getLentTo());
 
                                                         final DocumentReference docLoanInit = mFirebaseFirestore.collection("loanInitialization").document(mBookID);
                                                         docLoanInit.set(book, SetOptions.merge());
