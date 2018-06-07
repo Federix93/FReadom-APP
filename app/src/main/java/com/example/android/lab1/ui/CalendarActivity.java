@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -15,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
@@ -90,10 +92,13 @@ public class CalendarActivity extends AppCompatActivity {
                             long lastDate;
                             long firstDate = mCalendar.getSelectedDates().get(0).getTimeInMillis();
                             result.putExtra(FIRST_DATE, firstDate);
-                            if (mCalendar.getSelectedDates().size() > 1) {
+                            if (mCalendar.getSelectedDates().size() <= 1) {
+                                Toast.makeText(v.getContext(), getResources().getString(R.string.select_start_end_date), Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                                 lastDate = mCalendar.getSelectedDates().get(mCalendar.getSelectedDates().size() - 1).getTimeInMillis();
                                 result.putExtra(LAST_DATE, lastDate);
-                            }
+
                             setResult(RESULT_OK, result);
 
                             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());

@@ -343,7 +343,7 @@
     <string name="loan_request_notification_content">%1$s vuole iniziare il prestito di %2$s</string>
     <string name="loan_end_notification_title">Richiesta fine prestito</string>
     <string name="loan_end_notification_content">%1$s vuole terminare il prestito di %2$s</string>
-
+    <string name="select_start_end_date">Devi selezionare inizio e fine data</string>
 
 
 

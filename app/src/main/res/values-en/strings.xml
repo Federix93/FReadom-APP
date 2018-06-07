@@ -240,6 +240,6 @@
     <string name="loan_end_notification_content">%1$s wants to end the loan of %2$s</string>
     <string name="reminder_notification_title">Loan expiration</string>
     <string name="reminder_notification_content">Today you have to hand the book back to %1$s</string>
-
+    <string name="select_start_end_date">You must select a start and an end date</string>
 
 </resources>
