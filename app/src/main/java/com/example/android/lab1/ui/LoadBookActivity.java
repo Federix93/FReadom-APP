@@ -1126,6 +1126,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
             case POSITION_ACTIVITY_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PERMISSION_GRANTED) {
                     Intent positionActivityIntent = Utilities.getPositionActivityIntent(LoadBookActivity.this, false);
+                    positionActivityIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivityForResult(positionActivityIntent, POSITION_ACTIVITY_REQUEST);
                 }
                 break;
