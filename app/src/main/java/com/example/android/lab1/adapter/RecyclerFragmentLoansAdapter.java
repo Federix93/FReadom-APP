@@ -146,11 +146,6 @@ public class RecyclerFragmentLoansAdapter extends RecyclerView.Adapter<RecyclerF
                                 String chatID = (String) dataSnapshot.getValue();
                                 Intent intent = new Intent(v.getContext(), ChatActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                Log.d("VINCI", "onDataChange:  username " + mUsersOwner.get(position).getUsername());
-                                Log.d("VINCI", "onDataChange:  chatid " + chatID);
-                                Log.d("VINCI", "onDataChange:  imageurl " + mUsersOwner.get(position).getPhotoURL());
-                                Log.d("VINCI", "onDataChange:  BOOKID " + mBookList.get(position).getBookID());
-
 
                                 intent.putExtra("ChatID", chatID);
                                 intent.putExtra("Username", mUsersOwner.get(position).getUsername());
