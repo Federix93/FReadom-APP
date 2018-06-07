@@ -1,46 +1,32 @@
 <resources>
-    <string name="app_name">Freadom</string>
+    <string name="app_name" translatable="false">Freadom</string>
     <string name="username">Nome</string>
     <string name="email">Email</string>
     <string name="phoneNumber">Numero di telefono</string>
     <string name="position">Posizione</string>
-    <string name="editIcon">default_descriptor</string>
     <string name="title_dialog">Cambia foto</string>
     <string name="camera_option_dialog">Scatta foto</string>
     <string name="gallery_option_dialog">Scegli foto</string>
     <string name="negative_button_dialog">Annulla</string>
     <string name="shared_preferences" translatable="false">SharedPreferencesKey</string>
-    <string name="title_activity_position">Map</string>
     <string name="text_position_toolbar">Cerca</string>
     <string name="service_not_available">Nessun geocoder disponibile</string>
     <string name="invalid_lat_long_used">Errata Latitudine o Longitudine usata</string>
     <string name="no_address_found">Nessun indirizzo trovato</string>
-    <string name="address_text">Indirizzo</string>
-    <string name="short_bio_text" translatable="false">Breve Descrizione</string>
+    <string name="short_bio_text">Breve Descrizione</string>
     <string name="selection_position">Seleziona la tua posizione</string>
-    <string name="enable_internet">Connettersi ad una rete per selezionare una nuova posizione</string>
     <string name="no_internet_connection">Connessione ad internet assente</string>
     <string name="edit_title_activity">Modifica il tuo profilo</string>
-    <string name="isbn">ISBN</string>
     <string name="title">Titolo</string>
-    <string name="load_book_auto_fill_icon_desc">Icona che permette di scaricare informazioni di un libro da internet</string>
     <string name="author">Autore</string>
     <string name="publisher">Editore</string>
     <string name="publishing_year">Anno di pubblicazione</string>
     <string name="conditions">Condizioni</string>
-    <string name="bad">Cattive</string>
-    <string name="decent">Discrete</string>
-    <string name="good">Buone</string>
-    <string name="great">Ottime</string>
-    <string name="neww">Nuovo</string>
-    <string name="invalid_isbn">Codice ISBN-13 invalido</string>
     <string name="scan_isbn_hint">Inquadrare il codice a barre posto sul retro del libro</string>
-    <string name="load_book_toolbar_title">Aggiungi un nuovo libro</string>
     <string name="load_book_book_not_found">Libro non trovato</string>
     <string name="load_book_autofill_request_error">Errore durante la richiesta delle informazioni del libro</string>
     <string name="connection_internet_dialog">Attesa della connessione internet</string>
-    <string name="email_verification">Verificare l\'email per procedere con il login, altrimenti cambiare metodo di accesso.</string>
-    <string name="title_home">Home</string>
+    <string name="title_home" translatable="false">Home</string>
     <string name="title_loans">Prestiti</string>
     <string name="title_requests">Richieste</string>
     <string name="title_profile">Profilo</string>
@@ -48,15 +34,12 @@
     <string name="profile_reviews_fragment">Recensioni</string>
     <string name="search">Cerca</string>
     <string name="filter">Filtra</string>
-    <string name="verification_email_confirm">OK</string>
-    <string name="load_book_fill_fields">Completare tutti i campi prima di confermare</string>
     <string name="confirm">Conferma</string>
     <string name="loan_your_item">Libri dati in prestito</string>
     <string name="loan_other_book_item">Libri ricevuti</string>
     <string name="request_done_item">Effettuate</string>
     <string name="request_received_item">Ricevute</string>
 
-    <string name="load_book_upload">Upload del libro in corso</string>
     <string name="load_book_upload_error">Impossibile caricare il libro</string>
     <string name="load_book_tags">Aggiungi parole chiave per la ricerca del libro</string>
     <string name="tags">Tags</string>
@@ -68,19 +51,13 @@
     <string name="condition_mint">Perfette</string>
 
     <string name="toolbar_title_home">Freadom</string>
-    <string name="activate_position">Attivare la posizione</string>
-    <string name="activate">Attiva</string>
 
     <string name="button_signin">ACCEDI</string>
     <string name="access_without_login">CONTINUA SENZA ACCEDERE</string>
-    <string name="title_activity_home_page">HomePageActivity</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Impostazioni</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_home_page" translatable="false">HomePageActivity</string>
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
+    <string name="nav_header_desc" translatable="false">Navigation header</string>
     <string name="no_email_nav_drawer">Nessuna email</string>
     <string name="no_name_nav_drawer">Nessun nome</string>
     <string name="button_right_recycler_view">ALTRO</string>
@@ -88,74 +65,64 @@
     <string name="add_to_favorite">Aggiungi ai preferiti</string>
     <string name="share">Condividi</string>
     <string name="preview">Anteprima</string>
-    <string name="book">Prenota</string>
     <string name="filter_by">Filtra per</string>
     <string name="book_request">Richiedi</string>
-    <string name="filter_dialog_title">Filtra per</string>
 
     <string name="search_books_hint">Titolo, autore, editore, tags…</string>
 
     <string name="your_library_fragment">La tua libreria</string>
-    <string name="your_library_advice">Qui troverai i tuoi libri una volta caricati. Premi sul simbolo + in basso per aggiungere il primo libro</string>
+    <string name="your_library_advice">Qui troverai i tuoi libri una volta caricati.
+        Premi sul simbolo + in basso per aggiungere il primo libro</string>
 
     <string name="position_filter_home_page">POSIZIONE</string>
     <string name="genre_filter_home_page">GENERI</string>
     <string name="latest_arrivals_home_page">Nuovi arrivi</string>
     <string name="condition">Condizioni:  %1$s</string>
-    <string name="reviews">Recensioni</string>
     <string name="books">Libri</string>
-    <string name="rating">Rating</string>
     <string name="rating_global_profile">Rating: %.1f</string>
-    <string name="library">Libreria</string>
 
     <string-array name="genre">
         <item>Arte</item>
         <item>Biografie</item>
         <item>Economia</item>
         <item>Fantasy</item>
+        <item>Filosofia</item>
+        <item>Gastronomia</item>
+        <item>Letteratura</item>
+        <item>Narrativa</item>
+        <item>Scienza</item>
+        <item>Sport</item>
+        <item>Storia</item>
+        <item>Tecnologia</item>
     </string-array>
 
     <string name="tutorial_title_genre">Cerca i libri in base al tuo genere preferito</string>
     <string name="tutorial_title_position">Cerca i libri in base alla tua posizione attuale</string>
-    <string name="tutorial_title_search">Cerca uno specifico libro</string>
 
 
     <string name="min_selection">Seleziona almeno un elemento</string>
-    <string name="book_owner_text">I libri di %1$s</string>
     <string name="search_no_connection_1">Connessione a Internet assente</string>
     <string name="search_no_connection_2">Controlla la connessione ai dati mobili o al Wi-Fi</string>
     <string name="try_again">Riprova</string>
 
     <string name="search_by">Ricerca per</string>
     <string name="search_by_title">Cerca per:</string>
-    <string name="dialog_isbn_search">Cerca su Internet</string>
     <string name="dialog_isbn_scan">Leggi da codice a barre</string>
-    <string name="load_new_book">Aggiungi un nuovo libro</string>
-
-    <string-array name="search_by_address_or_current_position_items">
-        <item>Tramite ricerca indirizzo</item>
-        <item>Tramite la posizione corrente</item>
-    </string-array>
 
     <string name="genre_hint">Genere</string>
-    <string name="date">Inserisci il periodo di prestito</string>
     <string name="isbn_hint">Inserire il codice ISBN</string>
-    <string name="add_your_photos">Aggiungi le foto del libro</string>
+    <string name="add_your_photos">Premi per inserire le foto del libro</string>
     <string name="insert_book">Inserisci il libro</string>
-    <string name="add_isbn_code">Aggiungi il codice ISBN</string>
     <string name="insert_manually">Inserisci manualmente</string>
     <string name="insert_isbn_code">Inserisci il codice ISBN del libro</string>
-    <string name="search_by_address_or_current_position">Scegliere il metodo di condivisione della posizione</string>
-    <string name="yes">Si</string>
     <string name="choose_initial_date">Seleziona data inizio prestito</string>
-    <string name="ok">OK</string>
+    <string name="ok" translatable="false">OK</string>
     <string name="choose_end_date">Seleziona data fine prestito</string>
-    <string name="confirm_date">Conferma data</string>
     <string name="loan_successfully_sent">Inizio prestito iniziato con successo</string>
     <string name="confirm_loan_title">Confermi inizio prestito?</string>
     <string name="confirm_reject_title">Confermi rifiuto prestito?</string>
     <string name="confirm_reject_end_title">Confermi rifiuto fine prestito?</string>
-    <string name="confirm_reject_end_message">Puoi rifiutare la fine del prestito se non hai ancora restituito il libro al proprietario e lui ha concluso il prestito per errore. Vuoi confermare annullamento fine?</string>
+    <string name="confirm_reject_end_message">Puoi rifiutare la fine del prestito se non hai ancora restituito il libro al proprietario e lui ha concluso il prestito per errore.\\nVuoi confermare annullamento fine?</string>
     <string name="confirm_loan_text">Una volta confermato le altre chat aperte saranno cancellate. Questo libro non sarà più disponibile da altri utenti finché non terminerai il tuo prestito.</string>
     <string name="confirm_reject_message">Se rifiuti il prestito il proprietario sarà informato che non hai più intenzione di voler ricevere il suo libro</string>
     <string name="confirm_loan_init_message">Il proprietario ha deciso di prestarti il suo libro. Clicca sul tasto conferma se sei d\'accordo. Se c\'è qualcosa di sbagliato (ad esempio la data) puoi rifiutare l\'inizio del prestito. Il proprietario potrà comunque iniziarti il prestito in un secondo momento. </string>
@@ -175,9 +142,8 @@
     <string name="confirm_end_text">L\'utente ti ha effettivamente restituito il libro? In caso affermativo il libro tornerà disponibile e potrai ricevere nuove richieste da altri utenti</string>
 
     <string name="click_position_button">Aggiungi posizione</string>
-    <string name="select_genres">Selezionare i generi che si vogliono visualizzare</string>
     <string name="cancel">Annulla</string>
-    <string name="choose_genre">Selezionare il genere a cui si è interessati</string>
+    <string name="choose_genre">Selezionare il genere</string>
     <string name="no_genre_in_particular">Nessuno in particolare</string>
     <string name="tag">Tag</string>
     <string name="conversations_title">Conversazioni</string>
@@ -199,9 +165,6 @@
     <string name="search_intro_botttom">Inserisci almeno due caratteri per cominciare</string>
     <string name="search_book_distance">A %.1f km da te</string>
     <string name="user_rating">Rating utente</string>
-    <string name="order_by">Ordina per</string>
-    <string name="ad_date">Data annuncio</string>
-    <string name="book_conditions">Condizioni libro</string>
     <string name="apply_uppercase">APPLICA</string>
     <string name="cancel_uppercase">ANNULLA</string>
     <string name="reset_filters_uppercase">RESETTA FILTRI</string>
@@ -209,10 +172,8 @@
     <string name="review_leave_optional_comment_for_owner">Racconta come è andato il tuo scambio</string>
     <string name="review_title">Valuta il tuo scambio</string>
     <string name="leave_review">Pubblica recensione</string>
-    <string name="review_toolbar_title">Lascia una recensione</string>
     <string name="express_rating">Nessun giudizio espresso</string>
     <string name="no_rating_to_show">Nessuna recensione</string>
-    <string name="ratings">Recensioni</string>
     <string name="less_than_a_minute">Meno di un minuto fa</string>
     <string name="a_minute_ago">Un minuto fa</string>
     <string name="minutes_ago">Minuti fa</string>
@@ -244,7 +205,6 @@
 
     <string name="upload_photo">Carica foto</string>
     <string name="start_loan">Inizia prestito</string>
-    <string name="wait_for_chat_opening">Apertura della chat in corso</string>
     <string name="book_not_available">Libro non più disponibile</string>
     <string name="open_chat">Vai alla chat</string>
     <string name="photo_message_chat">Foto</string>
@@ -279,16 +239,12 @@
     <string name="open_conversations"><![CDATA[Apri\nconversazioni]]></string>
     <string name="you_borrowed">Hai prestato a:</string>
     <string name="you_lent">Hai ricevuto da:</string>
-    <string name="to">A:</string>
-    <string name="from">Da:</string>
     <string name="review_exchange">Recensisci scambio</string>
-    <string name="current_position">POSIZIONE</string>
     <string name="start_loan_progress">Inizio del prestito in corso...</string>
     <string name="end_loan_progress">Fine del prestito in corso...</string>
     <string name="loan_started_from">Prestito iniziato il: %1$s</string>
     <string name="loan_to_be_closed">Devi restituirlo entro il: %1$s</string>
     <string name="loan_to_be_closed_owner">Tornerà disponibile entro il: %1$s</string>
-    <string name="reject_progress">Rifiuto richiesta in corso...</string>
 
     <string name="review_published">Recensione pubblicata</string>
     <string name="load_review">Caricamento della recensione...</string>
@@ -301,8 +257,6 @@
     <string name="preview_not_available">Anteprima non disponibile</string>
 
     <string name="may_have_new_messages">Potresti avere nuovi messaggi</string>
-    <string name="no_books_lent_or_borrowed">Non hai ancora prestato nè preso in prestito alcun libro. Qui troverai uno storico dei tuoi scambi</string>
-    <string name="wait_for">Attend...</string>
     <string name="position_shared_preference_file">USER_POSITION</string>
     <string name="homepage_select_position">Selezionare una posizione per continuare</string>
     <string name="homepage_no_results">Nessun libro trovato nelle vicinanze</string>
