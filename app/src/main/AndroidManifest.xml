@@ -130,7 +130,8 @@
             android:label="@string/title_activity_home_page"
             android:theme="@style/ThemeDrawer" />
         <activity android:name=".ui.GenreBooksActivity" />
-        <activity android:name=".ui.searchbooks.SearchBookActivity" />
+        <activity android:name=".ui.searchbooks.SearchBookActivity"
+            android:configChanges="orientation"/>
         <activity android:name=".ui.profile.ProfileActivity" />
         <activity android:name=".ui.CalendarActivity" />
         <activity

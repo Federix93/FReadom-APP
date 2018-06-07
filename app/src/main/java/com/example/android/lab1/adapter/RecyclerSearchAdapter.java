@@ -67,7 +67,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
     public class ResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView mTitle, mAuthor, mRating, mConditionsText, mBookDistance;
-        ImageView mThumbnail, mUserPicture, mConditionsImage;
+        ImageView mThumbnail, mUserPicture, mConditionsImage, mRatingStar;
         String mBookId;
 
         public ResultViewHolder(View itemView) {
@@ -81,6 +81,7 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             mRating = itemView.findViewById(R.id.search_book_user_rating);
             mConditionsText = itemView.findViewById(R.id.search_book_conditions_text);
             mConditionsImage = itemView.findViewById(R.id.search_book_conditions_image);
+            mRatingStar = itemView.findViewById(R.id.rating_star_search);
 
             itemView.setOnClickListener(this);
         }
@@ -101,12 +102,15 @@ public class RecyclerSearchAdapter extends RecyclerView.Adapter<RecyclerSearchAd
             else {
                 Glide.with(itemView.getContext()).load(itemView.getResources().getDrawable(R.drawable.ic_person_black_24dp)).apply(RequestOptions.circleCropTransform()).into(mUserPicture);
             }
-            if(book.getUserRating() == 0)
+            if(book.getUserRating() == 0) {
                 mRating.setText("");
-            else
+                mRatingStar.setVisibility(View.GONE);
+            }
+            else {
+                mRatingStar.setVisibility(View.VISIBLE);
                 mRating.setText(String.format(itemView.getContext().getResources().getConfiguration().locale, "%.1f", book.getUserRating()));
-
-
+            }
+            
             double distance = Utilities.distanceBetweenGeoPoints(book.getGeoPoint().getLatitude(), book.getGeoPoint().getLongitude(),
                     mCurrentLat, mCurrentLong, 'K');
             if(distance >= 1)

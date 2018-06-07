@@ -98,7 +98,7 @@
                         card_view:layout_constraintStart_toEndOf="@+id/search_book_user_picture" />
 
                     <ImageView
-                        android:id="@+id/imageView"
+                        android:id="@+id/rating_star_search"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="36dp"
