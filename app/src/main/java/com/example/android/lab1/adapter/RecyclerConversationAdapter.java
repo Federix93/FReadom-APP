@@ -73,7 +73,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mToolbar.setTitle(R.string.conversations_title);
             final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(mRecyclerView.getContext());
             progressDialogHolder.showLoadingDialog(R.string.cancellation_in_progress);
-            Conversation removed = mConversations.remove(positionsChecked);
+            final Conversation removed = mConversations.remove(positionsChecked);
             notifyItemRemoved(positionsChecked);
             mRecyclerView.removeOnItemTouchListener(listener);
             positionsChecked = -1;
@@ -108,8 +108,15 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                                                 .document(FirebaseAuth.getInstance().getUid())
                                                 .collection("books").document(mBookID).delete();
                                     }
-                                    if(progressDialogHolder.isProgressDialogShowing())
-                                        progressDialogHolder.dismissDialog();
+                                    if(mCallback != null) {
+                                        if (progressDialogHolder.isProgressDialogShowing())
+                                            progressDialogHolder.dismissDialog();
+                                        mCallback.removeWithContext(removed.getChatId());
+
+                                        if (mConversations.size() == 0) {
+                                            mCallback.doClose();
+                                        }
+                                    }
                                 }
                             }
                         });
@@ -117,11 +124,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                     }
                 }
             });
-            mCallback.removeWithContext(removed.getChatId());
 
-            if (mConversations.size() == 0) {
-                mCallback.doClose();
-            }
         }
     }
 

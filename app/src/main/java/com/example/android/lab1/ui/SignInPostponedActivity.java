@@ -142,12 +142,13 @@ public class SignInPostponedActivity extends AppCompatActivity {
                     AuthUI.getInstance()
                             .createSignInIntentBuilder()
                             .setIsSmartLockEnabled(false)
+                            .setLogo(R.drawable.freadom_app_name_white)
                             .setTheme(R.style.LoginTheme)
                             .setAvailableProviders(providers)
                             .build(),
                     RC_SIGN_IN);
 
-            //.setLogo(R.drawable.bookique)
+            //
         }
     }
 
