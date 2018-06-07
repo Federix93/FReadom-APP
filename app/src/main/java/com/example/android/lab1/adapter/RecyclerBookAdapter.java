@@ -2,10 +2,8 @@ package com.example.android.lab1.adapter;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -151,21 +149,4 @@ public class RecyclerBookAdapter extends RecyclerView.Adapter<RecyclerBookAdapte
         popup.show();
     }*/
 
-    class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
-
-        public MyMenuItemClickListener() {
-        }
-
-        @Override
-        public boolean onMenuItemClick(MenuItem menuItem) {
-            switch (menuItem.getItemId()) {
-                case R.id.action_view_preview:
-                    return true;
-                case R.id.action_add_wishlist:
-                    return true;
-                default:
-            }
-            return false;
-        }
-    }
 }

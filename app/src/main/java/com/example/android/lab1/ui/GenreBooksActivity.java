@@ -1,16 +1,18 @@
 package com.example.android.lab1.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.lab1.R;
@@ -21,7 +23,7 @@ public class GenreBooksActivity extends AppCompatActivity {
     public static final String SELECTED_GENRE = "SELECTED_GENRE";
     private static final int NO_GENRE_SELECTED = -1;
     Toolbar mToolbar;
-    ListView mGenreListView;
+    RecyclerView mGenreListRecyclerView;
 
     public static boolean isValidGenre(int i) {
         return i >= 0;
@@ -46,36 +48,68 @@ public class GenreBooksActivity extends AppCompatActivity {
                 finish();
             }
         });
+        mGenreListRecyclerView = findViewById(R.id.genre_recycler_view);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mGenreListRecyclerView.setLayoutManager(linearLayoutManager);
+        mGenreListRecyclerView.setHasFixedSize(true);
+        mGenreListRecyclerView.setAdapter(new GenreAdapterSelect(getResources().getStringArray(R.array.genre)));
+    }
 
+    class GenreAdapterSelect extends RecyclerView.Adapter<GenreAdapterSelect.GenreVH> {
 
-        mGenreListView = findViewById(R.id.genre_recycler_view);
-        mGenreListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent result = new Intent();
-                result.putExtra(SELECTED_GENRE, position - 1);
-                setResult(RESULT_OK, result);
-                finish();
+        private String[] mGenres;
+
+        public GenreAdapterSelect(String[] genres) {
+            this.mGenres = genres;
+        }
+
+        @NonNull
+        @Override
+        public GenreVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            Context context = parent.getContext();
+            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            return new GenreVH(layoutInflater.inflate(R.layout.item_book_genre,
+                    parent,
+                    false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull GenreVH holder, int position) {
+            if (position == 0)
+                holder.genreTextView.setText(R.string.no_genre_in_particular);
+            else
+                holder.genreTextView.setText(mGenres[position - 1]);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mGenres.length + 1;
+        }
+
+        class GenreVH extends RecyclerView.ViewHolder {
+            public TextView genreTextView;
+
+            public GenreVH(View itemView) {
+                super(itemView);
+                genreTextView = itemView.findViewById(R.id.genre_text_view);
+                genreTextView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int selectedGenre = getAdapterPosition();
+                        if (selectedGenre < 0)
+                            selectedGenre = NO_GENRE_SELECTED;
+                        else
+                            selectedGenre--;
+                        Intent i = new Intent();
+                        i.putExtra(SELECTED_GENRE, selectedGenre);
+                        setResult(RESULT_OK, i);
+                        finish();
+                    }
+                });
             }
-        });
-        TextView noGenreTextView = (TextView) getLayoutInflater()
-                .inflate(R.layout.item_book_genre, null, false);
-        noGenreTextView.setText(R.string.no_genre_in_particular);
-        noGenreTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.setClickable(false);
-                mGenreListView.setOnItemClickListener(null);
-                Intent i = new Intent();
-                i.putExtra(SELECTED_GENRE, NO_GENRE_SELECTED);
-                setResult(RESULT_OK, i);
-                finish();
-            }
-        });
-
-        mGenreListView.addHeaderView(noGenreTextView);
-        mGenreListView.setAdapter(ArrayAdapter.createFromResource(getApplicationContext(),
-                R.array.genre,
-                R.layout.item_book_genre));
+        }
     }
 }
+
+
