@@ -91,7 +91,7 @@ public class SignInActivity extends AppCompatActivity {
         mLogoImageView = findViewById(R.id.logo);
         mRootConstraintLayout = findViewById(R.id.root);
         mLoginButton = findViewById(R.id.open_firebase_ui_button);
-        //mWithoutLoginButton = findViewById(R.id.open_without_login_button);
+        mWithoutLoginButton = findViewById(R.id.open_without_login_button);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Utilities.setupStatusBarColor(this);
@@ -114,17 +114,17 @@ public class SignInActivity extends AppCompatActivity {
             public void onClick(View v) {
                 openFirebaseUI();
                 mLoginButton.setVisibility(View.GONE);
-                //mWithoutLoginButton.setVisibility(View.GONE);
+                mWithoutLoginButton.setVisibility(View.GONE);
             }
         });
 
-        /*mWithoutLoginButton.setOnClickListener(new View.OnClickListener() {
+        mWithoutLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openHomePageActivity();
                 //Toast.makeText(getApplicationContext(), "Function not yet implemented", Toast.LENGTH_SHORT).show();
             }
-        });*/
+        });
     }
 
     @Override
@@ -133,7 +133,7 @@ public class SignInActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
         registerReceiver(mNetworkConnectionBroadcastReceiver, filter);
         mLoginButton.setVisibility(View.VISIBLE);
-        //mWithoutLoginButton.setVisibility(View.VISIBLE);
+        mWithoutLoginButton.setVisibility(View.VISIBLE);
 
     }
 
@@ -142,7 +142,7 @@ public class SignInActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(mNetworkConnectionBroadcastReceiver);
         mLoginButton.setVisibility(View.GONE);
-        //mWithoutLoginButton.setVisibility(View.GONE);
+        mWithoutLoginButton.setVisibility(View.GONE);
     }
 
     @Override
@@ -228,10 +228,10 @@ public class SignInActivity extends AppCompatActivity {
                 }
                 if (response.getError() != null) {
                     mLoginButton.setVisibility(View.VISIBLE);
-                    //mWithoutLoginButton.setVisibility(View.VISIBLE);
+                    mWithoutLoginButton.setVisibility(View.VISIBLE);
                 }
                 mLoginButton.setVisibility(View.VISIBLE);
-                //mWithoutLoginButton.setVisibility(View.VISIBLE);
+                mWithoutLoginButton.setVisibility(View.VISIBLE);
             }
         }
     }
