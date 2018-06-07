@@ -449,8 +449,8 @@ public class FirebaseNotificationService extends com.google.firebase.messaging.F
 
         Intent clickIntent = new Intent(this, ReviewActivity.class);
         clickIntent.putExtra(ReviewActivity.Keys.BOOK_ID, data.get("book"));
-        clickIntent.putExtra(ReviewActivity.Keys.REVIEWER_ID, data.get("lenderUID"));
-        clickIntent.putExtra(ReviewActivity.Keys.REVIEWED_ID, data.get("reviewerUID"));
+        clickIntent.putExtra(ReviewActivity.Keys.REVIEWER_ID, data.get("borrowerUID"));
+        clickIntent.putExtra(ReviewActivity.Keys.REVIEWED_ID, data.get("lenderUID"));
         clickIntent.putExtra(ReviewActivity.Keys.NOTIFICATION_CMD, true);
 
         PendingIntent clickPendingIntent;

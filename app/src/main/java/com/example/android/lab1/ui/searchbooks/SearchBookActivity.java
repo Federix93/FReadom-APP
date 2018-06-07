@@ -775,20 +775,37 @@ public class SearchBookActivity extends AppCompatActivity implements FilterDataP
 
         Arrays.fill(currentView, false);
         currentView[currentViewIndex] = true;
+        Log.d("GNIPPO", "onRestoreInstanceState: "+currentViewIndex);
 
         if (currentView[OFFLINE_VIEW])
-            showOfflineView();
+        {
+            mIntroTextViewTop.setVisibility(View.GONE);
+            mIntroTextViewBottom.setVisibility(View.GONE);
+            mNoConnectionTextViewTop.setVisibility(View.VISIBLE);
+            mNoConnectionTextViewBottom.setVisibility(View.VISIBLE);
+            mNoConnectionButton.setVisibility(View.VISIBLE);
+        }
         else if (currentView[NO_RESULTS_VIEW]) {
-            showNoResultsView();
             updateNoResultsTextView(savedInstanceState.getString("NO_RESULT_SEARCH"));
             booksQuery.setQuery(mSearchView.getQuery());
+            mIntroTextViewTop.setVisibility(View.GONE);
+            mIntroTextViewBottom.setVisibility(View.GONE);
+            mNoResultsTextViewTop.setVisibility(View.VISIBLE);
+            mNoResultsTextViewBottom.setVisibility(View.VISIBLE);
         } else if (currentView[RESULTS_VIEW]) {
             backupDataSet = (ArrayList<BookSearchItem>) savedInstanceState.getSerializable("DATA_SET");
             mAdapter = new RecyclerSearchAdapter(backupDataSet, mCurrentPosition.getLatitude(), mCurrentPosition.getLongitude());
             mRecyclerView.setAdapter(mAdapter);
-            showResultsView();
+            mIntroTextViewTop.setVisibility(View.GONE);
+            mIntroTextViewBottom.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
         } else if (currentView[UNKNOWN_ERROR_VIEW])
-            showUnknownErrorView();
+        {
+            mIntroTextViewTop.setVisibility(View.GONE);
+            mIntroTextViewBottom.setVisibility(View.GONE);
+            mUnknownErrorTextViewTop.setVisibility(View.VISIBLE);
+            mUnknownErrorTextViewBottom.setVisibility(View.VISIBLE);
+        }
 
         lastSearchedSeqNo = savedInstanceState.getInt("LAST_SEARCHED_SEQ_NO");
         lastDisplayedSeqNo = savedInstanceState.getInt("LAST_DISPLAYED_SEQ_NO");
