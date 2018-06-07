@@ -26,6 +26,7 @@ import com.example.android.lab1.utils.Utilities;
 import com.example.android.lab1.viewmodel.ConversationsViewModel;
 import com.example.android.lab1.viewmodel.ViewModelFactory;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.firebase.ui.auth.ui.ProgressDialogHolder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -49,6 +50,7 @@ public class ConversationsActivity extends AppCompatActivity {
     private ChildEventListener mChildEventListener;
     private ConversationsViewModel mConversationsViewModel;
     private Observer<DataSnapshot> mObserver;
+    private ProgressDialogHolder progressDialogHolder;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -80,7 +82,7 @@ public class ConversationsActivity extends AppCompatActivity {
             }
         });
         mShimmerViewContainer = findViewById(R.id.shimmer_view_container);
-
+        progressDialogHolder = new ProgressDialogHolder(this);
         mRecyclerView = findViewById(R.id.conversation_recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setHasFixedSize(true);
@@ -195,7 +197,7 @@ public class ConversationsActivity extends AppCompatActivity {
                                                                                         ConversationsActivity.this,
                                                                                         true);
                                                                         }
-                                                                    });
+                                                                    }, progressDialogHolder);
                                                             mRecyclerView.setAdapter(mAdapter);
                                                         }
 

@@ -105,7 +105,7 @@ public class SignInActivity extends AppCompatActivity {
         });
 
         Glide.with(this)
-                .load(R.drawable.logo).apply(new RequestOptions().transforms(new CircleCrop()))
+                .load(R.drawable.freadom_app_name_white)
                 .transition(new DrawableTransitionOptions().transition(R.anim.button_animation))
                 .into(mLogoImageView);
 

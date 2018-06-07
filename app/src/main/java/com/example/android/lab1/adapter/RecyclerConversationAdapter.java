@@ -49,10 +49,12 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
     Toolbar mToolbar;
     private boolean bookIsPresent;
     private int counterSize;
+    private ProgressDialogHolder mProgressDialogHolder;
     public RecyclerConversationAdapter(ArrayList<Conversation> conversations,
                                        String bookID,
                                        Toolbar toolbar,
-                                       ActivityCallBack callback) {
+                                       ActivityCallBack callback,
+                                       ProgressDialogHolder progressDialogHolder) {
         this.mConversations = conversations;
         mBookID = bookID;
         positionsChecked = -1;
@@ -60,6 +62,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
         bookIsPresent = false;
         counterSize = 0;
         mCallback = callback;
+        mProgressDialogHolder = progressDialogHolder;
     }
 
     public void deleteChat(RecyclerView.OnItemTouchListener listener) {
@@ -71,8 +74,7 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
             mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
             mToolbar.getMenu().findItem(R.id.delete_chat).setVisible(false);
             mToolbar.setTitle(R.string.conversations_title);
-            final ProgressDialogHolder progressDialogHolder = new ProgressDialogHolder(mRecyclerView.getContext());
-            progressDialogHolder.showLoadingDialog(R.string.cancellation_in_progress);
+            mProgressDialogHolder.showLoadingDialog(R.string.cancellation_in_progress);
             final Conversation removed = mConversations.remove(positionsChecked);
             notifyItemRemoved(positionsChecked);
             mRecyclerView.removeOnItemTouchListener(listener);
@@ -91,8 +93,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                         if(bookIsPresent) {
                             counterSize = 0;
                             bookIsPresent = false;
-                            if(progressDialogHolder.isProgressDialogShowing())
-                                progressDialogHolder.dismissDialog();
+                            if(mProgressDialogHolder.isProgressDialogShowing())
+                                mProgressDialogHolder.dismissDialog();
                             break;
                         }
                         d.getReference().collection("books").document(mBookID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -109,8 +111,8 @@ public class RecyclerConversationAdapter extends RecyclerView.Adapter<RecyclerCo
                                                 .collection("books").document(mBookID).delete();
                                     }
                                     if(mCallback != null) {
-                                        if (progressDialogHolder.isProgressDialogShowing())
-                                            progressDialogHolder.dismissDialog();
+                                        if (mProgressDialogHolder.isProgressDialogShowing())
+                                            mProgressDialogHolder.dismissDialog();
                                         mCallback.removeWithContext(removed.getChatId());
 
                                         if (mConversations.size() == 0) {
