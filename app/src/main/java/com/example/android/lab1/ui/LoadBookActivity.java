@@ -674,6 +674,7 @@ public class LoadBookActivity extends AppCompatActivity implements View.OnClickL
                 if (Utilities.checkPermissionActivity(LoadBookActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     Intent i = Utilities.getPositionActivityIntent(LoadBookActivity.this,
                             false);
+                    i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivityForResult(i, Constants.POSITION_ACTIVITY_REQUEST);
                 } else {
                     Utilities.askPermissionActivity(LoadBookActivity.this,
